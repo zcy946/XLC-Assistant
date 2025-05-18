@@ -34,7 +34,8 @@ def init():
 def main():
     init()
     logger.info("Start MCP server...")
-    mcp.run("stdio")
+    # mcp.run("stdio")
+    mcp.run("sse")
 
 
 if __name__ == "__main__":

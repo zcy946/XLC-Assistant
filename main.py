@@ -6,6 +6,7 @@ from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
 from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.mcp import MCPServerHTTP
 from aioconsole import ainput
 
 model = OpenAIModel(
@@ -13,10 +14,11 @@ model = OpenAIModel(
     provider=DeepSeekProvider(api_key='sk-88a681b5432744208fce812a72396cb0'),
 )
 
-server = MCPServerStdio(
-    command='D:/Anaconda3/python.exe',
-    args=["E:/学习资料/作业/人工智能实训/PY/ShallowSeek/mcp/mcp_main.py"],
-)
+# server = MCPServerStdio(
+#     command='D:/Anaconda3/python.exe',
+#     args=["E:/学习资料/作业/人工智能实训/PY/ShallowSeek/mcp/mcp_main.py"],
+# )
+server = MCPServerHTTP("http://0.0.0.0:8000/sse")
 
 agent = Agent(model,
               system_prompt="你是一位经验丰富的程序员",
