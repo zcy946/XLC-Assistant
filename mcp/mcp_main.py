@@ -3,7 +3,7 @@ import tools
 import os
 from loguru import logger
 
-mcp = FastMCP("host info mcp")
+mcp = FastMCP("ShallowSeek MCP")
 
 
 # 同文件内可以通过注释直接添加
@@ -22,7 +22,7 @@ def initLogger():
     """初始化日志"""
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
-    logger.add(os.path.join(output_dir, "output.log"), enqueue=True, rotation="10 MB", retention=5)
+    logger.add(os.path.join(output_dir, "ShallowSeek_MCPServer.log"), enqueue=True, rotation="10 MB", retention=5)
 
 
 def init():
