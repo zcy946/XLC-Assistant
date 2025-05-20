@@ -12,19 +12,19 @@ class BaseWidget(QWidget):
         self.__initUI()
 
     def __initUI(self):
-        self._initWidget()
-        self._initItems()
-        self._initLayout()
+        self._init_widget()
+        self._init_items()
+        self._init_layout()
 
-    def _initWidget(self):
+    def _init_widget(self):
         """子类可重写"""
         pass
 
-    def _initItems(self):
+    def _init_items(self):
         """子类可重写"""
         pass
 
-    def _initLayout(self):
+    def _init_layout(self):
         """子类可重写"""
         pass
 

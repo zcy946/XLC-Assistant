@@ -8,19 +8,19 @@ from AssistantPage import AssistantPage
 
 
 class PageContainer(BaseWidget):
-    __stackedLayout: QStackedLayout
-    __assistantPage: AssistantPage
+    __stacked_layout: QStackedLayout
+    __page_assistant: AssistantPage
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def _initWidget(self):
+    def _init_widget(self):
         pass
 
-    def _initItems(self):
-        self.__assistantPage = AssistantPage(self)
+    def _init_items(self):
+        self.__page_assistant = AssistantPage(self)
 
-    def _initLayout(self):
-        self.__stackedLayout = QStackedLayout(self)
-        self.__stackedLayout.setContentsMargins(0, 0, 0, 0)
-        self.__stackedLayout.addWidget(self.__assistantPage)
+    def _init_layout(self):
+        self.__stacked_layout = QStackedLayout(self)
+        self.__stacked_layout.setContentsMargins(0, 0, 0, 0)
+        self.__stacked_layout.addWidget(self.__page_assistant)
