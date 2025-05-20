@@ -4,12 +4,14 @@ from PySide6.QtWidgets import (
     QStackedLayout
 
 )
-from AssistantPage import AssistantPage
+from PageLLM import PageLLM
+from PageAgent import PageAgent
 
 
 class PageContainer(BaseWidget):
     __stacked_layout: QStackedLayout
-    __page_assistant: AssistantPage
+    __page_llm: PageLLM
+    __page_agent: PageAgent
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -18,9 +20,16 @@ class PageContainer(BaseWidget):
         pass
 
     def _init_items(self):
-        self.__page_assistant = AssistantPage(self)
+        # __page_llm
+        self.__page_llm = PageLLM(self)
+        # ____page_agent
+        self.____page_agent = PageAgent(self)
 
     def _init_layout(self):
         self.__stacked_layout = QStackedLayout(self)
         self.__stacked_layout.setContentsMargins(0, 0, 0, 0)
-        self.__stacked_layout.addWidget(self.__page_assistant)
+        self.__stacked_layout.addWidget(self.__page_llm)
+        self.__stacked_layout.addWidget(self.____page_agent)
+
+    def setCurrentIndex(self, index: int) -> None:
+        self.__stacked_layout.setCurrentIndex(index)

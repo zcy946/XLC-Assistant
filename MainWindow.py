@@ -11,6 +11,7 @@ from SvgManager import (
 )
 from loguru import logger
 
+
 class MainWindow(BaseWidget):
     __splitter: QSplitter
     __navigation_bar: NavigationBar
@@ -32,11 +33,10 @@ class MainWindow(BaseWidget):
         self.__navigation_bar.setMaximumWidth(80)
         self.__navigation_bar.add_svg_item("大模型", svg_damoxing)
         self.__navigation_bar.add_svg_item("智能体", svg_zhinengti)
-        self.__navigation_bar.signal_index_changed.connect(
-            lambda index: logger.debug(index)
-        )
         # __page_container
         self.__page_container = PageContainer(self)
+        self.__navigation_bar.signal_index_changed.connect(self.__handle_navigation)
+
         # __splitter
         self.__splitter = QSplitter(self)
         # 防止子控件被压扁
@@ -52,3 +52,8 @@ class MainWindow(BaseWidget):
         v_layout.setSpacing(0)
         v_layout.setContentsMargins(0, 0, 0, 0)
         v_layout.addWidget(self.__splitter)
+
+    def __handle_navigation(self, index: int) -> None:
+        """处理导航栏点击事件"""
+        logger.debug("current page index: {}", index)
+        self.__page_container.setCurrentIndex(index)
