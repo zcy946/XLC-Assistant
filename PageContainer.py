@@ -4,13 +4,13 @@ from PySide6.QtWidgets import (
     QStackedLayout
 
 )
-from PageLLM import PageLLM
+from PageChat import PageChat
 from PageAgent import PageAgent
 
 
 class PageContainer(BaseWidget):
     __stacked_layout: QStackedLayout
-    __page_llm: PageLLM
+    __page_llm: PageChat
     __page_agent: PageAgent
 
     def __init__(self, parent=None):
@@ -21,7 +21,7 @@ class PageContainer(BaseWidget):
 
     def _init_items(self):
         # __page_llm
-        self.__page_llm = PageLLM(self)
+        self.__page_llm = PageChat(self)
         # ____page_agent
         self.____page_agent = PageAgent(self)
 

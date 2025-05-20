@@ -14,7 +14,7 @@ def initLogger() -> None:
     output_dir = "./logs"
     os.makedirs(output_dir, exist_ok=True)
     logger.add(
-        os.path.join(output_dir, "ShallowSeek.log"),
+        os.path.join(output_dir, "XLC Assistant.log"),
         enqueue=True,  # 启用队列模式，防止多线程打印出错
         rotation="10 MB",  # 按10MB轮转日志
         retention=5  # 保留最近5个日志文件

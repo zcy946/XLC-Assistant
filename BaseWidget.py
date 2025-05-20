@@ -18,6 +18,7 @@ class BaseWidget(QWidget):
 
     def _init_widget(self):
         """子类可重写"""
+        print(123)
         pass
 
     def _init_items(self):

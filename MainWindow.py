@@ -6,7 +6,7 @@ from PySide6.QtWidgets import (
 from components.NavigationBar import NavigationBar
 from PageContainer import PageContainer
 from SvgManager import (
-    svg_damoxing,
+    svg_chat,
     svg_zhinengti,
 )
 from loguru import logger
@@ -31,7 +31,7 @@ class MainWindow(BaseWidget):
         self.__navigation_bar = NavigationBar(self)
         self.__navigation_bar.setMinimumWidth(70)
         self.__navigation_bar.setMaximumWidth(80)
-        self.__navigation_bar.add_svg_item("大模型", svg_damoxing)
+        self.__navigation_bar.add_svg_item("对话", svg_chat)
         self.__navigation_bar.add_svg_item("智能体", svg_zhinengti)
         # __page_container
         self.__page_container = PageContainer(self)
