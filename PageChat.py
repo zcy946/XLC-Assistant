@@ -1,6 +1,6 @@
 from BaseWidget import BaseWidget
 from PySide6.QtWidgets import (
-    QLabel,
+    QWidget,
     QVBoxLayout,
     QSplitter,
 )
@@ -13,7 +13,7 @@ class PageChat(BaseWidget):
     __list_chat: ListChat
     __list_message: CentralWidgetChat
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
 
     def _init_widget(self):

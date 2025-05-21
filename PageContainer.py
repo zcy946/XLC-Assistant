@@ -1,5 +1,6 @@
 from BaseWidget import BaseWidget
 from PySide6.QtWidgets import (
+    QWidget,
     QLabel,
     QStackedLayout
 
@@ -13,7 +14,7 @@ class PageContainer(BaseWidget):
     __page_llm: PageChat
     __page_agent: PageAgent
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
 
     def _init_widget(self):

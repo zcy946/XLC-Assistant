@@ -1,5 +1,6 @@
 from BaseWidget import BaseWidget
 from PySide6.QtWidgets import (
+    QWidget,
     QBoxLayout,
     QVBoxLayout
 )
@@ -40,7 +41,7 @@ class NavigationBar(BaseWidget):
     __index_hover: int
     __index_pressed: int
 
-    def __init__(self, parent=None):
+    def __init__(self, parent:QWidget | None = None):
         super().__init__(parent)
         self.__color_item_hover = QColor(COLOR_ITEM_HOVER)
         self.__color_font = QColor(COLOR_FONT)

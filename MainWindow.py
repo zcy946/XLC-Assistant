@@ -1,5 +1,6 @@
 from BaseWidget import BaseWidget
 from PySide6.QtWidgets import (
+    QWidget,
     QVBoxLayout,
     QSplitter
 )

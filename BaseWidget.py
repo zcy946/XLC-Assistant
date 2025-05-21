@@ -35,3 +35,9 @@ class BaseWidget(QWidget):
         painter.setPen(QColor(f"#{randint(0, 0xFFFFFF):06x}"))
         painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
         painter.end()
+
+    # NOTE
+    # 主题切换思路：
+    #   1. 写一个切换主题的空实现虚函数，
+    #   2. 将主题管理单例类的主题切换信号连接到此函数
+    #   3. 这样所有继承自此类的子类只需要重写此函数即可实现主题的切换
