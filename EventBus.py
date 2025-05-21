@@ -21,23 +21,35 @@ class SingletonMeta(type(QObject)):
 class EventBus(QObject, metaclass=SingletonMeta):
     # 信号
     signal_button_clicked = Signal(Any) # 按钮点击
-    signal_send_message = Signal(Any) # 发送消息
+    signal_message_sent = Signal(Any) # 发送消息
+    signal_message_received = Signal(Any) # 消息响应
+    # 事件类型
     class EventType(Enum):
         ButtonClicked = auto()
-        SendMessage = auto()
+        MessageSent = auto()
+        MessageReceived = auto()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self._event_signal_map = {
+            self.EventType.ButtonClicked: self.signal_button_clicked,
+            self.EventType.MessageSent: self.signal_message_sent,
+            self.EventType.MessageReceived: self.signal_message_received
+        }
 
-    def publish(self, event_type: "EventBus.EventType", data: Any) -> None:
+    def publish(self, event_type: "EventBus.EventType", data: Any = None) -> None:
+        """发布事件"""
+        if not isinstance(event_type, self.EventType):
+            logger.error("Invalid event type: {}", event_type)
+            return
+
         logger.debug("[event] -> {}:{}:[{}]", event_type, type(data), data)
-        match event_type:
-            case EventBus.EventType.ButtonClicked:
-                self.signal_button_clicked.emit(data)
-            case EventBus.EventType.SendMessage:
-                self.signal_send_message.emit(data)
-            case _:
-                logger.error("[event] -> unknow event type:{}:[{}]", type(data), data)
+
+        signal = self._event_signal_map.get(event_type)
+        if signal:
+            signal.emit(data)
+        else:
+            logger.error("Unhandled event type: {}", event_type)
 
 
 

@@ -13,6 +13,7 @@ from PySide6.QtCore import (
 from MessageList import MessageList
 from UserInputEdit import UserInputEdit
 from EventBus import EventBus
+from typing import Any
 
 
 class CentralWidgetChat(BaseWidget):
@@ -32,9 +33,8 @@ class CentralWidgetChat(BaseWidget):
     def _init_items(self):
         # __message_list
         self.__message_list = MessageList(self)
-        EventBus().signal_send_message.connect(
-            lambda text: self.__message_list.addItem(f"Q: {text}")
-        )
+        EventBus().signal_message_sent.connect(self.__on_message_sent)
+        EventBus().signal_message_received.connect(self.__on_message_received)
         # __widget_text_area
         self.__widget_text_area = QWidget(self)
         # __plaintext_edit
@@ -74,4 +74,10 @@ class CentralWidgetChat(BaseWidget):
 
     def __on_pushbutton_send_clicked(self):
         """发送按钮槽函数"""
-        EventBus().publish(EventBus.EventType.SendMessage, self.__plaintext_edit.toPlainText())
+        EventBus().publish(EventBus.EventType.MessageSent, self.__plaintext_edit.toPlainText())
+
+    def __on_message_sent(self, text:Any):
+        self.__message_list.addItem(f"Q: {text}")
+
+    def __on_message_received(self, text:Any):
+        self.__message_list.addItem(f"A: {text}")

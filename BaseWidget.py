@@ -7,7 +7,7 @@ from PySide6.QtGui import (
 
 
 class BaseWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.__initUI()
 
@@ -18,7 +18,6 @@ class BaseWidget(QWidget):
 
     def _init_widget(self):
         """子类可重写"""
-        print(123)
         pass
 
     def _init_items(self):
