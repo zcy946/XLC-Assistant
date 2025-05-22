@@ -37,7 +37,8 @@ class NavigationBar(BaseWidget):
     __size_icon_background: int
     __size_icon: int
     __height_text: int
-    __items: list[dict[str, str] | dict[str, str]]
+    __items: list[dict[str, str]]
+    __ignore_items: list[str]
     __index_hover: int
     __index_pressed: int
 
@@ -55,6 +56,7 @@ class NavigationBar(BaseWidget):
         self.__size_icon_background = 0
         self.__height_text = 0
         self.__items = []
+        self.__ignore_items = []
         self.__index_hover = -1
         self.__index_pressed = 0
 
@@ -111,10 +113,11 @@ class NavigationBar(BaseWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             index_current_selected = (event.pos().y() - self.__margin_top) // (self.__size_icon_background + self.__height_text + self.__spacing)
-            if index_current_selected >= 0 and index_current_selected + 1 <= len(self.__items) and self.__index_pressed != index_current_selected:
-                self.__index_pressed = index_current_selected
+            if 0 <= index_current_selected != self.__index_pressed and index_current_selected + 1 <= len(self.__items):
+                if self.__items[index_current_selected].get(KEY_TEXT) not in self.__ignore_items:
+                    self.__index_pressed = index_current_selected
                 # logger.debug("pressed: {}", self.__index_pressed)
-                self.signal_index_changed.emit(self.__index_pressed)
+                self.signal_index_changed.emit(index_current_selected)
                 self.update()
 
     def leaveEvent(self, event):
@@ -128,7 +131,7 @@ class NavigationBar(BaseWidget):
         # 渲染 SVG 图标
         svg_renderer.render(painter, QRect(x, y, w, h))
 
-    def add_svg_item(self, text: str, svg_code: str):
+    def add_item_svg(self, text: str, svg_code: str):
         """
         添加SVG项
         参数：
@@ -137,3 +140,23 @@ class NavigationBar(BaseWidget):
         """
         self.__items.append({KEY_TEXT: text, KEY_ICON: svg_code})
         self.update()
+
+    def add_non_selectable_item(self, item_name: str):
+        """
+        添加忽略项，被忽略的项不会被选中
+        :param item_name: 被忽略项的名字
+        :return: None
+        """
+        if any(item.get(KEY_TEXT) == item_name for item in self.__items):
+            self.__ignore_items.append(item_name)
+
+    def get_index(self, item_name: str):
+        """
+        通过名字获取下标
+        :param item_name: 查找项的名字
+        :return: int
+        """
+        for index, item in enumerate(self.__items):
+            if item.get(KEY_TEXT) == item_name:
+                return index
+        return None
