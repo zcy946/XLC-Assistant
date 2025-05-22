@@ -5,7 +5,6 @@ import asyncio
 import qasync
 from loguru import logger
 from PySide6.QtWidgets import QApplication
-from qasync import QEventLoop
 from MainWindow import MainWindow
 
 
@@ -24,24 +23,28 @@ def initLogger() -> None:
 async def main():
     # 初始化日志
     initLogger()
-    # 初始化QApplication
-    app: QApplication = QApplication(sys.argv)
-    # 使用 qasync 设置事件循环
-    loop: QEventLoop = qasync.QEventLoop(app)
-    asyncio.set_event_loop(loop)
 
-    window = MainWindow()
-    window.show()
+    try:
+        # 创建Qt应用
+        app = QApplication(sys.argv)
 
-    # 启动事件循环
-    with loop:
-        loop.run_forever()
+        # 设置异步事件循环
+        loop = qasync.QEventLoop(app)
+        asyncio.set_event_loop(loop)
+
+        window = MainWindow()
+        window.show()
+
+        # 运行事件循环
+        with loop:
+            loop.run_forever()
+
+    except KeyboardInterrupt:
+        logger.info("Program  terminated by user")
+    except Exception as e:
+        logger.critical(f"Unknown  error: {e}")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        logger.info("程序已由用户终止")
-    # except Exception as e:
-    #     logger.critical(f"错误: {e}")
-    #     sys.exit(1)
+    qasync.run(main())

@@ -3,7 +3,7 @@ import os
 from loguru import logger
 
 
-BASE_DIR = Path("E:/学习资料/作业/人工智能实训/PY/ShallowSeek/test")
+BASE_DIR = Path("E:/学习资料/作业/人工智能实训/PY/XLC Assistant/test")
 
 def read_file(file_path: str) -> str:
     """Return file content. If not exist, return error message.

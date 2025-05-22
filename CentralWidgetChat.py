@@ -1,3 +1,8 @@
+import asyncio
+import time
+
+import qasync
+
 from BaseWidget import BaseWidget
 from PySide6.QtWidgets import (
     QVBoxLayout,
@@ -10,10 +15,13 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import (
     Qt,
 )
+
+from DeepSeekApiManager import DeepSeekApiManager
 from MessageList import MessageList
 from UserInputEdit import UserInputEdit
 from EventBus import EventBus
-from typing import Any
+from typing import Any, Tuple
+from loguru import logger
 
 
 class CentralWidgetChat(BaseWidget):
@@ -26,6 +34,7 @@ class CentralWidgetChat(BaseWidget):
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
+        self.__api_manager = DeepSeekApiManager()
 
     def _init_widget(self):
         pass
@@ -74,10 +83,29 @@ class CentralWidgetChat(BaseWidget):
 
     def __on_pushbutton_send_clicked(self):
         """发送按钮槽函数"""
-        EventBus().publish(EventBus.EventType.MessageSent, self.__plaintext_edit.toPlainText())
+        user_input = self.__plaintext_edit.toPlainText().strip()
+        if not user_input:
+            logger.debug("Empty user input")
+            return
+        self.__plaintext_edit.clear()  # 清空输入框
+        # 发布用户输入消息
+        EventBus().publish(EventBus.EventType.MessageSent, user_input)
+        # 异步运行任务
+        asyncio.ensure_future(self.__execute_task(user_input))
 
-    def __on_message_sent(self, text:Any):
+    async def __execute_task(self, user_input: str):
+        """运行任务并处理结果"""
+        try:
+            # 调用公开的 translate_text 方法
+            result = await self.__api_manager.execute_task(user_input)
+            # 发送结果到 UI
+            EventBus().publish(EventBus.EventType.MessageReceived, result)
+        except Exception as e:
+            logger.error(f"Task {user_input} failed: {e}")
+            EventBus().publish(EventBus.EventType.MessageReceived, f"Error: {str(e)}")
+
+    def __on_message_sent(self, text: Any):
         self.__message_list.addItem(f"Q: {text}")
 
-    def __on_message_received(self, text:Any):
+    def __on_message_received(self, text: Any):
         self.__message_list.addItem(f"A: {text}")
