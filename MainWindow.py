@@ -11,6 +11,8 @@ from SvgManager import (
     svg_zhinengti,
 )
 from loguru import logger
+from LLMService import LLMService
+from LLMController import LLMController
 
 
 class MainWindow(BaseWidget):
@@ -20,10 +22,14 @@ class MainWindow(BaseWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        # 初始化llm服务
+        LLMService().init()
+        # 初始化llm控制器
+        LLMController().init()
 
     def _init_widget(self) -> None:
         """初始化窗口"""
-        self.setWindowTitle("ShallowSeek")
+        self.setWindowTitle("XLC Assistant")
         self.resize(800, 600)
 
     def _init_items(self) -> None:

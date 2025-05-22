@@ -41,9 +41,9 @@ async def main():
 
     except KeyboardInterrupt:
         logger.info("Program  terminated by user")
-    except Exception as e:
-        logger.critical(f"Unknown  error: {e}")
-        sys.exit(1)
+    # except Exception as e:
+    #     logger.critical(f"Unknown  error: {e}")
+    #     sys.exit(1)
 
 
 if __name__ == "__main__":

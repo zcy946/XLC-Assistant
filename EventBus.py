@@ -21,11 +21,13 @@ class SingletonMeta(type(QObject)):
 class EventBus(QObject, metaclass=SingletonMeta):
     # 信号
     signal_button_clicked = Signal(Any) # 按钮点击
+    signal_state_changed = Signal(Any) # 状态改变
     signal_message_sent = Signal(Any) # 发送消息
     signal_message_received = Signal(Any) # 消息响应
     # 事件类型
     class EventType(Enum):
         ButtonClicked = auto()
+        StateChanged = auto()
         MessageSent = auto()
         MessageReceived = auto()
 
@@ -33,6 +35,7 @@ class EventBus(QObject, metaclass=SingletonMeta):
         super().__init__(parent=parent)
         self._event_signal_map = {
             self.EventType.ButtonClicked: self.signal_button_clicked,
+            self.EventType.StateChanged: self.signal_state_changed,
             self.EventType.MessageSent: self.signal_message_sent,
             self.EventType.MessageReceived: self.signal_message_received
         }
