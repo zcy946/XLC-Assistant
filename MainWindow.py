@@ -8,7 +8,8 @@ from components.NavigationBar import NavigationBar
 from PageContainer import PageContainer
 from SvgManager import (
     svg_chat,
-    svg_zhinengti,
+    svg_agent,
+    svg_setting,
 )
 from loguru import logger
 from LLMService import LLMService
@@ -36,8 +37,10 @@ class MainWindow(BaseWidget):
         self.__navigation_bar = NavigationBar(self)
         self.__navigation_bar.setMinimumWidth(70)
         self.__navigation_bar.setMaximumWidth(80)
-        self.__navigation_bar.add_svg_item("对话", svg_chat)
-        self.__navigation_bar.add_svg_item("智能体", svg_zhinengti)
+        self.__navigation_bar.add_item_svg("对话", svg_chat)
+        self.__navigation_bar.add_item_svg("智能体", svg_agent)
+        self.__navigation_bar.add_item_svg("设置", svg_setting)
+        self.__navigation_bar.add_non_selectable_item("设置")
         # __page_container
         self.__page_container = PageContainer(self)
         self.__navigation_bar.signal_index_changed.connect(self.__handle_navigation)
@@ -60,5 +63,11 @@ class MainWindow(BaseWidget):
 
     def __handle_navigation(self, index: int) -> None:
         """处理导航栏点击事件"""
+        logger.debug(self.__navigation_bar.get_index("设置"))
+        if index == self.__navigation_bar.get_index("设置"):
+            self.__open_setting_dialog()
         logger.debug("current page index: {}", index)
         self.__page_container.setCurrentIndex(index)
+
+    def __open_setting_dialog(self):
+        logger.debug("打开设置对话框")

@@ -3,7 +3,7 @@ __pycache__/
 test/
 logs/
 /dev.qss
-/master.py
 /mcp/output/output.log
 /output/ShallowSeek_Client.log
 /mcp/output/ShallowSeek_MCPServer.log
+/main_old.py
