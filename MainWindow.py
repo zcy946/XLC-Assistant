@@ -22,10 +22,8 @@ class MainWindow(BaseWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        # 初始化llm服务
-        LLMService().init()
         # 初始化llm控制器
-        LLMController().init()
+        LLMController()
 
     def _init_widget(self) -> None:
         """初始化窗口"""

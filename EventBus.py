@@ -24,6 +24,9 @@ class EventBus(QObject, metaclass=SingletonMeta):
     signal_state_changed = Signal(Any) # 状态改变
     signal_message_sent = Signal(Any) # 发送消息
     signal_message_received = Signal(Any) # 消息响应
+    # 按钮id
+    class Buttons(Enum):
+        CLEAR_CONTEXT = auto()
     # 事件类型
     class EventType(Enum):
         ButtonClicked = auto()

@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import (
     Qt,
 )
-
 from MessageList import MessageList
 from UserInputEdit import UserInputEdit
 from EventBus import EventBus
@@ -23,6 +22,7 @@ class CentralWidgetChat(BaseWidget):
     __message_list: MessageList
     __widget_text_area: QWidget
     __plaintext_edit: UserInputEdit
+    __pushbutton_clear_message: QPushButton
     __pushbutton_clear_context: QPushButton
     __pushbutton_send: QPushButton
 
@@ -41,9 +41,15 @@ class CentralWidgetChat(BaseWidget):
         self.__widget_text_area = QWidget(self)
         # __plaintext_edit
         self.__plaintext_edit = UserInputEdit(self.__widget_text_area)
+        self.__plaintext_edit.setPlaceholderText("输入消息，开始聊天")
+        # __pushbutton_clear_message
+        self.__pushbutton_clear_message = QPushButton(self)
+        self.__pushbutton_clear_message.setText("清空消息")
+        self.__pushbutton_clear_message.clicked.connect(self.__on_pushbutton_clear_message_clicked)
         # __pushbutton_clear_context
         self.__pushbutton_clear_context = QPushButton(self)
         self.__pushbutton_clear_context.setText("清除上下文")
+        self.__pushbutton_clear_context.clicked.connect(self.__on_pushbutton_clear_context_clicked)
         # __pushbutton_send
         self.__pushbutton_send = QPushButton(self)
         self.__pushbutton_send.setText("发送")
@@ -61,6 +67,7 @@ class CentralWidgetChat(BaseWidget):
         # h_layout_tools
         h_layout_tools = QHBoxLayout()
         h_layout_tools.setContentsMargins(0, 0, 0, 0)
+        h_layout_tools.addWidget(self.__pushbutton_clear_message)
         h_layout_tools.addWidget(self.__pushbutton_clear_context)
         h_layout_tools.addStretch()
         h_layout_tools.addWidget(self.__pushbutton_send)
@@ -79,8 +86,7 @@ class CentralWidgetChat(BaseWidget):
         user_input = self.__plaintext_edit.toPlainText().strip()
         if not user_input:
             return
-        self.__plaintext_edit.clear()  # 清空输入框
-        # 发布用户输入消息
+        self.__plaintext_edit.clear()
         EventBus().publish(EventBus.EventType.MessageSent, user_input)
 
     def __on_message_sent(self, text: Any):
@@ -88,3 +94,14 @@ class CentralWidgetChat(BaseWidget):
 
     def __on_message_received(self, text: Any):
         self.__message_list.addItem(f"A: {text}")
+
+    def __on_pushbutton_clear_message_clicked(self):
+        self.__message_list.clear()
+
+    def __on_pushbutton_clear_context_clicked(self):
+        data = {
+            "id": EventBus.Buttons.CLEAR_CONTEXT,
+            "message": "Clear context"
+        }
+        EventBus().publish(EventBus.EventType.ButtonClicked, data)
+        self.__message_list.addItem("----------已清除上下文----------")
