@@ -32,7 +32,7 @@ class BaseWidget(QWidget):
         """开发调试使用"""
         painter = QPainter(self)
         painter.setPen(QColor(f"#{randint(0, 0xFFFFFF):06x}"))
-        painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
+        # painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
         painter.end()
 
     # NOTE

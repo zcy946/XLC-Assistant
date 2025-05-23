@@ -18,15 +18,25 @@ class SingletonMeta(type(QObject)):
                     cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
 
+
 class EventBus(QObject, metaclass=SingletonMeta):
     # 信号
-    signal_button_clicked = Signal(Any) # 按钮点击
-    signal_state_changed = Signal(Any) # 状态改变
-    signal_message_sent = Signal(Any) # 发送消息
-    signal_message_received = Signal(Any) # 消息响应
+    signal_button_clicked = Signal(Any)  # 按钮点击
+    signal_state_changed = Signal(Any)  # 状态改变
+    signal_message_sent = Signal(Any)  # 发送消息
+    signal_message_received = Signal(Any)  # 消息响应
+
     # 按钮id
     class Buttons(Enum):
-        CLEAR_CONTEXT = auto()
+        CLEAR_CONTEXT = auto()  # 清除上下文
+        UPDATE_SYSTEM_PROMPT = auto()  # 更新系统提示词
+        RESET_MODEL_ARGS = auto() # 重置模型参数
+
+    # 状态id
+    class States(Enum):
+        MODEL_UPDATED = auto() # 模型更新
+        MCP_SERVERS_UPDATED = auto() # mcp服务器更新
+
     # 事件类型
     class EventType(Enum):
         ButtonClicked = auto()
@@ -56,6 +66,3 @@ class EventBus(QObject, metaclass=SingletonMeta):
             signal.emit(data)
         else:
             logger.error("Unhandled event type: {}", event_type)
-
-
-

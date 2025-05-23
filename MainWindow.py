@@ -14,12 +14,14 @@ from SvgManager import (
 from loguru import logger
 from LLMService import LLMService
 from LLMController import LLMController
+from DialogSettings import DialogSettings
 
 
 class MainWindow(BaseWidget):
     __splitter: QSplitter
     __navigation_bar: NavigationBar
     __page_container: PageContainer
+    __settings_dialog: DialogSettings
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -44,7 +46,6 @@ class MainWindow(BaseWidget):
         # __page_container
         self.__page_container = PageContainer(self)
         self.__navigation_bar.signal_index_changed.connect(self.__handle_navigation)
-
         # __splitter
         self.__splitter = QSplitter(self)
         # 防止子控件被压扁
@@ -53,6 +54,9 @@ class MainWindow(BaseWidget):
         self.__splitter.addWidget(self.__page_container)
         self.__splitter.setStretchFactor(0, 1)
         self.__splitter.setStretchFactor(1, 9)
+        # __settings_dialog
+        self.__settings_dialog = DialogSettings(self)
+        self.__settings_dialog.resize(600, 400)
 
     def _init_layout(self) -> None:
         """初始化布局"""
@@ -63,11 +67,10 @@ class MainWindow(BaseWidget):
 
     def __handle_navigation(self, index: int) -> None:
         """处理导航栏点击事件"""
-        logger.debug(self.__navigation_bar.get_index("设置"))
         if index == self.__navigation_bar.get_index("设置"):
             self.__open_setting_dialog()
-        logger.debug("current page index: {}", index)
+        # logger.debug("current page index: {}", index)
         self.__page_container.setCurrentIndex(index)
 
     def __open_setting_dialog(self):
-        logger.debug("打开设置对话框")
+        self.__settings_dialog.show()

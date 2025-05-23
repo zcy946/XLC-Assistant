@@ -99,9 +99,8 @@ class CentralWidgetChat(BaseWidget):
         self.__message_list.clear()
 
     def __on_pushbutton_clear_context_clicked(self):
-        data = {
+        EventBus().publish(EventBus.EventType.ButtonClicked, {
             "id": EventBus.Buttons.CLEAR_CONTEXT,
             "message": "Clear context"
-        }
-        EventBus().publish(EventBus.EventType.ButtonClicked, data)
+        })
         self.__message_list.addItem("----------已清除上下文----------")
