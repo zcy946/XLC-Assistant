@@ -360,6 +360,7 @@ class SettingsCentralWidget(BaseWidget):
 
     def _init_layout(self):
         self.__stacked_layout = QStackedLayout(self)
+        self.__stacked_layout.setContentsMargins(0, 0, 0, 0)
         self.__stacked_layout.addWidget(self.__page_system_prompt)
         self.__stacked_layout.addWidget(self.__page_model)
         self.__stacked_layout.addWidget(self.__page_mcp_server)
@@ -404,6 +405,7 @@ class DialogSettings(QDialog):
 
     def _init_layout(self):
         v_layout = QVBoxLayout(self)
+        v_layout.addSpacing(0)
         v_layout.addWidget(self.__splitter)
 
     def showEvent(self, event):
@@ -418,5 +420,3 @@ class DialogSettings(QDialog):
 
     def __on_selection_changed(self):
         self.__settings_central_widget.set_current_index(self.__list_widget.currentIndex().row())
-
-

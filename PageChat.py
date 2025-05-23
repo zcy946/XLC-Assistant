@@ -35,4 +35,5 @@ class PageChat(BaseWidget):
     def _init_layout(self):
         v_layout = QVBoxLayout(self)
         v_layout.setContentsMargins(0, 0, 0, 0)
+        v_layout.addSpacing(0)
         v_layout.addWidget(self.__splitter)

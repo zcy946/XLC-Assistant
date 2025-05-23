@@ -21,6 +21,9 @@ KEY_TEXT = "text"
 KEY_ICON = "icon"
 COLOR_ITEM_HOVER = COLOR_ITEM_SELECTED = "#4B4C4F"
 COLOR_FONT = "#DFE1E5"
+COLOR_BACKGROUND = "#2D2D2D"
+COLOR_BORDER = "#3C3C3C"
+
 
 class NavigationBar(BaseWidget):
     signal_index_changed = Signal(int)
@@ -42,7 +45,7 @@ class NavigationBar(BaseWidget):
     __index_hover: int
     __index_pressed: int
 
-    def __init__(self, parent:QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.__color_item_hover = QColor(COLOR_ITEM_HOVER)
         self.__color_font = QColor(COLOR_FONT)
@@ -78,22 +81,28 @@ class NavigationBar(BaseWidget):
         fontMetrics = QFontMetrics(font)
         self.__size_icon_background = self.width() - self.__margin_left - self.__margin_right - 10
         size_icon = self.__size_icon_background // 5 * 3
+        # 绘制背景
+        painter.setPen(QColor(COLOR_BORDER))
+        painter.setBrush(QColor(COLOR_BACKGROUND))
+        painter.drawRect(self.rect().adjusted(1, 1, -1, -1))
         for i in range(0, len(self.__items)):
             text = self.__items[i].get(KEY_TEXT, "undefined")
             svg_code = self.__items[i].get(KEY_ICON, "")
             width_text = fontMetrics.horizontalAdvance(text)
             self.__height_text = fontMetrics.height()
             x_icon_background = (self.width() - self.__size_icon_background) // 2
-            y_icon_background = self.__margin_top + i * (self.__size_icon_background + self.__spacing +  self.__height_text)
+            y_icon_background = self.__margin_top + i * (
+                        self.__size_icon_background + self.__spacing + self.__height_text)
             x_icon = x_icon_background + (self.__size_icon_background - size_icon) // 2
             y_icon = y_icon_background + (self.__size_icon_background - size_icon) // 2
             x_text = (self.width() - width_text) // 2
-            y_text = y_icon_background + self.__size_icon_background +  self.__height_text
+            y_text = y_icon_background + self.__size_icon_background + self.__height_text
             # 绘制边框
             if (i == self.__index_hover or i == self.__index_pressed):
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(self.__color_item_hover)
-                painter.drawRoundedRect(x_icon_background, y_icon_background, self.__size_icon_background, self.__size_icon_background,
+                painter.drawRoundedRect(x_icon_background, y_icon_background, self.__size_icon_background,
+                                        self.__size_icon_background,
                                         self.__border_radius, self.__border_radius)
             # 绘制图标
             painter.setBrush(Qt.NoBrush)
@@ -104,15 +113,18 @@ class NavigationBar(BaseWidget):
         painter.end()
 
     def mouseMoveEvent(self, event):
-        index_current_hover = (event.pos().y() - self.__margin_top) // (self.__size_icon_background + self.__height_text + self.__spacing)
-        if index_current_hover >= 0 and index_current_hover + 1 <= len(self.__items) and self.__index_hover != index_current_hover:
+        index_current_hover = (event.pos().y() - self.__margin_top) // (
+                    self.__size_icon_background + self.__height_text + self.__spacing)
+        if index_current_hover >= 0 and index_current_hover + 1 <= len(
+                self.__items) and self.__index_hover != index_current_hover:
             self.__index_hover = index_current_hover
             # logger.debug("hover: {}", self.__index_hover)
             self.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            index_current_selected = (event.pos().y() - self.__margin_top) // (self.__size_icon_background + self.__height_text + self.__spacing)
+            index_current_selected = (event.pos().y() - self.__margin_top) // (
+                        self.__size_icon_background + self.__height_text + self.__spacing)
             if 0 <= index_current_selected != self.__index_pressed and index_current_selected + 1 <= len(self.__items):
                 if self.__items[index_current_selected].get(KEY_TEXT) not in self.__ignore_items:
                     self.__index_pressed = index_current_selected
