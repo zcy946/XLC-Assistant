@@ -28,7 +28,6 @@ def main():
     try:
         app = QApplication(sys.argv)
 
-        # 设置qasync事件循环
         loop = qasync.QEventLoop(app)
         asyncio.set_event_loop(loop)
 
@@ -39,8 +38,12 @@ def main():
         logger.info("Application started successfully")
 
         # 运行应用
-        with loop:
-            loop.run_forever()
+        try:
+            with loop:
+                loop.run_forever()
+        except Exception as e:
+            logger.error(f"Event loop error: {e}")
+            raise
 
     except KeyboardInterrupt:
         logger.info("Program terminated by user")
