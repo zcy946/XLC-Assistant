@@ -243,7 +243,6 @@ class PageMcpServer(BaseWidget):
             super().__init__(parent)
 
         def _init_widget(self):
-            logger.debug(123456)
             pass
 
         def _init_items(self):

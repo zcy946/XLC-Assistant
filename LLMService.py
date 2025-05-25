@@ -11,6 +11,8 @@ from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.deepseek import DeepSeekProvider
 from loguru import logger
 from pydantic_ai.result import OutputDataT
+import os
+from dotenv import load_dotenv
 
 
 class LLMService:
@@ -23,9 +25,14 @@ class LLMService:
     __max_concurrency: int  # 最大协程数量
 
     def __init__(self):
+        # 加载 .env 文件中的环境变量
+        load_dotenv()
+        deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
+        if not deepseek_api_key:
+            raise ValueError("DEEPSEEK_API_KEY environment variable not set in .env or environment.")
         self.__module = OpenAIModel(
             model_name="deepseek-chat",
-            provider=DeepSeekProvider(api_key='sk-88a681b5432744208fce812a72396cb0'),
+            provider=DeepSeekProvider(api_key=deepseek_api_key),
         )
         self.__system_prompt = "你是一个助手，解决用户的需求"
         self.__mcp_servers = [MCPServerHTTP("http://0.0.0.0:8000/sse")]

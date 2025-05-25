@@ -26,12 +26,7 @@ def main():
     initLogger()
 
     try:
-
-        # 检查是否已存在QApplication实例
-        app = QApplication.instance()
-
-        if app is None:
-            app = QApplication(sys.argv)
+        app = QApplication(sys.argv)
 
         # 设置qasync事件循环
         loop = qasync.QEventLoop(app)
