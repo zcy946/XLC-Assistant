@@ -11,6 +11,7 @@ from MainWindow import MainWindow
 def initLogger() -> None:
     """初始化日志"""
     output_dir = "./logs"
+
     os.makedirs(output_dir, exist_ok=True)
     logger.add(
         os.path.join(output_dir, "XLC Assistant.log"),
@@ -20,31 +21,38 @@ def initLogger() -> None:
     )
 
 
-async def main():
+def main():
     # 初始化日志
     initLogger()
 
     try:
-        # 创建Qt应用
-        app = QApplication(sys.argv)
 
-        # 设置异步事件循环
+        # 检查是否已存在QApplication实例
+        app = QApplication.instance()
+
+        if app is None:
+            app = QApplication(sys.argv)
+
+        # 设置qasync事件循环
         loop = qasync.QEventLoop(app)
         asyncio.set_event_loop(loop)
 
+        # 创建主窗口
         window = MainWindow()
         window.show()
 
-        # 运行事件循环
+        logger.info("Application started successfully")
+
+        # 运行应用
         with loop:
             loop.run_forever()
 
     except KeyboardInterrupt:
-        logger.info("Program  terminated by user")
-    # except Exception as e:
-    #     logger.critical(f"Unknown  error: {e}")
-    #     sys.exit(1)
+        logger.info("Program terminated by user")
+    except Exception as e:
+        logger.critical(f"Unknown error: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    qasync.run(main())
+    main()

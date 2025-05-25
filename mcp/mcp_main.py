@@ -20,7 +20,7 @@ def initTools():
 
 def initLogger():
     """初始化日志"""
-    output_dir = "output"
+    output_dir = "./logs"
     os.makedirs(output_dir, exist_ok=True)
     logger.add(os.path.join(output_dir, "ShallowSeek_MCPServer.log"), enqueue=True, rotation="10 MB", retention=5)
 
