@@ -5,3 +5,4 @@ logs/
 /dev.qss
 /main_old.py
 .env
+.vscode/
