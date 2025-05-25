@@ -1,7 +1,6 @@
 import os
 import sys
 import asyncio
-
 import qasync
 from loguru import logger
 from PySide6.QtWidgets import QApplication
