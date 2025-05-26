@@ -49,6 +49,7 @@ class EventBus(QObject, metaclass=SingletonMeta):
         StateChanged = auto()
         MessageSent = auto()
         MessageReceived = auto()
+        ConfigEvent = auto()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -56,7 +57,8 @@ class EventBus(QObject, metaclass=SingletonMeta):
             self.EventType.ButtonClicked: self.signal_button_clicked,
             self.EventType.StateChanged: self.signal_state_changed,
             self.EventType.MessageSent: self.signal_message_sent,
-            self.EventType.MessageReceived: self.signal_message_received
+            self.EventType.MessageReceived: self.signal_message_received,
+            self.EventType.ConfigEvent: self.signal_config_event,
         }
 
     def publish(self, event_type: "EventBus.EventType", data: Any = None) -> None:
