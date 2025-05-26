@@ -102,7 +102,7 @@ class LLMService:
             max_tokens=self.__current_agent_config.max_tokens,
             system_prompt=self.__current_agent_config.system_prompt,
             mcp_servers=self.__mcp_servers_instances, # 传递 MCP 服务器实例列表
-            # enable_streaming=self.__current_agent_config.enable_streaming, # 如果 AgentConfig 中有此字段
+            enable_streaming=self.__current_agent_config.enable_streaming,
             **self.__current_agent_config.model_kwargs # 传递额外的模型参数
         )
         logger.info(f"Agent re-initialized with model: {self.__current_agent_config.model} and {len(self.__mcp_servers_instances)} mounted MCP servers.")

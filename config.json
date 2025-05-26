@@ -3,11 +3,11 @@
     "agent_templates": {
         "default": {
             "model": "deepseek:deepseek-chat",
-            "temperature": 0.37,
-            "top_p": 0.14,
+            "temperature": 0.7,
+            "top_p": 1.0,
             "max_tokens": null,
-            "system_prompt": "你是一个有用的助手，帮助用户完成任务。请在每一次回答后加上`😄`",
-            "context_size": 2278,
+            "system_prompt": "你是一个有用的助手，帮助用户完成任务。",
+            "context_size": 4,
             "model_kwargs": {},
             "enable_streaming": false,
             "mounted_mcp_server_ids": [
