@@ -6,3 +6,4 @@ logs/
 /main_old.py
 .env
 .vscode/
+.venv/
