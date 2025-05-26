@@ -32,7 +32,7 @@ class AgentConfig(BaseModel):
     system_prompt: Optional[str] = Field(
         None, description="用于引导 agent 行为的初始提示。")
     context_size: Optional[int] = Field(
-        None, gt=0, description="上下文数量，越大，模型能记住的历史越多。")
+        None, ge=0, description="上下文数量，越大，模型能记住的历史越多。")
 
     model_kwargs: Dict[str, Any] = Field(
         {}, description="传递给底层 AI 模型的其他关键字参数。")
@@ -83,10 +83,10 @@ class AppConfig(BaseModel):
 # --- 默认配置 ---
 DEFAULT_MCP_SERVERS = [
     MCPServer(
-        id="my_local_mcp",
-        name="本地开发MCP",
+        id="test_local_mcp",
+        name="本地开发测试MCP",
         url="http://127.0.0.1:8000/sse",
-        description="用于本地开发的MCP服务器。"
+        description="用于本地开发测试的MCP服务器。"
     )
 ]
 
@@ -197,24 +197,40 @@ class ConfigManager(Singleton):
             self.update_template(target_template_name, mounted_mcp_server_ids=selected_mcp_server_ids)
     
     def _load_config(self):
+        """
+        加载配置文件。
+        如果文件不存在、内容为空、或加载/验证失败，则使用默认配置并尝试保存。
+        """
         if os.path.exists(self._config_file_path):
+            # 检查文件是否为空
+            if os.path.getsize(self._config_file_path) == 0:
+                logger.warning(f"Config file at {self._config_file_path} is empty. Using default config and saving it.")
+                self._current_config = DEFAULT_APP_CONFIG.model_copy(deep=True)
+                self.save_config(modified_template_name="default") # 保存默认配置
+                return # 加载并保存后直接返回
+
             try:
                 with open(self._config_file_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    self._current_config = AppConfig.model_validate(data)
-                    logger.info(f"Config loaded from {self._config_file_path}")
+                self._current_config = AppConfig.model_validate(data)
+                logger.info(f"Config loaded from {self._config_file_path}")
             except (json.JSONDecodeError, ValidationError) as e:
+                # 文件内容不是有效的JSON或不符合AppConfig结构
                 logger.error(f"Error loading/validating config from {self._config_file_path}: {e}. Using default.")
                 self._current_config = DEFAULT_APP_CONFIG.model_copy(deep=True) # 使用深拷贝
+                self.save_config(modified_template_name="default") # 保存默认配置
             except Exception as e:
-                logger.critical(f"Unexpected error loading config: {e}. Using default.")
+                # 其他意外错误
+                logger.critical(f"Unexpected error loading config from {self._config_file_path}: {e}. Using default.")
                 self._current_config = DEFAULT_APP_CONFIG.model_copy(deep=True) # 使用深拷贝
+                self.save_config(modified_template_name="default") # 保存默认配置
         else:
+            # 文件不存在
             logger.warning(f"Config file not found at {self._config_file_path}. Creating with default.")
             self._current_config = DEFAULT_APP_CONFIG.model_copy(deep=True) # 使用深拷贝
-            self.save_config(modified_template_name="default") # 保存并通知，假设 "default" 被初始化
+            self.save_config(modified_template_name="default") # 保存默认配置
 
-    # MODIFIED: save_config 现在可以接收一个参数，并在特定模板修改时发出事件
+    # save_config 可以接收一个参数，并在特定模板修改时发出事件
     def save_config(self, modified_template_name: Optional[str] = None):
         try:
             with open(self._config_file_path, 'w', encoding='utf-8') as f:

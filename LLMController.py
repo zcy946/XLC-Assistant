@@ -86,7 +86,6 @@ class LLMController(QObject, metaclass=SingletonMeta):
         """运行任务并处理结果"""
         try:
             result, self.__message_history = await self.__llm_service.execute_task(user_input, self.__message_history)
-            logger.info(self.__message_history)
             EventBus().publish(EventBus.EventType.MessageReceived, result)
         except Exception as e:
             logger.error(f"Task {user_input} failed: {e}")

@@ -10,16 +10,18 @@
             "context_size": null,
             "model_kwargs": {},
             "enable_streaming": false,
-            "mounted_mcp_server_ids": []
+            "mounted_mcp_server_ids": [
+                "test_local_mcp"
+            ]
         }
     },
     "mcp_servers": [
         {
-            "id": "my_local_mcp",
-            "name": "本地开发MCP",
+            "id": "test_local_mcp",
+            "name": "本地开发测试MCP",
             "url": "http://127.0.0.1:8000/sse",
             "api_key": null,
-            "description": "用于本地开发的MCP服务器。"
+            "description": "用于本地开发测试的MCP服务器。"
         }
     ]
 }

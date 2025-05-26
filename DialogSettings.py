@@ -158,12 +158,13 @@ class PageModel(BaseWidget):
 
         # __slider_model_contexts_number & __spinbox_model_contexts_number
         self.__slider_model_contexts_number = QSlider(self)
-        self.__slider_model_contexts_number.setRange(
-            0, 100)
+        self.__slider_model_contexts_number.setRange(0, 100)
         self.__slider_model_contexts_number.setOrientation(
             Qt.Orientation.Horizontal)
+        self.__slider_model_contexts_number.setDisabled(True) # TODO 暂未实现
         self.__spinbox_model_contexts_number = QSpinBox(self)
         self.__spinbox_model_contexts_number.setRange(0, 100)
+        self.__spinbox_model_contexts_number.setDisabled(True) # TODO 暂未实现
         self.__slider_model_contexts_number.valueChanged.connect(
             self.__on_slider_model_contexts_number_value_changed)
         self.__spinbox_model_contexts_number.valueChanged.connect(
@@ -183,6 +184,7 @@ class PageModel(BaseWidget):
         # __checkbox_streaming_output
         self.__checkbox_streaming_output = QCheckBox(self)
         self.__checkbox_streaming_output.setText("流式输出")
+        self.__checkbox_streaming_output.setDisabled(True)  # TODO 暂未实现
         self.__checkbox_streaming_output.checkStateChanged.connect(
             self.__emit_model_update_slot)
 
@@ -215,7 +217,7 @@ class PageModel(BaseWidget):
         v_layout.addLayout(h_layout_model_temperature)
         v_layout.addWidget(QLabel("Top-P", self))
         v_layout.addLayout(h_layout_model_top_p)
-        v_layout.addWidget(QLabel("上下文数(一问一答记一次 & 调至最大则按照模型窗口大小)", self))
+        v_layout.addWidget(QLabel("上下文数", self))
         v_layout.addLayout(h_layout_model_contexts_number)
         v_layout.addWidget(self.__checkbox_max_tokens_number)
         v_layout.addWidget(self.__spinbox_max_tokens_number)
