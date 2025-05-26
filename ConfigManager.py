@@ -7,6 +7,8 @@ from typing import Dict, Optional, List
 from pydantic import ValidationError
 from loguru import logger
 from Singleton import Singleton 
+from EventBus import EventBus
+
 
 # --- MCP 服务器模型 ---
 class MCPServer(BaseModel):
@@ -118,8 +120,82 @@ class ConfigManager(Singleton):
     def __init__(self, config_file_path: Optional[str] = None):
         if config_file_path:
             self._config_file_path = config_file_path
-        
         self._load_config()
+        self._subscribe_to_events()
+
+    def _subscribe_to_events(self):
+        event_bus = EventBus()
+        event_bus.signal_button_clicked.connect(self._handle_button_clicked)
+        event_bus.signal_state_changed.connect(self._handle_state_changed)
+        logger.info("ConfigManager subscribed to UI events.")
+
+    def _handle_button_clicked(self, event_data: dict):
+        event_id = event_data.get("id")
+        data = event_data.get("data")
+
+        if event_id == EventBus.Buttons.UPDATE_SYSTEM_PROMPT:
+            logger.debug(f"ConfigManager handling UPDATE_SYSTEM_PROMPT: {data}")
+            agent_payload = event_data.get("agent", {}) # DialogSettings sends it as {"data": {"agent": ...}}
+            if not agent_payload: # cater for structure EventBus.publish(EventBus.EventType.ButtonClicked, {"id": ..., "data": actual_payload})
+                agent_payload = data.get("agent",{})
+
+
+            target_template_name = agent_payload.get("agent_name")
+            new_system_prompt = agent_payload.get("system_prompt")
+
+            if not target_template_name:
+                logger.warning("No agent_name provided for system prompt update. Using current default.")
+                target_template_name = self._current_config.default_config_name
+            
+            if new_system_prompt is not None:
+                self.update_template(target_template_name, system_prompt=new_system_prompt)
+            else:
+                logger.warning(f"No system_prompt content provided for template '{target_template_name}'.")
+
+        elif event_id == EventBus.Buttons.RESET_MODEL_ARGS:
+            logger.debug("ConfigManager handling RESET_MODEL_ARGS")
+            target_template_name = self._current_config.default_config_name
+            # Attempt to get the original default for *this specific template name* if it existed
+            # or fall back to the generic "default" from DEFAULT_AGENT_CONFIGS
+            original_default_config = DEFAULT_AGENT_CONFIGS.get(target_template_name, DEFAULT_AGENT_CONFIGS.get("default"))
+            if original_default_config:
+                update_kwargs = original_default_config.model_dump(exclude_none=False) # Get all fields
+                 # mounted_mcp_server_ids should ideally be reset too, or handled carefully
+                update_kwargs.pop('mounted_mcp_server_ids', None) # Don't reset mounted servers on model reset, unless intended
+                self.update_template(target_template_name, **update_kwargs)
+            else:
+                logger.error(f"Could not find default configuration to reset template '{target_template_name}'.")
+
+
+    def _handle_state_changed(self, event_data: dict):
+        event_id = event_data.get("id")
+        data = event_data.get("data")
+
+        if event_id == EventBus.States.MODEL_UPDATED:
+            logger.debug(f"ConfigManager handling MODEL_UPDATED: {data}")
+            target_template_name = self._current_config.default_config_name # Assume editing default
+            
+            # Map UI names to AgentConfig field names if necessary
+            kwargs_for_update = {
+                "model": data.get("model"),
+                "temperature": data.get("temperature"),
+                "top_p": data.get("top_p"),
+                "context_size": data.get("contexts_number"), # UI 'contexts_number' maps to 'context_size'
+                "max_tokens": data.get("max_tokens"), # PageModel now sends None if checkbox is off
+                "enable_streaming": data.get("streaming_output", False)
+            }
+            # Filter out any keys with None values if update_template doesn't want them,
+            # but pydantic handles `None` correctly for Optional fields.
+            # kwargs_for_update = {k: v for k, v in kwargs_for_update.items() if v is not None or k in ["max_tokens", "enable_streaming", "context_size", "system_prompt"]}
+            self.update_template(target_template_name, **kwargs_for_update)
+
+        elif event_id == EventBus.States.MCP_SERVERS_UPDATED:
+            logger.debug(f"ConfigManager handling MCP_SERVERS_UPDATED: {data}")
+            target_template_name = self._current_config.default_config_name # Assume editing default
+            selected_mcp_server_ids = [s["id"] for s in data.get("mcp_servers", [])]
+            self.update_template(target_template_name, mounted_mcp_server_ids=selected_mcp_server_ids)
+
+    
 
     def _load_config(self):
         """

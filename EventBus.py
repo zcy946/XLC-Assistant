@@ -25,6 +25,7 @@ class EventBus(QObject, metaclass=SingletonMeta):
     signal_state_changed = Signal(Any)  # 状态改变
     signal_message_sent = Signal(Any)  # 发送消息
     signal_message_received = Signal(Any)  # 消息响应
+    signal_config_event = Signal(Any) # 配置改变
 
     # 按钮id
     class Buttons(Enum):
@@ -36,6 +37,11 @@ class EventBus(QObject, metaclass=SingletonMeta):
     class States(Enum):
         MODEL_UPDATED = auto() # 模型更新
         MCP_SERVERS_UPDATED = auto() # mcp服务器更新
+
+    # 配置改变事件id
+    class ConfigEvents(Enum):
+        AGENT_TEMPLATE_UPDATED = auto()  # data: {"template_name": str}
+        DEFAULT_AGENT_TEMPLATE_CHANGED = auto() # data: {"template_name": str}
 
     # 事件类型
     class EventType(Enum):
