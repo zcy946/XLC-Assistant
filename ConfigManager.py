@@ -365,8 +365,6 @@ class ConfigManager(Singleton):
         return None
 
     def add_mcp_server(self, server: MCPServer):
-        # 省略实现细节，假设其调用 self.save_config() 且可能需要事件通知逻辑
-        # 如果添加/更新MCP服务器会影响Agent模板（例如，通过自动验证或清理），则需要更复杂的事件逻辑
         existing_server_index = -1
         for i, s in enumerate(self._current_config.mcp_servers):
             if s.id == server.id:
@@ -379,10 +377,9 @@ class ConfigManager(Singleton):
         else:
             self._current_config.mcp_servers.append(server)
             logger.info(f"MCP server '{server.id}' added.")
-        self.save_config() # 全局保存，可能需要检查是否有模板因此失效
+        self.save_config()
 
     def update_mcp_server(self, server_id: str, **kwargs):
-        # 省略实现细节，同上
         server_found = False
         for i, server in enumerate(self._current_config.mcp_servers):
             if server.id == server_id:
@@ -396,7 +393,6 @@ class ConfigManager(Singleton):
                     break
                 except ValidationError as e:
                     logger.error(f"Failed to update MCP server '{server_id}': {e}")
-                # ... (rest of error handling)
         if not server_found:
             logger.warning(f"MCP server '{server_id}' not found.")
 
@@ -454,7 +450,7 @@ class ConfigManager(Singleton):
         else:
             logger.info(f"MCP server '{server_id}' is not mounted to template '{template_name}'.")
 
-from pydantic_ai import Agent # 保留，尽管create_agent_from_config未使用
+from pydantic_ai import Agent
 
 # 辅助函数 create_agent_from_config 保持不变，当前主要由 LLMService 内部处理 Agent 创建
 def create_agent_from_config(agent_config: AgentConfig) -> Agent:
