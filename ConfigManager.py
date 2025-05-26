@@ -89,8 +89,8 @@ DEFAULT_MCP_SERVERS = [
     MCPServer(
         id="my_local_mcp",
         name="本地开发MCP",
-        url="http://localhost:8000/sse",
-        api_key="dev_key_123",
+        url="http://127.0.0.1:8000/sse",
+        # api_key="dev_key_123",
         description="用于本地开发的MCP服务器。"
     )
 ]
@@ -100,24 +100,7 @@ DEFAULT_AGENT_CONFIGS = {
         model="deepseek:deepseek-chat",
         system_prompt="你是一个有用的助手，帮助用户完成任务。",
         mounted_mcp_server_ids=[] # 默认不挂载
-    ),
-    "creative": AgentConfig(
-        model="deepseek:deepseek-chat",
-        temperature=0.9,
-        top_p=0.8,
-        max_tokens=800,
-        enable_streaming=True,
-        system_prompt="你是一个极具创造力的故事讲述者和诗人。",
-        mounted_mcp_server_ids=[]
-    ),
-    "precise": AgentConfig(
-        model="deepseek:deepseek-chat",
-        temperature=0.2,
-        top_p=0.1,
-        max_tokens=200,
-        enable_streaming=False,
-        system_prompt="你是一个简洁且注重事实的助手。提供直接的答案。",
-        mounted_mcp_server_ids=["my_local_mcp"] # 示例：挂载一个默认服务器
+        # mounted_mcp_server_ids=["my_local_mcp"] # 示例：挂载一个默认服务器
     )
 }
 

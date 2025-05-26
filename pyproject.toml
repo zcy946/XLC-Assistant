@@ -8,6 +8,5 @@ dependencies = [
     "loguru>=0.7.3",
     "pydantic-ai>=0.2.7",
     "pyside6>=6.9.0",
-    "python-dotenv>=1.1.0",
     "qasync>=0.27.1",
 ]

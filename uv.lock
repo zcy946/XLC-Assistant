@@ -1419,7 +1419,6 @@ dependencies = [
     { name = "loguru" },
     { name = "pydantic-ai" },
     { name = "pyside6" },
-    { name = "python-dotenv" },
     { name = "qasync" },
 ]
 
@@ -1428,7 +1427,6 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "pydantic-ai", specifier = ">=0.2.7" },
     { name = "pyside6", specifier = ">=6.9.0" },
-    { name = "python-dotenv", specifier = ">=1.1.0" },
     { name = "qasync", specifier = ">=0.27.1" },
 ]
 
