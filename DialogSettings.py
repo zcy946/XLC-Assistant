@@ -24,6 +24,7 @@ from PySide6.QtCore import (
 from BaseWidget import BaseWidget
 from EventBus import EventBus
 from loguru import logger
+from ConfigManager import ConfigManager
 
 
 class PageSystemPrompt(BaseWidget):
@@ -47,7 +48,8 @@ class PageSystemPrompt(BaseWidget):
         # __pushbutton_save
         self.__pushbutton_save = QPushButton(self)
         self.__pushbutton_save.setText("保存")
-        self.__pushbutton_save.clicked.connect(self.__on_pushbutton_save_clicked)
+        self.__pushbutton_save.clicked.connect(
+            self.__on_pushbutton_save_clicked)
 
     def _init_layout(self):
         v_layout = QVBoxLayout(self)
@@ -55,15 +57,18 @@ class PageSystemPrompt(BaseWidget):
         v_layout.addWidget(self.__lineedit_agent_name)
         v_layout.addWidget(QLabel("提示词", self))
         v_layout.addWidget(self.__plaintext_edit_system_prompt)
-        v_layout.addWidget(self.__pushbutton_save, 0, Qt.AlignmentFlag.AlignRight)
+        v_layout.addWidget(self.__pushbutton_save, 0,
+                           Qt.AlignmentFlag.AlignRight)
 
     def __on_pushbutton_save_clicked(self):
         EventBus().publish(EventBus.EventType.ButtonClicked, {
             "id": EventBus.Buttons.UPDATE_SYSTEM_PROMPT,
             "message": "Update system promot",
             "data": {
-                "agent_name": self.__lineedit_agent_name.text(),
-                "system_prompt": self.__plaintext_edit_system_prompt.toPlainText()
+                "agent": {
+                    "agent_name": self.__lineedit_agent_name.text(),
+                    "system_prompt": self.__plaintext_edit_system_prompt.toPlainText()
+                }
             }
         })
 
@@ -94,9 +99,11 @@ class PageModel(BaseWidget):
         self.__combobox_model.currentTextChanged.connect(self.__update_model)
         # __slider_model_temperature
         self.__slider_model_temperature = QSlider(self)
-        self.__slider_model_temperature.setOrientation(Qt.Orientation.Horizontal)
+        self.__slider_model_temperature.setOrientation(
+            Qt.Orientation.Horizontal)
         self.__slider_model_temperature.setRange(0, 200)  # 放大100倍，取值时再缩回来
-        self.__slider_model_temperature.valueChanged.connect(self.__on_slider_model_temperature_value_changed)
+        self.__slider_model_temperature.valueChanged.connect(
+            self.__on_slider_model_temperature_value_changed)
         # __double_spinbox_model_temperature
         self.__double_spinbox_model_temperature = QDoubleSpinBox(self)
         self.__double_spinbox_model_temperature.setRange(0, 2)
@@ -106,20 +113,25 @@ class PageModel(BaseWidget):
         self.__slider_model_top_p = QSlider(self)
         self.__slider_model_top_p.setOrientation(Qt.Orientation.Horizontal)
         self.__slider_model_top_p.setRange(0, 100)
-        self.__slider_model_top_p.valueChanged.connect(self.__on_slider_model_top_p_value_changed)
+        self.__slider_model_top_p.valueChanged.connect(
+            self.__on_slider_model_top_p_value_changed)
         # __double_spinbox_model_top_p
         self.__double_spinbox_model_top_p = QDoubleSpinBox(self)
         self.__double_spinbox_model_top_p.setRange(0, 1)
-        self.__double_spinbox_model_top_p.valueChanged.connect(self.__on_double_spinbox_model_top_p_value_changed)
+        self.__double_spinbox_model_top_p.valueChanged.connect(
+            self.__on_double_spinbox_model_top_p_value_changed)
         # __slider_contexts_number
         self.__slider_model_contexts_number = QSlider(self)
         self.__slider_model_contexts_number.setRange(0, 100)
-        self.__slider_model_contexts_number.setOrientation(Qt.Orientation.Horizontal)
-        self.__slider_model_contexts_number.valueChanged.connect(self.__on_slider_model_contexts_number_value_changed)
+        self.__slider_model_contexts_number.setOrientation(
+            Qt.Orientation.Horizontal)
+        self.__slider_model_contexts_number.valueChanged.connect(
+            self.__on_slider_model_contexts_number_value_changed)
         # __spinbox_model_context_number
         self.__spinbox_model_contexts_number = QSpinBox(self)
         self.__spinbox_model_contexts_number.setRange(0, 100)
-        self.__spinbox_model_contexts_number.valueChanged.connect(self.__on_spinbox_model_contexts_number_value_changed)
+        self.__spinbox_model_contexts_number.valueChanged.connect(
+            self.__on_spinbox_model_contexts_number_value_changed)
         # __checkbox_max_tokens_number
         self.__checkbox_max_tokens_number = QCheckBox(self)
         self.__checkbox_max_tokens_number.setText("最大Token数")
@@ -129,33 +141,41 @@ class PageModel(BaseWidget):
         self.__spinbox_max_tokens_number = QSpinBox(self)
         self.__spinbox_max_tokens_number.setRange(0, 10000000)
         self.__spinbox_max_tokens_number.hide()
-        self.__spinbox_max_tokens_number.valueChanged.connect(self.__update_model)
+        self.__spinbox_max_tokens_number.valueChanged.connect(
+            self.__update_model)
         # __checkbox_streaming_output
         self.__checkbox_streaming_output = QCheckBox(self)
         self.__checkbox_streaming_output.setText("流式输出")
-        self.__checkbox_streaming_output.checkStateChanged.connect(self.__update_model)
+        self.__checkbox_streaming_output.checkStateChanged.connect(
+            self.__update_model)
         # __pushbutton_reset
         self.__pushbutton_reset = QPushButton(self)
         self.__pushbutton_reset.setText("重置")
-        self.__pushbutton_reset.clicked.connect(self.__on_pushbutton_reset_clicked)
+        self.__pushbutton_reset.clicked.connect(
+            self.__on_pushbutton_reset_clicked)
 
     def _init_layout(self):
         # h_layout_model_temperature
         h_layout_model_temperature = QHBoxLayout()
-        h_layout_model_temperature.addWidget(self.__slider_model_temperature, 8)
-        h_layout_model_temperature.addWidget(self.__double_spinbox_model_temperature, 2)
+        h_layout_model_temperature.addWidget(
+            self.__slider_model_temperature, 8)
+        h_layout_model_temperature.addWidget(
+            self.__double_spinbox_model_temperature, 2)
         # h_layout_model_top_p
         h_layout_model_top_p = QHBoxLayout()
         h_layout_model_top_p.addWidget(self.__slider_model_top_p, 8)
         h_layout_model_top_p.addWidget(self.__double_spinbox_model_top_p, 2)
         # h_layout_model_contexts_number
         h_layout_model_contexts_number = QHBoxLayout()
-        h_layout_model_contexts_number.addWidget(self.__slider_model_contexts_number, 8)
-        h_layout_model_contexts_number.addWidget(self.__spinbox_model_contexts_number, 2)
+        h_layout_model_contexts_number.addWidget(
+            self.__slider_model_contexts_number, 8)
+        h_layout_model_contexts_number.addWidget(
+            self.__spinbox_model_contexts_number, 2)
         # v_layout
         v_layout = QVBoxLayout(self)
         v_layout.addWidget(QLabel("默认模型", self))
-        v_layout.addWidget(self.__combobox_model, 0, Qt.AlignmentFlag.AlignLeft)
+        v_layout.addWidget(self.__combobox_model, 0,
+                           Qt.AlignmentFlag.AlignLeft)
         v_layout.addWidget(QLabel("模型温度", self))
         v_layout.addLayout(h_layout_model_temperature)
         v_layout.addWidget(QLabel("Top-P", self))
@@ -165,7 +185,8 @@ class PageModel(BaseWidget):
         v_layout.addWidget(self.__checkbox_max_tokens_number)
         v_layout.addWidget(self.__spinbox_max_tokens_number)
         v_layout.addWidget(self.__checkbox_streaming_output)
-        v_layout.addWidget(self.__pushbutton_reset, 0, Qt.AlignmentFlag.AlignRight)
+        v_layout.addWidget(self.__pushbutton_reset, 0,
+                           Qt.AlignmentFlag.AlignRight)
         v_layout.addStretch()
 
     def __update_model(self, model: str | None = None,
@@ -189,7 +210,8 @@ class PageModel(BaseWidget):
 
     def __on_slider_model_temperature_value_changed(self, value: int):
         """模型温度滑动条槽函数"""
-        self.__double_spinbox_model_temperature.setValue(value / 100)  # 为了视觉效果放大了100倍，使用时缩小100倍
+        self.__double_spinbox_model_temperature.setValue(
+            value / 100)  # 为了视觉效果放大了100倍，使用时缩小100倍
 
     def __on_double_spinbox_model_temperature_value_changed(self, value: float):
         self.__slider_model_temperature.setValue(int(value * 100))
@@ -213,7 +235,8 @@ class PageModel(BaseWidget):
 
     def __on_checkbox_max_tokens_number_check_state_changed(self, state: Qt.CheckState):
         """最大token数开关槽函数"""
-        self.__spinbox_max_tokens_number.show() if state == Qt.CheckState.Checked else self.__spinbox_max_tokens_number.hide()
+        self.__spinbox_max_tokens_number.show(
+        ) if state == Qt.CheckState.Checked else self.__spinbox_max_tokens_number.hide()
 
     def __on_pushbutton_reset_clicked(self):
         """重置按钮槽函数"""
@@ -257,7 +280,8 @@ class PageMcpServer(BaseWidget):
             self.__label_url.setText(self.__url)
             # __checkbox
             self.__checkbox = QCheckBox(self)
-            self.__checkbox.checkStateChanged.connect(self.__on_checkbox_check_state_changed)
+            self.__checkbox.checkStateChanged.connect(
+                self.__on_checkbox_check_state_changed)
 
         def _init_layout(self):
             # v_layout_details
@@ -284,8 +308,10 @@ class PageMcpServer(BaseWidget):
         self.__selected_mcp_servers = []
         super().__init__(parent)
         # TEST
-        self.add_item("test-uuid-01", "测试服务器1name", "测试服务器1description", "测试服务器1url")
-        self.add_item("test-uuid-02", "测试服务器2name", "测试服务器2description", "测试服务器2url")
+        self.add_item("test-uuid-01", "测试服务器1name",
+                      "测试服务器1description", "测试服务器1url")
+        self.add_item("test-uuid-02", "测试服务器2name",
+                      "测试服务器2description", "测试服务器2url")
 
     def _init_widget(self):
         pass
@@ -302,8 +328,10 @@ class PageMcpServer(BaseWidget):
     def add_item(self, id: str, name: str, description: str, url: str):
         """向列表中添加mcp服务器"""
         item = QListWidgetItem(self.__list_widget)
-        widget_mcp_server = PageMcpServer.WidgetMcpServer(id, name, description, url, self.__list_widget)
-        widget_mcp_server.signal_check_state_changed.connect(self.__on_item_mcp_selected)
+        widget_mcp_server = PageMcpServer.WidgetMcpServer(
+            id, name, description, url, self.__list_widget)
+        widget_mcp_server.signal_check_state_changed.connect(
+            self.__on_item_mcp_selected)
         # 设置 size hint，确保 item 有高度
         item.setSizeHint(widget_mcp_server.sizeHint())
         self.__list_widget.addItem(item)
@@ -381,6 +409,7 @@ class DialogSettings(QDialog):
         self._init_items()
         self._init_layout()
 
+
     def _init_widget(self):
         self.setWindowTitle("设置")
         self.setModal(True)
@@ -391,7 +420,8 @@ class DialogSettings(QDialog):
         self.__list_widget.addItem("提示词设置")
         self.__list_widget.addItem("模型设置")
         self.__list_widget.addItem("MCP服务器")
-        self.__list_widget.currentItemChanged.connect(self.__on_selection_changed)
+        self.__list_widget.currentItemChanged.connect(
+            self.__on_selection_changed)
         # __settings_central_widget
         self.__settings_central_widget = SettingsCentralWidget(self)
         # __splitter
@@ -418,4 +448,5 @@ class DialogSettings(QDialog):
         super().closeEvent(event)
 
     def __on_selection_changed(self):
-        self.__settings_central_widget.set_current_index(self.__list_widget.currentIndex().row())
+        self.__settings_central_widget.set_current_index(
+            self.__list_widget.currentIndex().row())

@@ -4,6 +4,7 @@ test/
 logs/
 /dev.qss
 /main_old.py
-.env
+test.py
 .vscode/
 .venv/
+file.log
