@@ -170,7 +170,7 @@ class LLMService:
         使用 Semaphore 限制并发数量。
         """
         # 提示：如果 MCP 服务器配置了但未连接，这里会发出警告。
-        # 根据你的业务逻辑，你可能希望在这里抛出异常，或者强制等待连接。
+        # 可以在这里抛出异常，或者强制等待连接。
         if self.__mcp_servers_instances and not self.__is_mcp_servers_connected:
             logger.warning("MCP servers are configured but not connected. Attempting to run task without them.")
         

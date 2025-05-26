@@ -25,19 +25,19 @@ class LLMController(QObject, metaclass=SingletonMeta):
 
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
-        self.__llm_service = LLMService() # LLMService initialized, will use default config
+        self.__llm_service = LLMService()
         self.__message_history = list()
         self.__init_handlers()
-        # Subscribe to config events
+        # 订阅配置改变事件
         EventBus().signal_config_event.connect(self.__on_config_event)
         logger.info("LLMController initialized and subscribed to config events.")
 
 
     def __init_handlers(self):
         EventBus().signal_message_sent.connect(self.__on_message_sent)
-        EventBus().signal_button_clicked.connect(self.__on_button_clicked_clear_history) # Renamed for clarity
+        EventBus().signal_button_clicked.connect(self.__on_button_clicked_clear_history)
 
-    def __on_button_clicked_clear_history(self, data): # Renamed and specified
+    def __on_button_clicked_clear_history(self, data):
         """清除上下文"""
         if data["id"] == EventBus.Buttons.CLEAR_CONTEXT:
             self.__message_history.clear()
@@ -86,6 +86,7 @@ class LLMController(QObject, metaclass=SingletonMeta):
         """运行任务并处理结果"""
         try:
             result, self.__message_history = await self.__llm_service.execute_task(user_input, self.__message_history)
+            logger.info(self.__message_history)
             EventBus().publish(EventBus.EventType.MessageReceived, result)
         except Exception as e:
             logger.error(f"Task {user_input} failed: {e}")

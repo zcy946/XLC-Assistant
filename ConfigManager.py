@@ -32,7 +32,7 @@ class AgentConfig(BaseModel):
     system_prompt: Optional[str] = Field(
         None, description="用于引导 agent 行为的初始提示。")
     context_size: Optional[int] = Field(
-        None, gt=0, description="模型可处理的最大 token 数，包括提示和补全内容。（仅作参考，PydanticAI 不直接设置）")
+        None, gt=0, description="上下文数量，越大，模型能记住的历史越多。")
 
     model_kwargs: Dict[str, Any] = Field(
         {}, description="传递给底层 AI 模型的其他关键字参数。")
