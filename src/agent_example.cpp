@@ -1,4 +1,3 @@
-// #include "httplib.h"
 #include "mcp_server.h"
 #include "mcp_sse_client.h"
 #include "mcp_logger.h"
