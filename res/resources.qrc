@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/agent.svg</file>
+        <file>image/llm.svg</file>
+        <file>image/settings.svg</file>
+    </qresource>
+</RCC>

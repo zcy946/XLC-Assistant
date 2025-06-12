@@ -10,7 +10,7 @@
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
-inline void InitLogger()
+inline void initLogger()
 {
     // 使用静态变量防止重复初始化
     static bool initialized = false;

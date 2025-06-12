@@ -97,6 +97,8 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "memory_resource": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "qpainter": "cpp",
+        "qpair": "cpp"
     }
 }

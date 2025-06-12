@@ -30,6 +30,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find required packages
 find_package(Threads REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui Svg REQUIRED)
 
 option(MCP_SSL "Enable SSL support" ON)
 
@@ -40,20 +41,37 @@ if(MCP_SSL)
     add_compile_definitions(MCP_SSL CPPHTTPLIB_OPENSSL_SUPPORT)
 endif()
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/cpp-mcp/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/cpp-mcp/common)
 
 # Add MCP library
 add_subdirectory(lib/cpp-mcp)
 
+file(GLOB_RECURSE HEADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
+)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
+
 add_executable(${PROJECT_NAME}
+    ${SRC}
+    ${HEADERS}
+
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/agent_example.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/agent_without_mcp_server.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/src/agent_without_mcp_server.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     mcp
     spdlog::spdlog_header_only
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Gui
+    Qt5::Svg
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
