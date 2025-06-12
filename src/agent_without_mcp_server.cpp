@@ -18,7 +18,7 @@ struct Config
     double temperature = 0.0;
 
     // Server Config
-    int port = 8889;
+    int port = 8888;
 
     // Agent Config
     int max_steps = 3;
@@ -137,70 +137,13 @@ static Config parse_config(int argc, char *argv[])
     return config;
 }
 
-// Calculator tool handler
-static mcp::json calculator_handler(const mcp::json &params, const std::string & /* session_id */)
-{
-    if (!params.contains("operation"))
-    {
-        throw mcp::mcp_exception(mcp::error_code::invalid_params, "Missing 'operation' parameter");
-    }
-
-    std::string operation = params["operation"];
-    double result = 0.0;
-
-    if (operation == "add")
-    {
-        if (!params.contains("a") || !params.contains("b"))
-        {
-            throw mcp::mcp_exception(mcp::error_code::invalid_params, "Missing 'a' or 'b' parameter");
-        }
-        result = params["a"].get<double>() + params["b"].get<double>();
-    }
-    else if (operation == "subtract")
-    {
-        if (!params.contains("a") || !params.contains("b"))
-        {
-            throw mcp::mcp_exception(mcp::error_code::invalid_params, "Missing 'a' or 'b' parameter");
-        }
-        result = params["a"].get<double>() - params["b"].get<double>();
-    }
-    else if (operation == "multiply")
-    {
-        if (!params.contains("a") || !params.contains("b"))
-        {
-            throw mcp::mcp_exception(mcp::error_code::invalid_params, "Missing 'a' or 'b' parameter");
-        }
-        result = params["a"].get<double>() * params["b"].get<double>();
-    }
-    else if (operation == "divide")
-    {
-        if (!params.contains("a") || !params.contains("b"))
-        {
-            throw mcp::mcp_exception(mcp::error_code::invalid_params, "Missing 'a' or 'b' parameter");
-        }
-        if (params["b"].get<double>() == 0.0)
-        {
-            throw mcp::mcp_exception(mcp::error_code::invalid_params, "Division by zero not allowed");
-        }
-        result = params["a"].get<double>() / params["b"].get<double>();
-    }
-    else
-    {
-        throw mcp::mcp_exception(mcp::error_code::invalid_params, "Unknown operation: " + operation);
-    }
-
-    return {
-        {{"type", "text"},
-         {"text", std::to_string(result)}}};
-}
-
 static bool readline_utf8(std::string &line, bool multiline_input)
 {
 #if defined(_WIN32)
     std::wstring wline;
     if (!std::getline(std::wcin, wline))
     {
-        // Input stream is bad or EOF received
+        // 输入流错误或收到EOF
         line.clear();
         GenerateConsoleCtrlEvent(CTRL_C_EVENT, 0);
         return false;
@@ -212,7 +155,7 @@ static bool readline_utf8(std::string &line, bool multiline_input)
 #else
     if (!std::getline(std::cin, line))
     {
-        // Input stream is bad or EOF received
+        // 输入流错误或收到EOF
         line.clear();
         return false;
     }
@@ -221,18 +164,18 @@ static bool readline_utf8(std::string &line, bool multiline_input)
     {
         char last = line.back();
         if (last == '/')
-        { // Always return control on '/' symbol
+        { // 始终在“/”符号处返回控制
             line.pop_back();
             return false;
         }
         if (last == '\\')
-        { // '\\' changes the default action
+        { // '\\' 更改默认操作
             line.pop_back();
             multiline_input = !multiline_input;
         }
     }
 
-    // By default, continue input if multiline_input is set
+    // 默认情况下，如果设置了 multiline_input，则继续输入
     return multiline_input;
 }
 
@@ -255,7 +198,7 @@ static mcp::json ask_tool(const mcp::json &messages, const mcp::json &tools, int
 
     while (retry <= max_retries)
     {
-        // send request
+        // 发送请求
         auto res = client.Post(config.endpoint, body_str, "application/json");
 
         if (!res)
@@ -287,7 +230,7 @@ static mcp::json ask_tool(const mcp::json &messages, const mcp::json &tools, int
             break;
         }
 
-        // wait for a while before retrying
+        // 延时500ms后重试
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         std::cerr << "Retrying " << retry << "/" << max_retries << std::endl;
@@ -359,62 +302,41 @@ int main(int argc, char *argv[])
 
     // Global config
     config = parse_config(argc, argv);
-
-    // Create example server with Calculator tool
-    mcp::server server("localhost", config.port);
-    server.set_server_info("ExampleServer", "0.1.0");
-    mcp::json capabilities = {
-        {"tools", mcp::json::object()}};
-    server.set_capabilities(capabilities);
-
-    mcp::tool calc_tool = mcp::tool_builder("calculator")
-                              .with_description("Perform basic calculations")
-                              .with_string_param("operation", "Operation to perform (add, subtract, multiply, divide)")
-                              .with_number_param("a", "First operand")
-                              .with_number_param("b", "Second operand")
-                              .build();
-
-    server.register_tool(calc_tool, calculator_handler);
-
-    mcp::json tools = mcp::json::array();
-
-    for (const auto &tool : server.get_tools())
-    {
-        mcp::json converted_tool = {
-            {"type", "function"},
-            {"function", {{"name", tool.name}, {"description", tool.description}, {"parameters", {{"type", "object"}, {"properties", tool.parameters_schema["properties"]}, {"required", tool.parameters_schema["required"]}}}}}};
-        tools.push_back(converted_tool);
-    }
-
-    // Start server
-    server.start(false); // Non-blocking mode
-
-    // Create a client
+    // 创建mcp客户端
     mcp::sse_client client("localhost", config.port);
-
-    // Set timeout
+    // 设置超时时长
     client.set_timeout(10);
-
+    // 初始化客户端
     bool initialized = client.initialize("ExampleClient", "0.1.0");
-
     if (!initialized)
     {
         std::cerr << "Failed to initialize connection to server" << std::endl;
         return 1;
     }
 
-    // Get available tools
+    // 获取可用工具
+    std::cout << "\nGetting available tools..." << std::endl;
+    std::cout << "Available tools:" << std::endl;
+    mcp::json tools = mcp::json::array();
+    for (const auto &tool : client.get_tools())
     {
-        std::cout << "\nGetting available tools..." << std::endl;
-        auto tools = client.get_tools();
-        std::cout << "Available tools:" << std::endl;
-        for (const auto &tool : tools)
-        {
-            std::cout << "- " << tool.name << ": " << tool.description << std::endl;
-        }
+        std::cout << "- " << tool.name << ": " << tool.description << std::endl;
+        // LOG_DEBUG("Schema for tool '", tool.name, "': ", tool.parameters_schema.dump(4));
+        mcp::json converted_tool = {
+            {"type", "function"},
+            {"function",
+             {{"name", tool.name},
+              {"description", tool.description},
+              {"parameters",
+               {{"type", "object"},
+                // 如果 "properties" 不存在，使用一个空的 JSON object {} 作为默认值
+                {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
+                // 如果 "required" 不存在，使用一个空的 JSON array [] 作为默认值
+                {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
+        tools.push_back(converted_tool);
     }
 
-    // Initialize messages
+    // 初始化消息
     mcp::json messages;
 
     if (!config.system_prompt.empty())
@@ -425,7 +347,7 @@ int main(int argc, char *argv[])
         messages.push_back(system_message);
     }
 
-    // Start chating with LLM
+    // 开始与LLM对话
     while (true)
     {
         std::cout << "\n>>> ";
@@ -436,7 +358,7 @@ int main(int argc, char *argv[])
         messages.push_back({{"role", "user"},
                             {"content", prompt}});
 
-        // Maximum steps calling tools without user input
+        // 未收到用户输入时调用工具的最大步数
         int steps = config.max_steps;
 
         while (steps--)
@@ -446,13 +368,13 @@ int main(int argc, char *argv[])
 
             display_message(response);
 
-            // No tool calls, exit loop
+            // 不调用工具，退出循环
             if (response["tool_calls"].empty())
             {
                 break;
             }
 
-            // Call tool
+            // 调用工具
             for (const auto &tool_call : response["tool_calls"])
             {
                 try
@@ -461,7 +383,7 @@ int main(int argc, char *argv[])
 
                     std::cout << "\nCalling tool " << tool_name << "...\n\n";
 
-                    // Parse arguments
+                    // 解析参数
                     mcp::json args = tool_call["function"]["arguments"];
 
                     if (args.is_string())
@@ -469,7 +391,7 @@ int main(int argc, char *argv[])
                         args = mcp::json::parse(args.get<std::string>());
                     }
 
-                    // Execute the tool
+                    // 执行工具
                     mcp::json result = client.call_tool(tool_name, args);
                     LOG_DEBUG("result: ", result);
 
@@ -477,14 +399,14 @@ int main(int argc, char *argv[])
 
                     std::cout << "\nResult for " << tool_name << ": ";
 
-                    // Add response to messages
+                    // 添加对消息的回复
                     messages.push_back({{"role", "tool"},
                                         {"tool_call_id", tool_call["id"]},
                                         {"content", content.dump()}});
                 }
                 catch (const std::exception &e)
                 {
-                    // Handle error
+                    // 处理错误
                     messages.push_back({{"role", "tool"},
                                         {"tool_call_id", tool_call["id"]},
                                         {"content", "Error: " + std::string(e.what())}});
