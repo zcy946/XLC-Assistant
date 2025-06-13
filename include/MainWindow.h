@@ -18,7 +18,6 @@ protected:
     void initLayout() override;
 
 private:
-    QSplitter *m_splitter;
     CNavigationBar *m_navigationBar;
 };
 

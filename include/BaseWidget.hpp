@@ -14,11 +14,8 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override
     {
-        int r = QRandomGenerator::global()->bounded(256);
-        int g = QRandomGenerator::global()->bounded(256);
-        int b = QRandomGenerator::global()->bounded(256);
         QPainter painter(this);
-        painter.setPen(QColor(r, g, b));
+        painter.setPen(QColor::fromRgb(QRandomGenerator::global()->generate()));
         painter.drawRect(rect().adjusted(1, 1, -1, -1));
         painter.end();
         QWidget::paintEvent(event);

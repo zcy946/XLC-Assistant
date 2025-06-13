@@ -60,6 +60,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 add_executable(${PROJECT_NAME}
     ${SRC}
     ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
 
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/agent_example.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/src/agent_without_mcp_server.cpp

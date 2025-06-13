@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>image/agent.svg</file>
-        <file>image/llm.svg</file>
-        <file>image/settings.svg</file>
+        <file>image/message-3-line.svg</file>
+        <file>image/settings-3-line.svg</file>
+        <file>image/fire-line.svg</file>
     </qresource>
 </RCC>
