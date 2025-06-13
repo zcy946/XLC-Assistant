@@ -95,19 +95,12 @@ void CNavigationContentWidget::paintEvent(QPaintEvent *event)
     for (int i = 0; i < m_items.size(); ++i)
     {
         QRect rectItem(m_marginLeft, m_marginTop + i * (m_heightItem + m_spacingItem), m_widthItem, m_heightItem);
-        if (m_items[i].selectable)
-        {
-            if (m_indexSelected == i)
-                painter.setBrush(m_colorIconBackgroundSelected);
-            else if (m_indexHovered == i)
-                painter.setBrush(m_colorIconBackgroundHovered);
-            else
-                painter.setBrush(m_colorBackground);
-        }
+        if (m_indexSelected == i)
+            painter.setBrush(m_colorIconBackgroundSelected);
+        else if (m_indexHovered == i)
+            painter.setBrush(m_colorIconBackgroundHovered);
         else
-        {
             painter.setBrush(m_colorBackground);
-        }
         painter.setPen(Qt::NoPen);
         QRect rectBackground = rectItem.adjusted(0, 0, 0, -(m_spacingBackground2Text + m_heightText));
         painter.drawRoundedRect(rectBackground, m_borderRadiusBackground, m_borderRadiusBackground);
@@ -131,9 +124,10 @@ void CNavigationContentWidget::paintEvent(QPaintEvent *event)
 void CNavigationContentWidget::mousePressEvent(QMouseEvent *event)
 {
     int index = itemAt(event->pos());
-    if (index != -1 /*&& m_items[index].selectable*/ && index != m_indexSelected)
+    if (index != -1 && index != m_indexSelected)
     {
-        m_indexSelected = index;
+        if (m_items[index].selectable)
+            m_indexSelected = index;
         emit indexChanged(m_indexSelected, m_items[m_indexSelected].text);
         update();
     }

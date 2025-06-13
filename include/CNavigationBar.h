@@ -72,6 +72,9 @@ public:
     explicit CNavigationBar(QWidget *parent = nullptr);
     ~CNavigationBar();
     void addItemSvg(const QString &text, const QString &filename);
+    /**
+     * 添加不可选中的item(仍能触发信号)
+     */
     void addNonSelectableItemSvg(const QString &text, const QString &filename);
 
 private:
