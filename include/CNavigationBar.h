@@ -25,11 +25,11 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    int m_marginLeft = 10;         // 外边距 - 左
-    int m_marginTop = 10;          // 外边距 - 上
-    int m_marginRight = 10;        // 外边距 - 右
+    int m_marginLeft = 0;          // 外边距 - 左
+    int m_marginTop = 0;           // 外边距 - 上
+    int m_marginRight = 0;         // 外边距 - 右
     int m_marginBottom = 0;        // 外边距 - 下
-    int m_spacing = 10;             // item 间距
+    int m_spacing = 10;            // item 间距
     int m_borderRadius;            // icon 背景圆角半径大小
     int m_sizeFont;                // 文字大小
     int m_colorFont;               // 文字颜色

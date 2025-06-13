@@ -3,6 +3,7 @@
 
 #include "BaseWidget.hpp"
 #include "CNavigationBar.h"
+#include <QSplitter>
 
 class MainWindow : public BaseWidget
 {
@@ -17,6 +18,7 @@ protected:
     void initLayout() override;
 
 private:
+    QSplitter *m_splitter;
     CNavigationBar *m_navigationBar;
 };
 

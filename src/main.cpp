@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication app(argc, argv);
     MainWindow w;
+    w.resize(600, 400);
     w.show();
     app.exec();
     return 0;

@@ -31,7 +31,7 @@ inline void initLogger()
     auto rotating_file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs.txt", max_size, max_files);
     // 使用 %@ 或 %s:%# 来显示文件名和行号
     rotating_file_sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%s:%#] %v");
-    rotating_file_sink->set_level(spdlog::level::debug);
+    rotating_file_sink->set_level(spdlog::level::info);
 
     // 2. 创建 logger 并关联 sinks
     auto logger = std::make_shared<spdlog::logger>("multi_sink", spdlog::sinks_init_list{console_sink, rotating_file_sink});
