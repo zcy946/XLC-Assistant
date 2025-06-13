@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include "Logger.hpp"
 #include "BorderDebugger.hpp"
+#include "global.h"
 
 CNavigationContentWidget::CNavigationContentWidget(QWidget *parent)
     : QWidget(parent), m_indexHovered(-1), m_indexSelected(0)
@@ -18,7 +19,7 @@ CNavigationContentWidget::CNavigationContentWidget(QWidget *parent)
     m_borderRadiusBackground = 5;
     m_spacingIcon2Background = 3;
     m_spacingBackground2Text = 3;
-    m_sizeFont = 7;
+    m_sizeFont = 8;
     m_colorFont = QColor("#000000");
     m_colorBackground = QColor("#F0F0F0");
     m_colorIconBackgroundHovered = QColor("#E5F3FF");
@@ -47,10 +48,7 @@ QSize CNavigationContentWidget::sizeHint() const
         availableWidth = 50;
 
     int widthItem = qMax(availableWidth - m_marginLeft - m_marginRight, 20);
-
-    QFont font("Microsoft YaHei", m_sizeFont);
-    font.setStyleHint(QFont::SansSerif);
-    QFontMetrics fm(font);
+    QFontMetrics fm(font());
     int heightText = fm.height();
 
     int heightItem = widthItem + m_spacingBackground2Text + heightText;
@@ -75,9 +73,7 @@ void CNavigationContentWidget::paintEvent(QPaintEvent *event)
     Q_UNUSED(event);
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    QFont font;
-    font.setFamily("Microsoft YaHei");
-    font.setStyleHint(QFont::SansSerif); // 微软雅黑不存在时优先考虑无衬线字体
+    QFont font = getGlobalFont();
     font.setPointSize(m_sizeFont);
     painter.setFont(font);
     QFontMetrics fm(font);
@@ -87,6 +83,8 @@ void CNavigationContentWidget::paintEvent(QPaintEvent *event)
 
     // 绘制背景
     painter.fillRect(rect(), m_colorBackground);
+    painter.setPen(m_colorBackground.darker(120));
+    painter.drawLine(width() - 1, 0, width() - 1, height());
 
     // 绘制item
     if (m_widthItem <= 0)

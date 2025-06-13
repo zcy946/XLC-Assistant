@@ -14,11 +14,13 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override
     {
+#ifdef QT_DEBUG
         QPainter painter(this);
         painter.setPen(QColor::fromRgb(QRandomGenerator::global()->generate()));
         painter.drawRect(rect().adjusted(1, 1, -1, -1));
         painter.end();
         QWidget::paintEvent(event);
+#endif
     }
 
 protected:

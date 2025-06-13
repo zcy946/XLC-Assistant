@@ -3,11 +3,16 @@
 
 #include "BaseWidget.hpp"
 #include "CNavigationBar.h"
-#include <QSplitter>
+#include <QStackedLayout>
+#include "PageChat.h"
+#include "PageSettings.h"
 
 class MainWindow : public BaseWidget
 {
     Q_OBJECT
+private Q_SLOTS:
+    void on_navigationBar_indexChanged(int index, const QString &text);
+
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -19,6 +24,9 @@ protected:
 
 private:
     CNavigationBar *m_navigationBar;
+    QStackedLayout *m_stackedLayout;
+    PageChat *m_pageChat;
+    PageSettings *m_pageSettings;
 };
 
 #endif // MAINWINDOW_H
