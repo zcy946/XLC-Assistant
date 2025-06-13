@@ -4,8 +4,6 @@
 #include <QMouseEvent>
 #include "Logger.hpp"
 #include "BorderDebugger.hpp"
-#include <QPalette>
-#include <QApplication>
 
 CNavigationContentWidget::CNavigationContentWidget(QWidget *parent)
     : QWidget(parent), m_indexHovered(-1), m_indexSelected(0)
@@ -23,8 +21,9 @@ CNavigationContentWidget::CNavigationContentWidget(QWidget *parent)
     m_sizeFont = 7;
     m_colorFont = QColor("#000000");
     m_colorBackground = QColor("#F0F0F0");
-    m_colorIconBackgroundHovered = QColor("#E2E2E2");
-    m_colorIconBackgroundSelected = m_colorIconBackgroundHovered;
+    m_colorIconBackgroundHovered = QColor("#E5F3FF");
+    m_colorIconBackgroundSelected = QColor("#CCE8FF");
+    m_colorBorderIconBackground = QColor("#99D1FF");
 }
 
 void CNavigationContentWidget::addItemSvg(const QString &text, const QString &filename)
@@ -95,13 +94,15 @@ void CNavigationContentWidget::paintEvent(QPaintEvent *event)
     for (int i = 0; i < m_items.size(); ++i)
     {
         QRect rectItem(m_marginLeft, m_marginTop + i * (m_heightItem + m_spacingItem), m_widthItem, m_heightItem);
+        painter.setPen(Qt::NoPen);
         if (m_indexSelected == i)
             painter.setBrush(m_colorIconBackgroundSelected);
         else if (m_indexHovered == i)
             painter.setBrush(m_colorIconBackgroundHovered);
         else
             painter.setBrush(m_colorBackground);
-        painter.setPen(Qt::NoPen);
+        if (m_indexSelected == i && m_indexHovered == i)
+            painter.setPen(m_colorBorderIconBackground);
         QRect rectBackground = rectItem.adjusted(0, 0, 0, -(m_spacingBackground2Text + m_heightText));
         painter.drawRoundedRect(rectBackground, m_borderRadiusBackground, m_borderRadiusBackground);
 
@@ -128,7 +129,7 @@ void CNavigationContentWidget::mousePressEvent(QMouseEvent *event)
     {
         if (m_items[index].selectable)
             m_indexSelected = index;
-        emit indexChanged(m_indexSelected, m_items[m_indexSelected].text);
+        emit indexChanged(index, m_items[m_indexSelected].text);
         update();
     }
 }

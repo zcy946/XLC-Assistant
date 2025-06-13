@@ -44,8 +44,9 @@ private:
     int m_sizeFont;                       // 字体大小
     QColor m_colorFont;                   // 字体颜色
     QColor m_colorBackground;             // 背景颜色
-    QColor m_colorIconBackgroundHovered;  // 悬停时icon背景颜色
-    QColor m_colorIconBackgroundSelected; // 选中时icon背景颜色
+    QColor m_colorIconBackgroundHovered;  // 悬停时icon的背景颜色
+    QColor m_colorIconBackgroundSelected; // 选中时icon的背景颜色
+    QColor m_colorBorderIconBackground;   // 悬停在被选中的icon上时的背景颜色
     int m_heightText;                     // 当前字体下的字体高度
     int m_widthItem;                      // 每个item的宽度
     int m_heightItem;                     // 每个item的高度
