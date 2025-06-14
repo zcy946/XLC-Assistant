@@ -31,7 +31,7 @@ public:
         console_sink->set_level(spdlog::level::trace);
 
         // 文件输出（可旋转）
-        auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs.txt", 1024 * 1024 * 5, 3);
+        auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs/logs.txt", 1024 * 1024 * 5, 3);
         rotating_sink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%s:%#] %v");
 #ifdef QT_DEBUG
         rotating_sink->set_level(spdlog::level::trace);
