@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QTabWidget>
 
 class WidgetChat;
 class PageChat : public BaseWidget
@@ -20,7 +21,9 @@ protected:
     void initLayout() override;
 
 private:
+    QListWidget *m_listWidgetAgent;
     QListWidget *m_listWidgetHistory;
+    QTabWidget *m_tabWidgetSiderBar;
     WidgetChat *m_widgetChat;
 };
 
@@ -38,6 +41,7 @@ protected:
 private:
     QListWidget *m_listWidgetMessages;
     QPlainTextEdit *m_plainTextEdit;
+    QPushButton *m_pushButtonSend;
     QPushButton *m_pushButtonClearContext;
     QPushButton *m_pushButtonNewChat;
 };

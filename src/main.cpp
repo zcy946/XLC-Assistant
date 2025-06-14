@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     _setmode(_fileno(stdin), _O_WTEXT);
 #endif
     // 初始化日志
-    initLogger();
+    Logger::init();
 
     // 开启高DPI支持
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication app(argc, argv);
+
+    // 注册元对象
+    registerAllMetaType();
 
     // 设置全局字体
     app.setFont(getGlobalFont());
