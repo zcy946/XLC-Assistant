@@ -3,3 +3,8 @@ example/
 .vscode/
 test.json
 test.ui
+output/xlc_mcp_client.pdb
+output/xlc_mcp_client.ilk
+output/xlc_mcp_client.exe
+output/fmtd.dll
+output/logs/

@@ -1,0 +1,480 @@
+[
+    {
+        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+        "name": "General Chat Agent",
+        "description": "A versatile agent for general conversations.",
+        "children": 5,
+        "context": 2048,
+        "systemPrompt": "You are a helpful AI assistant.",
+        "modelName": "gpt-4o",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+                "name": "OpenAI Compatible API (SSE)",
+                "description": "Connects to an OpenAI-compatible API endpoint for streaming responses.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.example.com/v1/chat/completions",
+                "requestHeaders": "{\"Authorization\": \"Bearer sk-your_api_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+        "name": "Code Generation Agent",
+        "description": "An agent specialized in generating code snippets.",
+        "children": 2,
+        "context": 4096,
+        "systemPrompt": "You are a senior software engineer. Provide concise and correct code.",
+        "modelName": "deepseek-coder",
+        "temperature": 0.5,
+        "topP": 0.8,
+        "maxTokens": 2048,
+        "mcpServers": [
+            {
+                "uuid": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+                "name": "Local LLM Server (stdio)",
+                "description": "A local server running a language model via standard I/O.",
+                "type": 0,
+                "timeout": 300,
+                "command": "/usr/local/bin/llama-cpp",
+                "args": [
+                    "-m",
+                    "/models/llama2-7b.gguf",
+                    "-c",
+                    "2048"
+                ],
+                "envVars": {
+                    "CUDA_VISIBLE_DEVICES": "0",
+                    "LLAMA_NUM_THREADS": "8"
+                }
+            },
+            {
+                "uuid": "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+                "name": "OpenAI Compatible API (SSE)",
+                "description": "Connects to an OpenAI-compatible API endpoint for streaming responses.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.example.com/v1/chat/completions",
+                "requestHeaders": "{\"Authorization\": \"Bearer sk-your_api_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "f7a8b9c0-d1e2-3456-7890-abcdef123456",
+        "name": "Math Solver Agent",
+        "description": "Solves mathematical problems and equations.",
+        "children": 3,
+        "context": 1024,
+        "systemPrompt": "You are a math expert. Solve problems step by step.",
+        "modelName": "gpt-4",
+        "temperature": 0.2,
+        "topP": 0.95,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
+                "name": "Math API Server",
+                "description": "Handles math queries via API.",
+                "type": 1,
+                "timeout": 30,
+                "url": "https://api.mathsolver.com/v1/solve",
+                "requestHeaders": "{\"Authorization\": \"Bearer math_api_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345678",
+        "name": "Translation Agent",
+        "description": "Translates text between multiple languages.",
+        "children": 4,
+        "context": 2048,
+        "systemPrompt": "You are a professional translator. Translate accurately.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.3,
+        "topP": 0.85,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef013",
+                "name": "Translation API",
+                "description": "Provides translation services.",
+                "type": 1,
+                "timeout": 45,
+                "url": "https://api.translate.com/v1/translate",
+                "requestHeaders": "{\"Authorization\": \"Bearer translate_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "b1c2d3e4-f5a6-7890-1234-abcdef567890",
+        "name": "Summarization Agent",
+        "description": "Summarizes long documents into concise overviews.",
+        "children": 2,
+        "context": 4096,
+        "systemPrompt": "You are an expert at summarizing text.",
+        "modelName": "gpt-4",
+        "temperature": 0.4,
+        "topP": 0.9,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0124",
+                "name": "Summarization API",
+                "description": "Summarizes documents via API.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.summarize.com/v1/summarize",
+                "requestHeaders": "{\"Authorization\": \"Bearer summarize_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "c2d3e4f5-a6b7-8901-2345-abcdef678901",
+        "name": "Creative Writing Agent",
+        "description": "Generates creative stories and poems.",
+        "children": 3,
+        "context": 2048,
+        "systemPrompt": "You are a creative writer. Write engaging stories.",
+        "modelName": "gpt-4o",
+        "temperature": 0.9,
+        "topP": 0.98,
+        "maxTokens": 2048,
+        "mcpServers": [
+            {
+                "uuid": "f6a7b8c9-d0e1-2345-6789-0abcdef12345",
+                "name": "Creative API",
+                "description": "Handles creative writing requests.",
+                "type": 1,
+                "timeout": 90,
+                "url": "https://api.creative.com/v1/write",
+                "requestHeaders": "{\"Authorization\": \"Bearer creative_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "d3e4f5a6-b7c8-9012-3456-abcdef789012",
+        "name": "Legal Advisor Agent",
+        "description": "Provides legal information and document drafting.",
+        "children": 1,
+        "context": 2048,
+        "systemPrompt": "You are a legal advisor. Provide information, not advice.",
+        "modelName": "gpt-4",
+        "temperature": 0.3,
+        "topP": 0.85,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "a7b8c9d0-e1f2-3456-7890-abcdef123457",
+                "name": "Legal API",
+                "description": "Handles legal queries.",
+                "type": 1,
+                "timeout": 120,
+                "url": "https://api.legal.com/v1/advice",
+                "requestHeaders": "{\"Authorization\": \"Bearer legal_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "e4f5a6b7-c8d9-0123-4567-abcdef890123",
+        "name": "Medical Info Agent",
+        "description": "Provides general medical information.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are a medical information provider. Do not give medical advice.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef234567",
+                "name": "Medical API",
+                "description": "Provides medical information.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.medical.com/v1/info",
+                "requestHeaders": "{\"Authorization\": \"Bearer medical_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "f5a6b7c8-d9e0-1234-5678-abcdef901234",
+        "name": "Travel Planner Agent",
+        "description": "Helps plan trips and itineraries.",
+        "children": 3,
+        "context": 2048,
+        "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
+        "modelName": "gpt-4",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "c9d0e1f2-a3b4-5678-9012-abcdef345678",
+                "name": "Travel API",
+                "description": "Handles travel planning requests.",
+                "type": 1,
+                "timeout": 90,
+                "url": "https://api.travel.com/v1/plan",
+                "requestHeaders": "{\"Authorization\": \"Bearer travel_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "a6b7c8d9-e0f1-2345-6789-abcdef012345",
+        "name": "Recipe Generator Agent",
+        "description": "Suggests recipes based on ingredients.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are a chef. Suggest creative recipes.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.8,
+        "topP": 0.95,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "d0e1f2a3-b4c5-6789-0123-abcdef456789",
+                "name": "Recipe API",
+                "description": "Provides recipe suggestions.",
+                "type": 1,
+                "timeout": 45,
+                "url": "https://api.recipes.com/v1/generate",
+                "requestHeaders": "{\"Authorization\": \"Bearer recipe_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "b7c8d9e0-f1a2-3456-7890-abcdef123458",
+        "name": "Fitness Coach Agent",
+        "description": "Provides fitness routines and advice.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
+        "modelName": "gpt-4",
+        "temperature": 0.5,
+        "topP": 0.9,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "e1f2a3b4-c5d6-7890-1234-abcdef567891",
+                "name": "Fitness API",
+                "description": "Handles fitness queries.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.fitness.com/v1/coach",
+                "requestHeaders": "{\"Authorization\": \"Bearer fitness_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "c8d9e0f1-a2b3-4567-8901-abcdef234568",
+        "name": "News Digest Agent",
+        "description": "Summarizes and delivers daily news.",
+        "children": 1,
+        "context": 2048,
+        "systemPrompt": "You are a news editor. Summarize today's top stories.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.4,
+        "topP": 0.85,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "f2a3b4c5-d6e7-8901-2345-abcdef678912",
+                "name": "News API",
+                "description": "Provides news summaries.",
+                "type": 1,
+                "timeout": 30,
+                "url": "https://api.news.com/v1/digest",
+                "requestHeaders": "{\"Authorization\": \"Bearer news_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "d9e0f1a2-b3c4-5678-9012-abcdef345679",
+        "name": "Finance Advisor Agent",
+        "description": "Provides financial information and budgeting tips.",
+        "children": 2,
+        "context": 2048,
+        "systemPrompt": "You are a finance advisor. Provide general financial information.",
+        "modelName": "gpt-4",
+        "temperature": 0.3,
+        "topP": 0.8,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "a3b4c5d6-e7f8-9012-3456-abcdef789013",
+                "name": "Finance API",
+                "description": "Handles finance queries.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.finance.com/v1/advice",
+                "requestHeaders": "{\"Authorization\": \"Bearer finance_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "e0f1a2b3-c4d5-6789-0123-abcdef456790",
+        "name": "Shopping Assistant Agent",
+        "description": "Helps find products and compare prices.",
+        "children": 3,
+        "context": 1024,
+        "systemPrompt": "You are a shopping assistant. Find the best deals.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "b4c5d6e7-f8a9-0123-4567-abcdef890124",
+                "name": "Shopping API",
+                "description": "Provides shopping assistance.",
+                "type": 1,
+                "timeout": 45,
+                "url": "https://api.shopping.com/v1/assist",
+                "requestHeaders": "{\"Authorization\": \"Bearer shopping_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "f1a2b3c4-d5e6-7890-1234-abcdef567892",
+        "name": "Weather Info Agent",
+        "description": "Provides weather forecasts and updates.",
+        "children": 1,
+        "context": 512,
+        "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "maxTokens": 256,
+        "mcpServers": [
+            {
+                "uuid": "c5d6e7f8-a9b0-1234-5678-abcdef901235",
+                "name": "Weather API",
+                "description": "Provides weather information.",
+                "type": 1,
+                "timeout": 30,
+                "url": "https://api.weather.com/v1/forecast",
+                "requestHeaders": "{\"Authorization\": \"Bearer weather_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "a2b3c4d5-e6f7-8901-2345-abcdef678913",
+        "name": "Movie Recommendation Agent",
+        "description": "Suggests movies based on user preferences.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are a movie expert. Recommend movies.",
+        "modelName": "gpt-4",
+        "temperature": 0.7,
+        "topP": 0.95,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "d6e7f8a9-b0c1-2345-6789-abcdef012346",
+                "name": "Movie API",
+                "description": "Provides movie recommendations.",
+                "type": 1,
+                "timeout": 45,
+                "url": "https://api.movies.com/v1/recommend",
+                "requestHeaders": "{\"Authorization\": \"Bearer movie_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "b3c4d5e6-f7a8-9012-3456-abcdef789014",
+        "name": "Music Suggestion Agent",
+        "description": "Recommends music tracks and playlists.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are a music expert. Suggest songs and playlists.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.8,
+        "topP": 0.9,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "e7f8a9b0-c1d2-3456-7890-abcdef123459",
+                "name": "Music API",
+                "description": "Provides music suggestions.",
+                "type": 1,
+                "timeout": 45,
+                "url": "https://api.music.com/v1/suggest",
+                "requestHeaders": "{\"Authorization\": \"Bearer music_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "c4d5e6f7-a8b9-0123-4567-abcdef890125",
+        "name": "Homework Helper Agent",
+        "description": "Assists with homework and study questions.",
+        "children": 3,
+        "context": 2048,
+        "systemPrompt": "You are a tutor. Help students with their homework.",
+        "modelName": "gpt-4",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "f8a9b0c1-d2e3-4567-8901-abcdef234569",
+                "name": "Homework API",
+                "description": "Provides homework assistance.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.homework.com/v1/help",
+                "requestHeaders": "{\"Authorization\": \"Bearer homework_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "d5e6f7a8-b9c0-1234-5678-abcdef901236",
+        "name": "Job Application Agent",
+        "description": "Helps write resumes and cover letters.",
+        "children": 2,
+        "context": 2048,
+        "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
+        "modelName": "gpt-4",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "maxTokens": 1024,
+        "mcpServers": [
+            {
+                "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345680",
+                "name": "Job API",
+                "description": "Assists with job applications.",
+                "type": 1,
+                "timeout": 90,
+                "url": "https://api.jobs.com/v1/apply",
+                "requestHeaders": "{\"Authorization\": \"Bearer job_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    },
+    {
+        "uuid": "e6f7a8b9-c0d1-2345-6789-abcdef012347",
+        "name": "Event Planner Agent",
+        "description": "Helps organize events and manage guest lists.",
+        "children": 2,
+        "context": 1024,
+        "systemPrompt": "You are an event planner. Organize events efficiently.",
+        "modelName": "gpt-3.5-turbo",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "maxTokens": 512,
+        "mcpServers": [
+            {
+                "uuid": "b0c1d2e3-f4a5-6789-0123-abcdef456791",
+                "name": "Event API",
+                "description": "Handles event planning requests.",
+                "type": 1,
+                "timeout": 60,
+                "url": "https://api.events.com/v1/plan",
+                "requestHeaders": "{\"Authorization\": \"Bearer event_key\", \"Content-Type\": \"application/json\"}"
+            }
+        ]
+    }
+]

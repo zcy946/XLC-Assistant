@@ -48,9 +48,9 @@ struct McpServer
 {
     enum Type
     {
-        stdio,
-        sse,
-        streambleHttp
+        stdio = 0,
+        sse = 1,
+        streambleHttp = 2
     };
     QString uuid;
     QString name;
