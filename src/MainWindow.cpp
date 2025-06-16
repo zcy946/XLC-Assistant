@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    // TODO 异步执行初始化
-    DataManager::GetInstance()->init();
+    // 加载数据
+    DataManager::getInstance()->init();
 }
 
 MainWindow::~MainWindow()

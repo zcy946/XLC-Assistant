@@ -1,19 +1,19 @@
 #ifndef DATAMANAGER_H
 #define DATAMANAGER_H
 
-#include "Singleton.h"
 #include <memory>
 #include <QHash>
 #include <global.h>
+#include <QObject>
 
 struct McpServer;
 struct Agent;
 struct Conversation;
-class DataManager : public Singleton<DataManager>
+class DataManager : public QObject
 {
-    friend class Singleton<DataManager>;
-
+    Q_OBJECT
 public:
+    static DataManager *getInstance();
     ~DataManager() = default;
     static void registerAllMetaType();
     void init();
@@ -91,7 +91,7 @@ public:
     /**
      * 加载所有对话
      */
-    void loadConversations();
+    bool loadConversations();
 
     /**
      * 新增对话
@@ -139,9 +139,12 @@ public:
     const QString &getFilePathAgents(const QString &filePath) const;
 
 private:
-    DataManager();
+    explicit DataManager(QObject *parent = nullptr);
+    DataManager(const DataManager &) = delete;
+    DataManager &operator=(const DataManager &) = delete;
 
 private:
+    static DataManager *s_instance;
     QString m_filePathMcpServers;
     QString m_filePathAgents;
     QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;

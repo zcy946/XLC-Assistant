@@ -30,7 +30,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find required packages
 find_package(Threads REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets Gui Svg REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui Svg Concurrent REQUIRED)
 
 option(MCP_SSL "Enable SSL support" ON)
 
@@ -73,6 +73,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Gui
     Qt5::Svg
+    Qt5::Concurrent
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

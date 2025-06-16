@@ -2,11 +2,27 @@
 #include "Logger.hpp"
 #include <QFile>
 #include <QJsonDocument>
-#include <stdexcept>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
 
-DataManager::DataManager()
-    : m_filePathMcpServers(FILE_MCPSERVERS), m_filePathAgents(FILE_AGENTS)
+DataManager *DataManager::s_instance = nullptr;
+
+DataManager *DataManager::getInstance()
 {
+    if (!s_instance)
+    {
+        s_instance = new DataManager();
+        // 在应用程序退出时自动清理单例实例
+        connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
+    }
+    return s_instance;
+}
+
+DataManager::DataManager(QObject *parent)
+    : QObject(parent)
+{
+    m_filePathMcpServers = FILE_MCPSERVERS;
+    m_filePathAgents = FILE_AGENTS;
 }
 
 void DataManager::registerAllMetaType()
@@ -19,29 +35,56 @@ void DataManager::registerAllMetaType()
 void DataManager::init()
 {
     // TODO 将这三个加载函数用异步实现，通过信号通知更新ui
-    try
-    {
-        if (loadMcpServers(m_filePathMcpServers))
+    QFuture<bool> futureMcpServers = QtConcurrent::run(
+        [this]()
         {
-            LOG_INFO("Successfully loaded [{}] McpServers from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
-        }
-    }
-    catch (const std::runtime_error &e)
-    {
-        LOG_ERROR("Error loading McpServers: {}", e.what());
-    }
-    try
-    {
-        if (loadAgents(m_filePathAgents))
+            return this->loadMcpServers(m_filePathMcpServers);
+        });
+    QFutureWatcher<bool> *futureWatcherMcpServers = new QFutureWatcher<bool>(this);
+    connect(futureWatcherMcpServers, &QFutureWatcher<bool>::finished, this,
+            [this, futureWatcherMcpServers]()
+            {
+                if (futureWatcherMcpServers->result())
+                {
+                    LOG_INFO("Successfully loaded [{}] McpServers from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+                }
+                futureWatcherMcpServers->deleteLater();
+            });
+    futureWatcherMcpServers->setFuture(futureMcpServers);
+
+    QFuture<bool> futureAgents = QtConcurrent::run(
+        [this]()
         {
-            LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_agents.count(), m_filePathAgents);
-        }
-    }
-    catch (const std::runtime_error &e)
-    {
-        LOG_ERROR("Error loading Agents: {}", e.what());
-    }
-    loadConversations();
+            return this->loadAgents(m_filePathAgents);
+        });
+    QFutureWatcher<bool> *futureWatcherAgents = new QFutureWatcher<bool>(this);
+    connect(futureWatcherAgents, &QFutureWatcher<bool>::finished, this,
+            [this, futureWatcherAgents]()
+            {
+                if (futureWatcherAgents->result())
+                {
+                    LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+                }
+                futureWatcherAgents->deleteLater();
+            });
+    futureWatcherAgents->setFuture(futureAgents);
+
+    QFuture<bool> futureConversations = QtConcurrent::run(
+        [this]()
+        {
+            return this->loadConversations();
+        });
+    QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
+    connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
+            [this, futureWatcherConversations]()
+            {
+                if (futureWatcherConversations->result())
+                {
+                    // LOG_INFO("Successfully loaded [{}] Conversations from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+                }
+                futureWatcherConversations->deleteLater();
+            });
+    futureWatcherConversations->setFuture(futureAgents);
 }
 
 bool DataManager::loadMcpServers(const QString &filePath)
@@ -50,7 +93,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QString errorMsg = QString("Could not open McpServers file: %1 - %2").arg(filePath).arg(file.errorString());
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
@@ -61,14 +104,14 @@ bool DataManager::loadMcpServers(const QString &filePath)
     if (doc.isNull())
     {
         QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
     if (!doc.isArray())
     {
         QString errorMsg = QString("McpServers JSON root is not an array in file: %1").arg(filePath);
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
@@ -210,7 +253,7 @@ bool DataManager::loadAgents(const QString &filePath)
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QString errorMsg = QString("Could not open Agents file: %1 - %2").arg(filePath).arg(file.errorString());
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
@@ -221,14 +264,14 @@ bool DataManager::loadAgents(const QString &filePath)
     if (doc.isNull())
     {
         QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
     if (!doc.isArray())
     {
         QString errorMsg = QString("Agents JSON root is not an array in file: %1").arg(filePath);
-        throw std::runtime_error(errorMsg.toStdString());
+        LOG_ERROR("{}", errorMsg);
         return false;
     }
 
@@ -349,9 +392,10 @@ QList<std::shared_ptr<Agent>> DataManager::getAgents() const
     return m_agents.values();
 }
 
-void DataManager::loadConversations()
+bool DataManager::loadConversations()
 {
     // Do nothing
+    return true;
 }
 
 void DataManager::addConversation(const std::shared_ptr<Conversation> &conversation)
