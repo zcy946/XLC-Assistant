@@ -13,6 +13,7 @@ DataManager *DataManager::getInstance()
     {
         s_instance = new DataManager();
         // 在应用程序退出时自动清理单例实例
+        // TODO 应用关闭时检查是否在保存
         connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
     }
     return s_instance;
@@ -162,7 +163,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
     if (mcpServer)
     {
         m_mcpServers.insert(mcpServer->uuid.trimmed(), mcpServer);
-        saveMcpServers(m_filePathMcpServers);
+        saveMcpServersAsync(m_filePathMcpServers);
     }
     else
     {
@@ -173,7 +174,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
 void DataManager::removeMcpServer(const QString &uuid)
 {
     m_mcpServers.remove(uuid.trimmed());
-    saveMcpServers(m_filePathMcpServers);
+    saveMcpServersAsync(m_filePathMcpServers);
 }
 
 void DataManager::updateMcpServer(const McpServer &mcpServer)
@@ -186,7 +187,7 @@ void DataManager::updateMcpServer(const McpServer &mcpServer)
         // 然后执行 McpServer 的 operator=
         (*it.value()) = mcpServer;
         LOG_DEBUG("Updated McpServer with UUID: {}", mcpServer.uuid);
-        saveMcpServers(FILE_MCPSERVERS);
+        saveMcpServersAsync(FILE_MCPSERVERS);
     }
     else
     {
@@ -201,7 +202,6 @@ void DataManager::updateMcpServer(const McpServer &mcpServer)
     }
 }
 
-// TODO 将saveMcpServers改为异步实现
 void DataManager::saveMcpServers(const QString &filePath) const
 {
     QJsonArray jsonArray;
@@ -239,7 +239,24 @@ void DataManager::saveMcpServers(const QString &filePath) const
         return;
     }
 
-    LOG_INFO("Successfully saved {} McpServers to: {}", m_mcpServers.count(), filePath);
+    LOG_INFO("Successfully saved [{}] McpServers to: [{}]", m_mcpServers.count(), filePath);
+}
+
+void DataManager::saveMcpServersAsync(const QString &filePath) const
+{
+    QFuture<void> futureMcpServers = QtConcurrent::run(
+        [this, filePath]()
+        {
+            this->saveMcpServers(filePath);
+        });
+    QFutureWatcher<void> *futureWatcherMcpServers = new QFutureWatcher<void>();
+    connect(futureWatcherMcpServers, &QFutureWatcher<void>::finished, this,
+            [this, futureWatcherMcpServers, filePath]()
+            {
+                LOG_DEBUG("Asynchronous save of McpServers finished for: [{}]", filePath);
+                futureWatcherMcpServers->deleteLater();
+            });
+    futureWatcherMcpServers->setFuture(futureMcpServers);
 }
 
 std::shared_ptr<McpServer> DataManager::getMcpServer(const QString &uuid) const
@@ -322,7 +339,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
     if (agent)
     {
         m_agents.insert(agent->uuid.trimmed(), agent);
-        saveAgents(m_filePathAgents);
+        saveAgentsAsync(m_filePathAgents);
     }
     else
     {
@@ -333,7 +350,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
 void DataManager::removeAgent(const QString &uuid)
 {
     m_agents.remove(uuid.trimmed());
-    saveAgents(m_filePathAgents);
+    saveAgentsAsync(m_filePathAgents);
 }
 
 void DataManager::updateAgent(const Agent &agent)
@@ -343,7 +360,7 @@ void DataManager::updateAgent(const Agent &agent)
     {
         (*it.value()) = agent;
         LOG_DEBUG("Updated Agent with UUID: {}", agent.uuid);
-        saveAgents(m_filePathAgents);
+        saveAgentsAsync(m_filePathAgents);
     }
     else
     {
@@ -383,8 +400,24 @@ void DataManager::DataManager::saveAgents(const QString &filePath) const
         return;
     }
 
-    LOG_INFO("Successfully saved {} Agents to: {}", m_agents.count(), filePath);
-    return;
+    LOG_INFO("Successfully saved [{}] Agents to: [{}]", m_agents.count(), filePath);
+}
+
+void DataManager::saveAgentsAsync(const QString &filePath) const
+{
+    QFuture<void> futureAgents = QtConcurrent::run(
+        [this, filePath]()
+        {
+            this->saveAgents(filePath);
+        });
+    QFutureWatcher<void> *futureWatcherAgents = new QFutureWatcher<void>();
+    connect(futureWatcherAgents, &QFutureWatcher<void>::finished, this,
+            [this, futureWatcherAgents, filePath]()
+            {
+                LOG_DEBUG("Asynchronous save of Agents finished for: [{}]", filePath);
+                futureWatcherAgents->deleteLater();
+            });
+    futureWatcherAgents->setFuture(futureAgents);
 }
 
 std::shared_ptr<Agent> DataManager::getAgent(const QString &uuid) const

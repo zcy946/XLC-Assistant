@@ -1,303 +1,296 @@
 [
     {
-        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-        "name": "General Chat Agent",
-        "description": "A versatile agent for general conversations.",
-        "children": 5,
+        "children": 1,
         "context": 2048,
-        "systemPrompt": "You are a helpful AI assistant.",
-        "modelName": "gpt-4o",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
-        ]
-    },
-    {
-        "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-        "name": "Code Generation Agent",
-        "description": "An agent specialized in generating code snippets.",
-        "children": 2,
-        "context": 4096,
-        "systemPrompt": "You are a senior software engineer. Provide concise and correct code.",
-        "modelName": "deepseek-coder",
-        "temperature": 0.5,
-        "topP": 0.8,
-        "maxTokens": 2048,
-        "mcpServers": [
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
-        ]
-    },
-    {
-        "uuid": "f7a8b9c0-d1e2-3456-7890-abcdef123456",
-        "name": "Math Solver Agent",
-        "description": "Solves mathematical problems and equations.",
-        "children": 3,
-        "context": 1024,
-        "systemPrompt": "You are a math expert. Solve problems step by step.",
-        "modelName": "gpt-4",
-        "temperature": 0.2,
-        "topP": 0.95,
-        "maxTokens": 512,
-        "mcpServers": [
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef12"
-        ]
-    },
-    {
-        "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345678",
-        "name": "Translation Agent",
-        "description": "Translates text between multiple languages.",
-        "children": 4,
-        "context": 2048,
-        "systemPrompt": "You are a professional translator. Translate accurately.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.3,
-        "topP": 0.85,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "d4e5f6a7-b8c9-0123-4567-890abcdef013"
-        ]
-    },
-    {
-        "uuid": "b1c2d3e4-f5a6-7890-1234-abcdef567890",
-        "name": "Summarization Agent",
-        "description": "Summarizes long documents into concise overviews.",
-        "children": 2,
-        "context": 4096,
-        "systemPrompt": "You are an expert at summarizing text.",
-        "modelName": "gpt-4",
-        "temperature": 0.4,
-        "topP": 0.9,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0124"
-        ]
-    },
-    {
-        "uuid": "c2d3e4f5-a6b7-8901-2345-abcdef678901",
-        "name": "Creative Writing Agent",
-        "description": "Generates creative stories and poems.",
-        "children": 3,
-        "context": 2048,
-        "systemPrompt": "You are a creative writer. Write engaging stories.",
-        "modelName": "gpt-4o",
-        "temperature": 0.9,
-        "topP": 0.98,
-        "maxTokens": 2048,
-        "mcpServers": [
-            "f6a7b8c9-d0e1-2345-6789-0abcdef12345"
-        ]
-    },
-    {
-        "uuid": "d3e4f5a6-b7c8-9012-3456-abcdef789012",
-        "name": "Legal Advisor Agent",
         "description": "Provides legal information and document drafting.",
-        "children": 1,
-        "context": 2048,
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Legal Advisor Agent",
         "systemPrompt": "You are a legal advisor. Provide information, not advice.",
-        "modelName": "gpt-4",
         "temperature": 0.3,
         "topP": 0.85,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "a7b8c9d0-e1f2-3456-7890-abcdef123457"
-        ]
+        "uuid": "d3e4f5a6-b7c8-9012-3456-abcdef789012"
     },
     {
-        "uuid": "e4f5a6b7-c8d9-0123-4567-abcdef890123",
-        "name": "Medical Info Agent",
-        "description": "Provides general medical information.",
         "children": 2,
-        "context": 1024,
-        "systemPrompt": "You are a medical information provider. Do not give medical advice.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.2,
-        "topP": 0.8,
-        "maxTokens": 512,
+        "context": 4096,
+        "description": "An agent specialized in generating code snippets.",
+        "maxTokens": 2048,
         "mcpServers": [
-            "b8c9d0e1-f2a3-4567-8901-abcdef234567"
-        ]
-    },
-    {
-        "uuid": "f5a6b7c8-d9e0-1234-5678-abcdef901234",
-        "name": "Travel Planner Agent",
-        "description": "Helps plan trips and itineraries.",
-        "children": 3,
-        "context": 2048,
-        "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
-        "modelName": "gpt-4",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-abcdef345678"
-        ]
-    },
-    {
-        "uuid": "a6b7c8d9-e0f1-2345-6789-abcdef012345",
-        "name": "Recipe Generator Agent",
-        "description": "Suggests recipes based on ingredients.",
-        "children": 2,
-        "context": 1024,
-        "systemPrompt": "You are a chef. Suggest creative recipes.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.8,
-        "topP": 0.95,
-        "maxTokens": 512,
-        "mcpServers": [
-            "d0e1f2a3-b4c5-6789-0123-abcdef456789"
-        ]
-    },
-    {
-        "uuid": "b7c8d9e0-f1a2-3456-7890-abcdef123458",
-        "name": "Fitness Coach Agent",
-        "description": "Provides fitness routines and advice.",
-        "children": 2,
-        "context": 1024,
-        "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
-        "modelName": "gpt-4",
+        ],
+        "modelName": "deepseek-coder",
+        "name": "Code Generation Agent",
+        "systemPrompt": "You are a senior software engineer. Provide concise and correct code.",
         "temperature": 0.5,
-        "topP": 0.9,
-        "maxTokens": 512,
-        "mcpServers": [
-            "e1f2a3b4-c5d6-7890-1234-abcdef567891"
-        ]
-    },
-    {
-        "uuid": "c8d9e0f1-a2b3-4567-8901-abcdef234568",
-        "name": "News Digest Agent",
-        "description": "Summarizes and delivers daily news.",
-        "children": 1,
-        "context": 2048,
-        "systemPrompt": "You are a news editor. Summarize today's top stories.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.4,
-        "topP": 0.85,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "f2a3b4c5-d6e7-8901-2345-abcdef678912"
-        ]
-    },
-    {
-        "uuid": "d9e0f1a2-b3c4-5678-9012-abcdef345679",
-        "name": "Finance Advisor Agent",
-        "description": "Provides financial information and budgeting tips.",
-        "children": 2,
-        "context": 2048,
-        "systemPrompt": "You are a finance advisor. Provide general financial information.",
-        "modelName": "gpt-4",
-        "temperature": 0.3,
         "topP": 0.8,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "a3b4c5d6-e7f8-9012-3456-abcdef789013"
-        ]
+        "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
     },
     {
-        "uuid": "e0f1a2b3-c4d5-6789-0123-abcdef456790",
-        "name": "Shopping Assistant Agent",
-        "description": "Helps find products and compare prices.",
-        "children": 3,
-        "context": 1024,
-        "systemPrompt": "You are a shopping assistant. Find the best deals.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "maxTokens": 512,
-        "mcpServers": [
-            "b4c5d6e7-f8a9-0123-4567-abcdef890124"
-        ]
-    },
-    {
-        "uuid": "f1a2b3c4-d5e6-7890-1234-abcdef567892",
-        "name": "Weather Info Agent",
-        "description": "Provides weather forecasts and updates.",
         "children": 1,
         "context": 512,
-        "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.2,
-        "topP": 0.8,
+        "description": "Provides weather forecasts and updates.",
         "maxTokens": 256,
         "mcpServers": [
-            "c5d6e7f8-a9b0-1234-5678-abcdef901235"
-        ]
-    },
-    {
-        "uuid": "a2b3c4d5-e6f7-8901-2345-abcdef678913",
-        "name": "Movie Recommendation Agent",
-        "description": "Suggests movies based on user preferences.",
-        "children": 2,
-        "context": 1024,
-        "systemPrompt": "You are a movie expert. Recommend movies.",
-        "modelName": "gpt-4",
-        "temperature": 0.7,
-        "topP": 0.95,
-        "maxTokens": 512,
-        "mcpServers": [
-            "d6e7f8a9-b0c1-2345-6789-abcdef012346"
-        ]
-    },
-    {
-        "uuid": "b3c4d5e6-f7a8-9012-3456-abcdef789014",
-        "name": "Music Suggestion Agent",
-        "description": "Recommends music tracks and playlists.",
-        "children": 2,
-        "context": 1024,
-        "systemPrompt": "You are a music expert. Suggest songs and playlists.",
+        ],
         "modelName": "gpt-3.5-turbo",
-        "temperature": 0.8,
-        "topP": 0.9,
-        "maxTokens": 512,
-        "mcpServers": [
-            "e7f8a9b0-c1d2-3456-7890-abcdef123459"
-        ]
+        "name": "Weather Info Agent",
+        "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "uuid": "f1a2b3c4-d5e6-7890-1234-abcdef567892"
     },
     {
-        "uuid": "c4d5e6f7-a8b9-0123-4567-abcdef890125",
-        "name": "Homework Helper Agent",
-        "description": "Assists with homework and study questions.",
+        "children": 2,
+        "context": 1024,
+        "description": "Suggests recipes based on ingredients.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Recipe Generator Agent",
+        "systemPrompt": "You are a chef. Suggest creative recipes.",
+        "temperature": 0.8,
+        "topP": 0.95,
+        "uuid": "a6b7c8d9-e0f1-2345-6789-abcdef012345"
+    },
+    {
+        "children": 5,
+        "context": 2048,
+        "description": "A versatile agent for general conversations.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4o",
+        "name": "General Chat Agent",
+        "systemPrompt": "You are a helpful AI assistant.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Helps organize events and manage guest lists.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Event Planner Agent",
+        "systemPrompt": "You are an event planner. Organize events efficiently.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "e6f7a8b9-c0d1-2345-6789-abcdef012347"
+    },
+    {
+        "children": 0,
+        "context": 123,
+        "description": "异步保存测试",
+        "maxTokens": 1234,
+        "mcpServers": [
+        ],
+        "modelName": "异步保存测试",
+        "name": "异步保存测试",
+        "systemPrompt": "异步保存测试",
+        "temperature": 1.11,
+        "topP": 1.1,
+        "uuid": "a012dbb0-efed-4bd8-91a1-f81f6e6fbd28"
+    },
+    {
+        "children": 3,
+        "context": 1024,
+        "description": "Solves mathematical problems and equations.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Math Solver Agent",
+        "systemPrompt": "You are a math expert. Solve problems step by step.",
+        "temperature": 0.2,
+        "topP": 0.95,
+        "uuid": "f7a8b9c0-d1e2-3456-7890-abcdef123456"
+    },
+    {
         "children": 3,
         "context": 2048,
-        "systemPrompt": "You are a tutor. Help students with their homework.",
-        "modelName": "gpt-4",
-        "temperature": 0.5,
-        "topP": 0.85,
+        "description": "Helps plan trips and itineraries.",
         "maxTokens": 1024,
         "mcpServers": [
-            "f8a9b0c1-d2e3-4567-8901-abcdef234569"
-        ]
-    },
-    {
-        "uuid": "d5e6f7a8-b9c0-1234-5678-abcdef901236",
-        "name": "Job Application Agent",
-        "description": "Helps write resumes and cover letters.",
-        "children": 2,
-        "context": 2048,
-        "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
+        ],
         "modelName": "gpt-4",
+        "name": "Travel Planner Agent",
+        "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
         "temperature": 0.6,
         "topP": 0.9,
-        "maxTokens": 1024,
-        "mcpServers": [
-            "a9b0c1d2-e3f4-5678-9012-abcdef345680"
-        ]
+        "uuid": "f5a6b7c8-d9e0-1234-5678-abcdef901234"
     },
     {
-        "uuid": "e6f7a8b9-c0d1-2345-6789-abcdef012347",
-        "name": "Event Planner Agent",
-        "description": "Helps organize events and manage guest lists.",
+        "children": 1,
+        "context": 2048,
+        "description": "Summarizes and delivers daily news.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "News Digest Agent",
+        "systemPrompt": "You are a news editor. Summarize today's top stories.",
+        "temperature": 0.4,
+        "topP": 0.85,
+        "uuid": "c8d9e0f1-a2b3-4567-8901-abcdef234568"
+    },
+    {
         "children": 2,
         "context": 1024,
-        "systemPrompt": "You are an event planner. Organize events efficiently.",
-        "modelName": "gpt-3.5-turbo",
-        "temperature": 0.7,
-        "topP": 0.9,
+        "description": "Provides general medical information.",
         "maxTokens": 512,
         "mcpServers": [
-            "b0c1d2e3-f4a5-6789-0123-abcdef456791"
-        ]
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Medical Info Agent",
+        "systemPrompt": "You are a medical information provider. Do not give medical advice.",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "uuid": "e4f5a6b7-c8d9-0123-4567-abcdef890123"
+    },
+    {
+        "children": 2,
+        "context": 2048,
+        "description": "Helps write resumes and cover letters.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Job Application Agent",
+        "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "d5e6f7a8-b9c0-1234-5678-abcdef901236"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Suggests movies based on user preferences.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Movie Recommendation Agent",
+        "systemPrompt": "You are a movie expert. Recommend movies.",
+        "temperature": 0.7,
+        "topP": 0.95,
+        "uuid": "a2b3c4d5-e6f7-8901-2345-abcdef678913"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Generates creative stories and poems.",
+        "maxTokens": 2048,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4o",
+        "name": "Creative Writing Agent",
+        "systemPrompt": "You are a creative writer. Write engaging stories.",
+        "temperature": 0.9,
+        "topP": 0.98,
+        "uuid": "c2d3e4f5-a6b7-8901-2345-abcdef678901"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Recommends music tracks and playlists.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Music Suggestion Agent",
+        "systemPrompt": "You are a music expert. Suggest songs and playlists.",
+        "temperature": 0.8,
+        "topP": 0.9,
+        "uuid": "b3c4d5e6-f7a8-9012-3456-abcdef789014"
+    },
+    {
+        "children": 3,
+        "context": 1024,
+        "description": "Helps find products and compare prices.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Shopping Assistant Agent",
+        "systemPrompt": "You are a shopping assistant. Find the best deals.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "e0f1a2b3-c4d5-6789-0123-abcdef456790"
+    },
+    {
+        "children": 4,
+        "context": 2048,
+        "description": "Translates text between multiple languages.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-3.5-turbo",
+        "name": "Translation Agent",
+        "systemPrompt": "You are a professional translator. Translate accurately.",
+        "temperature": 0.3,
+        "topP": 0.85,
+        "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345678"
+    },
+    {
+        "children": 2,
+        "context": 2048,
+        "description": "Provides financial information and budgeting tips.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Finance Advisor Agent",
+        "systemPrompt": "You are a finance advisor. Provide general financial information.",
+        "temperature": 0.3,
+        "topP": 0.8,
+        "uuid": "d9e0f1a2-b3c4-5678-9012-abcdef345679"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides fitness routines and advice.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Fitness Coach Agent",
+        "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
+        "temperature": 0.5,
+        "topP": 0.9,
+        "uuid": "b7c8d9e0-f1a2-3456-7890-abcdef123458"
+    },
+    {
+        "children": 2,
+        "context": 4096,
+        "description": "Summarizes long documents into concise overviews.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Summarization Agent",
+        "systemPrompt": "You are an expert at summarizing text.",
+        "temperature": 0.4,
+        "topP": 0.9,
+        "uuid": "b1c2d3e4-f5a6-7890-1234-abcdef567890"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with homework and study questions.",
+        "maxTokens": 1024,
+        "mcpServers": [
+        ],
+        "modelName": "gpt-4",
+        "name": "Homework Helper Agent",
+        "systemPrompt": "You are a tutor. Help students with their homework.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "c4d5e6f7-a8b9-0123-4567-abcdef890125"
     }
 ]

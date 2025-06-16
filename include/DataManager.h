@@ -50,6 +50,11 @@ public:
     void saveMcpServers(const QString &filePath) const;
 
     /**
+     * 异步保存mcp服务器
+     */
+    void saveMcpServersAsync(const QString &filePath) const;
+
+    /**
      * 通过uuid获取mcp服务器
      */
     std::shared_ptr<McpServer> getMcpServer(const QString &uuid) const;
@@ -78,6 +83,11 @@ public:
      * 保存所有agent到文件
      */
     void saveAgents(const QString &filePath) const;
+
+    /**
+     * 异步保存agent
+     */
+    void saveAgentsAsync(const QString &filePath) const;
 
     /**
      * 新增agent
