@@ -176,6 +176,7 @@ void WidgetAgentInfo::initItems()
     m_lineEditName->setPlaceholderText("名称");
     // m_spinBoxChildren
     m_spinBoxChildren = new QSpinBox(this);
+    m_spinBoxChildren->setRange(0, 9999999);
     // m_plainTextEditDescription
     m_plainTextEditDescription = new QPlainTextEdit(this);
     m_plainTextEditDescription->setPlaceholderText("描述");
@@ -184,12 +185,16 @@ void WidgetAgentInfo::initItems()
     m_lineEditModelName->setPlaceholderText("模型名称");
     // m_spinBoxContext
     m_spinBoxContext = new QSpinBox(this);
+    m_spinBoxContext->setRange(0, 9999999);
     // m_doubleSpinBoxTemperature
     m_doubleSpinBoxTemperature = new QDoubleSpinBox(this);
+    m_doubleSpinBoxTemperature->setRange(0, 1);
     // m_doubleSpinBoxTopP
     m_doubleSpinBoxTopP = new QDoubleSpinBox(this);
+    m_doubleSpinBoxTopP->setRange(0, 1);
     // m_spinBoxMaxTokens
     m_spinBoxMaxTokens = new QSpinBox(this);
+    m_spinBoxMaxTokens->setRange(0, 9999999);
     // m_plainTextEditSystemPrompt
     m_plainTextEditSystemPrompt = new QPlainTextEdit(this);
     m_plainTextEditSystemPrompt->setPlaceholderText("系统提示词");
@@ -260,6 +265,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     m_doubleSpinBoxTopP->setValue(agent->topP);
     m_spinBoxMaxTokens->setValue(agent->maxTokens);
     m_plainTextEditSystemPrompt->setPlainText(agent->systemPrompt);
+    m_listWidgetMcpServers->clear();
     for (const QString &uuid : agent->mcpServers)
     {
         const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
