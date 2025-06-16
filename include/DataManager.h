@@ -5,6 +5,7 @@
 #include <QHash>
 #include <global.h>
 #include <QObject>
+#include "Logger.hpp"
 
 struct McpServer;
 struct Agent;
@@ -308,7 +309,7 @@ struct Agent
     double temperature;
     double topP;
     int maxTokens;
-    QVector<McpServer> mcpServers;
+    QVector<QString> mcpServers; // 挂载的mcp服务器的uuid
 
     Agent()
         : name(),
@@ -332,7 +333,7 @@ struct Agent
           double temperature,
           double topP,
           int maxTokens,
-          const QVector<McpServer> &mcpServers = QVector<McpServer>())
+          const QVector<QString> &mcpServers = QVector<QString>())
         : uuid(generateUuid()),
           name(name),
           description(description),
@@ -365,10 +366,7 @@ struct Agent
         QJsonArray mcpServersArray = jsonObject["mcpServers"].toArray();
         for (const QJsonValue &value : mcpServersArray)
         {
-            if (value.isObject())
-            {
-                agent.mcpServers.append(McpServer::fromJson(value.toObject()));
-            }
+            agent.mcpServers.append(value.toString());
         }
         return agent;
     }
@@ -389,9 +387,9 @@ struct Agent
         jsonObject["maxTokens"] = maxTokens;
 
         QJsonArray mcpServersArray;
-        for (const McpServer &server : mcpServers)
+        for (const QString &serverUuid : mcpServers)
         {
-            mcpServersArray.append(server.toJsonObject());
+            mcpServersArray.append(serverUuid);
         }
         jsonObject["mcpServers"] = mcpServersArray;
         return jsonObject;
