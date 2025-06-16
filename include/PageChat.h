@@ -12,6 +12,9 @@ class WidgetChat;
 class PageChat : public BaseWidget
 {
     Q_OBJECT
+private Q_SLOTS:
+    void slot_onAgentsLoaded(bool success);
+
 public:
     explicit PageChat(QWidget *parent = nullptr);
 

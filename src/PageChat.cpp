@@ -10,6 +10,7 @@ PageChat::PageChat(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
+    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
 }
 
 void PageChat::initWidget()
@@ -37,13 +38,13 @@ void PageChat::initItems()
                           currentConversation.uuid, currentConversation.summary, currentConversation.createdTime.toString("yyyy-MM-dd HH:mm:ss"), currentConversation.updatedTime.toString("yyyy-MM-dd HH:mm:ss"));
             });
 #ifdef QT_DEBUG
-    for (int i = 0; i < 20; ++i)
+    for (int i = 0; i < 50; ++i)
     {
-        QString nameAgent = "agent实例测试" + QString::number(i + 1);
-        QListWidgetItem *itemAgent = new QListWidgetItem();
-        itemAgent->setText(nameAgent);
-        itemAgent->setData(Qt::UserRole, QVariant::fromValue(Agent(nameAgent, generateUuid(), QRandomGenerator::global()->bounded(101), QRandomGenerator::global()->bounded(11), generateUuid(), generateUuid(), QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(10001))));
-        m_listWidgetAgent->addItem(itemAgent);
+        // QString nameAgent = "agent实例测试" + QString::number(i + 1);
+        // QListWidgetItem *itemAgent = new QListWidgetItem();
+        // itemAgent->setText(nameAgent);
+        // itemAgent->setData(Qt::UserRole, QVariant::fromValue(Agent(nameAgent, generateUuid(), QRandomGenerator::global()->bounded(101), QRandomGenerator::global()->bounded(11), generateUuid(), generateUuid(), QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(10001))));
+        // m_listWidgetAgent->addItem(itemAgent);
 
         QString nameConversation = "对话实例测试" + QString::number(i + 1);
         QListWidgetItem *itemConversation = new QListWidgetItem();
@@ -72,6 +73,19 @@ void PageChat::initLayout()
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->addWidget(splitter);
+}
+
+void PageChat::slot_onAgentsLoaded(bool success)
+{
+    if (!success)
+        return;
+    for (auto &agent : DataManager::getInstance()->getAgents())
+    {
+        QListWidgetItem *itemAgent = new QListWidgetItem();
+        itemAgent->setText(agent->name);
+        itemAgent->setData(Qt::UserRole, QVariant::fromValue(*(agent.get())));
+        m_listWidgetAgent->addItem(itemAgent);
+    }
 }
 
 /**
