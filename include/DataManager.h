@@ -12,6 +12,12 @@ struct Conversation;
 class DataManager : public QObject
 {
     Q_OBJECT
+
+Q_SIGNALS:
+    void sig_mcpServersLoaded(bool success);
+    void sig_agentsLoaded(bool success);
+    void sig_conversationsLoaded(bool success);
+
 public:
     static DataManager *getInstance();
     ~DataManager() = default;
@@ -142,6 +148,7 @@ private:
     explicit DataManager(QObject *parent = nullptr);
     DataManager(const DataManager &) = delete;
     DataManager &operator=(const DataManager &) = delete;
+    void loadDataAsync();
 
 private:
     static DataManager *s_instance;

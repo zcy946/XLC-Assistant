@@ -34,7 +34,11 @@ void DataManager::registerAllMetaType()
 
 void DataManager::init()
 {
-    // TODO 将这三个加载函数用异步实现，通过信号通知更新ui
+    loadDataAsync();
+}
+
+void DataManager::loadDataAsync()
+{
     QFuture<bool> futureMcpServers = QtConcurrent::run(
         [this]()
         {
@@ -44,7 +48,9 @@ void DataManager::init()
     connect(futureWatcherMcpServers, &QFutureWatcher<bool>::finished, this,
             [this, futureWatcherMcpServers]()
             {
-                if (futureWatcherMcpServers->result())
+                bool success = futureWatcherMcpServers->result();
+                Q_EMIT sig_mcpServersLoaded(success);
+                if (success)
                 {
                     LOG_INFO("Successfully loaded [{}] McpServers from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
                 }
@@ -61,9 +67,11 @@ void DataManager::init()
     connect(futureWatcherAgents, &QFutureWatcher<bool>::finished, this,
             [this, futureWatcherAgents]()
             {
-                if (futureWatcherAgents->result())
+                bool success = futureWatcherAgents->result();
+                Q_EMIT sig_agentsLoaded(success);
+                if (success)
                 {
-                    LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+                    LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_agents.count(), m_filePathMcpServers);
                 }
                 futureWatcherAgents->deleteLater();
             });
@@ -78,9 +86,11 @@ void DataManager::init()
     connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
             [this, futureWatcherConversations]()
             {
-                if (futureWatcherConversations->result())
+                bool success = futureWatcherConversations->result();
+                Q_EMIT sig_conversationsLoaded(success);
+                if (success)
                 {
-                    // LOG_INFO("Successfully loaded [{}] Conversations from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+                    LOG_INFO("Successfully loaded [{}] Conversations from database", m_conversations.count());
                 }
                 futureWatcherConversations->deleteLater();
             });
@@ -394,7 +404,7 @@ QList<std::shared_ptr<Agent>> DataManager::getAgents() const
 
 bool DataManager::loadConversations()
 {
-    // Do nothing
+    // TODO 从数据库加载对话信息
     return true;
 }
 
