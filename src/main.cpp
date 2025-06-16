@@ -6,7 +6,7 @@
 #include <io.h>
 #include <fcntl.h>
 #endif
-#include "global.h"
+#include "DataManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     // 注册元对象
-    registerAllMetaType();
+    DataManager::registerAllMetaType();
 
     // 设置全局字体
     app.setFont(getGlobalFont());

@@ -1,11 +1,14 @@
 #include "MainWindow.h"
 #include <QHBoxLayout>
 #include "Logger.hpp"
+#include "DataManager.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
+    // TODO 异步执行初始化
+    DataManager::GetInstance()->init();
 }
 
 MainWindow::~MainWindow()

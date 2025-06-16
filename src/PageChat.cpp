@@ -3,7 +3,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <FlowLayout.h>
-#include "global.h"
+#include "DataManager.h"
 #include "Logger.hpp"
 
 PageChat::PageChat(QWidget *parent)

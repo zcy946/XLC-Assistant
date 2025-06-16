@@ -1,18 +1,107 @@
 #include "DataManager.h"
 #include "Logger.hpp"
+#include <QFile>
+#include <QJsonDocument>
+#include <stdexcept>
 
 DataManager::DataManager()
+    : m_filePathMcpServers(FILE_MCPSERVERS), m_filePathAgents(FILE_AGENTS)
 {
 }
 
-void DataManager::loadMcpServers()
+void DataManager::registerAllMetaType()
 {
-    // Do nothing for now, but if you load from persistence,
-    // you'd populate m_mcpServers hash here.
-    // Example:
-    // for (const auto& loadedServer : someDataSource) {
-    //     m_mcpServers.insert(loadedServer->uuid, loadedServer);
-    // }
+    qRegisterMetaType<McpServer>("McpServer");
+    qRegisterMetaType<Agent>("Agent");
+    qRegisterMetaType<Conversation>("Conversation");
+}
+
+void DataManager::init()
+{
+    // TODO 将这三个加载函数用异步实现，通过信号通知更新ui
+    try
+    {
+        if (loadMcpServers(m_filePathMcpServers))
+        {
+            LOG_INFO("Successfully loaded [{}] McpServers from: [{}]", m_mcpServers.count(), m_filePathMcpServers);
+        }
+    }
+    catch (const std::runtime_error &e)
+    {
+        LOG_ERROR("Error loading McpServers: {}", e.what());
+    }
+    try
+    {
+        if (loadAgents(m_filePathAgents))
+        {
+            LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_agents.count(), m_filePathAgents);
+        }
+    }
+    catch (const std::runtime_error &e)
+    {
+        LOG_ERROR("Error loading Agents: {}", e.what());
+    }
+    loadConversations();
+}
+
+bool DataManager::loadMcpServers(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QString errorMsg = QString("Could not open McpServers file: %1 - %2").arg(filePath).arg(file.errorString());
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull())
+    {
+        QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    if (!doc.isArray())
+    {
+        QString errorMsg = QString("McpServers JSON root is not an array in file: %1").arg(filePath);
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    QJsonArray jsonArray = doc.array();
+
+    // 清空现有数据，准备加载新数据
+    m_mcpServers.clear();
+
+    for (const QJsonValue &value : jsonArray)
+    {
+        if (value.isObject())
+        {
+            QJsonObject serverObject = value.toObject();
+            // 使用 McpServer 的 fromJson 辅助函数来解析
+            McpServer newServer = McpServer::fromJson(serverObject);
+
+            // 检查 UUID 是否有效
+            if (newServer.uuid.isEmpty())
+            {
+                LOG_WARN("McpServer entry missing UUID. Skipping entry.");
+                continue;
+            }
+
+            // 使用 std::make_shared 创建智能指针并存储到 QHash 中
+            m_mcpServers.insert(newServer.uuid, std::make_shared<McpServer>(newServer));
+            LOG_DEBUG("Loaded McpServer: {}, UUID: {}", newServer.name, newServer.uuid);
+        }
+        else
+        {
+            LOG_WARN("McpServers array contains non-object element. Skipping.");
+        }
+    }
+    return true;
 }
 
 void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
@@ -20,6 +109,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
     if (mcpServer)
     {
         m_mcpServers.insert(mcpServer->uuid.trimmed(), mcpServer);
+        saveMcpServers(m_filePathMcpServers);
     }
     else
     {
@@ -30,6 +120,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
 void DataManager::removeMcpServer(const QString &uuid)
 {
     m_mcpServers.remove(uuid.trimmed());
+    saveMcpServers(m_filePathMcpServers);
 }
 
 void DataManager::updateMcpServer(const McpServer &mcpServer)
@@ -42,6 +133,7 @@ void DataManager::updateMcpServer(const McpServer &mcpServer)
         // 然后执行 McpServer 的 operator=
         (*it.value()) = mcpServer;
         LOG_DEBUG("Updated McpServer with UUID: {}", mcpServer.uuid);
+        saveMcpServers(FILE_MCPSERVERS);
     }
     else
     {
@@ -54,6 +146,47 @@ void DataManager::updateMcpServer(const McpServer &mcpServer)
         // LOG_INFO("McpServer with UUID {} not found for update, adding as new.", mcpServer.uuid);
         // addMcpServer(std::make_shared<McpServer>(mcpServer)); // 注意：这里需要构造一个新的shared_ptr
     }
+}
+
+// TODO 将saveMcpServers改为异步实现
+void DataManager::saveMcpServers(const QString &filePath) const
+{
+    QJsonArray jsonArray;
+    for (const auto &serverPtr : m_mcpServers.values())
+    {
+        if (serverPtr)
+        {
+            jsonArray.append(serverPtr->toJsonObject());
+        }
+    }
+
+    QJsonDocument doc(jsonArray);
+
+    QFile file(filePath);
+    // 使用 QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate
+    // WriteOnly: 只写模式
+    // Text: 文本模式（处理行末符）
+    // Truncate: 如果文件存在，先清空其内容
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+        QString errorMsg = QString("Could not open McpServers file for writing: %1 - %2").arg(filePath).arg(file.errorString());
+        LOG_ERROR("{}", errorMsg);
+        return;
+    }
+
+    // 将 JSON 文档写入文件，使用 BeautifulIndented 格式使其可读性更好
+    QByteArray jsonData = doc.toJson(QJsonDocument::JsonFormat::Indented);
+    qint64 bytesWritten = file.write(jsonData);
+    file.close();
+
+    if (bytesWritten == -1)
+    {
+        QString errorMsg = QString("Failed to write to McpServers file: %1 - %2").arg(filePath).arg(file.errorString());
+        LOG_ERROR("{}", errorMsg);
+        return;
+    }
+
+    LOG_INFO("Successfully saved {} McpServers to: {}", m_mcpServers.count(), filePath);
 }
 
 std::shared_ptr<McpServer> DataManager::getMcpServer(const QString &uuid) const
@@ -71,9 +204,64 @@ QList<std::shared_ptr<McpServer>> DataManager::getMcpServers() const
     return m_mcpServers.values();
 }
 
-void DataManager::loadAgents()
+bool DataManager::loadAgents(const QString &filePath)
 {
-    // Do nothing
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QString errorMsg = QString("Could not open Agents file: %1 - %2").arg(filePath).arg(file.errorString());
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull())
+    {
+        QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    if (!doc.isArray())
+    {
+        QString errorMsg = QString("Agents JSON root is not an array in file: %1").arg(filePath);
+        throw std::runtime_error(errorMsg.toStdString());
+        return false;
+    }
+
+    QJsonArray jsonArray = doc.array();
+
+    // 清空现有数据，准备加载新数据
+    m_agents.clear();
+
+    for (const QJsonValue &value : jsonArray)
+    {
+        if (value.isObject())
+        {
+            QJsonObject agentObject = value.toObject();
+            // 使用 Agent 的 fromJson 辅助函数来解析
+            Agent newAgent = Agent::fromJson(agentObject);
+
+            // 检查 UUID 是否有效
+            if (newAgent.uuid.isEmpty())
+            {
+                LOG_WARN("Agent entry missing UUID. Skipping entry.");
+                continue;
+            }
+
+            // 使用 std::make_shared 创建智能指针并存储到 QHash 中
+            m_agents.insert(newAgent.uuid, std::make_shared<Agent>(newAgent));
+            LOG_DEBUG("Loaded Agent: {}, UUID: {}", newAgent.name, newAgent.uuid);
+        }
+        else
+        {
+            LOG_WARN("Agents array contains non-object element. Skipping.");
+        }
+    }
+    return true;
 }
 
 void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
@@ -171,4 +359,28 @@ std::shared_ptr<Conversation> DataManager::getConversation(const QString &uuid) 
 QList<std::shared_ptr<Conversation>> DataManager::getConversations() const
 {
     return m_conversations.values();
+}
+
+void DataManager::setFilePathMcpServers(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+    m_filePathMcpServers = filePath;
+}
+
+const QString &DataManager::getFilePathMcpServers(const QString &filePath) const
+{
+    return m_filePathMcpServers;
+}
+
+void DataManager::setFilePathAgents(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+    m_filePathAgents = filePath;
+}
+
+const QString &DataManager::getFilePathAgents(const QString &filePath) const
+{
+    return m_filePathAgents;
 }
