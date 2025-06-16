@@ -69,6 +69,11 @@ public:
     void updateAgent(const Agent &agent);
 
     /**
+     * 保存所有agent到文件
+     */
+    void saveAgents(const QString &filePath) const;
+
+    /**
      * 新增agent
      */
     void addAgent(const std::shared_ptr<Agent> &agent);

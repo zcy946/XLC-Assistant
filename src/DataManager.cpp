@@ -269,6 +269,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
     if (agent)
     {
         m_agents.insert(agent->uuid.trimmed(), agent);
+        saveAgents(m_filePathAgents);
     }
     else
     {
@@ -279,6 +280,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
 void DataManager::removeAgent(const QString &uuid)
 {
     m_agents.remove(uuid.trimmed());
+    saveAgents(m_filePathAgents);
 }
 
 void DataManager::updateAgent(const Agent &agent)
@@ -288,11 +290,48 @@ void DataManager::updateAgent(const Agent &agent)
     {
         (*it.value()) = agent;
         LOG_DEBUG("Updated Agent with UUID: {}", agent.uuid);
+        saveAgents(m_filePathAgents);
     }
     else
     {
         LOG_WARN("Agent with UUID {} not found for update. No action taken.", agent.uuid);
     }
+}
+
+void DataManager::DataManager::saveAgents(const QString &filePath) const
+{
+    QJsonArray jsonArray;
+    for (const auto &agentPtr : m_agents.values())
+    {
+        if (agentPtr)
+        {
+            jsonArray.append(agentPtr->toJsonObject());
+        }
+    }
+
+    QJsonDocument doc(jsonArray);
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
+    {
+        QString errorMsg = QString("Could not open Agents file for writing: %1 - %2").arg(filePath).arg(file.errorString());
+        LOG_ERROR("{}", errorMsg);
+        return;
+    }
+
+    QByteArray jsonData = doc.toJson(QJsonDocument::JsonFormat::Indented);
+    qint64 bytesWritten = file.write(jsonData);
+    file.close();
+
+    if (bytesWritten == -1)
+    {
+        QString errorMsg = QString("Failed to write to Agents file: %1 - %2").arg(filePath).arg(file.errorString());
+        LOG_ERROR("{}", errorMsg);
+        return;
+    }
+
+    LOG_INFO("Successfully saved {} Agents to: {}", m_agents.count(), filePath);
+    return;
 }
 
 std::shared_ptr<Agent> DataManager::getAgent(const QString &uuid) const
