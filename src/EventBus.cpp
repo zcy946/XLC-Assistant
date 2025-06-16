@@ -10,16 +10,16 @@ void EventBus::publish(EventType eventType, const QVariant &data)
     switch (eventType)
     {
     case EventType::ButtonClicked:
-        emit signalButtonClicked(data);
+        Q_EMIT sig_buttonClicked(data);
         break;
     case EventType::StateChanged:
-        emit signalStateChanged(data);
+        Q_EMIT sig_stateChanged(data);
         break;
     case EventType::MessageSent:
-        emit signalMessageSent(data);
+        Q_EMIT sig_messageSent(data);
         break;
     case EventType::MessageReceived:
-        emit signalMessageReceived(data);
+        Q_EMIT sig_messageReceived(data);
         break;
     default:
         qWarning() << "Unhandled event type:" << static_cast<int>(eventType);

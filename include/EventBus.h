@@ -39,10 +39,10 @@ public:
     void publish(EventType eventType, const QVariant &data = QVariant());
 
 signals:
-    void signalButtonClicked(const QVariant &data);
-    void signalStateChanged(const QVariant &data);
-    void signalMessageSent(const QVariant &data);
-    void signalMessageReceived(const QVariant &data);
+    void sig_buttonClicked(const QVariant &data);
+    void sig_stateChanged(const QVariant &data);
+    void sig_messageSent(const QVariant &data);
+    void sig_messageReceived(const QVariant &data);
 
 private:
     explicit EventBus(QObject *parent = nullptr);
