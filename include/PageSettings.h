@@ -11,6 +11,8 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QComboBox>
+#include <QLabel>
 
 class PageSettingsAgent;
 class PageSettingsMcp;
@@ -93,11 +95,13 @@ private:
     QPushButton *m_pushButtonSave;
 };
 
+class WidgetMcpServerInfo;
 class PageSettingsMcp : public BaseWidget
 {
     Q_OBJECT
 private Q_SLOTS:
     void slot_onListWidgetItemClicked(QListWidgetItem *item);
+    void slot_onMcpServersLoaded(bool success);
 
 public:
     explicit PageSettingsMcp(QWidget *parent = nullptr);
@@ -109,9 +113,49 @@ protected:
 
 private:
     QListWidget *m_listWidgetMcpServers;
+    WidgetMcpServerInfo *m_widgetMcpServerInfo;
 
 private:
     void showMcpServerInfo(const QString &uuid);
+};
+
+class WidgetMcpServerInfo : public BaseWidget
+{
+    Q_OBJECT
+private Q_SLOTS:
+    void slot_onComboBoxCurrentIndexChanged(int index);
+
+public:
+    explicit WidgetMcpServerInfo(QWidget *parent = nullptr);
+    ~WidgetMcpServerInfo() = default;
+    /**
+     * 更新表单数据
+     */
+    void updateData(std::shared_ptr<McpServer> mcpServer);
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    QLineEdit *m_lineEditUuid;
+    QLineEdit *m_lineEditName;
+    QPlainTextEdit *m_plainTextEditDescription;
+    QComboBox *m_comboBoxType;
+    QSpinBox *m_spinBoxTimeout;
+    QLabel *m_labelCommand;
+    QLineEdit *m_lineEditCommand;
+    QLabel *m_labelArgs;
+    QPlainTextEdit *m_plainTextEditArgs;
+    QLabel *m_labelEnvVars;
+    QPlainTextEdit *m_plainTextEditEnvVars;
+    QLabel *m_labelUrl;
+    QLineEdit *m_lineEditUrl;
+    QLabel *m_labelRequestHeaders;
+    QPlainTextEdit *m_plainTextEditRequestHeaders;
+    QPushButton *m_pushButtonReset;
+    QPushButton *m_pushButtonSave;
 };
 
 class PageSettingsData : public BaseWidget
