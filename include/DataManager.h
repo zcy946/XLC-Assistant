@@ -45,7 +45,7 @@ public:
     /**
      * 更新mcp服务器
      */
-    void updateMcpServer(const McpServer &mcpServer);
+    void updateMcpServer(const std::shared_ptr<McpServer> &mcpServer);
 
     /**
      * 保存所有mcp服务器到文件
@@ -80,7 +80,7 @@ public:
     /**
      * 更新agent
      */
-    void updateAgent(const Agent &agent);
+    void updateAgent(const std::shared_ptr<Agent> &agent);
 
     /**
      * 保存所有agent到文件

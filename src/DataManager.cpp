@@ -202,28 +202,23 @@ void DataManager::removeMcpServer(const QString &uuid)
     saveMcpServersAsync(m_filePathMcpServers);
 }
 
-void DataManager::updateMcpServer(const McpServer &mcpServer)
+void DataManager::updateMcpServer(const std::shared_ptr<McpServer> &mcpServer)
 {
-    auto it = m_mcpServers.find(mcpServer.uuid.trimmed());
+    if (!mcpServer)
+    {
+        LOG_WARN("Attempted to update a null McpServer shared_ptr.");
+        return;
+    }
+    auto it = m_mcpServers.find(mcpServer->uuid.trimmed());
     if (it != m_mcpServers.end())
     {
-        // it.value() 返回 std::shared_ptr<McpServer>
-        // *it.value() 解引用智能指针，得到 McpServer 对象的引用
-        // 然后执行 McpServer 的 operator=
-        (*it.value()) = mcpServer;
-        LOG_DEBUG("Updated McpServer with UUID: {}", mcpServer.uuid);
-        saveMcpServersAsync(FILE_MCPSERVERS);
+        (*it.value()) = *mcpServer;
+        LOG_DEBUG("Updated McpServer with UUID: {}", mcpServer->uuid);
+        saveMcpServersAsync(m_filePathMcpServers);
     }
     else
     {
-        // 如果找不到，根据业务需求处理：
-        // 1. 什么也不做（当前行为）
-        LOG_WARN("McpServer with UUID {} not found for update. No action taken.", mcpServer.uuid);
-        // 2. 抛出异常
-        // throw std::runtime_error("McpServer not found for update");
-        // 3. 将其作为新项添加
-        // LOG_INFO("McpServer with UUID {} not found for update, adding as new.", mcpServer.uuid);
-        // addMcpServer(std::make_shared<McpServer>(mcpServer)); // 注意：这里需要构造一个新的shared_ptr
+        LOG_WARN("McpServer with UUID {} not found for update. No action taken.", mcpServer->uuid);
     }
 }
 
@@ -286,6 +281,8 @@ void DataManager::saveMcpServersAsync(const QString &filePath) const
 
 std::shared_ptr<McpServer> DataManager::getMcpServer(const QString &uuid) const
 {
+    if (uuid.isEmpty())
+        return nullptr;
     auto it = m_mcpServers.find(uuid.trimmed());
     if (it != m_mcpServers.end())
     {
@@ -378,18 +375,23 @@ void DataManager::removeAgent(const QString &uuid)
     saveAgentsAsync(m_filePathAgents);
 }
 
-void DataManager::updateAgent(const Agent &agent)
+void DataManager::updateAgent(const std::shared_ptr<Agent> &agent)
 {
-    auto it = m_agents.find(agent.uuid.trimmed());
+    if (!agent)
+    {
+        LOG_WARN("Attempted to update a null Agent shared_ptr.");
+        return;
+    }
+    auto it = m_agents.find(agent->uuid.trimmed());
     if (it != m_agents.end())
     {
-        (*it.value()) = agent;
-        LOG_DEBUG("Updated Agent with UUID: {}", agent.uuid);
+        (*it.value()) = *agent;
+        LOG_DEBUG("Updated Agent with UUID: {}", agent->uuid);
         saveAgentsAsync(m_filePathAgents);
     }
     else
     {
-        LOG_WARN("Agent with UUID {} not found for update. No action taken.", agent.uuid);
+        LOG_WARN("Agent with UUID {} not found for update. No action taken.", agent->uuid);
     }
 }
 
@@ -447,6 +449,8 @@ void DataManager::saveAgentsAsync(const QString &filePath) const
 
 std::shared_ptr<Agent> DataManager::getAgent(const QString &uuid) const
 {
+    if (uuid.isEmpty())
+        return nullptr;
     auto it = m_agents.find(uuid.trimmed());
     if (it != m_agents.end())
     {
@@ -499,6 +503,8 @@ void DataManager::updateConversation(const Conversation &conversation)
 
 std::shared_ptr<Conversation> DataManager::getConversation(const QString &uuid) const
 {
+    if (uuid.isEmpty())
+        return nullptr;
     auto it = m_conversations.find(uuid.trimmed());
     if (it != m_conversations.end())
     {

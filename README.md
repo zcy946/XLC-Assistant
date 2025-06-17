@@ -5,7 +5,8 @@
 - [x] 更新MCPServer.json文件
 - [x] 从Agents.json文件中加载agent
 - [x] 更新Agents.json文件
-- [ ] 从DataManager中**异步**读取mcp服务器和agent并渲染
+- [x] 从DataManager中**异步**读取mcp服务器和agent并渲染
+- [ ] 实现Agents设置界面增删mcp服务器列表
 
 
 

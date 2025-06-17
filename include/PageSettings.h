@@ -80,6 +80,12 @@ protected:
     void initLayout() override;
 
 private:
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<Agent> getCurrentData();
+
+private:
     QLineEdit *m_lineEditUuid;
     QLineEdit *m_lineEditName;
     QSpinBox *m_spinBoxChildren;
@@ -137,6 +143,12 @@ protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
+
+private:
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<McpServer> getCurrentData();
 
 private:
     QLineEdit *m_lineEditUuid;

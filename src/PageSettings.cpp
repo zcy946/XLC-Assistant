@@ -30,6 +30,11 @@ PageSettings::PageSettings(QWidget *parent)
         m_listWidget->addItem(itemSetting);
     }
 #endif
+    // 默认选中并展示第一项
+    if (m_listWidget->currentItem() == nullptr)
+    {
+        m_listWidget->setCurrentRow(0);
+    }
 }
 
 void PageSettings::initWidget()
@@ -136,13 +141,17 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
     for (const std::shared_ptr<Agent> &agent : agents)
     {
         QListWidgetItem *itemAgent = new QListWidgetItem(agent->name, m_listWidgetAgents);
-        itemAgent->setData(Qt::UserRole, agent->uuid);
+        itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(agent->uuid));
+        m_listWidgetAgents->addItem(itemAgent);
     }
     // 默认选中并展示第一项
     if (m_listWidgetAgents->currentItem() == nullptr)
     {
         m_listWidgetAgents->setCurrentRow(0);
-        m_widgetAgentInfo->updateData(DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>()));
+        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
+        if (!agent)
+            return;
+        m_widgetAgentInfo->updateData(agent);
     }
 }
 
@@ -205,17 +214,20 @@ void WidgetAgentInfo::initItems()
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
     connect(m_pushButtonReset, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                // TODO 重载
+                const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
+                if (!agent)
+                    return;
+                updateData(agent);
                 LOG_DEBUG("重载agent设置");
             });
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
     connect(m_pushButtonSave, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                // TODO 保存
+                DataManager::getInstance()->updateAgent(getCurrentData());
                 LOG_DEBUG("保存agent设置");
             });
 }
@@ -278,8 +290,34 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
             LOG_WARN("不存在的mcp服务器: {}", uuid);
             continue;
         }
-        m_listWidgetMcpServers->addItem(mcpServer->name);
+        QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+        itemMcpServer->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+        m_listWidgetMcpServers->addItem(itemMcpServer);
     }
+}
+
+std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
+{
+    std::shared_ptr<Agent> agent = std::make_shared<Agent>();
+    agent->uuid = m_lineEditUuid->text();
+    agent->name = m_lineEditName->text();
+    agent->children = m_spinBoxChildren->value();
+    agent->description = m_plainTextEditDescription->toPlainText();
+    agent->modelName = m_lineEditModelName->text();
+    agent->context = m_spinBoxContext->value();
+    agent->temperature = m_doubleSpinBoxTemperature->value();
+    agent->topP = m_doubleSpinBoxTopP->value();
+    agent->maxTokens = m_spinBoxMaxTokens->value();
+    agent->systemPrompt = m_plainTextEditSystemPrompt->toPlainText();
+    agent->mcpServers.clear();
+    for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
+    {
+        QListWidgetItem *item = m_listWidgetMcpServers->item(i);
+        QString uuid = item->data(Qt::UserRole).toString();
+        if (!uuid.isEmpty())
+            agent->mcpServers.append(uuid);
+    }
+    return agent;
 }
 
 // PageSettingsMcp
@@ -337,7 +375,8 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
     for (const std::shared_ptr<McpServer> &mcpServer : mcpServers)
     {
         QListWidgetItem *itemAgent = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
-        itemAgent->setData(Qt::UserRole, mcpServer->uuid);
+        itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+        m_listWidgetMcpServers->addItem(itemAgent);
     }
     // 默认选中并展示第一项
     if (m_listWidgetMcpServers->currentItem() == nullptr)
@@ -419,17 +458,17 @@ void WidgetMcpServerInfo::initItems()
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
     connect(m_pushButtonReset, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                // TODO 重载
+                updateData(DataManager::getInstance()->getMcpServer(m_lineEditUuid->text()));
                 LOG_DEBUG("重载mcp服务器设置");
             });
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
     connect(m_pushButtonSave, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                // TODO 保存
+                DataManager::getInstance()->updateMcpServer(getCurrentData());
                 LOG_DEBUG("保存mcp服务器设置");
             });
 }
@@ -484,13 +523,55 @@ void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
     }
     m_plainTextEditArgs->setPlainText(strAgrs);
     QString strEnvVars;
-    for (const QString &envVar : mcpServer->envVars)
+    for (auto it = mcpServer->envVars.constBegin(); it != mcpServer->envVars.constEnd(); ++it)
     {
-        strEnvVars.append(envVar).append("\n");
+        strEnvVars.append(it.key()).append("=").append(it.value()).append("\n");
     }
     m_plainTextEditEnvVars->setPlainText(strEnvVars);
     m_lineEditUrl->setText(mcpServer->url);
     m_plainTextEditRequestHeaders->setPlainText(mcpServer->requestHeaders);
+}
+
+std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()
+{
+    std::shared_ptr<McpServer> mcpServer = std::make_shared<McpServer>();
+    mcpServer->uuid = m_lineEditUuid->text();
+    mcpServer->name = m_lineEditName->text();
+    mcpServer->description = m_plainTextEditDescription->toPlainText();
+    mcpServer->type = static_cast<McpServer::Type>(m_comboBoxType->currentIndex());
+    mcpServer->timeout = m_spinBoxTimeout->value();
+    mcpServer->command = m_lineEditCommand->text();
+
+    // 解析参数
+    mcpServer->args.clear();
+    QStringList argsList = m_plainTextEditArgs->toPlainText().split('\n', Qt::SkipEmptyParts);
+    for (const QString &arg : argsList)
+    {
+        mcpServer->args.append(arg.trimmed());
+    }
+
+    // 解析环境变量
+    mcpServer->envVars.clear();
+    QStringList envList = m_plainTextEditEnvVars->toPlainText().split('\n', Qt::SkipEmptyParts);
+    for (const QString &env : envList)
+    {
+        QString trimmedEnv = env.trimmed();
+        if (trimmedEnv.isEmpty())
+            continue;
+        int idx = trimmedEnv.indexOf('=');
+        if (idx > 0)
+        {
+            QString key = trimmedEnv.left(idx).trimmed();
+            QString value = trimmedEnv.mid(idx + 1).trimmed();
+            if (!key.isEmpty())
+                mcpServer->envVars.insert(key, value);
+        }
+    }
+
+    mcpServer->url = m_lineEditUrl->text();
+    mcpServer->requestHeaders = m_plainTextEditRequestHeaders->toPlainText();
+
+    return mcpServer;
 }
 
 void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
