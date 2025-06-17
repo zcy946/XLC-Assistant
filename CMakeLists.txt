@@ -24,23 +24,12 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 设置mcp库的路径
-set(MCP_ROOT "E:/github/cpp-mcp-fork/cpp-mcp/src/install")
-set(MCP_INCLUDES "${MCP_ROOT}/include")
-set(MCP_LIB_DEBUG "${MCP_ROOT}/mcpd.lib")
-set(MCP_LIB_RELEASE "${MCP_ROOT}/mcp.lib")
-set(MCP_LIBS
-    debug ${MCP_LIB_DEBUG}
-    optimized ${MCP_LIB_RELEASE}
-)
-
-# mcp库必备宏定义
-add_compile_definitions(MCP_SSL CPPHTTPLIB_OPENSSL_SUPPORT)
 
 # 查找包
-find_package(OpenSSL COMPONENTS Crypto SSL REQUIRED)
+set(MCP_DIR "E:/github/1MyFork/cpp-mcp/install/cmake")
 find_package(spdlog CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets Gui Svg Concurrent REQUIRED)
+find_package(MCP REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -54,28 +43,24 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 
 add_executable(${PROJECT_NAME}
 
-    # ${SRC}
-    # ${HEADERS}
-    # ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
-    ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_example.cpp
-
+    ${SRC}
+    ${HEADERS}
+    ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
+    # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_example.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_without_mcp_server.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${MCP_LIBS}
-    ${OPENSSL_LIBRARIES}
     spdlog::spdlog_header_only
     Qt5::Core
     Qt5::Widgets
     Qt5::Gui
     Qt5::Svg
     Qt5::Concurrent
+    MCP::mcp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${MCP_INCLUDES}
-    ${OPENSSL_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
