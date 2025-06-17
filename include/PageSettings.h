@@ -161,6 +161,10 @@ private:
 class PageSettingsData : public BaseWidget
 {
     Q_OBJECT
+private Q_SLOTS:
+    void slot_onFilePathChangedAgents(const QString &filePath);
+    void slot_onFilePathChangedMcpServers(const QString &filePath);
+
 public:
     explicit PageSettingsData(QWidget *parent = nullptr);
 
@@ -170,6 +174,10 @@ protected:
     void initLayout() override;
 
 private:
+    QLineEdit *m_lineEditFilePathAgents;
+    QPushButton *m_pushButtonSelectFileAgents;
+    QLineEdit *m_lineEditFilePathMcpServers;
+    QPushButton *m_pushButtonSelectFileMcpServers;
 };
 
 class PageAbout : public BaseWidget

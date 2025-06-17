@@ -5,6 +5,8 @@
 #include "global.h"
 #include <QGridLayout>
 #include <QDesktopServices>
+#include <QGroupBox>
+#include <QFileDialog>
 
 // PageSettings
 PageSettings::PageSettings(QWidget *parent)
@@ -130,6 +132,7 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
     QList<std::shared_ptr<McpServer>> mcpServers = DataManager::getInstance()->getMcpServers();
     if (agents.isEmpty() || mcpServers.isEmpty())
         return;
+    m_listWidgetAgents->clear();
     for (const std::shared_ptr<Agent> &agent : agents)
     {
         QListWidgetItem *itemAgent = new QListWidgetItem(agent->name, m_listWidgetAgents);
@@ -330,6 +333,7 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
     QList<std::shared_ptr<McpServer>> mcpServers = DataManager::getInstance()->getMcpServers();
     if (mcpServers.isEmpty())
         return;
+    m_listWidgetMcpServers->clear();
     for (const std::shared_ptr<McpServer> &mcpServer : mcpServers)
     {
         QListWidgetItem *itemAgent = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
@@ -527,6 +531,8 @@ PageSettingsData::PageSettingsData(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
+    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedAgents, this, &PageSettingsData::slot_onFilePathChangedAgents);
+    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedMcpServers, this, &PageSettingsData::slot_onFilePathChangedMcpServers);
 }
 
 void PageSettingsData::initWidget()
@@ -535,11 +541,69 @@ void PageSettingsData::initWidget()
 
 void PageSettingsData::initItems()
 {
-    QLabel *label = new QLabel("PageSettingsData", this);
+    // m_lineEditFilePathAgents
+    m_lineEditFilePathAgents = new QLineEdit(this);
+    m_lineEditFilePathAgents->setText(QFileInfo(DataManager::getInstance()->getFilePathAgents()).absoluteFilePath());
+    // m_pushButtonSelectFileAgents
+    m_pushButtonSelectFileAgents = new QPushButton("选择", this);
+    connect(m_pushButtonSelectFileAgents, &QPushButton::clicked, this,
+            [this]()
+            {
+                QString fileName = QFileDialog::getOpenFileName(this, "选择 Agents 文件", QString(), "JSON Files (*.json);;All Files (*)");
+                if (!fileName.isEmpty())
+                {
+                    DataManager::getInstance()->setFilePathAgents(fileName);
+                    LOG_DEBUG("设置agents文件路径为: {}", fileName);
+                }
+            });
+    // m_lineEditFilePathMcpServers
+    m_lineEditFilePathMcpServers = new QLineEdit(this);
+    m_lineEditFilePathMcpServers->setText(QFileInfo(DataManager::getInstance()->getFilePathMcpServers()).absoluteFilePath());
+    // m_pushButtonSelectFileMcpServers
+    m_pushButtonSelectFileMcpServers = new QPushButton("选择", this);
+    connect(m_pushButtonSelectFileMcpServers, &QPushButton::clicked, this,
+            [this]()
+            {
+                QString fileName = QFileDialog::getOpenFileName(this, "选择 McpServers 文件", QString(), "JSON Files (*.json);;All Files (*)");
+                if (!fileName.isEmpty())
+                {
+                    DataManager::getInstance()->setFilePathMcpServers(fileName);
+                    LOG_DEBUG("设置mcp服务器文件路径为: {}", fileName);
+                }
+            });
 }
 
 void PageSettingsData::initLayout()
 {
+    // gLayoutStorage
+    QGridLayout *gLayoutStorage = new QGridLayout();
+    gLayoutStorage->addWidget(new QLabel("Agents", this), 0, 0);
+    gLayoutStorage->addWidget(m_lineEditFilePathAgents, 0, 1);
+    gLayoutStorage->addWidget(m_pushButtonSelectFileAgents, 0, 2);
+    gLayoutStorage->addWidget(new QLabel("McpServers", this), 1, 0);
+    gLayoutStorage->addWidget(m_lineEditFilePathMcpServers, 1, 1);
+    gLayoutStorage->addWidget(m_pushButtonSelectFileMcpServers, 1, 2);
+    // groupBoxStorage
+    QGroupBox *groupBoxStorage = new QGroupBox("存储设置", this);
+    groupBoxStorage->setLayout(gLayoutStorage);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(groupBoxStorage);
+    vLayout->addStretch();
+}
+
+void PageSettingsData::slot_onFilePathChangedAgents(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+    m_lineEditFilePathAgents->setText(QFileInfo(filePath).absoluteFilePath());
+}
+
+void PageSettingsData::slot_onFilePathChangedMcpServers(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+    m_lineEditFilePathMcpServers->setText(QFileInfo(filePath).absoluteFilePath());
 }
 
 // PageAbout
