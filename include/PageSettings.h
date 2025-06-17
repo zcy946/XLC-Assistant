@@ -184,6 +184,8 @@ protected:
     void initLayout() override;
 
 private:
+    QPushButton *m_pushButtonGitHub;
+    QPushButton *m_pushButtonBlog;
 };
 
 #endif // PAGESETTINGS_H

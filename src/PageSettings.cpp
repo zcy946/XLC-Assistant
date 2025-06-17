@@ -4,7 +4,7 @@
 #include <QVBoxLayout>
 #include "global.h"
 #include <QGridLayout>
-#include <QSpacerItem>
+#include <QDesktopServices>
 
 // PageSettings
 PageSettings::PageSettings(QWidget *parent)
@@ -555,9 +555,29 @@ void PageAbout::initWidget()
 
 void PageAbout::initItems()
 {
-    QLabel *label = new QLabel("PageAbout", this);
+    // m_pushButtonGitHub
+    m_pushButtonGitHub = new QPushButton("GitHub", this);
+    connect(m_pushButtonGitHub, &QPushButton::clicked, this,
+            []()
+            {
+                QDesktopServices::openUrl(QUrl("https://github.com/zcy946/XLC-Assistant"));
+                LOG_DEBUG("跳转到GitHub");
+            });
+    // m_pushButtonBlog
+    m_pushButtonBlog = new QPushButton("Blog", this);
+    connect(m_pushButtonBlog, &QPushButton::clicked, this,
+            []()
+            {
+                QDesktopServices::openUrl(QUrl("https://1610161.xyz"));
+                LOG_DEBUG("跳转到Blog");
+            });
 }
 
 void PageAbout::initLayout()
 {
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(new QLabel("XLCMCPClient\n——by: xialichen", this));
+    vLayout->addWidget(m_pushButtonGitHub, 0, Qt::AlignRight);
+    vLayout->addWidget(m_pushButtonBlog, 0, Qt::AlignRight);
+    vLayout->addStretch();
 }
