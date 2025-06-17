@@ -18,6 +18,8 @@ Q_SIGNALS:
     void sig_mcpServersLoaded(bool success);
     void sig_agentsLoaded(bool success);
     void sig_conversationsLoaded(bool success);
+    void sig_filePathChangedAgents(const QString &filePath);
+    void sig_filePathChangedMcpServers(const QString &filePath);
 
 public:
     static DataManager *getInstance();
@@ -143,7 +145,7 @@ public:
     /**
      * 获取mcp服务器文件路径
      */
-    const QString &getFilePathMcpServers(const QString &filePath) const;
+    const QString &getFilePathMcpServers() const;
 
     /**
      * 设置agents文件路径
@@ -153,13 +155,15 @@ public:
     /**
      * 获取agents文件路径
      */
-    const QString &getFilePathAgents(const QString &filePath) const;
+    const QString &getFilePathAgents() const;
 
 private:
     explicit DataManager(QObject *parent = nullptr);
     DataManager(const DataManager &) = delete;
     DataManager &operator=(const DataManager &) = delete;
     void loadDataAsync();
+    void loadMcpServersAsync();
+    void loadAgentsAsync();
 
 private:
     static DataManager *s_instance;

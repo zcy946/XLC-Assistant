@@ -22,8 +22,24 @@ DataManager *DataManager::getInstance()
 DataManager::DataManager(QObject *parent)
     : QObject(parent)
 {
-    m_filePathMcpServers = FILE_MCPSERVERS;
-    m_filePathAgents = FILE_AGENTS;
+    QFile fileCheck(FILE_MCPSERVERS);
+    if (!fileCheck.exists())
+    {
+        LOG_WARN("McpServers file does not exist: {}", FILE_MCPSERVERS);
+    }
+    else
+    {
+        m_filePathMcpServers = FILE_MCPSERVERS;
+    }
+    fileCheck.setFileName(FILE_AGENTS);
+    if (!fileCheck.exists())
+    {
+        LOG_WARN("Agents file does not exist: {}", FILE_AGENTS);
+    }
+    else
+    {
+        m_filePathAgents = FILE_AGENTS;
+    }
 }
 
 void DataManager::registerAllMetaType()
@@ -39,6 +55,31 @@ void DataManager::init()
 }
 
 void DataManager::loadDataAsync()
+{
+    loadMcpServersAsync();
+    loadAgentsAsync();
+
+    QFuture<bool> futureConversations = QtConcurrent::run(
+        [this]()
+        {
+            return this->loadConversations();
+        });
+    QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
+    connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
+            [this, futureWatcherConversations]()
+            {
+                bool success = futureWatcherConversations->result();
+                Q_EMIT sig_conversationsLoaded(success);
+                if (success)
+                {
+                    LOG_INFO("Successfully loaded [{}] Conversations from database", m_conversations.count());
+                }
+                futureWatcherConversations->deleteLater();
+            });
+    futureWatcherConversations->setFuture(futureConversations);
+}
+
+void DataManager::loadMcpServersAsync()
 {
     QFuture<bool> futureMcpServers = QtConcurrent::run(
         [this]()
@@ -58,7 +99,10 @@ void DataManager::loadDataAsync()
                 futureWatcherMcpServers->deleteLater();
             });
     futureWatcherMcpServers->setFuture(futureMcpServers);
+}
 
+void DataManager::loadAgentsAsync()
+{
     QFuture<bool> futureAgents = QtConcurrent::run(
         [this]()
         {
@@ -77,25 +121,6 @@ void DataManager::loadDataAsync()
                 futureWatcherAgents->deleteLater();
             });
     futureWatcherAgents->setFuture(futureAgents);
-
-    QFuture<bool> futureConversations = QtConcurrent::run(
-        [this]()
-        {
-            return this->loadConversations();
-        });
-    QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
-    connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
-            [this, futureWatcherConversations]()
-            {
-                bool success = futureWatcherConversations->result();
-                Q_EMIT sig_conversationsLoaded(success);
-                if (success)
-                {
-                    LOG_INFO("Successfully loaded [{}] Conversations from database", m_conversations.count());
-                }
-                futureWatcherConversations->deleteLater();
-            });
-    futureWatcherConversations->setFuture(futureAgents);
 }
 
 bool DataManager::loadMcpServers(const QString &filePath)
@@ -492,9 +517,11 @@ void DataManager::setFilePathMcpServers(const QString &filePath)
     if (filePath.isEmpty())
         return;
     m_filePathMcpServers = filePath;
+    loadMcpServersAsync();
+    Q_EMIT sig_filePathChangedMcpServers(filePath);
 }
 
-const QString &DataManager::getFilePathMcpServers(const QString &filePath) const
+const QString &DataManager::getFilePathMcpServers() const
 {
     return m_filePathMcpServers;
 }
@@ -504,9 +531,11 @@ void DataManager::setFilePathAgents(const QString &filePath)
     if (filePath.isEmpty())
         return;
     m_filePathAgents = filePath;
+    loadAgentsAsync();
+    Q_EMIT sig_filePathChangedAgents(filePath);
 }
 
-const QString &DataManager::getFilePathAgents(const QString &filePath) const
+const QString &DataManager::getFilePathAgents() const
 {
     return m_filePathAgents;
 }
