@@ -8,3 +8,6 @@ output/xlc_mcp_client.ilk
 output/xlc_mcp_client.exe
 output/fmtd.dll
 output/logs/
+test.md
+output/libcrypto-3-x64.dll
+output/libssl-3-x64.dll

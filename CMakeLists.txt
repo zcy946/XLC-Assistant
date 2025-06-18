@@ -48,6 +48,7 @@ add_executable(${PROJECT_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_example.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_without_mcp_server.cpp
+    # ${CMAKE_CURRENT_SOURCE_DIR}/example/justLLM.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -7,6 +7,9 @@
 - [x] 更新Agents.json文件
 - [x] 从DataManager中**异步**读取mcp服务器和agent并渲染
 - [ ] 实现Agents设置界面增删mcp服务器列表
+- [ ] 封装mcpclient为mcp网关，用于统一管理mcp服务器
+- [ ] 创建McpService类用于不同的Agent和Mcp网关交互
+- [ ] 抽象出Model类用于管理模型
 
 
 

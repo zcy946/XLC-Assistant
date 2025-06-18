@@ -14,6 +14,9 @@
 
 constexpr const char *FILE_MCPSERVERS = "./config/MCPServers.json";
 constexpr const char *FILE_AGENTS = "./config/Agents.json";
+constexpr const char *BASE_URL = "https://api.deepseek.com";
+constexpr const char *ENDPOINT = "/v1/chat/completions";
+constexpr const char *API_KEY = "sk-67827bd147dc43afbb9a982349c4be31";
 
 /**
  * 获取默认字体
