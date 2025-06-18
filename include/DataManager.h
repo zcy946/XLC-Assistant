@@ -6,6 +6,7 @@
 #include <global.h>
 #include <QObject>
 #include "Logger.hpp"
+#include <mcp_message.h>
 
 struct McpServer;
 struct Agent;
@@ -407,12 +408,14 @@ struct Conversation
     QString summary; // 对话摘要
     QDateTime createdTime;
     QDateTime updatedTime;
+    mcp::json messages;
 
     Conversation()
         : uuid(generateUuid()),
           summary(),
           createdTime(QDateTime::currentDateTime()),
-          updatedTime(QDateTime::currentDateTime())
+          updatedTime(QDateTime::currentDateTime()),
+          messages(mcp::json())
     {
     }
     Conversation(const QString &summary,
@@ -421,7 +424,8 @@ struct Conversation
         : uuid(generateUuid()),
           summary(summary),
           createdTime(createdTime),
-          updatedTime(updatedTime)
+          updatedTime(updatedTime),
+          messages(mcp::json())
     {
     }
 };
