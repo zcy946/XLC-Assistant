@@ -31,7 +31,7 @@ public:
 
     mcp::json getToolsForServer(const QString &serverId);
 
-    mcp::json getToolsForServers(const QList<QString> &serverIds);
+    mcp::json getToolsForServers(const QVector<QString> &serverIds);
 
     // 获取所有已注册服务器提供的全部工具列表
     mcp::json getAllAvailableTools();
@@ -48,7 +48,7 @@ public slots:
     void callTool(const QString &sessionId, const QString &toolName, const mcp::json &params);
 
 private:
-    QMap<QString, std::unique_ptr<RegisteredServer>> m_servers;
+    QMap<QString, std::shared_ptr<RegisteredServer>> m_servers;
     QMutex m_mutex;
 };
 

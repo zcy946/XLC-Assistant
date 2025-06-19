@@ -7,21 +7,20 @@ ModelService::ModelService(QObject *parent)
 {
 }
 
-void ModelService::processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, int max_retries = 3)
+void ModelService::processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, const mcp::json &tools, int max_retries)
 {
     // 使用QtConcurrent::run来在后台线程执行耗时操作
     QtConcurrent::run(
-        [this, conversationUuid, agent, messages, max_retries]()
+        [this, conversationUuid, agent, messages, tools, max_retries]()
         {
             nlohmann::json body =
                 {
                     {"model", agent->modelName.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
-                    {"messages", messages} /*, // TODO 获取tools
-                     {"tools", tools},
-                     {"tool_choice", "auto"}*/
-                };
+                    {"messages", messages},
+                    {"tools", tools},
+                    {"tool_choice", "auto"}};
             m_client = std::make_unique<httplib::Client>(BASE_URL);
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(API_KEY)}});
             m_client->set_connection_timeout(10);
@@ -40,7 +39,12 @@ void ModelService::processRequest(const QString &conversationUuid, const std::sh
 
                         // 将 nlohmann::json 转换为 QString 以便信号传递
                         QString responseStr = QString::fromStdString(message.dump());
-                        emit responseReady(conversationUuid, responseStr);
+                        emit responseReady(conversationUuid, responseStr); 
+                        /**
+                         * TODO 
+                         * 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数
+                         *  - 如果不需要则break - 存储记录
+                         *  - 如果需要则调用所有工具 - 存储各个记录 - (m_maxMcpToolChainCall - 1) - 继续调用processRequest*/ 
                         return;
                     }
                     catch (const std::exception &e)

@@ -25,7 +25,7 @@ public:
      * @param messages 要发送消息的 JSON 对象.
      * @param max_retries 失败时最大重试次数（默认为3）.
      */
-    void processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, int max_retries = 3);
+    void processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, const mcp::json &tools,int max_retries = 3);
 
 private:
     /**

@@ -7,12 +7,12 @@ mcp::json MCPGateway::getToolsForServer(const QString &serverId)
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverId))
     {
-        return m_servers[serverId]->available_tools;
+        return m_servers[serverId]->available_tools;    
     }
     return mcp::json::array(); // 返回空数组
 }
 
-mcp::json MCPGateway::getToolsForServers(const QList<QString> &serverIds)
+mcp::json MCPGateway::getToolsForServers(const QVector<QString> &serverIds)
 {
     QMutexLocker locker(&m_mutex);
     mcp::json merged_tools = mcp::json::array();
@@ -55,7 +55,7 @@ void MCPGateway::registerServer(const QString &serverId, const QString &host, in
     auto client = std::make_unique<mcp::sse_client>(host.toStdString(), port);
     if (client->initialize("GatewayClient", "0.1.0"))
     {
-        auto mcpServer = std::make_unique<RegisteredServer>();
+        auto mcpServer = std::make_shared<RegisteredServer>();
         mcpServer->client = std::move(client);
         // 获取并缓存这个服务器的工具
         for (const auto &tool : mcpServer->client->get_tools())
@@ -65,7 +65,7 @@ void MCPGateway::registerServer(const QString &serverId, const QString &host, in
                 {"function", {{"name", tool.name}, {"description", tool.description}, {"parameters", {{"type", "object"}, {"properties", tool.parameters_schema["properties"]}, {"required", tool.parameters_schema["required"]}}}}}};
             mcpServer->available_tools.push_back(convertedTool);
         }
-        m_servers.insert(serverId, std::move(mcpServer));
+        m_servers.insert(serverId, mcpServer);
         emit serverRegistered(serverId); // 通知外界，例如让ChatManager刷新可用工具列表
     }
     else
