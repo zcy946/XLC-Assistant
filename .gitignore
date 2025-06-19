@@ -11,3 +11,7 @@ output/logs/
 test.md
 output/libcrypto-3-x64.dll
 output/libssl-3-x64.dll
+output/fmt.dll
+cmake-build-debug/
+cmake-build-release/
+.idea/
