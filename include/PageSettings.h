@@ -126,6 +126,9 @@ private:
 class WidgetAgentInfo : public BaseWidget
 {
     Q_OBJECT
+private Q_SLOTS:
+    void slot_onLLMsLoaded(bool success);
+
 public:
     explicit WidgetAgentInfo(QWidget *parent = nullptr);
     ~WidgetAgentInfo() = default;
@@ -150,7 +153,7 @@ private:
     QLineEdit *m_lineEditName;
     QSpinBox *m_spinBoxChildren;
     QPlainTextEdit *m_plainTextEditDescription;
-    QLineEdit *m_lineEditModelUuid;
+    QComboBox *m_comboBoxLLM;
     QSpinBox *m_spinBoxContext;
     QDoubleSpinBox *m_doubleSpinBoxTemperature;
     QDoubleSpinBox *m_doubleSpinBoxTopP;

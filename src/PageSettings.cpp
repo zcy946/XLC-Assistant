@@ -13,10 +13,10 @@ PageSettings::PageSettings(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    // pageSettingsLLM
-    addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsAgent
     addPage("助手设置", new PageSettingsAgent(this));
+    // pageSettingsLLM
+    addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsMcp
     addPage("MCP 服务器", new PageSettingsMcp(this));
     // pageSettingData
@@ -205,6 +205,7 @@ void WidgetLLMInfo::initItems()
             []()
             {
                 LOG_DEBUG("添加新模型");
+                // TODO 添加新模型
             });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
@@ -369,6 +370,7 @@ void PageSettingsAgent::showAgentInfo(const QString &uuid)
 WidgetAgentInfo::WidgetAgentInfo(QWidget *parent)
 {
     initUI();
+    connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &WidgetAgentInfo::slot_onLLMsLoaded);
 }
 
 void WidgetAgentInfo::initWidget()
@@ -390,9 +392,8 @@ void WidgetAgentInfo::initItems()
     // m_plainTextEditDescription
     m_plainTextEditDescription = new QPlainTextEdit(this);
     m_plainTextEditDescription->setPlaceholderText("描述");
-    // m_lineEditModelUuid
-    m_lineEditModelUuid = new QLineEdit(this);
-    m_lineEditModelUuid->setPlaceholderText("模型");
+    // m_comboBoxLLM
+    m_comboBoxLLM = new QComboBox(this);
     // m_spinBoxContext
     m_spinBoxContext = new QSpinBox(this);
     m_spinBoxContext->setRange(0, 9999999);
@@ -450,7 +451,7 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(new QLabel("描述", this), 3, 0);
     gLayout->addWidget(m_plainTextEditDescription, 3, 1);
     gLayout->addWidget(new QLabel("模型", this), 4, 0);
-    gLayout->addWidget(m_lineEditModelUuid, 4, 1);
+    gLayout->addWidget(m_comboBoxLLM, 4, 1);
     gLayout->addWidget(new QLabel("上下文", this), 5, 0);
     gLayout->addWidget(m_spinBoxContext, 5, 1);
     gLayout->addWidget(new QLabel("模型温度", this), 6, 0);
@@ -474,7 +475,16 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     m_lineEditName->setText(agent->name);
     m_spinBoxChildren->setValue(agent->children);
     m_plainTextEditDescription->setPlainText(agent->description);
-    m_lineEditModelUuid->setText(agent->modelUuid);
+    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->modelUuid);
+    if (!llm)
+    {
+        LOG_WARN("不存在的llm: {}", agent->modelUuid);
+        m_comboBoxLLM->setCurrentText("null");
+    }
+    else
+    {
+        m_comboBoxLLM->setCurrentText(llm->modelName);
+    }
     m_spinBoxContext->setValue(agent->context);
     m_doubleSpinBoxTemperature->setValue(agent->temperature);
     m_doubleSpinBoxTopP->setValue(agent->topP);
@@ -502,7 +512,7 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
     agent->name = m_lineEditName->text();
     agent->children = m_spinBoxChildren->value();
     agent->description = m_plainTextEditDescription->toPlainText();
-    agent->modelUuid = m_lineEditModelUuid->text();
+    agent->modelUuid = m_comboBoxLLM->currentData().toString();
     agent->context = m_spinBoxContext->value();
     agent->temperature = m_doubleSpinBoxTemperature->value();
     agent->topP = m_doubleSpinBoxTopP->value();
@@ -517,6 +527,22 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
             agent->mcpServers.append(uuid);
     }
     return agent;
+}
+
+void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
+{
+    QList<std::shared_ptr<LLM>> llms = DataManager::getInstance()->getLLMs();
+    if (llms.count() <= 0)
+        return;
+    std::sort(llms.begin(), llms.end(),
+              [](const std::shared_ptr<LLM> &llm_a, const std::shared_ptr<LLM> &llm_b)
+              {
+                  return llm_a->modelName < llm_b->modelName;
+              });
+    for (const std::shared_ptr<LLM> &llm : llms)
+    {
+        m_comboBoxLLM->addItem(llm->modelName, llm->uuid);
+    }
 }
 
 // PageSettingsMcp
