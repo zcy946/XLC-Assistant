@@ -286,7 +286,7 @@ void DataManager::saveLLMs(const QString &filePath) const
         return;
     }
 
-    LOG_INFO("Successfully saved [{}] LLMs to: [{}]", m_llms.count(), filePath);
+    LOG_INFO("Successfully saved [{}] LLMs to: [{}]", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
 }
 
 void DataManager::saveLLMsAsync(const QString &filePath) const
@@ -475,7 +475,7 @@ void DataManager::saveMcpServers(const QString &filePath) const
         return;
     }
 
-    LOG_INFO("Successfully saved [{}] McpServers to: [{}]", m_mcpServers.count(), filePath);
+    LOG_INFO("Successfully saved [{}] McpServers to: [{}]", m_mcpServers.count(), QFileInfo(filePath).absoluteFilePath());
 }
 
 void DataManager::saveMcpServersAsync(const QString &filePath) const
@@ -657,7 +657,7 @@ void DataManager::DataManager::saveAgents(const QString &filePath) const
         return;
     }
 
-    LOG_INFO("Successfully saved [{}] Agents to: [{}]", m_agents.count(), filePath);
+    LOG_INFO("Successfully saved [{}] Agents to: [{}]", m_agents.count(), QFileInfo(filePath).absoluteFilePath());
 }
 
 void DataManager::saveAgentsAsync(const QString &filePath) const
