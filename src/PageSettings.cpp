@@ -411,6 +411,76 @@ void WidgetAgentInfo::initItems()
     m_plainTextEditSystemPrompt->setPlaceholderText("系统提示词");
     // m_listWidgetMcpServers
     m_listWidgetMcpServers = new QListWidget(this);
+    // 添加右键菜单
+    // 右键点击时会发出 customContextMenuRequested 信号
+    m_listWidgetMcpServers->setContextMenuPolicy(Qt::CustomContextMenu);
+    // m_contextMenu
+    m_contextMenu = new QMenu(m_listWidgetMcpServers);
+    QAction *addAction = new QAction("添加", m_listWidgetMcpServers);
+    QAction *deleteAction = new QAction("删除", m_listWidgetMcpServers);
+    m_contextMenu->addAction(addAction);
+    m_contextMenu->addAction(deleteAction);
+    connect(m_listWidgetMcpServers, &QListWidget::customContextMenuRequested, this,
+            [this, deleteAction](const QPoint &pos)
+            {
+                QListWidgetItem *rightClickedItem = m_listWidgetMcpServers->itemAt(pos);
+                if (rightClickedItem)
+                {
+                    deleteAction->setEnabled(true);
+                }
+                else
+                {
+                    deleteAction->setEnabled(false);
+                }
+                m_contextMenu->exec(m_listWidgetMcpServers->mapToGlobal(pos));
+            });
+    connect(addAction, &QAction::triggered, this,
+            [this]()
+            {
+                LOG_DEBUG("Agent[{}]: 尝试添加mcp服务器", m_lineEditUuid->text());
+                std::shared_ptr<QVector<QString>> uuidsMcpServer = std::make_shared<QVector<QString>>();
+                for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
+                {
+                    QListWidgetItem *item = m_listWidgetMcpServers->item(i);
+                    if (item)
+                    {
+                        uuidsMcpServer->append(item->data(Qt::UserRole).toString());
+                    }
+                }
+                DialogAddMcpServer *dialog = new DialogAddMcpServer(uuidsMcpServer, this);
+                connect(dialog, &DialogAddMcpServer::finished, this,
+                        [this, dialog, uuidsMcpServer](int result)
+                        {
+                            if (result == QDialog::Accepted)
+                            {
+                                m_listWidgetMcpServers->clear();
+                                for (QString uuid : *uuidsMcpServer)
+                                {
+                                    const std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
+                                    if (!mcpServer)
+                                        continue;
+                                    QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+                                    item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+                                    m_listWidgetMcpServers->addItem(item);
+                                }
+                                LOG_TRACE("更新mcp服务器列表");
+                            }
+                        });
+                dialog->exec();
+            });
+    connect(deleteAction, &QAction::triggered, this,
+            [this]()
+            {
+                // 删除当前选中项
+                QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
+                if (selectedItem)
+                {
+                    LOG_DEBUG("Agent[{}]: 删除已挂载mcp服务器: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    int row = m_listWidgetMcpServers->row(selectedItem);
+                    delete m_listWidgetMcpServers->takeItem(row);
+                }
+            });
+
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
     connect(m_pushButtonReset, &QPushButton::clicked, this,
@@ -543,6 +613,90 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
     {
         m_comboBoxLLM->addItem(llm->modelName, llm->uuid);
     }
+}
+
+// DialogAddMcpServer
+DialogAddMcpServer::DialogAddMcpServer(std::shared_ptr<QVector<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
+{
+    initUI();
+}
+
+void DialogAddMcpServer::initWidget()
+{
+    setWindowTitle("挂载Mcp服务器");
+    resize(400, 300);
+}
+
+void DialogAddMcpServer::initItems()
+{
+    // m_listWidgetMcpServers
+    m_listWidgetMcpServers = new QListWidget(this);
+    for (const std::shared_ptr<McpServer> &mcpServer : DataManager::getInstance()->getMcpServers())
+    {
+        QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+        item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+        if (m_uuidsMcpServer->contains(mcpServer->uuid))
+        {
+            item->setCheckState(Qt::Checked);
+        }
+        else
+        {
+            item->setCheckState(Qt::Unchecked);
+        }
+        m_listWidgetMcpServers->addItem(item);
+    }
+    m_listWidgetMcpServers->sortItems();
+    connect(m_listWidgetMcpServers, &QListWidget::itemChanged, this,
+            [this](QListWidgetItem *item)
+            {
+                const QString uuidMcpServer = item->data(Qt::UserRole).toString();
+                if (item->checkState() == Qt::Checked)
+                {
+                    if (m_uuidsMcpServer->contains(uuidMcpServer))
+                        return;
+                    m_uuidsMcpServer->append(uuidMcpServer);
+                    LOG_TRACE("挂载mcp服务器: {}", uuidMcpServer);
+                }
+                else if (item->checkState() == Qt::Unchecked)
+                {
+                    if (m_uuidsMcpServer->contains(uuidMcpServer))
+                    {
+                        m_uuidsMcpServer->removeAll(uuidMcpServer);
+                        LOG_TRACE("取消挂载mcp服务器: {}", uuidMcpServer);
+                    }
+                }
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this,
+            [this]()
+            {
+                Q_EMIT accept();
+            });
+    // m_pushButtonCancel
+    m_pushButtonCancel = new QPushButton("取消", this);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddMcpServer::reject);
+}
+
+void DialogAddMcpServer::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    hLayoutButtons->addWidget(m_pushButtonCancel);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(m_listWidgetMcpServers);
+    vLayout->addLayout(hLayoutButtons);
+}
+
+void DialogAddMcpServer::initUI()
+{
+    initWidget();
+    initItems();
+    initLayout();
 }
 
 // PageSettingsMcp
@@ -838,6 +992,7 @@ PageSettingsData::PageSettingsData(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
+    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedLLMs, this, &PageSettingsData::slot_onFilePathChangedLLMs);
     connect(DataManager::getInstance(), &DataManager::sig_filePathChangedAgents, this, &PageSettingsData::slot_onFilePathChangedAgents);
     connect(DataManager::getInstance(), &DataManager::sig_filePathChangedMcpServers, this, &PageSettingsData::slot_onFilePathChangedMcpServers);
 }
@@ -848,6 +1003,21 @@ void PageSettingsData::initWidget()
 
 void PageSettingsData::initItems()
 {
+    // m_lineEditFilePathLLMs
+    m_lineEditFilePathLLMs = new QLineEdit(this);
+    m_lineEditFilePathLLMs->setText(QFileInfo(DataManager::getInstance()->getFilePathLLMs()).absoluteFilePath());
+    // m_pushButtonSelectFileLLMs
+    m_pushButtonSelectFileLLMs = new QPushButton("选择", this);
+    connect(m_pushButtonSelectFileLLMs, &QPushButton::clicked, this,
+            [this]()
+            {
+                QString fileName = QFileDialog::getOpenFileName(this, "选择 LLMs 文件", QString(), "JSON Files (*.json);;All Files (*)");
+                if (!fileName.isEmpty())
+                {
+                    DataManager::getInstance()->setFilePathLLMs(fileName);
+                    LOG_DEBUG("设置llms文件路径为: {}", fileName);
+                }
+            });
     // m_lineEditFilePathAgents
     m_lineEditFilePathAgents = new QLineEdit(this);
     m_lineEditFilePathAgents->setText(QFileInfo(DataManager::getInstance()->getFilePathAgents()).absoluteFilePath());
@@ -884,12 +1054,15 @@ void PageSettingsData::initLayout()
 {
     // gLayoutStorage
     QGridLayout *gLayoutStorage = new QGridLayout();
-    gLayoutStorage->addWidget(new QLabel("Agents", this), 0, 0);
-    gLayoutStorage->addWidget(m_lineEditFilePathAgents, 0, 1);
-    gLayoutStorage->addWidget(m_pushButtonSelectFileAgents, 0, 2);
-    gLayoutStorage->addWidget(new QLabel("McpServers", this), 1, 0);
-    gLayoutStorage->addWidget(m_lineEditFilePathMcpServers, 1, 1);
-    gLayoutStorage->addWidget(m_pushButtonSelectFileMcpServers, 1, 2);
+    gLayoutStorage->addWidget(new QLabel("LLMs", this), 0, 0);
+    gLayoutStorage->addWidget(m_lineEditFilePathLLMs, 0, 1);
+    gLayoutStorage->addWidget(m_pushButtonSelectFileLLMs, 0, 2);
+    gLayoutStorage->addWidget(new QLabel("Agents", this), 1, 0);
+    gLayoutStorage->addWidget(m_lineEditFilePathAgents, 1, 1);
+    gLayoutStorage->addWidget(m_pushButtonSelectFileAgents, 1, 2);
+    gLayoutStorage->addWidget(new QLabel("McpServers", this), 2, 0);
+    gLayoutStorage->addWidget(m_lineEditFilePathMcpServers, 2, 1);
+    gLayoutStorage->addWidget(m_pushButtonSelectFileMcpServers, 2, 2);
     // groupBoxStorage
     QGroupBox *groupBoxStorage = new QGroupBox("存储设置", this);
     groupBoxStorage->setLayout(gLayoutStorage);
@@ -897,6 +1070,13 @@ void PageSettingsData::initLayout()
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->addWidget(groupBoxStorage);
     vLayout->addStretch();
+}
+
+void PageSettingsData::slot_onFilePathChangedLLMs(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+    m_lineEditFilePathLLMs->setText(QFileInfo(filePath).absoluteFilePath());
 }
 
 void PageSettingsData::slot_onFilePathChangedAgents(const QString &filePath)

@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QLabel>
+#include <QMenu>
+#include <QDialog>
 
 class PageSettingsLLM;
 class PageSettingsAgent;
@@ -123,6 +125,7 @@ private:
     void showAgentInfo(const QString &uuid);
 };
 
+class DialogAddMcpServer;
 class WidgetAgentInfo : public BaseWidget
 {
     Q_OBJECT
@@ -160,8 +163,31 @@ private:
     QSpinBox *m_spinBoxMaxTokens;
     QPlainTextEdit *m_plainTextEditSystemPrompt;
     QListWidget *m_listWidgetMcpServers;
+    QMenu *m_contextMenu;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
+};
+
+class DialogAddMcpServer : public QDialog
+{
+    Q_OBJECT
+public:
+    DialogAddMcpServer(std::shared_ptr<QVector<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogAddMcpServer() = default;
+
+protected:
+    virtual void initWidget();
+    virtual void initItems();
+    virtual void initLayout();
+
+private:
+    void initUI();
+
+private:
+    std::shared_ptr<QVector<QString>> m_uuidsMcpServer;
+    QListWidget *m_listWidgetMcpServers;
+    QPushButton *m_pushButtonSave;
+    QPushButton *m_pushButtonCancel;
 };
 
 class WidgetMcpServerInfo;
@@ -237,6 +263,7 @@ class PageSettingsData : public BaseWidget
 {
     Q_OBJECT
 private Q_SLOTS:
+    void slot_onFilePathChangedLLMs(const QString &filePath);
     void slot_onFilePathChangedAgents(const QString &filePath);
     void slot_onFilePathChangedMcpServers(const QString &filePath);
 
@@ -249,6 +276,8 @@ protected:
     void initLayout() override;
 
 private:
+    QLineEdit *m_lineEditFilePathLLMs;
+    QPushButton *m_pushButtonSelectFileLLMs;
     QLineEdit *m_lineEditFilePathAgents;
     QPushButton *m_pushButtonSelectFileAgents;
     QLineEdit *m_lineEditFilePathMcpServers;

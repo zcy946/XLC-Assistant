@@ -24,7 +24,6 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 # 查找包
 set(MCP_DIR "E:/github/1MyFork/cpp-mcp/install/cmake")
 find_package(spdlog CONFIG REQUIRED)
@@ -42,10 +41,10 @@ file(GLOB_RECURSE HEADERS
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 
 add_executable(${PROJECT_NAME}
-
     ${SRC}
     ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/res/resources.qrc
+
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_example.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/agent_without_mcp_server.cpp
     # ${CMAKE_CURRENT_SOURCE_DIR}/example/justLLM.cpp
@@ -75,4 +74,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/output
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/output
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/output
+)
+
+add_executable(dev_test
+    ${CMAKE_CURRENT_SOURCE_DIR}/test.cpp
+)
+
+target_link_libraries(dev_test PRIVATE
+    spdlog::spdlog_header_only
+    Qt5::Core
+    Qt5::Widgets
+    Qt5::Gui
+    Qt5::Svg
+    Qt5::Concurrent
+    MCP::mcp
 )

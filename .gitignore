@@ -15,3 +15,4 @@ output/fmt.dll
 cmake-build-debug/
 cmake-build-release/
 .idea/
+test.cpp

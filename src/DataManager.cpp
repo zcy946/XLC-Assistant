@@ -325,12 +325,11 @@ QList<std::shared_ptr<LLM>> DataManager::getLLMs() const
 
 void DataManager::setFilePathLLMs(const QString &filePath)
 {
+    
     if (filePath.isEmpty())
         return;
     m_filePathLLMs = filePath;
-    // 假设有 loadLLMsAsync，如果没有则直接 loadLLMs
-    QtConcurrent::run([this, filePath]()
-                      { this->loadLLMs(filePath); });
+    loadLLMsAsync();
     Q_EMIT sig_filePathChangedLLMs(filePath);
 }
 
