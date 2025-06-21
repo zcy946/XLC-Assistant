@@ -2,21 +2,724 @@
     {
         "children": 2,
         "context": 1024,
-        "description": "Provides advice on pet adoption and care.",
+        "description": "Provides advice on starting a small business.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Startup Advisor Agent",
+        "systemPrompt": "You are a startup advisor. Guide new business owners.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "w7x8y9z0-a1b2-3456-7890-abcdef567907"
+    },
+    {
+        "children": 3,
+        "context": 1024,
+        "description": "Solves mathematical problems and equations.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Math Solver Agent",
+        "systemPrompt": "You are a math expert. Solve problems step by step.",
+        "temperature": 0.2,
+        "topP": 0.95,
+        "uuid": "f7a8b9c0-d1e2-3456-7890-abcdef123456"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on digital art and design tools.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Digital Art Agent",
+        "systemPrompt": "You are a digital artist. Advise on art tools.",
+        "temperature": 0.8,
+        "topP": 0.9,
+        "uuid": "a7b8c9d0-e1f2-3456-7890-abcdef567917"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Assists with academic research and citations.",
         "maxTokens": 512,
         "mcpServers": [
             "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Research Assistant Agent",
+        "systemPrompt": "You are a research assistant. Help with academic research.",
+        "temperature": 0.4,
+        "topP": 0.8,
+        "uuid": "q1r2s3t4-u5v6-7890-1234-abcdef567901"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on healthy eating and nutrition.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Nutrition Advisor Agent",
+        "systemPrompt": "You are a nutritionist. Suggest healthy eating habits.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "y9z0a1b2-c3d4-5678-9012-abcdef567909"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with online shopping and product reviews.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Online Shopping Agent",
+        "systemPrompt": "You are an online shopping assistant. Review products.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "f6a7b8c9-d0e1-2345-6789-abcdef567916"
+    },
+    {
+        "children": 2,
+        "context": 2048,
+        "description": "Provides financial information and budgeting tips.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "c5d6e7f8-091a-1234-5678-23456789abcd"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Finance Advisor Agent",
+        "systemPrompt": "You are a finance advisor. Provide general financial information.",
+        "temperature": 0.3,
+        "topP": 0.8,
+        "uuid": "d9e0f1a2-b3c4-5678-9012-abcdef345679"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Helps plan trips and itineraries.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Travel Planner Agent",
+        "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "f5a6b7c8-d9e0-1234-5678-abcdef901234"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides general medical information.",
+        "maxTokens": 512,
+        "mcpServers": [
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Medical Info Agent",
+        "systemPrompt": "You are a medical information provider. Do not give medical advice.",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "uuid": "e4f5a6b7-c8d9-0123-4567-abcdef890123"
+    },
+    {
+        "children": 1,
+        "context": 1024,
+        "description": "Provides gardening tips and plant care advice.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "b4c5d6e7-f809-0123-4567-123456789abc"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Gardening Advisor Agent",
+        "systemPrompt": "You are a gardening expert. Give plant care tips.",
+        "temperature": 0.6,
+        "topP": 0.85,
+        "uuid": "g1h2i3j4-k5l6-7890-1234-abcdef567891"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on volunteering and community service.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "d0e1f2a3-b4c5-6789-0123-def012345678"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Volunteer Advisor Agent",
+        "systemPrompt": "You are a volunteer advisor. Suggest community service ideas.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "a1b2c3d4-e5f6-7890-1234-abcdef567923"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Generates creative stories and poems.",
+        "maxTokens": 2048,
+        "mcpServers": [
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
+        ],
+        "modelUuid": "gpt-4o",
+        "name": "Creative Writing Agent",
+        "systemPrompt": "You are a creative writer. Write engaging stories.",
+        "temperature": 0.9,
+        "topP": 0.98,
+        "uuid": "c2d3e4f5-a6b7-8901-2345-abcdef678901"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with genealogy and family history research.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Genealogy Agent",
+        "systemPrompt": "You are a genealogy expert. Help trace family history.",
+        "temperature": 0.4,
+        "topP": 0.9,
+        "uuid": "v6w7x8y9-z0a1-2345-6789-abcdef567906"
+    },
+    {
+        "children": 2,
+        "context": 2048,
+        "description": "Helps with home repair and DIY projects.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "e7f8091a-2b3c-3456-7890-456789abcdef"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Home Repair Agent",
+        "systemPrompt": "You are a DIY expert. Guide home repairs.",
+        "temperature": 0.5,
+        "topP": 0.9,
+        "uuid": "h2i3j4k5-l6m7-8901-2345-abcdef567892"
+    },
+    {
+        "children": 3,
+        "context": 1024,
+        "description": "Helps find products and compare prices.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "67875264-bff1-468e-9e67-acfe2776c72d"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Shopping Assistant Agent",
+        "systemPrompt": "You are a shopping assistant. Find the best deals.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "e0f1a2b3-c4d5-6789-0123-abcdef456790"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with learning programming languages.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Programming Tutor Agent",
+        "systemPrompt": "You are a programming tutor. Teach coding basics.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "d0e1f2a3-b4c5-6789-0123-abcdef567920"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Helps with personal finance and investment basics.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Investment Advisor Agent",
+        "systemPrompt": "You are an investment advisor. Explain investment basics.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "a1b2c3d4-e5f6-7890-1234-abcdef567911"
+    },
+    {
+        "children": 456,
+        "context": 123,
+        "description": "保存agent测试666",
+        "maxTokens": 1234,
+        "mcpServers": [
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01"
+        ],
+        "modelUuid": "异步保存测试",
+        "name": "异步保存测试",
+        "systemPrompt": "异步保存测试",
+        "temperature": 1,
+        "topP": 1,
+        "uuid": "a012dbb0-efed-4bd8-91a1-f81f6e6fbd28"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with writing and editing emails.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
             "b4c5d6e7-f809-0123-4567-123456789abc",
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "e7f8091a-2b3c-3456-7890-456789abcdef"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Email Assistant Agent",
+        "systemPrompt": "You are an email assistant. Help write and edit emails.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "d4e5f6a7-b8c9-0123-4567-abcdef567914"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with learning musical instruments.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Music Tutor Agent",
+        "systemPrompt": "You are a music tutor. Help learn instruments.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef567918"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with art critique and appreciation.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Art Critic Agent",
+        "systemPrompt": "You are an art critic. Provide feedback on artworks.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "z0a1b2c3-d4e5-6789-0123-abcdef567910"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on remote work and productivity.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Remote Work Agent",
+        "systemPrompt": "You are a remote work advisor. Suggest productivity tips.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "e1f2a3b4-c5d6-7890-1234-abcdef567921"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with digital marketing strategies.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Marketing Advisor Agent",
+        "systemPrompt": "You are a marketing advisor. Suggest digital marketing strategies.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "n8o9p0q1-r2s3-4567-8901-abcdef567898"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with public speaking and presentations.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Public Speaking Coach Agent",
+        "systemPrompt": "You are a public speaking coach. Help with presentations.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "t4u5v6w7-x8y9-0123-4567-abcdef567904"
+    },
+    {
+        "children": 4,
+        "context": 2048,
+        "description": "Translates text between multiple languages.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Translation Agent",
+        "systemPrompt": "You are a professional translator. Translate accurately.",
+        "temperature": 0.3,
+        "topP": 0.85,
+        "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345678"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with homework and study questions.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "e7f8091a-2b3c-3456-7890-456789abcdef",
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "67875264-bff1-468e-9e67-acfe2776c72d"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Homework Helper Agent",
+        "systemPrompt": "You are a tutor. Help students with their homework.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "c4d5e6f7-a8b9-0123-4567-abcdef890125"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Suggests movies based on user preferences.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Movie Recommendation Agent",
+        "systemPrompt": "You are a movie expert. Recommend movies.",
+        "temperature": 0.7,
+        "topP": 0.95,
+        "uuid": "a2b3c4d5-e6f7-8901-2345-abcdef678913"
+    },
+    {
+        "children": 1,
+        "context": 512,
+        "description": "Provides weather forecasts and updates.",
+        "maxTokens": 256,
+        "mcpServers": [
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Weather Info Agent",
+        "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
+        "temperature": 0.2,
+        "topP": 0.8,
+        "uuid": "f1a2b3c4-d5e6-7890-1234-abcdef567892"
+    },
+    {
+        "children": 2,
+        "context": 2048,
+        "description": "Helps write resumes and cover letters.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Job Application Agent",
+        "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "d5e6f7a8-b9c0-1234-5678-abcdef901236"
+    },
+    {
+        "children": 2,
+        "context": 4096,
+        "description": "Summarizes long documents into concise overviews.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Summarization Agent",
+        "systemPrompt": "You are an expert at summarizing text.",
+        "temperature": 0.4,
+        "topP": 0.9,
+        "uuid": "b1c2d3e4-f5a6-7890-1234-abcdef567890"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Helps organize events and manage guest lists.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "e7f8091a-2b3c-3456-7890-456789abcdef"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Event Planner Agent",
+        "systemPrompt": "You are an event planner. Organize events efficiently.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "e6f7a8b9-c0d1-2345-6789-abcdef012347"
+    },
+    {
+        "children": 5,
+        "context": 2048,
+        "description": "A versatile agent for general conversations.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        ],
+        "modelUuid": "gpt-4o",
+        "name": "General Chat Agent",
+        "systemPrompt": "You are a helpful AI assistant.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Helps with interior design and home decor.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "b4c5d6e7-f809-0123-4567-123456789abc",
             "1a2b3c4d-5e6f-6789-0123-789abcdef012"
         ],
         "modelUuid": "gpt-3.5-turbo",
-        "name": "Pet Adoption Agent",
-        "systemPrompt": "You are a pet adoption advisor. Guide on adopting pets.",
-        "temperature": 0.7,
+        "name": "Interior Designer Agent",
+        "systemPrompt": "You are an interior designer. Suggest decor ideas.",
+        "temperature": 0.8,
         "topP": 0.9,
-        "uuid": "e5f6a7b8-c9d0-1234-5678-abcdef567915"
+        "uuid": "o9p0q1r2-s3t4-5678-9012-abcdef567899"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Recommends music tracks and playlists.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "d0e1f2a3-b4c5-6789-0123-def012345678",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Music Suggestion Agent",
+        "systemPrompt": "You are a music expert. Suggest songs and playlists.",
+        "temperature": 0.8,
+        "topP": 0.9,
+        "uuid": "b3c4d5e6-f7a8-9012-3456-abcdef789014"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Suggests recipes based on ingredients.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "d0e1f2a3-b4c5-6789-0123-def012345678"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Recipe Generator Agent",
+        "systemPrompt": "You are a chef. Suggest creative recipes.",
+        "temperature": 0.8,
+        "topP": 0.95,
+        "uuid": "a6b7c8d9-e0f1-2345-6789-abcdef012345"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Helps with time management and productivity.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Productivity Coach Agent",
+        "systemPrompt": "You are a productivity coach. Suggest time management tips.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "s3t4u5v6-w7x8-9012-3456-abcdef567903"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on home organization and decluttering.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "d0e1f2a3-b4c5-6789-0123-def012345678"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Home Organizer Agent",
+        "systemPrompt": "You are a home organizer. Suggest decluttering tips.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "c3d4e5f6-a7b8-9012-3456-abcdef567913"
     },
     {
         "children": 1,
@@ -56,24 +759,166 @@
         "uuid": "p0q1r2s3-t4u5-6789-0123-abcdef567900"
     },
     {
+        "children": 1,
+        "context": 2048,
+        "description": "Assists with learning photography techniques.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "d6e7f809-1a2b-2345-6789-3456789abcde"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Photography Tutor Agent",
+        "systemPrompt": "You are a photography tutor. Teach photo techniques.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "f8091a2b-3c4d-4567-8901-abcdef567922"
+    },
+    {
         "children": 2,
         "context": 1024,
-        "description": "Suggests recipes based on ingredients.",
+        "description": "Helps with language learning and practice.",
         "maxTokens": 512,
         "mcpServers": [
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "d0e1f2a3-b4c5-6789-0123-def012345678"
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "c5d6e7f8-091a-1234-5678-23456789abcd"
         ],
         "modelUuid": "gpt-3.5-turbo",
-        "name": "Recipe Generator Agent",
-        "systemPrompt": "You are a chef. Suggest creative recipes.",
-        "temperature": 0.8,
-        "topP": 0.95,
-        "uuid": "a6b7c8d9-e0f1-2345-6789-abcdef012345"
+        "name": "Language Tutor Agent",
+        "systemPrompt": "You are a language tutor. Help users practice languages.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "k5l6m7n8-o9p0-1234-5678-abcdef567895"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with learning chess and strategy games.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "d6e7f809-1a2b-2345-6789-3456789abcde"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Chess Tutor Agent",
+        "systemPrompt": "You are a chess tutor. Teach chess strategies.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef567924"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on pet adoption and care.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
+            "b4c5d6e7-f809-0123-4567-123456789abc",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Pet Adoption Agent",
+        "systemPrompt": "You are a pet adoption advisor. Guide on adopting pets.",
+        "temperature": 0.7,
+        "topP": 0.9,
+        "uuid": "e5f6a7b8-c9d0-1234-5678-abcdef567915"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides fitness routines and advice.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Fitness Coach Agent",
+        "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
+        "temperature": 0.5,
+        "topP": 0.9,
+        "uuid": "b7c8d9e0-f1a2-3456-7890-abcdef123458"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides car maintenance and troubleshooting advice.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "d6e7f809-1a2b-2345-6789-3456789abcde",
+            "67875264-bff1-468e-9e67-acfe2776c72d",
+            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "c5d6e7f8-091a-1234-5678-23456789abcd",
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Car Maintenance Agent",
+        "systemPrompt": "You are an auto mechanic. Help with car issues.",
+        "temperature": 0.6,
+        "topP": 0.9,
+        "uuid": "m7n8o9p0-q1r2-3456-7890-abcdef567897"
+    },
+    {
+        "children": 1,
+        "context": 2048,
+        "description": "Provides legal information and document drafting.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
+            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
+            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
+            "f8091a2b-3c4d-4567-8901-56789abcdef0",
+            "67875264-bff1-468e-9e67-acfe2776c72d"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Legal Advisor Agent",
+        "systemPrompt": "You are a legal advisor. Provide information, not advice.",
+        "temperature": 0.3,
+        "topP": 0.85,
+        "uuid": "d3e4f5a6-b7c8-9012-3456-abcdef789012"
+    },
+    {
+        "children": 3,
+        "context": 2048,
+        "description": "Assists with resume review and interview preparation.",
+        "maxTokens": 1024,
+        "mcpServers": [
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
+            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
+            "091a2b3c-4d5e-5678-9012-6789abcdef01",
+            "d0e1f2a3-b4c5-6789-0123-def012345678"
+        ],
+        "modelUuid": "gpt-4",
+        "name": "Career Prep Agent",
+        "systemPrompt": "You are a career coach. Help with resumes and interviews.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "x8y9z0a1-b2c3-4567-8901-abcdef567908"
     },
     {
         "children": 1,
@@ -115,298 +960,24 @@
         "uuid": "i3j4k5l6-m7n8-9012-3456-abcdef567893"
     },
     {
-        "children": 2,
-        "context": 1024,
-        "description": "Helps organize events and manage guest lists.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "e7f8091a-2b3c-3456-7890-456789abcdef"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Event Planner Agent",
-        "systemPrompt": "You are an event planner. Organize events efficiently.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "e6f7a8b9-c0d1-2345-6789-abcdef012347"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides general medical information.",
-        "maxTokens": 512,
-        "mcpServers": [
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Medical Info Agent",
-        "systemPrompt": "You are a medical information provider. Do not give medical advice.",
-        "temperature": 0.2,
-        "topP": 0.8,
-        "uuid": "e4f5a6b7-c8d9-0123-4567-abcdef890123"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Recommends music tracks and playlists.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Music Suggestion Agent",
-        "systemPrompt": "You are a music expert. Suggest songs and playlists.",
-        "temperature": 0.8,
-        "topP": 0.9,
-        "uuid": "b3c4d5e6-f7a8-9012-3456-abcdef789014"
-    },
-    {
-        "children": 2,
-        "context": 2048,
-        "description": "Helps with home repair and DIY projects.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "e7f8091a-2b3c-3456-7890-456789abcdef"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Home Repair Agent",
-        "systemPrompt": "You are a DIY expert. Guide home repairs.",
-        "temperature": 0.5,
-        "topP": 0.9,
-        "uuid": "h2i3j4k5-l6m7-8901-2345-abcdef567892"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on home organization and decluttering.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "d0e1f2a3-b4c5-6789-0123-def012345678"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Home Organizer Agent",
-        "systemPrompt": "You are a home organizer. Suggest decluttering tips.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "c3d4e5f6-a7b8-9012-3456-abcdef567913"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with learning photography techniques.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "d6e7f809-1a2b-2345-6789-3456789abcde"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Photography Tutor Agent",
-        "systemPrompt": "You are a photography tutor. Teach photo techniques.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "f8091a2b-3c4d-4567-8901-abcdef567922"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on eco-friendly travel.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Eco Travel Agent",
-        "systemPrompt": "You are an eco travel advisor. Suggest sustainable travel tips.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "c9d0e1f2-a3b4-5678-9012-abcdef567919"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Suggests movies based on user preferences.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Movie Recommendation Agent",
-        "systemPrompt": "You are a movie expert. Recommend movies.",
-        "temperature": 0.7,
-        "topP": 0.95,
-        "uuid": "a2b3c4d5-e6f7-8901-2345-abcdef678913"
-    },
-    {
         "children": 3,
         "context": 2048,
-        "description": "Assists with public speaking and presentations.",
+        "description": "Assists with digital privacy and security tips.",
         "maxTokens": 1024,
-        "mcpServers": [
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Public Speaking Coach Agent",
-        "systemPrompt": "You are a public speaking coach. Help with presentations.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "t4u5v6w7-x8y9-0123-4567-abcdef567904"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on sustainable living.",
-        "maxTokens": 512,
-        "mcpServers": [
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Sustainability Advisor Agent",
-        "systemPrompt": "You are a sustainability advisor. Suggest eco-friendly practices.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "u5v6w7x8-y9z0-1234-5678-abcdef567905"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with resume review and interview preparation.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "d0e1f2a3-b4c5-6789-0123-def012345678"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Career Prep Agent",
-        "systemPrompt": "You are a career coach. Help with resumes and interviews.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "x8y9z0a1-b2c3-4567-8901-abcdef567908"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on healthy eating and nutrition.",
-        "maxTokens": 512,
         "mcpServers": [
             "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
             "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Nutrition Advisor Agent",
-        "systemPrompt": "You are a nutritionist. Suggest healthy eating habits.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "y9z0a1b2-c3d4-5678-9012-abcdef567909"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Helps with language learning and practice.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "c5d6e7f8-091a-1234-5678-23456789abcd"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Language Tutor Agent",
-        "systemPrompt": "You are a language tutor. Help users practice languages.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "k5l6m7n8-o9p0-1234-5678-abcdef567895"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with online shopping and product reviews.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Online Shopping Agent",
-        "systemPrompt": "You are an online shopping assistant. Review products.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "f6a7b8c9-d0e1-2345-6789-abcdef567916"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides fitness routines and advice.",
-        "maxTokens": 512,
-        "mcpServers": [
             "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012"
+            "d4e5f6a7-b8c9-0123-4567-890abcdef012"
         ],
         "modelUuid": "gpt-4",
-        "name": "Fitness Coach Agent",
-        "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
-        "temperature": 0.5,
+        "name": "Cybersecurity Advisor Agent",
+        "systemPrompt": "You are a cybersecurity advisor. Suggest privacy best practices.",
+        "temperature": 0.4,
         "topP": 0.9,
-        "uuid": "b7c8d9e0-f1a2-3456-7890-abcdef123458"
+        "uuid": "b2c3d4e5-f6a7-8901-2345-abcdef567912"
     },
     {
         "children": 1,
@@ -434,114 +1005,36 @@
     {
         "children": 2,
         "context": 1024,
-        "description": "Provides advice on digital art and design tools.",
+        "description": "Provides advice on sustainable living.",
         "maxTokens": 512,
         "mcpServers": [
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
+        ],
+        "modelUuid": "gpt-3.5-turbo",
+        "name": "Sustainability Advisor Agent",
+        "systemPrompt": "You are a sustainability advisor. Suggest eco-friendly practices.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "u5v6w7x8-y9z0-1234-5678-abcdef567905"
+    },
+    {
+        "children": 2,
+        "context": 1024,
+        "description": "Provides advice on eco-friendly travel.",
+        "maxTokens": 512,
+        "mcpServers": [
+            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
             "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Digital Art Agent",
-        "systemPrompt": "You are a digital artist. Advise on art tools.",
-        "temperature": 0.8,
-        "topP": 0.9,
-        "uuid": "a7b8c9d0-e1f2-3456-7890-abcdef567917"
-    },
-    {
-        "children": 3,
-        "context": 1024,
-        "description": "Solves mathematical problems and equations.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
+            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Math Solver Agent",
-        "systemPrompt": "You are a math expert. Solve problems step by step.",
-        "temperature": 0.2,
-        "topP": 0.95,
-        "uuid": "f7a8b9c0-d1e2-3456-7890-abcdef123456"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with digital marketing strategies.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Marketing Advisor Agent",
-        "systemPrompt": "You are a marketing advisor. Suggest digital marketing strategies.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "n8o9p0q1-r2s3-4567-8901-abcdef567898"
-    },
-    {
-        "children": 2,
-        "context": 2048,
-        "description": "Helps write resumes and cover letters.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Job Application Agent",
-        "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "d5e6f7a8-b9c0-1234-5678-abcdef901236"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Helps with interior design and home decor.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012"
+            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
+            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
         ],
         "modelUuid": "gpt-3.5-turbo",
-        "name": "Interior Designer Agent",
-        "systemPrompt": "You are an interior designer. Suggest decor ideas.",
-        "temperature": 0.8,
-        "topP": 0.9,
-        "uuid": "o9p0q1r2-s3t4-5678-9012-abcdef567899"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with digital privacy and security tips.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Cybersecurity Advisor Agent",
-        "systemPrompt": "You are a cybersecurity advisor. Suggest privacy best practices.",
-        "temperature": 0.4,
-        "topP": 0.9,
-        "uuid": "b2c3d4e5-f6a7-8901-2345-abcdef567912"
+        "name": "Eco Travel Agent",
+        "systemPrompt": "You are an eco travel advisor. Suggest sustainable travel tips.",
+        "temperature": 0.5,
+        "topP": 0.85,
+        "uuid": "c9d0e1f2-a3b4-5678-9012-abcdef567919"
     },
     {
         "children": 3,
@@ -560,198 +1053,6 @@
         "temperature": 0.4,
         "topP": 0.9,
         "uuid": "l6m7n8o9-p0q1-2345-6789-abcdef567896"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on starting a small business.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Startup Advisor Agent",
-        "systemPrompt": "You are a startup advisor. Guide new business owners.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "w7x8y9z0-a1b2-3456-7890-abcdef567907"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Provides legal information and document drafting.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "67875264-bff1-468e-9e67-acfe2776c72d"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Legal Advisor Agent",
-        "systemPrompt": "You are a legal advisor. Provide information, not advice.",
-        "temperature": 0.3,
-        "topP": 0.85,
-        "uuid": "d3e4f5a6-b7c8-9012-3456-abcdef789012"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with writing and editing emails.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "e7f8091a-2b3c-3456-7890-456789abcdef"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Email Assistant Agent",
-        "systemPrompt": "You are an email assistant. Help write and edit emails.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "d4e5f6a7-b8c9-0123-4567-abcdef567914"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides car maintenance and troubleshooting advice.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Car Maintenance Agent",
-        "systemPrompt": "You are an auto mechanic. Help with car issues.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "m7n8o9p0-q1r2-3456-7890-abcdef567897"
-    },
-    {
-        "children": 1,
-        "context": 1024,
-        "description": "Provides gardening tips and plant care advice.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "b4c5d6e7-f809-0123-4567-123456789abc"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Gardening Advisor Agent",
-        "systemPrompt": "You are a gardening expert. Give plant care tips.",
-        "temperature": 0.6,
-        "topP": 0.85,
-        "uuid": "g1h2i3j4-k5l6-7890-1234-abcdef567891"
-    },
-    {
-        "children": 5,
-        "context": 2048,
-        "description": "A versatile agent for general conversations.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef"
-        ],
-        "modelUuid": "gpt-4o",
-        "name": "General Chat Agent",
-        "systemPrompt": "You are a helpful AI assistant.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012"
-    },
-    {
-        "children": 4,
-        "context": 2048,
-        "description": "Translates text between multiple languages.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Translation Agent",
-        "systemPrompt": "You are a professional translator. Translate accurately.",
-        "temperature": 0.3,
-        "topP": 0.85,
-        "uuid": "a9b0c1d2-e3f4-5678-9012-abcdef345678"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with learning chess and strategy games.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "d6e7f809-1a2b-2345-6789-3456789abcde"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Chess Tutor Agent",
-        "systemPrompt": "You are a chess tutor. Teach chess strategies.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef567924"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Helps with personal finance and investment basics.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Investment Advisor Agent",
-        "systemPrompt": "You are an investment advisor. Explain investment basics.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "a1b2c3d4-e5f6-7890-1234-abcdef567911"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with genealogy and family history research.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Genealogy Agent",
-        "systemPrompt": "You are a genealogy expert. Help trace family history.",
-        "temperature": 0.4,
-        "topP": 0.9,
-        "uuid": "v6w7x8y9-z0a1-2345-6789-abcdef567906"
     },
     {
         "children": 2,
@@ -776,306 +1077,5 @@
         "temperature": 0.5,
         "topP": 0.8,
         "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
-    },
-    {
-        "children": 2,
-        "context": 2048,
-        "description": "Provides financial information and budgeting tips.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "c5d6e7f8-091a-1234-5678-23456789abcd"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Finance Advisor Agent",
-        "systemPrompt": "You are a finance advisor. Provide general financial information.",
-        "temperature": 0.3,
-        "topP": 0.8,
-        "uuid": "d9e0f1a2-b3c4-5678-9012-abcdef345679"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on remote work and productivity.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "d0e1f2a3-b4c5-6789-0123-def012345678",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Remote Work Agent",
-        "systemPrompt": "You are a remote work advisor. Suggest productivity tips.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "e1f2a3b4-c5d6-7890-1234-abcdef567921"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Generates creative stories and poems.",
-        "maxTokens": 2048,
-        "mcpServers": [
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
-        ],
-        "modelUuid": "gpt-4o",
-        "name": "Creative Writing Agent",
-        "systemPrompt": "You are a creative writer. Write engaging stories.",
-        "temperature": 0.9,
-        "topP": 0.98,
-        "uuid": "c2d3e4f5-a6b7-8901-2345-abcdef678901"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Helps plan trips and itineraries.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Travel Planner Agent",
-        "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "f5a6b7c8-d9e0-1234-5678-abcdef901234"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with art critique and appreciation.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Art Critic Agent",
-        "systemPrompt": "You are an art critic. Provide feedback on artworks.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "z0a1b2c3-d4e5-6789-0123-abcdef567910"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "Assists with learning musical instruments.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Music Tutor Agent",
-        "systemPrompt": "You are a music tutor. Help learn instruments.",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef567918"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with homework and study questions.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "67875264-bff1-468e-9e67-acfe2776c72d"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Homework Helper Agent",
-        "systemPrompt": "You are a tutor. Help students with their homework.",
-        "temperature": 0.5,
-        "topP": 0.85,
-        "uuid": "c4d5e6f7-a8b9-0123-4567-abcdef890125"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Provides advice on volunteering and community service.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "d0e1f2a3-b4c5-6789-0123-def012345678"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Volunteer Advisor Agent",
-        "systemPrompt": "You are a volunteer advisor. Suggest community service ideas.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "a1b2c3d4-e5f6-7890-1234-abcdef567923"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Helps with time management and productivity.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Productivity Coach Agent",
-        "systemPrompt": "You are a productivity coach. Suggest time management tips.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "s3t4u5v6-w7x8-9012-3456-abcdef567903"
-    },
-    {
-        "children": 2,
-        "context": 1024,
-        "description": "Assists with academic research and citations.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "d4e5f6a7-b8c9-0123-4567-890abcdef012",
-            "67875264-bff1-468e-9e67-acfe2776c72d",
-            "c9d0e1f2-a3b4-5678-9012-cdef01234567",
-            "f8091a2b-3c4d-4567-8901-56789abcdef0",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Research Assistant Agent",
-        "systemPrompt": "You are a research assistant. Help with academic research.",
-        "temperature": 0.4,
-        "topP": 0.8,
-        "uuid": "q1r2s3t4-u5v6-7890-1234-abcdef567901"
-    },
-    {
-        "children": 3,
-        "context": 1024,
-        "description": "Helps find products and compare prices.",
-        "maxTokens": 512,
-        "mcpServers": [
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "67875264-bff1-468e-9e67-acfe2776c72d"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Shopping Assistant Agent",
-        "systemPrompt": "You are a shopping assistant. Find the best deals.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "e0f1a2b3-c4d5-6789-0123-abcdef456790"
-    },
-    {
-        "children": 3,
-        "context": 2048,
-        "description": "Assists with learning programming languages.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Programming Tutor Agent",
-        "systemPrompt": "You are a programming tutor. Teach coding basics.",
-        "temperature": 0.6,
-        "topP": 0.9,
-        "uuid": "d0e1f2a3-b4c5-6789-0123-abcdef567920"
-    },
-    {
-        "children": 2,
-        "context": 4096,
-        "description": "Summarizes long documents into concise overviews.",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
-        ],
-        "modelUuid": "gpt-4",
-        "name": "Summarization Agent",
-        "systemPrompt": "You are an expert at summarizing text.",
-        "temperature": 0.4,
-        "topP": 0.9,
-        "uuid": "b1c2d3e4-f5a6-7890-1234-abcdef567890"
-    },
-    {
-        "children": 456,
-        "context": 123,
-        "description": "保存agent测试666",
-        "maxTokens": 1234,
-        "mcpServers": [
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-            "e1f2a3b4-c5d6-7890-1234-ef0123456789",
-            "a7b8c9d0-e1f2-3456-7890-abcdef012345",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "b2c3d4e5-f6a7-8901-2345-67890abcdef0",
-            "e7f8091a-2b3c-3456-7890-456789abcdef",
-            "c5d6e7f8-091a-1234-5678-23456789abcd",
-            "091a2b3c-4d5e-5678-9012-6789abcdef01"
-        ],
-        "modelUuid": "异步保存测试",
-        "name": "异步保存测试",
-        "systemPrompt": "异步保存测试",
-        "temperature": 1,
-        "topP": 1,
-        "uuid": "a012dbb0-efed-4bd8-91a1-f81f6e6fbd28"
-    },
-    {
-        "children": 1,
-        "context": 512,
-        "description": "Provides weather forecasts and updates.",
-        "maxTokens": 256,
-        "mcpServers": [
-            "2b3c4d5e-6f70-7890-1234-89abcdef0123",
-            "b4c5d6e7-f809-0123-4567-123456789abc",
-            "1a2b3c4d-5e6f-6789-0123-789abcdef012",
-            "a3b4c5d6-e7f8-9012-3456-0123456789ab",
-            "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
-            "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
-            "d6e7f809-1a2b-2345-6789-3456789abcde",
-            "f2a3b4c5-d6e7-8901-2345-f0123456789a"
-        ],
-        "modelUuid": "gpt-3.5-turbo",
-        "name": "Weather Info Agent",
-        "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
-        "temperature": 0.2,
-        "topP": 0.8,
-        "uuid": "f1a2b3c4-d5e6-7890-1234-abcdef567892"
     }
 ]
