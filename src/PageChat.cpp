@@ -25,8 +25,8 @@ void PageChat::initItems()
             [](QListWidgetItem *item)
             {
                 Agent currentAgent = item->data(Qt::UserRole).value<Agent>();
-                LOG_DEBUG("\n选中agent: \n - uuid: {}\n - name: {}\n - description: {}\n - children: {}\n\t- context: {}\n\t- systemPrompt: {}\n\t- modelName: {}\n\t- temperature: {}\n\t- topP: {}\n\t- maxTokens: {}\n\t- mcpServers_count: {} ",
-                          currentAgent.uuid, currentAgent.name, currentAgent.description, currentAgent.children, currentAgent.context, currentAgent.systemPrompt, currentAgent.modelName, currentAgent.temperature, currentAgent.topP, currentAgent.maxTokens, currentAgent.mcpServers.count());
+                LOG_DEBUG("\n选中agent: \n - uuid: {}\n - name: {}\n - description: {}\n - children: {}\n\t- context: {}\n\t- systemPrompt: {}\n\t- modelUuid: {}\n\t- temperature: {}\n\t- topP: {}\n\t- maxTokens: {}\n\t- mcpServers_count: {} ",
+                          currentAgent.uuid, currentAgent.name, currentAgent.description, currentAgent.children, currentAgent.context, currentAgent.systemPrompt, currentAgent.modelUuid, currentAgent.temperature, currentAgent.topP, currentAgent.maxTokens, currentAgent.mcpServers.count());
             });
     // m_listWidgetHistory
     m_listWidgetHistory = new QListWidget(this);

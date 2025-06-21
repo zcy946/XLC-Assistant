@@ -191,9 +191,9 @@ void WidgetAgentInfo::initItems()
     // m_plainTextEditDescription
     m_plainTextEditDescription = new QPlainTextEdit(this);
     m_plainTextEditDescription->setPlaceholderText("描述");
-    // m_lineEditModelName
-    m_lineEditModelName = new QLineEdit(this);
-    m_lineEditModelName->setPlaceholderText("模型名称");
+    // m_lineEditModelUuid
+    m_lineEditModelUuid = new QLineEdit(this);
+    m_lineEditModelUuid->setPlaceholderText("模型");
     // m_spinBoxContext
     m_spinBoxContext = new QSpinBox(this);
     m_spinBoxContext->setRange(0, 9999999);
@@ -244,8 +244,8 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(m_spinBoxChildren, 2, 1);
     gLayout->addWidget(new QLabel("描述", this), 3, 0);
     gLayout->addWidget(m_plainTextEditDescription, 3, 1);
-    gLayout->addWidget(new QLabel("模型名称", this), 4, 0);
-    gLayout->addWidget(m_lineEditModelName, 4, 1);
+    gLayout->addWidget(new QLabel("模型", this), 4, 0);
+    gLayout->addWidget(m_lineEditModelUuid, 4, 1);
     gLayout->addWidget(new QLabel("上下文", this), 5, 0);
     gLayout->addWidget(m_spinBoxContext, 5, 1);
     gLayout->addWidget(new QLabel("模型温度", this), 6, 0);
@@ -275,7 +275,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     m_lineEditName->setText(agent->name);
     m_spinBoxChildren->setValue(agent->children);
     m_plainTextEditDescription->setPlainText(agent->description);
-    m_lineEditModelName->setText(agent->modelName);
+    m_lineEditModelUuid->setText(agent->modelUuid);
     m_spinBoxContext->setValue(agent->context);
     m_doubleSpinBoxTemperature->setValue(agent->temperature);
     m_doubleSpinBoxTopP->setValue(agent->topP);
@@ -303,7 +303,7 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
     agent->name = m_lineEditName->text();
     agent->children = m_spinBoxChildren->value();
     agent->description = m_plainTextEditDescription->toPlainText();
-    agent->modelName = m_lineEditModelName->text();
+    agent->modelUuid = m_lineEditModelUuid->text();
     agent->context = m_spinBoxContext->value();
     agent->temperature = m_doubleSpinBoxTemperature->value();
     agent->topP = m_doubleSpinBoxTopP->value();

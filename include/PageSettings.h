@@ -90,7 +90,7 @@ private:
     QLineEdit *m_lineEditName;
     QSpinBox *m_spinBoxChildren;
     QPlainTextEdit *m_plainTextEditDescription;
-    QLineEdit *m_lineEditModelName;
+    QLineEdit *m_lineEditModelUuid;
     QSpinBox *m_spinBoxContext;
     QDoubleSpinBox *m_doubleSpinBoxTemperature;
     QDoubleSpinBox *m_doubleSpinBoxTopP;
