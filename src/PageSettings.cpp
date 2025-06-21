@@ -475,10 +475,10 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     m_lineEditName->setText(agent->name);
     m_spinBoxChildren->setValue(agent->children);
     m_plainTextEditDescription->setPlainText(agent->description);
-    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->modelUuid);
+    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
     {
-        LOG_WARN("不存在的llm: {}", agent->modelUuid);
+        LOG_WARN("不存在的llm: {}", agent->llmUUid);
         m_comboBoxLLM->setCurrentText("null");
     }
     else
@@ -512,7 +512,7 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
     agent->name = m_lineEditName->text();
     agent->children = m_spinBoxChildren->value();
     agent->description = m_plainTextEditDescription->toPlainText();
-    agent->modelUuid = m_comboBoxLLM->currentData().toString();
+    agent->llmUUid = m_comboBoxLLM->currentData().toString();
     agent->context = m_spinBoxContext->value();
     agent->temperature = m_doubleSpinBoxTemperature->value();
     agent->topP = m_doubleSpinBoxTopP->value();

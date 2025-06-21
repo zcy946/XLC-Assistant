@@ -286,7 +286,7 @@ struct Agent
     // llm参数
     int context;
     QString systemPrompt;
-    QString modelUuid;
+    QString llmUUid;
     double temperature;
     double topP;
     int maxTokens;
@@ -299,7 +299,7 @@ struct Agent
           children(),
           context(),
           systemPrompt(),
-          modelUuid(),
+          llmUUid(),
           temperature(),
           topP(),
           maxTokens(),
@@ -311,7 +311,7 @@ struct Agent
           int children,
           int context,
           const QString &systemPrompt,
-          const QString &modelUuid,
+          const QString &llmUUid,
           double temperature,
           double topP,
           int maxTokens,
@@ -322,7 +322,7 @@ struct Agent
           children(children),
           context(context),
           systemPrompt(systemPrompt),
-          modelUuid(modelUuid),
+          llmUUid(llmUUid),
           temperature(temperature),
           topP(topP),
           maxTokens(maxTokens),
@@ -340,7 +340,7 @@ struct Agent
         agent.children = jsonObject["children"].toInt();
         agent.context = jsonObject["context"].toInt();
         agent.systemPrompt = jsonObject["systemPrompt"].toString();
-        agent.modelUuid = jsonObject["modelUuid"].toString();
+        agent.llmUUid = jsonObject["llmUUid"].toString();
         agent.temperature = jsonObject["temperature"].toDouble();
         agent.topP = jsonObject["topP"].toDouble();
         agent.maxTokens = jsonObject["maxTokens"].toInt();
@@ -363,7 +363,7 @@ struct Agent
         jsonObject["children"] = children;
         jsonObject["context"] = context;
         jsonObject["systemPrompt"] = systemPrompt;
-        jsonObject["modelUuid"] = modelUuid;
+        jsonObject["llmUUid"] = llmUUid;
         jsonObject["temperature"] = temperature;
         jsonObject["topP"] = topP;
         jsonObject["maxTokens"] = maxTokens;

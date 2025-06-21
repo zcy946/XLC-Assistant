@@ -15,7 +15,7 @@ void ModelService::processRequest(const QString &conversationUuid, const std::sh
         {
             nlohmann::json body =
                 {
-                    {"model", agent->modelUuid.toStdString()},
+                    {"model", agent->llmUUid.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
                     {"messages", messages},

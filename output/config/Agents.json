@@ -14,7 +14,7 @@
             "d6e7f809-1a2b-2345-6789-3456789abcde",
             "a7b8c9d0-e1f2-3456-7890-abcdef012345"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Parenting Advisor Agent",
         "systemPrompt": "You are a parenting expert. Advise on child development.",
         "temperature": 0.5,
@@ -37,7 +37,7 @@
             "d0e1f2a3-b4c5-6789-0123-def012345678",
             "a7b8c9d0-e1f2-3456-7890-abcdef012345"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Public Speaking Coach Agent",
         "systemPrompt": "You are a public speaking coach. Help with presentations.",
         "temperature": 0.7,
@@ -61,7 +61,7 @@
             "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
             "c3d4e5f6-a7b8-9012-3456-7890abcdef01"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Code Generation Agent",
         "systemPrompt": "You are a senior software engineer. Provide concise and correct code.",
         "temperature": 0.5,
@@ -84,7 +84,7 @@
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
             "b4c5d6e7-f809-0123-4567-123456789abc"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Etiquette Coach Agent",
         "systemPrompt": "You are an etiquette coach. Advise on manners.",
         "temperature": 0.3,
@@ -100,7 +100,7 @@
             "b4c5d6e7-f809-0123-4567-123456789abc",
             "1a2b3c4d-5e6f-6789-0123-789abcdef012"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Interior Designer Agent",
         "systemPrompt": "You are an interior designer. Suggest decor ideas.",
         "temperature": 0.8,
@@ -123,7 +123,7 @@
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
             "f2a3b4c5-d6e7-8901-2345-f0123456789a"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Startup Advisor Agent",
         "systemPrompt": "You are a startup advisor. Guide new business owners.",
         "temperature": 0.6,
@@ -145,7 +145,7 @@
             "67875264-bff1-468e-9e67-acfe2776c72d",
             "d6e7f809-1a2b-2345-6789-3456789abcde"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Photography Tutor Agent",
         "systemPrompt": "You are a photography tutor. Teach photo techniques.",
         "temperature": 0.5,
@@ -166,7 +166,7 @@
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
             "67875264-bff1-468e-9e67-acfe2776c72d"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Legal Advisor Agent",
         "systemPrompt": "You are a legal advisor. Provide information, not advice.",
         "temperature": 0.3,
@@ -183,7 +183,7 @@
             "f6a7b8c9-d0e1-2345-6789-0abcdef01234",
             "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Summarization Agent",
         "systemPrompt": "You are an expert at summarizing text.",
         "temperature": 0.4,
@@ -198,7 +198,7 @@
         "mcpServers": [
             "a7b8c9d0-e1f2-3456-7890-abcdef012345"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Travel Planner Agent",
         "systemPrompt": "You are a travel planner. Suggest optimal itineraries.",
         "temperature": 0.6,
@@ -218,7 +218,7 @@
             "c9d0e1f2-a3b4-5678-9012-cdef01234567",
             "d0e1f2a3-b4c5-6789-0123-def012345678"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Recipe Generator Agent",
         "systemPrompt": "You are a chef. Suggest creative recipes.",
         "temperature": 0.8,
@@ -239,7 +239,7 @@
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
             "e7f8091a-2b3c-3456-7890-456789abcdef"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Email Assistant Agent",
         "systemPrompt": "You are an email assistant. Help write and edit emails.",
         "temperature": 0.5,
@@ -255,7 +255,7 @@
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Online Shopping Agent",
         "systemPrompt": "You are an online shopping assistant. Review products.",
         "temperature": 0.6,
@@ -279,7 +279,7 @@
             "c5d6e7f8-091a-1234-5678-23456789abcd",
             "091a2b3c-4d5e-5678-9012-6789abcdef01"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "异步保存测试",
         "systemPrompt": "异步保存测试",
         "temperature": 1,
@@ -294,7 +294,7 @@
         "mcpServers": [
             "c9d0e1f2-a3b4-5678-9012-cdef01234567"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
         "name": "Genealogy Agent",
         "systemPrompt": "You are a genealogy expert. Help trace family history.",
         "temperature": 0.4,
@@ -311,7 +311,7 @@
             "f8091a2b-3c4d-4567-8901-56789abcdef0",
             "c5d6e7f8-091a-1234-5678-23456789abcd"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Language Tutor Agent",
         "systemPrompt": "You are a language tutor. Help users practice languages.",
         "temperature": 0.5,
@@ -335,7 +335,7 @@
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "1a2b3c4d-5e6f-6789-0123-789abcdef012"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Fitness Coach Agent",
         "systemPrompt": "You are a fitness coach. Suggest safe and effective routines.",
         "temperature": 0.5,
@@ -358,7 +358,7 @@
             "1a2b3c4d-5e6f-6789-0123-789abcdef012",
             "d0e1f2a3-b4c5-6789-0123-def012345678"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Volunteer Advisor Agent",
         "systemPrompt": "You are a volunteer advisor. Suggest community service ideas.",
         "temperature": 0.6,
@@ -381,7 +381,7 @@
             "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
             "2b3c4d5e-6f70-7890-1234-89abcdef0123"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Music Tutor Agent",
         "systemPrompt": "You are a music tutor. Help learn instruments.",
         "temperature": 0.7,
@@ -402,7 +402,7 @@
             "1a2b3c4d-5e6f-6789-0123-789abcdef012",
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Investment Advisor Agent",
         "systemPrompt": "You are an investment advisor. Explain investment basics.",
         "temperature": 0.5,
@@ -420,7 +420,7 @@
             "d0e1f2a3-b4c5-6789-0123-def012345678",
             "c5d6e7f8-091a-1234-5678-23456789abcd"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Finance Advisor Agent",
         "systemPrompt": "You are a finance advisor. Provide general financial information.",
         "temperature": 0.3,
@@ -439,7 +439,7 @@
             "a3b4c5d6-e7f8-9012-3456-0123456789ab",
             "2b3c4d5e-6f70-7890-1234-89abcdef0123"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Movie Recommendation Agent",
         "systemPrompt": "You are a movie expert. Recommend movies.",
         "temperature": 0.7,
@@ -459,7 +459,7 @@
             "67875264-bff1-468e-9e67-acfe2776c72d",
             "e7f8091a-2b3c-3456-7890-456789abcdef"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Home Repair Agent",
         "systemPrompt": "You are a DIY expert. Guide home repairs.",
         "temperature": 0.5,
@@ -477,7 +477,7 @@
             "e1f2a3b4-c5d6-7890-1234-ef0123456789",
             "b4c5d6e7-f809-0123-4567-123456789abc"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Gardening Advisor Agent",
         "systemPrompt": "You are a gardening expert. Give plant care tips.",
         "temperature": 0.6,
@@ -498,7 +498,7 @@
             "a3b4c5d6-e7f8-9012-3456-0123456789ab",
             "f8091a2b-3c4d-4567-8901-56789abcdef0"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Music Suggestion Agent",
         "systemPrompt": "You are a music expert. Suggest songs and playlists.",
         "temperature": 0.8,
@@ -514,7 +514,7 @@
             "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Pet Care Agent",
         "systemPrompt": "You are a pet care specialist. Advise on pet health and training.",
         "temperature": 0.7,
@@ -532,7 +532,7 @@
             "f2a3b4c5-d6e7-8901-2345-f0123456789a",
             "c3d4e5f6-a7b8-9012-3456-7890abcdef01"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Mindfulness Coach Agent",
         "systemPrompt": "You are a mindfulness coach. Guide meditation sessions.",
         "temperature": 0.4,
@@ -555,7 +555,7 @@
             "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             "67875264-bff1-468e-9e67-acfe2776c72d"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Homework Helper Agent",
         "systemPrompt": "You are a tutor. Help students with their homework.",
         "temperature": 0.5,
@@ -571,7 +571,7 @@
             "c9d0e1f2-a3b4-5678-9012-cdef01234567",
             "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Marketing Advisor Agent",
         "systemPrompt": "You are a marketing advisor. Suggest digital marketing strategies.",
         "temperature": 0.7,
@@ -594,7 +594,7 @@
             "2b3c4d5e-6f70-7890-1234-89abcdef0123",
             "f2a3b4c5-d6e7-8901-2345-f0123456789a"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Fashion Stylist Agent",
         "systemPrompt": "You are a fashion stylist. Suggest outfits and trends.",
         "temperature": 0.8,
@@ -612,7 +612,7 @@
             "2b3c4d5e-6f70-7890-1234-89abcdef0123",
             "67875264-bff1-468e-9e67-acfe2776c72d"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Shopping Assistant Agent",
         "systemPrompt": "You are a shopping assistant. Find the best deals.",
         "temperature": 0.6,
@@ -630,7 +630,7 @@
             "e5f6a7b8-c9d0-1234-5678-90abcdef0123",
             "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Digital Art Agent",
         "systemPrompt": "You are a digital artist. Advise on art tools.",
         "temperature": 0.8,
@@ -652,7 +652,7 @@
             "c9d0e1f2-a3b4-5678-9012-cdef01234567",
             "e1f2a3b4-c5d6-7890-1234-ef0123456789"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Remote Work Agent",
         "systemPrompt": "You are a remote work advisor. Suggest productivity tips.",
         "temperature": 0.7,
@@ -666,7 +666,7 @@
         "maxTokens": 512,
         "mcpServers": [
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Sustainability Advisor Agent",
         "systemPrompt": "You are a sustainability advisor. Suggest eco-friendly practices.",
         "temperature": 0.5,
@@ -688,7 +688,7 @@
             "d6e7f809-1a2b-2345-6789-3456789abcde",
             "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Math Solver Agent",
         "systemPrompt": "You are a math expert. Solve problems step by step.",
         "temperature": 0.2,
@@ -707,7 +707,7 @@
             "091a2b3c-4d5e-5678-9012-6789abcdef01",
             "d0e1f2a3-b4c5-6789-0123-def012345678"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Career Prep Agent",
         "systemPrompt": "You are a career coach. Help with resumes and interviews.",
         "temperature": 0.5,
@@ -727,7 +727,7 @@
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
             "f2a3b4c5-d6e7-8901-2345-f0123456789a"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Art Critic Agent",
         "systemPrompt": "You are an art critic. Provide feedback on artworks.",
         "temperature": 0.6,
@@ -749,7 +749,7 @@
             "d6e7f809-1a2b-2345-6789-3456789abcde",
             "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
         "name": "Research Assistant Agent",
         "systemPrompt": "You are a research assistant. Help with academic research.",
         "temperature": 0.4,
@@ -766,7 +766,7 @@
             "c5d6e7f8-091a-1234-5678-23456789abcd",
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
         "name": "Translation Agent",
         "systemPrompt": "You are a professional translator. Translate accurately.",
         "temperature": 0.3,
@@ -780,7 +780,7 @@
         "maxTokens": 512,
         "mcpServers": [
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Medical Info Agent",
         "systemPrompt": "You are a medical information provider. Do not give medical advice.",
         "temperature": 0.2,
@@ -800,7 +800,7 @@
             "091a2b3c-4d5e-5678-9012-6789abcdef01",
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef03",
         "name": "Job Application Agent",
         "systemPrompt": "You are a career coach. Help write resumes and cover letters.",
         "temperature": 0.6,
@@ -817,7 +817,7 @@
             "c3d4e5f6-a7b8-9012-3456-7890abcdef01",
             "d6e7f809-1a2b-2345-6789-3456789abcde"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Chess Tutor Agent",
         "systemPrompt": "You are a chess tutor. Teach chess strategies.",
         "temperature": 0.7,
@@ -837,7 +837,7 @@
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
             "d4e5f6a7-b8c9-0123-4567-890abcdef012"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Cybersecurity Advisor Agent",
         "systemPrompt": "You are a cybersecurity advisor. Suggest privacy best practices.",
         "temperature": 0.4,
@@ -861,7 +861,7 @@
             "d0e1f2a3-b4c5-6789-0123-def012345678",
             "e7f8091a-2b3c-3456-7890-456789abcdef"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Event Planner Agent",
         "systemPrompt": "You are an event planner. Organize events efficiently.",
         "temperature": 0.7,
@@ -877,7 +877,7 @@
             "b4c5d6e7-f809-0123-4567-123456789abc",
             "a1b2c3d4-e5f6-7890-1234-567890abcdef"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "General Chat Agent",
         "systemPrompt": "You are a helpful AI assistant.",
         "temperature": 0.7,
@@ -901,7 +901,7 @@
             "d6e7f809-1a2b-2345-6789-3456789abcde",
             "a7b8c9d0-e1f2-3456-7890-abcdef012345"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Nutrition Advisor Agent",
         "systemPrompt": "You are a nutritionist. Suggest healthy eating habits.",
         "temperature": 0.7,
@@ -920,7 +920,7 @@
             "a7b8c9d0-e1f2-3456-7890-abcdef012345",
             "1a2b3c4d-5e6f-6789-0123-789abcdef012"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Pet Adoption Agent",
         "systemPrompt": "You are a pet adoption advisor. Guide on adopting pets.",
         "temperature": 0.7,
@@ -940,7 +940,7 @@
             "a1b2c3d4-e5f6-7890-1234-567890abcdef",
             "2b3c4d5e-6f70-7890-1234-89abcdef0123"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Eco Travel Agent",
         "systemPrompt": "You are an eco travel advisor. Suggest sustainable travel tips.",
         "temperature": 0.5,
@@ -961,7 +961,7 @@
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "a3b4c5d6-e7f8-9012-3456-0123456789ab"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Productivity Coach Agent",
         "systemPrompt": "You are a productivity coach. Suggest time management tips.",
         "temperature": 0.6,
@@ -978,7 +978,7 @@
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "d0e1f2a3-b4c5-6789-0123-def012345678"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "Home Organizer Agent",
         "systemPrompt": "You are a home organizer. Suggest decluttering tips.",
         "temperature": 0.6,
@@ -1000,7 +1000,7 @@
             "d6e7f809-1a2b-2345-6789-3456789abcde",
             "f2a3b4c5-d6e7-8901-2345-f0123456789a"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Weather Info Agent",
         "systemPrompt": "You are a weather expert. Provide accurate forecasts.",
         "temperature": 0.2,
@@ -1015,7 +1015,7 @@
         "mcpServers": [
             "a3b4c5d6-e7f8-9012-3456-0123456789ab"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef04",
         "name": "Creative Writing Agent",
         "systemPrompt": "You are a creative writer. Write engaging stories.",
         "temperature": 0.9,
@@ -1033,7 +1033,7 @@
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456",
             "a3b4c5d6-e7f8-9012-3456-0123456789ab"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "name": "Programming Tutor Agent",
         "systemPrompt": "You are a programming tutor. Teach coding basics.",
         "temperature": 0.6,
@@ -1056,7 +1056,7 @@
             "1a2b3c4d-5e6f-6789-0123-789abcdef012",
             "a3b4c5d6-e7f8-9012-3456-0123456789ab"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
         "name": "Car Maintenance Agent",
         "systemPrompt": "You are an auto mechanic. Help with car issues.",
         "temperature": 0.6,
@@ -1071,7 +1071,7 @@
         "mcpServers": [
             "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
         ],
-        "modelUuid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef05",
         "name": "News Digest Agent",
         "systemPrompt": "You are a news editor. Summarize today's top stories.",
         "temperature": 0.4,
