@@ -300,7 +300,7 @@ void DataManager::saveLLMsAsync(const QString &filePath) const
     connect(futureWatcherLLMs, &QFutureWatcher<void>::finished, this,
             [this, futureWatcherLLMs, filePath]()
             {
-                LOG_DEBUG("Asynchronous save of LLMs finished for: [{}]", filePath);
+                LOG_DEBUG("Asynchronous save of LLMs finished for: [{}]", QFileInfo(filePath).absoluteFilePath());
                 futureWatcherLLMs->deleteLater();
             });
     futureWatcherLLMs->setFuture(futureLLMs);
@@ -489,7 +489,7 @@ void DataManager::saveMcpServersAsync(const QString &filePath) const
     connect(futureWatcherMcpServers, &QFutureWatcher<void>::finished, this,
             [this, futureWatcherMcpServers, filePath]()
             {
-                LOG_DEBUG("Asynchronous save of McpServers finished for: [{}]", filePath);
+                LOG_DEBUG("Asynchronous save of McpServers finished for: [{}]", QFileInfo(filePath).absoluteFilePath());
                 futureWatcherMcpServers->deleteLater();
             });
     futureWatcherMcpServers->setFuture(futureMcpServers);
@@ -671,7 +671,7 @@ void DataManager::saveAgentsAsync(const QString &filePath) const
     connect(futureWatcherAgents, &QFutureWatcher<void>::finished, this,
             [this, futureWatcherAgents, filePath]()
             {
-                LOG_DEBUG("Asynchronous save of Agents finished for: [{}]", filePath);
+                LOG_DEBUG("Asynchronous save of Agents finished for: [{}]", QFileInfo(filePath).absoluteFilePath());
                 futureWatcherAgents->deleteLater();
             });
     futureWatcherAgents->setFuture(futureAgents);
