@@ -8,6 +8,7 @@
 #include "Logger.hpp"
 #include <mcp_message.h>
 
+struct LLM;
 struct McpServer;
 struct Agent;
 struct Conversation;
@@ -16,11 +17,13 @@ class DataManager : public QObject
     Q_OBJECT
 
 Q_SIGNALS:
+    void sig_LLMsLoaded(bool success);
     void sig_mcpServersLoaded(bool success);
     void sig_agentsLoaded(bool success);
     void sig_conversationsLoaded(bool success);
-    void sig_filePathChangedAgents(const QString &filePath);
+    void sig_filePathChangedLLMs(const QString &filePath);
     void sig_filePathChangedMcpServers(const QString &filePath);
+    void sig_filePathChangedAgents(const QString &filePath);
 
 public:
     static DataManager *getInstance();
@@ -28,152 +31,125 @@ public:
     static void registerAllMetaType();
     void init();
 
-    /**
-     * 加载所有mcp服务器
-     */
+    bool loadLLMs(const QString &filePath);
+    void addLLM(const std::shared_ptr<LLM> &llm);
+    void removeLLM(const QString &uuid);
+    void updateLLM(const std::shared_ptr<LLM> &llm);
+    void saveLLMs(const QString &filePath) const;
+    void saveLLMsAsync(const QString &filePath) const;
+    std::shared_ptr<LLM> getLLM(const QString &uuid) const;
+    QList<std::shared_ptr<LLM>> getLLMs() const;
+    void setFilePathLLMs(const QString &filePath);
+    const QString &getFilePathLLMs() const;
+
     bool loadMcpServers(const QString &filePath);
-
-    /**
-     * 新增mcp服务器
-     */
     void addMcpServer(const std::shared_ptr<McpServer> &mcpServer);
-
-    /**
-     * 通过uuid删除mcp服务器
-     */
     void removeMcpServer(const QString &uuid);
-
-    /**
-     * 更新mcp服务器
-     */
     void updateMcpServer(const std::shared_ptr<McpServer> &mcpServer);
-
-    /**
-     * 保存所有mcp服务器到文件
-     */
     void saveMcpServers(const QString &filePath) const;
-
-    /**
-     * 异步保存mcp服务器
-     */
     void saveMcpServersAsync(const QString &filePath) const;
-
-    /**
-     * 通过uuid获取mcp服务器
-     */
     std::shared_ptr<McpServer> getMcpServer(const QString &uuid) const;
-
-    /**
-     * 获取所有mcp服务器
-     */
     QList<std::shared_ptr<McpServer>> getMcpServers() const;
-
-    /**
-     * 加载所有agent
-     */
-    bool loadAgents(const QString &filePath);
-
-    /**
-     * 通过uuid删除agent
-     */
-    void removeAgent(const QString &uuid);
-
-    /**
-     * 更新agent
-     */
-    void updateAgent(const std::shared_ptr<Agent> &agent);
-
-    /**
-     * 保存所有agent到文件
-     */
-    void saveAgents(const QString &filePath) const;
-
-    /**
-     * 异步保存agent
-     */
-    void saveAgentsAsync(const QString &filePath) const;
-
-    /**
-     * 新增agent
-     */
-    void addAgent(const std::shared_ptr<Agent> &agent);
-
-    /**
-     * 通过uuid获取agent
-     */
-    std::shared_ptr<Agent> getAgent(const QString &uuid) const;
-
-    /**
-     * 获取所有agent
-     */
-    QList<std::shared_ptr<Agent>> getAgents() const;
-
-    /**
-     * 加载所有对话
-     */
-    bool loadConversations();
-
-    /**
-     * 新增对话
-     */
-    void addConversation(const std::shared_ptr<Conversation> &conversation);
-
-    /**
-     * 通过uuid删除Conversation
-     */
-    void removeConversation(const QString &uuid);
-
-    /**
-     * 更新Conversation
-     */
-    void updateConversation(const Conversation &conversation);
-
-    /**
-     * 通过uuid获取对话
-     */
-    std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
-
-    /**
-     * 获取所有对话
-     */
-    QList<std::shared_ptr<Conversation>> getConversations() const;
-
-    /**
-     * 设置mcp服务器文件路径
-     */
     void setFilePathMcpServers(const QString &filePath);
-
-    /**
-     * 获取mcp服务器文件路径
-     */
     const QString &getFilePathMcpServers() const;
 
-    /**
-     * 设置agents文件路径
-     */
+    bool loadAgents(const QString &filePath);
+    void removeAgent(const QString &uuid);
+    void updateAgent(const std::shared_ptr<Agent> &agent);
+    void saveAgents(const QString &filePath) const;
+    void saveAgentsAsync(const QString &filePath) const;
+    void addAgent(const std::shared_ptr<Agent> &agent);
+    std::shared_ptr<Agent> getAgent(const QString &uuid) const;
+    QList<std::shared_ptr<Agent>> getAgents() const;
     void setFilePathAgents(const QString &filePath);
-
-    /**
-     * 获取agents文件路径
-     */
     const QString &getFilePathAgents() const;
+
+    bool loadConversations();
+    void addConversation(const std::shared_ptr<Conversation> &conversation);
+    void removeConversation(const QString &uuid);
+    void updateConversation(const Conversation &conversation);
+    std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
+    QList<std::shared_ptr<Conversation>> getConversations() const;
+    
 
 private:
     explicit DataManager(QObject *parent = nullptr);
     DataManager(const DataManager &) = delete;
     DataManager &operator=(const DataManager &) = delete;
     void loadDataAsync();
+    void loadLLMsAsync();
     void loadMcpServersAsync();
     void loadAgentsAsync();
 
 private:
     static DataManager *s_instance;
+    QString m_filePathLLMs;
     QString m_filePathMcpServers;
     QString m_filePathAgents;
+    QHash<QString, std::shared_ptr<LLM>> m_llms;
     QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;
     QHash<QString, std::shared_ptr<Agent>> m_agents;
     QHash<QString, std::shared_ptr<Conversation>> m_conversations;
 };
+
+struct LLM
+{
+    QString uuid;
+    QString modelID;
+    QString modelName;
+    QString apiKey;
+    QString baseUrl;
+    QString endPoint;
+
+    LLM()
+        : uuid(generateUuid()),
+          modelID(),
+          modelName(),
+          apiKey(),
+          baseUrl(),
+          endPoint("/v1/chat/completions")
+    {
+    }
+
+    LLM(const QString &modelID,
+        const QString &modelName,
+        const QString &apiKey,
+        const QString &baseUrl,
+        const QString &endPoint = QString())
+        : uuid(generateUuid()),
+          modelID(modelID),
+          modelName(modelName),
+          apiKey(apiKey),
+          baseUrl(baseUrl),
+          endPoint(endPoint)
+    {
+    }
+
+    static LLM fromJson(const QJsonObject &jsonObject)
+    {
+        LLM llm;
+        llm.uuid = jsonObject["uuid"].toString();
+        llm.modelID = jsonObject["modelID"].toString();
+        llm.modelName = jsonObject["modelName"].toString();
+        llm.apiKey = jsonObject["apiKey"].toString();
+        llm.baseUrl = jsonObject["baseUrl"].toString();
+        llm.endPoint = jsonObject["endPoint"].toString();
+        return llm;
+    }
+
+    QJsonObject toJsonObject() const
+    {
+        QJsonObject jsonObject;
+        jsonObject["uuid"] = uuid;
+        jsonObject["modelID"] = modelID;
+        jsonObject["modelName"] = modelName;
+        jsonObject["apiKey"] = apiKey;
+        jsonObject["baseUrl"] = baseUrl;
+        jsonObject["endPoint"] = endPoint;
+        return jsonObject;
+    }
+};
+Q_DECLARE_METATYPE(LLM)
 
 struct McpServer
 {
@@ -310,7 +286,7 @@ struct Agent
     // llm参数
     int context;
     QString systemPrompt;
-    QString modelName;
+    QString modelUuid;
     double temperature;
     double topP;
     int maxTokens;
@@ -323,7 +299,7 @@ struct Agent
           children(),
           context(),
           systemPrompt(),
-          modelName(),
+          modelUuid(),
           temperature(),
           topP(),
           maxTokens(),
@@ -335,7 +311,7 @@ struct Agent
           int children,
           int context,
           const QString &systemPrompt,
-          const QString &modelName,
+          const QString &modelUuid,
           double temperature,
           double topP,
           int maxTokens,
@@ -346,7 +322,7 @@ struct Agent
           children(children),
           context(context),
           systemPrompt(systemPrompt),
-          modelName(modelName),
+          modelUuid(modelUuid),
           temperature(temperature),
           topP(topP),
           maxTokens(maxTokens),
@@ -364,7 +340,7 @@ struct Agent
         agent.children = jsonObject["children"].toInt();
         agent.context = jsonObject["context"].toInt();
         agent.systemPrompt = jsonObject["systemPrompt"].toString();
-        agent.modelName = jsonObject["modelName"].toString();
+        agent.modelUuid = jsonObject["modelUuid"].toString();
         agent.temperature = jsonObject["temperature"].toDouble();
         agent.topP = jsonObject["topP"].toDouble();
         agent.maxTokens = jsonObject["maxTokens"].toInt();
@@ -387,7 +363,7 @@ struct Agent
         jsonObject["children"] = children;
         jsonObject["context"] = context;
         jsonObject["systemPrompt"] = systemPrompt;
-        jsonObject["modelName"] = modelName;
+        jsonObject["modelUuid"] = modelUuid;
         jsonObject["temperature"] = temperature;
         jsonObject["topP"] = topP;
         jsonObject["maxTokens"] = maxTokens;

@@ -12,6 +12,7 @@
 #include <QJsonValue>
 #include <QJsonObject>
 
+constexpr const char *FILE_LLMS = "./config/LLMs.json";
 constexpr const char *FILE_MCPSERVERS = "./config/MCPServers.json";
 constexpr const char *FILE_AGENTS = "./config/Agents.json";
 constexpr const char *BASE_URL = "https://api.deepseek.com";
