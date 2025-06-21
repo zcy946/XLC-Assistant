@@ -41,8 +41,7 @@ void ModelService::processRequest(const QString &conversationUuid, const std::sh
                         QString responseStr = QString::fromStdString(message.dump());
                         emit responseReady(conversationUuid, responseStr); 
                         /**
-                         * TODO 
-                         * 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数
+                         * TODO 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数
                          *  - 如果不需要则break - 存储记录
                          *  - 如果需要则调用所有工具 - 存储各个记录 - (m_maxMcpToolChainCall - 1) - 继续调用processRequest*/ 
                         return;
