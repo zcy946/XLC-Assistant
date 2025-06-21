@@ -14,6 +14,7 @@
 #include <QComboBox>
 #include <QLabel>
 
+class PageSettingsLLM;
 class PageSettingsAgent;
 class PageSettingsMcp;
 class PageSettingsData;
@@ -37,6 +38,65 @@ private:
     QListWidget *m_listWidget;
     QStackedWidget *m_stackedWidget;
     QMap<QString, QWidget *> m_pages;
+};
+
+class WidgetLLMInfo;
+class PageSettingsLLM : public BaseWidget
+{
+    Q_OBJECT
+private Q_SLOTS:
+    void slot_onListWidgetItemClicked(QListWidgetItem *item);
+    void slot_onLLMsLoaded(bool success);
+
+public:
+    explicit PageSettingsLLM(QWidget *parent = nullptr);
+    ~PageSettingsLLM() = default;
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    QListWidget *m_listWidgetLLMs;
+    WidgetLLMInfo *m_widgetLLMInfo;
+
+private:
+    void showLLMInfo(const QString &uuid);
+};
+
+class WidgetLLMInfo : public BaseWidget
+{
+    Q_OBJECT
+public:
+    explicit WidgetLLMInfo(QWidget *parent = nullptr);
+    ~WidgetLLMInfo() = default;
+    /**
+     * 更新表单数据
+     */
+    void updateData(std::shared_ptr<LLM> llm);
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<LLM> getCurrentData();
+
+private:
+    QLineEdit *m_lineEditUuid;
+    QLineEdit *m_lineEditModelID;
+    QLineEdit *m_lineEditModelName;
+    QLineEdit *m_lineEditApiKey;
+    QLineEdit *m_lineEditBaseUrl;
+    QLineEdit *m_lineEditEndPoint;
+    QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonReset;
+    QPushButton *m_pushButtonSave;
 };
 
 class WidgetAgentInfo;

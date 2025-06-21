@@ -13,6 +13,8 @@ PageSettings::PageSettings(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
+    // pageSettingsLLM
+    addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsAgent
     addPage("助手设置", new PageSettingsAgent(this));
     // pageSettingsMcp
@@ -84,6 +86,202 @@ void PageSettings::addPage(const QString &name, QWidget *page)
     m_pages.insert(name, page);
 }
 
+// PageSettingsLLM
+PageSettingsLLM::PageSettingsLLM(QWidget *parent)
+    : BaseWidget(parent)
+{
+    initUI();
+    connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &PageSettingsLLM::slot_onLLMsLoaded);
+}
+
+void PageSettingsLLM::initWidget()
+{
+}
+
+void PageSettingsLLM::initItems()
+{
+    // m_listWidgetLLMs
+    m_listWidgetLLMs = new QListWidget(this);
+    connect(m_listWidgetLLMs, &QListWidget::itemClicked, this, &PageSettingsLLM::slot_onListWidgetItemClicked);
+    // m_widgetLLMInfo
+    m_widgetLLMInfo = new WidgetLLMInfo(this);
+}
+
+void PageSettingsLLM::initLayout()
+{
+    // splitter
+    QSplitter *splitter = new QSplitter(this);
+    splitter->setChildrenCollapsible(false);
+    splitter->addWidget(m_listWidgetLLMs);
+    splitter->addWidget(m_widgetLLMInfo);
+    splitter->setStretchFactor(0, 2);
+    splitter->setStretchFactor(1, 8);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
+    vLayout->addWidget(splitter);
+}
+
+void PageSettingsLLM::slot_onListWidgetItemClicked(QListWidgetItem *item)
+{
+    const QString &llmName = item->data(Qt::DisplayRole).value<QString>();
+    const QString &llmUuid = item->data(Qt::UserRole).value<QString>();
+    LOG_DEBUG("选中llm: {} - {}", llmName, llmUuid);
+    showLLMInfo(llmUuid);
+}
+
+void PageSettingsLLM::slot_onLLMsLoaded(bool success)
+{
+    if (!success)
+        return;
+    QList<std::shared_ptr<LLM>> llms = DataManager::getInstance()->getLLMs();
+    if (llms.isEmpty())
+        return;
+    m_listWidgetLLMs->clear();
+    for (const std::shared_ptr<LLM> &llm : llms)
+    {
+        QListWidgetItem *itemLLM = new QListWidgetItem(llm->modelName, m_listWidgetLLMs);
+        itemLLM->setData(Qt::UserRole, QVariant::fromValue<QString>(llm->uuid));
+        m_listWidgetLLMs->addItem(itemLLM);
+    }
+    m_listWidgetLLMs->sortItems();
+    // 默认选中并展示第一项
+    if (m_listWidgetLLMs->currentItem() == nullptr)
+    {
+        m_listWidgetLLMs->setCurrentRow(0);
+        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
+        if (!llm)
+            return;
+        m_widgetLLMInfo->updateData(llm);
+    }
+}
+
+void PageSettingsLLM::showLLMInfo(const QString &uuid)
+{
+    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(uuid);
+    if (!llm)
+    {
+        LOG_WARN("不存在的llm: {}", uuid);
+        return;
+    }
+    m_widgetLLMInfo->updateData(llm);
+}
+
+// WidgetLLMInfo
+WidgetLLMInfo::WidgetLLMInfo(QWidget *parent)
+{
+    initUI();
+}
+
+void WidgetLLMInfo::initWidget()
+{
+}
+
+void WidgetLLMInfo::initItems()
+{
+    // m_lineEditUuid
+    m_lineEditUuid = new QLineEdit(this);
+    m_lineEditUuid->setReadOnly(true);
+    m_lineEditUuid->setPlaceholderText("UUID");
+    // m_lineEditModelID
+    m_lineEditModelID = new QLineEdit(this);
+    m_lineEditModelID->setPlaceholderText("deepseek-chat");
+    // m_lineEditModelName
+    m_lineEditModelName = new QLineEdit(this);
+    m_lineEditModelName->setPlaceholderText("DeepSeek-V3-0324");
+    // m_lineEditApiKey
+    m_lineEditApiKey = new QLineEdit(this);
+    m_lineEditApiKey->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+    m_lineEditApiKey->setPlaceholderText("sk-12345ab123ab12abcd1a123456a1ab12");
+    // m_lineEditBaseUrl
+    m_lineEditBaseUrl = new QLineEdit(this);
+    m_lineEditBaseUrl->setPlaceholderText("https://api.deepseek.com");
+    // m_lineEditEndPoint
+    m_lineEditEndPoint = new QLineEdit(this);
+    m_lineEditEndPoint->setPlaceholderText("/v1/chat/completions");
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                LOG_DEBUG("添加新模型");
+            });
+    // m_pushButtonReset
+    m_pushButtonReset = new QPushButton("重置", this);
+    connect(m_pushButtonReset, &QPushButton::clicked, this,
+            [this]()
+            {
+                const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_lineEditUuid->text());
+                if (!llm)
+                    return;
+                updateData(llm);
+                LOG_DEBUG("重载llm: {}", m_lineEditUuid->text());
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this,
+            [this]()
+            {
+                DataManager::getInstance()->updateLLM(getCurrentData());
+                LOG_DEBUG("保存llm: {}", m_lineEditUuid->text());
+            });
+}
+
+void WidgetLLMInfo::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    // gLayout
+    QGridLayout *gLayout = new QGridLayout();
+    gLayout->setContentsMargins(0, 0, 0, 0);
+    gLayout->addWidget(new QLabel("UUID", this), 0, 0);
+    gLayout->addWidget(m_lineEditUuid, 0, 1);
+    gLayout->addWidget(new QLabel("模型ID", this), 1, 0);
+    gLayout->addWidget(m_lineEditModelID, 1, 1);
+    gLayout->addWidget(new QLabel("模型名称", this), 2, 0);
+    gLayout->addWidget(m_lineEditModelName, 2, 1);
+    gLayout->addWidget(new QLabel("API密钥", this), 3, 0);
+    gLayout->addWidget(m_lineEditApiKey, 3, 1);
+    gLayout->addWidget(new QLabel("API地址", this), 4, 0);
+    gLayout->addWidget(m_lineEditBaseUrl, 4, 1);
+    gLayout->addWidget(new QLabel("接口", this), 5, 0);
+    gLayout->addWidget(m_lineEditEndPoint, 5, 1);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addLayout(gLayout);
+    vLayout->addLayout(hLayoutButtons);
+    vLayout->addStretch();
+}
+
+void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
+{
+    if (!llm)
+        return;
+    m_lineEditUuid->setText(llm->uuid);
+    m_lineEditModelID->setText(llm->modelID);
+    m_lineEditModelName->setText(llm->modelName);
+    m_lineEditApiKey->setText(llm->apiKey);
+    m_lineEditBaseUrl->setText(llm->baseUrl);
+    m_lineEditEndPoint->setText(llm->endPoint);
+}
+
+std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
+{
+    std::shared_ptr<LLM> llm = std::make_shared<LLM>();
+    llm->uuid = m_lineEditUuid->text();
+    llm->modelID = m_lineEditModelID->text();
+    llm->modelName = m_lineEditModelName->text();
+    llm->apiKey = m_lineEditApiKey->text();
+    llm->baseUrl = m_lineEditBaseUrl->text();
+    llm->endPoint = m_lineEditEndPoint->text();
+    return llm;
+}
+
 // PageSettingsAgent
 PageSettingsAgent::PageSettingsAgent(QWidget *parent)
     : BaseWidget(parent)
@@ -144,6 +342,7 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
         itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(agent->uuid));
         m_listWidgetAgents->addItem(itemAgent);
     }
+    m_listWidgetAgents->sortItems();
     // 默认选中并展示第一项
     if (m_listWidgetAgents->currentItem() == nullptr)
     {
@@ -220,7 +419,7 @@ void WidgetAgentInfo::initItems()
                 if (!agent)
                     return;
                 updateData(agent);
-                LOG_DEBUG("重载agent设置");
+                LOG_DEBUG("重载agent: {}", m_lineEditUuid->text());
             });
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
@@ -228,12 +427,18 @@ void WidgetAgentInfo::initItems()
             [this]()
             {
                 DataManager::getInstance()->updateAgent(getCurrentData());
-                LOG_DEBUG("保存agent设置");
+                LOG_DEBUG("保存agent: {}", m_lineEditUuid->text());
             });
 }
 
 void WidgetAgentInfo::initLayout()
 {
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
     QGridLayout *gLayout = new QGridLayout(this);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
@@ -258,12 +463,6 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(m_plainTextEditSystemPrompt, 9, 1);
     gLayout->addWidget(new QLabel("MCP服务器", this), 10, 0);
     gLayout->addWidget(m_listWidgetMcpServers, 10, 1);
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonSave);
     gLayout->addLayout(hLayoutButtons, 11, 1);
 }
 
@@ -378,6 +577,7 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
         itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
         m_listWidgetMcpServers->addItem(itemAgent);
     }
+    m_listWidgetMcpServers->sortItems();
     // 默认选中并展示第一项
     if (m_listWidgetMcpServers->currentItem() == nullptr)
     {
@@ -461,7 +661,7 @@ void WidgetMcpServerInfo::initItems()
             [this]()
             {
                 updateData(DataManager::getInstance()->getMcpServer(m_lineEditUuid->text()));
-                LOG_DEBUG("重载mcp服务器设置");
+                LOG_DEBUG("重载mcp服务器: {}", m_lineEditUuid->text());
             });
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
@@ -469,12 +669,18 @@ void WidgetMcpServerInfo::initItems()
             [this]()
             {
                 DataManager::getInstance()->updateMcpServer(getCurrentData());
-                LOG_DEBUG("保存mcp服务器设置");
+                LOG_DEBUG("保存mcp服务器: {}", m_lineEditUuid->text());
             });
 }
 
 void WidgetMcpServerInfo::initLayout()
 {
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
     QGridLayout *gLayout = new QGridLayout(this);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
@@ -497,12 +703,6 @@ void WidgetMcpServerInfo::initLayout()
     gLayout->addWidget(m_lineEditUrl, 8, 1);
     gLayout->addWidget(m_labelRequestHeaders, 9, 0);
     gLayout->addWidget(m_plainTextEditRequestHeaders, 9, 1);
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonSave);
     gLayout->addLayout(hLayoutButtons, 11, 1);
 }
 
