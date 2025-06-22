@@ -617,7 +617,7 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
 
 // DialogAddMcpServer
 DialogAddMcpServer::DialogAddMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
+    : BaseDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
 {
     initUI();
 }
@@ -688,13 +688,6 @@ void DialogAddMcpServer::initLayout()
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->addWidget(m_listWidgetMcpServers);
     vLayout->addLayout(hLayoutButtons);
-}
-
-void DialogAddMcpServer::initUI()
-{
-    initWidget();
-    initItems();
-    initLayout();
 }
 
 // PageSettingsMcp

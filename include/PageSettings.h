@@ -14,7 +14,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QMenu>
-#include <QDialog>
+#include "BaseDialog.hpp"
 
 class PageSettingsLLM;
 class PageSettingsAgent;
@@ -168,7 +168,7 @@ private:
     QPushButton *m_pushButtonSave;
 };
 
-class DialogAddMcpServer : public QDialog
+class DialogAddMcpServer : public BaseDialog
 {
     Q_OBJECT
 public:
@@ -176,12 +176,9 @@ public:
     ~DialogAddMcpServer() = default;
 
 protected:
-    virtual void initWidget();
-    virtual void initItems();
-    virtual void initLayout();
-
-private:
-    void initUI();
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
 
 private:
     std::shared_ptr<QSet<QString>> m_uuidsMcpServer;
