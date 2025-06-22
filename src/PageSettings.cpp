@@ -963,7 +963,10 @@ std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()
         }
     }
 
+    mcpServer->host = m_lineEditHost->text();
+    mcpServer->port = m_lineEditPort->text();
     mcpServer->baseUrl = m_lineEditBaseUrl->text();
+    mcpServer->endpoint = m_lineEditEndpoint->text();
     mcpServer->requestHeaders = m_plainTextEditRequestHeaders->toPlainText();
 
     return mcpServer;
