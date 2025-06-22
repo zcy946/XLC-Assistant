@@ -993,6 +993,10 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
     }
     if (index == McpServer::Type::sse || McpServer::Type::streambleHttp)
     {
+        if (index == McpServer::Type::sse)
+            m_lineEditEndpoint->setPlaceholderText("/sse");
+        else
+            m_lineEditEndpoint->setPlaceholderText("/mcp");
         m_labelCommand->hide();
         m_lineEditCommand->hide();
         m_labelArgs->hide();
@@ -1011,10 +1015,6 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         m_plainTextEditRequestHeaders->show();
         return;
     }
-    if (index == McpServer::Type::sse)
-        m_lineEditEndpoint->setPlaceholderText("/sse");
-    else if (index = McpServer::Type::streambleHttp)
-        m_lineEditEndpoint->setPlaceholderText("/mcp");
     LOG_WARN("不存在的mcp服务器类型: {}", m_comboBoxType->currentText());
 }
 
