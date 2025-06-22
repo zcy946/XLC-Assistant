@@ -29,7 +29,7 @@ Q_SIGNALS:
 public:
     static DataManager *getInstance();
     ~DataManager() = default;
-    static void registerAllMetaType();
+    // static void registerAllMetaType();
     void init();
 
     bool loadLLMs(const QString &filePath);
@@ -150,7 +150,7 @@ struct LLM
         return jsonObject;
     }
 };
-Q_DECLARE_METATYPE(LLM)
+// Q_DECLARE_METATYPE(LLM)
 
 struct McpServer
 {
@@ -276,7 +276,7 @@ struct McpServer
         return jsonObject;
     }
 };
-Q_DECLARE_METATYPE(McpServer)
+// Q_DECLARE_METATYPE(McpServer)
 
 struct Agent
 {
@@ -378,7 +378,7 @@ struct Agent
         return jsonObject;
     }
 };
-Q_DECLARE_METATYPE(Agent)
+// Q_DECLARE_METATYPE(Agent)
 
 struct Conversation
 {
@@ -407,6 +407,6 @@ struct Conversation
     {
     }
 };
-Q_DECLARE_METATYPE(Conversation)
+// Q_DECLARE_METATYPE(Conversation)
 
 #endif // DATAMANAGER_H

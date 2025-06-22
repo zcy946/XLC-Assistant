@@ -24,18 +24,16 @@ void PageChat::initItems()
     connect(m_listWidgetAgent, &QListWidget::itemClicked, this,
             [](QListWidgetItem *item)
             {
-                Agent currentAgent = item->data(Qt::UserRole).value<Agent>();
-                LOG_DEBUG("\n选中agent: \n - uuid: {}\n - name: {}\n - description: {}\n - children: {}\n\t- context: {}\n\t- systemPrompt: {}\n\t- llmUUid: {}\n\t- temperature: {}\n\t- topP: {}\n\t- maxTokens: {}\n\t- mcpServers_count: {} ",
-                          currentAgent.uuid, currentAgent.name, currentAgent.description, currentAgent.children, currentAgent.context, currentAgent.systemPrompt, currentAgent.llmUUid, currentAgent.temperature, currentAgent.topP, currentAgent.maxTokens, currentAgent.mcpServers.count());
+                const QString &uuid = item->data(Qt::UserRole).toString();
+                LOG_TRACE("选中agent: {}", uuid);
             });
     // m_listWidgetHistory
     m_listWidgetHistory = new QListWidget(this);
     connect(m_listWidgetHistory, &QListWidget::itemClicked, this,
             [](QListWidgetItem *item)
             {
-                Conversation currentConversation = item->data(Qt::UserRole).value<Conversation>();
-                LOG_DEBUG("\n选中对话: \n - uuid: {}\n - summary: {}\n\t - createdTime: {}\n\t - updatedTime: {}",
-                          currentConversation.uuid, currentConversation.summary, currentConversation.createdTime.toString("yyyy-MM-dd HH:mm:ss"), currentConversation.updatedTime.toString("yyyy-MM-dd HH:mm:ss"));
+                const QString &uuid = item->data(Qt::UserRole).toString();
+                LOG_TRACE("选中对话: {}", uuid);
             });
 #ifdef QT_DEBUG
     for (int i = 0; i < 50; ++i)
@@ -43,13 +41,13 @@ void PageChat::initItems()
         // QString nameAgent = "agent实例测试" + QString::number(i + 1);
         // QListWidgetItem *itemAgent = new QListWidgetItem();
         // itemAgent->setText(nameAgent);
-        // itemAgent->setData(Qt::UserRole, QVariant::fromValue(Agent(nameAgent, generateUuid(), QRandomGenerator::global()->bounded(101), QRandomGenerator::global()->bounded(11), generateUuid(), generateUuid(), QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(101) / 10, QRandomGenerator::global()->bounded(10001))));
+        // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
         // m_listWidgetAgent->addItem(itemAgent);
 
         QString nameConversation = "对话实例测试" + QString::number(i + 1);
         QListWidgetItem *itemConversation = new QListWidgetItem();
         itemConversation->setText(nameConversation);
-        itemConversation->setData(Qt::UserRole, QVariant::fromValue(Conversation(generateUuid(), QDateTime::currentDateTime(), QDateTime::currentDateTime())));
+        itemConversation->setData(Qt::UserRole, QVariant::fromValue(generateUuid()));
         m_listWidgetHistory->addItem(itemConversation);
     }
 #endif
@@ -83,7 +81,7 @@ void PageChat::slot_onAgentsLoaded(bool success)
     {
         QListWidgetItem *itemAgent = new QListWidgetItem();
         itemAgent->setText(agent->name);
-        itemAgent->setData(Qt::UserRole, QVariant::fromValue(*(agent.get())));
+        itemAgent->setData(Qt::UserRole, QVariant::fromValue(agent->uuid));
         m_listWidgetAgent->addItem(itemAgent);
     }
 }

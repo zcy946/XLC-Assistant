@@ -10,7 +10,7 @@
 - [ ] 封装mcpclient为mcp网关，用于统一管理mcp服务器
 - [ ] 创建McpService类用于不同的Agent和Mcp网关交互
 - [x] 抽象出Model类用于管理模型
-- [ ] 将Agent的McpServers改为用QSet存储
+- [x] 将Agent的McpServers改为用QSet存储
 - [ ] 修复配置加载前未备份导致内存被替换的bug
 
 **进阶**

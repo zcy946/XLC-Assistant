@@ -51,12 +51,12 @@ DataManager::DataManager(QObject *parent)
     }
 }
 
-void DataManager::registerAllMetaType()
-{
-    qRegisterMetaType<McpServer>("McpServer");
-    qRegisterMetaType<Agent>("Agent");
-    qRegisterMetaType<Conversation>("Conversation");
-}
+// void DataManager::registerAllMetaType()
+// {
+//     qRegisterMetaType<McpServer>("McpServer");
+//     qRegisterMetaType<Agent>("Agent");
+//     qRegisterMetaType<Conversation>("Conversation");
+// }
 
 void DataManager::init()
 {

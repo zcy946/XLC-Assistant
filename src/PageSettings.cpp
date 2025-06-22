@@ -57,7 +57,7 @@ void PageSettings::initItems()
                     return;
                 }
                 m_stackedWidget->setCurrentWidget(it.value());
-                LOG_DEBUG("选中设置项: {}", currentText);
+                LOG_TRACE("选中设置项: {}", currentText);
             });
 
     // m_stackedWidget
@@ -126,7 +126,7 @@ void PageSettingsLLM::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &llmName = item->data(Qt::DisplayRole).value<QString>();
     const QString &llmUuid = item->data(Qt::UserRole).value<QString>();
-    LOG_DEBUG("选中llm: {} - {}", llmName, llmUuid);
+    LOG_TRACE("选中llm: {} - {}", llmName, llmUuid);
     showLLMInfo(llmUuid);
 }
 
@@ -324,7 +324,7 @@ void PageSettingsAgent::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &agentName = item->data(Qt::DisplayRole).value<QString>();
     const QString &agentUuid = item->data(Qt::UserRole).value<QString>();
-    LOG_DEBUG("选中agent: {} - {}", agentName, agentUuid);
+    LOG_TRACE("选中agent: {} - {}", agentName, agentUuid);
     showAgentInfo(agentUuid);
 }
 
@@ -737,7 +737,7 @@ void PageSettingsMcp::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &mcpServerName = item->data(Qt::DisplayRole).value<QString>();
     const QString &mcpServerUuid = item->data(Qt::UserRole).value<QString>();
-    LOG_DEBUG("选中mcp服务器: {} - {}", mcpServerName, mcpServerUuid);
+    LOG_TRACE("选中mcp服务器: {} - {}", mcpServerName, mcpServerUuid);
     showMcpServerInfo(mcpServerUuid);
 }
 
