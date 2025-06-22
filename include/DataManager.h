@@ -71,7 +71,6 @@ public:
     void updateConversation(const Conversation &conversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
-    
 
 private:
     explicit DataManager(QObject *parent = nullptr);
@@ -100,7 +99,7 @@ struct LLM
     QString modelName;
     QString apiKey;
     QString baseUrl;
-    QString endPoint;
+    QString endpoint;
 
     LLM()
         : uuid(generateUuid()),
@@ -108,7 +107,7 @@ struct LLM
           modelName(),
           apiKey(),
           baseUrl(),
-          endPoint("/v1/chat/completions")
+          endpoint("/v1/chat/completions")
     {
     }
 
@@ -116,13 +115,13 @@ struct LLM
         const QString &modelName,
         const QString &apiKey,
         const QString &baseUrl,
-        const QString &endPoint = QString())
+        const QString &endpoint = QString())
         : uuid(generateUuid()),
           modelID(modelID),
           modelName(modelName),
           apiKey(apiKey),
           baseUrl(baseUrl),
-          endPoint(endPoint)
+          endpoint(endpoint)
     {
     }
 
@@ -134,7 +133,7 @@ struct LLM
         llm.modelName = jsonObject["modelName"].toString();
         llm.apiKey = jsonObject["apiKey"].toString();
         llm.baseUrl = jsonObject["baseUrl"].toString();
-        llm.endPoint = jsonObject["endPoint"].toString();
+        llm.endpoint = jsonObject["endpoint"].toString();
         return llm;
     }
 
@@ -146,7 +145,7 @@ struct LLM
         jsonObject["modelName"] = modelName;
         jsonObject["apiKey"] = apiKey;
         jsonObject["baseUrl"] = baseUrl;
-        jsonObject["endPoint"] = endPoint;
+        jsonObject["endpoint"] = endpoint;
         return jsonObject;
     }
 };
@@ -170,7 +169,10 @@ struct McpServer
     QVector<QString> args;
     QMap<QString, QString> envVars;
     // sse&streambleHttp参数
-    QString url;
+    QString host;
+    QString port;
+    QString baseUrl;
+    QString endpoint;
     QString requestHeaders;
 
     McpServer()
@@ -182,7 +184,10 @@ struct McpServer
           command(),
           args(),
           envVars(),
-          url(),
+          host(),
+          port(),
+          baseUrl(),
+          endpoint("/sse"),
           requestHeaders()
     {
     }
@@ -193,7 +198,8 @@ struct McpServer
               const QString &command,
               const QVector<QString> &args,
               const QMap<QString, QString> &envVars,
-              const QString &url,
+              const QString &baseUrl,
+              const QString &endpoint,
               const QString &requestHeaders)
         : uuid(generateUuid()),
           name(name),
@@ -203,7 +209,36 @@ struct McpServer
           command(command),
           args(args),
           envVars(envVars),
-          url(url),
+          host(),
+          port(),
+          baseUrl(baseUrl),
+          endpoint(endpoint),
+          requestHeaders(requestHeaders)
+    {
+    }
+    McpServer(const QString &name,
+              const QString &description,
+              Type type,
+              int timeout,
+              const QString &command,
+              const QVector<QString> &args,
+              const QMap<QString, QString> &envVars,
+              const QString &host,
+              const QString &port,
+              const QString &endpoint,
+              const QString &requestHeaders)
+        : uuid(generateUuid()),
+          name(name),
+          description(description),
+          type(type),
+          timeout(timeout),
+          command(command),
+          args(args),
+          envVars(envVars),
+          host(host),
+          port(port),
+          baseUrl(),
+          endpoint(endpoint),
           requestHeaders(requestHeaders)
     {
     }
@@ -235,7 +270,10 @@ struct McpServer
         }
         else if (server.type == sse || server.type == streambleHttp)
         {
-            server.url = jsonObject["url"].toString();
+            server.host = jsonObject["host"].toString();
+            server.port = jsonObject["port"].toString();
+            server.baseUrl = jsonObject["baseUrl"].toString();
+            server.endpoint = jsonObject["endpoint"].toString();
             server.requestHeaders = jsonObject["requestHeaders"].toString();
         }
         return server;
@@ -270,7 +308,10 @@ struct McpServer
         }
         else if (type == sse || type == streambleHttp)
         {
-            jsonObject["url"] = url;
+            jsonObject["host"] = host;
+            jsonObject["port"] = port;
+            jsonObject["baseUrl"] = baseUrl;
+            jsonObject["endpoint"] = endpoint;
             jsonObject["requestHeaders"] = requestHeaders;
         }
         return jsonObject;

@@ -2,127 +2,20 @@
     {
         "args": [
             "-m",
-            "/models/llama2-13b.gguf",
-            "-c",
-            "4096"
-        ],
-        "command": "/opt/llm/llama-cpp",
-        "description": "Remote server running LLM via stdio.",
-        "envVars": {
-            "CUDA_VISIBLE_DEVICES": "1",
-            "LLAMA_NUM_THREADS": "16"
-        },
-        "name": "Remote LLM Server (stdio)",
-        "timeout": 200,
-        "type": 0,
-        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012"
-    },
-    {
-        "description": "Connects to Cohere API endpoint.",
-        "name": "Cohere API",
-        "requestHeaders": "{\"Authorization\": \"Bearer cohere_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 65,
-        "type": 1,
-        "url": "https://api.cohere.ai/v1/generate",
-        "uuid": "d6e7f809-1a2b-2345-6789-3456789abcde"
-    },
-    {
-        "description": "Custom SSE endpoint for streaming.",
-        "name": "Custom SSE HTTP Endpoint",
-        "requestHeaders": "{\"X-API-Key\": \"custom_sse_key\"}",
-        "timeout": 100,
-        "type": 2,
-        "url": "http://custom-sse.local/stream",
-        "uuid": "a7b8c9d0-e1f2-3456-7890-abcdef012345"
-    },
-    {
-        "args": [
-            "-m",
-            "/models/llama2-3b.gguf",
+            "/models/ggml-model.bin",
             "-c",
             "1024"
         ],
-        "command": "/opt/llm/llama-cpp",
-        "description": "Remote LLM server using CPU only.",
+        "command": "/usr/bin/ggml-server",
+        "description": "Local server running GGML model.",
         "envVars": {
-            "LLAMA_NUM_THREADS": "4"
+            "GGML_THREADS": "4",
+            "xialichen": "666"
         },
-        "name": "Remote LLM (stdio, CPU)",
-        "timeout": 160,
+        "name": "Local GGML Server",
+        "timeout": 250,
         "type": 0,
-        "uuid": "f8091a2b-3c4d-4567-8901-56789abcdef0"
-    },
-    {
-        "description": "Connects to OpenRouter API endpoint.",
-        "name": "OpenRouter API",
-        "requestHeaders": "{\"Authorization\": \"Bearer openrouter_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 75,
-        "type": 1,
-        "url": "https://openrouter.ai/api/v1/chat/completions",
-        "uuid": "a3b4c5d6-e7f8-9012-3456-0123456789ab"
-    },
-    {
-        "description": "mcp保存测试666",
-        "name": "异步保存测试",
-        "requestHeaders": "异步保存测试",
-        "timeout": 60,
-        "type": 1,
-        "url": "异步保存测试",
-        "uuid": "67875264-bff1-468e-9e67-acfe2776c72d"
-    },
-    {
-        "description": "Connects to Google PaLM API endpoint.",
-        "name": "Google PaLM API",
-        "requestHeaders": "{\"Authorization\": \"Bearer your_google_token\", \"Content-Type\": \"application/json\"}",
-        "timeout": 80,
-        "type": 1,
-        "url": "https://palm.googleapis.com/v1beta2/models/chat-bison:generateMessage",
-        "uuid": "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
-    },
-    {
-        "description": "A proprietary streaming HTTP endpoint for custom integrations.",
-        "name": "Custom Streamable HTTP Endpoint",
-        "requestHeaders": "{\"X-Custom-Auth\": \"some_token\"}",
-        "timeout": 120,
-        "type": 2,
-        "url": "http://localhost:8080/stream",
-        "uuid": "c3d4e5f6-a7b8-9012-3456-7890abcdef01"
-    },
-    {
-        "description": "Connects to AI21 Studio API endpoint.",
-        "name": "AI21 Studio API",
-        "requestHeaders": "{\"Authorization\": \"Bearer ai21_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 85,
-        "type": 1,
-        "url": "https://api.ai21.com/studio/v1/j1-large/complete",
-        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef01"
-    },
-    {
-        "description": "Connects to Anthropic Claude API.",
-        "name": "Anthropic Claude API",
-        "requestHeaders": "{\"x-api-key\": \"anthropic_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 70,
-        "type": 1,
-        "url": "https://api.anthropic.com/v1/complete",
-        "uuid": "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
-    },
-    {
-        "description": "Custom WebSocket-based SSE endpoint.",
-        "name": "Custom WebSocket SSE",
-        "requestHeaders": "{\"X-WS-Token\": \"ws_token\"}",
-        "timeout": 150,
-        "type": 2,
-        "url": "ws://custom-ws-sse.local/stream",
-        "uuid": "1a2b3c4d-5e6f-6789-0123-789abcdef012"
-    },
-    {
-        "description": "Custom HTTP endpoint for JSON responses.",
-        "name": "Custom HTTP JSON Endpoint",
-        "requestHeaders": "{\"X-Auth\": \"json_token\"}",
-        "timeout": 110,
-        "type": 2,
-        "url": "http://json-endpoint.local/api",
-        "uuid": "e1f2a3b4-c5d6-7890-1234-ef0123456789"
+        "uuid": "c9d0e1f2-a3b4-5678-9012-cdef01234567"
     },
     {
         "args": [
@@ -142,75 +35,136 @@
         "uuid": "c5d6e7f8-091a-1234-5678-23456789abcd"
     },
     {
-        "args": [
-            "-m",
-            "/models/falcon-40b.bin",
-            "-c",
-            "4096"
-        ],
-        "command": "/usr/local/bin/falcon-serve",
-        "description": "Local server running Falcon model.",
-        "envVars": {
-            "FALCON_THREADS": "16"
-        },
-        "name": "Local Falcon Server",
-        "timeout": 210,
-        "type": 0,
-        "uuid": "2b3c4d5e-6f70-7890-1234-89abcdef0123"
-    },
-    {
-        "description": "Connects to Azure OpenAI endpoint.",
-        "name": "Azure OpenAI API",
-        "requestHeaders": "{\"api-key\": \"your_azure_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 90,
-        "type": 1,
-        "url": "https://azure.openai.com/v1/chat/completions",
-        "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
-    },
-    {
+        "baseUrl": "http://custom-http-sse.local/stream",
         "description": "Custom HTTP SSE endpoint.",
+        "endpoint": "",
+        "host": "",
         "name": "Custom HTTP SSE",
+        "port": "",
         "requestHeaders": "{\"X-Stream-Token\": \"stream_token\"}",
         "timeout": 140,
         "type": 2,
-        "url": "http://custom-http-sse.local/stream",
         "uuid": "e7f8091a-2b3c-3456-7890-456789abcdef"
     },
     {
-        "description": "Proxy server for SSE streaming.",
-        "name": "Custom SSE Proxy",
-        "requestHeaders": "{\"X-Proxy-Token\": \"proxy_token\"}",
-        "timeout": 130,
+        "baseUrl": "https://api.ai21.com/studio/v1/j1-large/complete",
+        "description": "Connects to AI21 Studio API endpoint.",
+        "endpoint": "/sse",
+        "host": "",
+        "name": "AI21 Studio API666",
+        "port": "",
+        "requestHeaders": "{\"Authorization\": \"Bearer ai21_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 85,
+        "type": 1,
+        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef01"
+    },
+    {
+        "baseUrl": "ws://custom-ws-sse.local/stream",
+        "description": "Custom WebSocket-based SSE endpoint.",
+        "endpoint": "",
+        "host": "",
+        "name": "Custom WebSocket SSE",
+        "port": "",
+        "requestHeaders": "{\"X-WS-Token\": \"ws_token\"}",
+        "timeout": 150,
         "type": 2,
-        "url": "http://sse-proxy.local/stream",
-        "uuid": "b4c5d6e7-f809-0123-4567-123456789abc"
+        "uuid": "1a2b3c4d-5e6f-6789-0123-789abcdef012"
     },
     {
-        "args": [
-            "-m",
-            "/models/ggml-model.bin",
-            "-c",
-            "1024"
-        ],
-        "command": "/usr/bin/ggml-server",
-        "description": "Local server running GGML model.",
-        "envVars": {
-            "GGML_THREADS": "4",
-            "xialichen": "666"
-        },
-        "name": "Local GGML Server",
-        "timeout": 250,
-        "type": 0,
-        "uuid": "c9d0e1f2-a3b4-5678-9012-cdef01234567"
+        "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+        "description": "Connects to OpenRouter API endpoint.",
+        "endpoint": "",
+        "host": "",
+        "name": "OpenRouter API",
+        "port": "",
+        "requestHeaders": "{\"Authorization\": \"Bearer openrouter_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 75,
+        "type": 1,
+        "uuid": "a3b4c5d6-e7f8-9012-3456-0123456789ab"
     },
     {
+        "baseUrl": "https://azure.openai.com/v1/chat/completions",
+        "description": "Connects to Azure OpenAI endpoint.",
+        "endpoint": "",
+        "host": "",
+        "name": "Azure OpenAI API",
+        "port": "",
+        "requestHeaders": "{\"api-key\": \"your_azure_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 90,
+        "type": 1,
+        "uuid": "e5f6a7b8-c9d0-1234-5678-90abcdef0123"
+    },
+    {
+        "baseUrl": "https://api.example.com/v1/chat/completions",
+        "description": "Connects to an OpenAI-compatible API endpoint for streaming responses.",
+        "endpoint": "",
+        "host": "",
+        "name": "OpenAI Compatible API (SSE)",
+        "port": "",
+        "requestHeaders": "{\"Authorization\": \"Bearer sk-your_api_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 60,
+        "type": 1,
+        "uuid": "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
+    },
+    {
+        "baseUrl": "https://palm.googleapis.com/v1beta2/models/chat-bison:generateMessage",
+        "description": "Connects to Google PaLM API endpoint.",
+        "endpoint": "",
+        "host": "",
+        "name": "Google PaLM API",
+        "port": "",
+        "requestHeaders": "{\"Authorization\": \"Bearer your_google_token\", \"Content-Type\": \"application/json\"}",
+        "timeout": 80,
+        "type": 1,
+        "uuid": "f6a7b8c9-d0e1-2345-6789-0abcdef01234"
+    },
+    {
+        "baseUrl": "https://api-inference.huggingface.co/models/gpt2",
         "description": "Connects to HuggingFace hosted inference endpoint.",
+        "endpoint": "",
+        "host": "",
         "name": "HuggingFace Inference API",
+        "port": "",
         "requestHeaders": "{\"Authorization\": \"Bearer hf_your_token\"}",
         "timeout": 60,
         "type": 1,
-        "url": "https://api-inference.huggingface.co/models/gpt2",
         "uuid": "d0e1f2a3-b4c5-6789-0123-def012345678"
+    },
+    {
+        "baseUrl": "https://api.anthropic.com/v1/complete",
+        "description": "Connects to Anthropic Claude API.",
+        "endpoint": "",
+        "host": "",
+        "name": "Anthropic Claude API",
+        "port": "",
+        "requestHeaders": "{\"x-api-key\": \"anthropic_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 70,
+        "type": 1,
+        "uuid": "b8c9d0e1-f2a3-4567-8901-bcdef0123456"
+    },
+    {
+        "baseUrl": "异步保存测试",
+        "description": "mcp保存测试666",
+        "endpoint": "",
+        "host": "",
+        "name": "异步保存测试",
+        "port": "",
+        "requestHeaders": "异步保存测试",
+        "timeout": 60,
+        "type": 1,
+        "uuid": "67875264-bff1-468e-9e67-acfe2776c72d"
+    },
+    {
+        "baseUrl": "https://api.cohere.ai/v1/generate",
+        "description": "Connects to Cohere API endpoint.",
+        "endpoint": "",
+        "host": "",
+        "name": "Cohere API",
+        "port": "",
+        "requestHeaders": "{\"Authorization\": \"Bearer cohere_key\", \"Content-Type\": \"application/json\"}",
+        "timeout": 65,
+        "type": 1,
+        "uuid": "d6e7f809-1a2b-2345-6789-3456789abcde"
     },
     {
         "args": [
@@ -231,13 +185,92 @@
         "uuid": "a1b2c3d4-e5f6-7890-1234-567890abcdef"
     },
     {
-        "description": "Connects to an OpenAI-compatible API endpoint for streaming responses.",
-        "name": "OpenAI Compatible API (SSE)",
-        "requestHeaders": "{\"Authorization\": \"Bearer sk-your_api_key\", \"Content-Type\": \"application/json\"}",
-        "timeout": 60,
-        "type": 1,
-        "url": "https://api.example.com/v1/chat/completions",
-        "uuid": "b2c3d4e5-f6a7-8901-2345-67890abcdef0"
+        "args": [
+            "-m",
+            "/models/llama2-3b.gguf",
+            "-c",
+            "1024"
+        ],
+        "command": "/opt/llm/llama-cpp",
+        "description": "Remote LLM server using CPU only.",
+        "envVars": {
+            "LLAMA_NUM_THREADS": "4"
+        },
+        "name": "Remote LLM (stdio, CPU)",
+        "timeout": 160,
+        "type": 0,
+        "uuid": "f8091a2b-3c4d-4567-8901-56789abcdef0"
+    },
+    {
+        "args": [
+            "-m",
+            "/models/falcon-40b.bin",
+            "-c",
+            "4096"
+        ],
+        "command": "/usr/local/bin/falcon-serve",
+        "description": "Local server running Falcon model.",
+        "envVars": {
+            "FALCON_THREADS": "16"
+        },
+        "name": "Local Falcon Server",
+        "timeout": 210,
+        "type": 0,
+        "uuid": "2b3c4d5e-6f70-7890-1234-89abcdef0123"
+    },
+    {
+        "args": [
+            "-m",
+            "/models/llama2-13b.gguf",
+            "-c",
+            "4096"
+        ],
+        "command": "/opt/llm/llama-cpp",
+        "description": "Remote server running LLM via stdio.",
+        "envVars": {
+            "CUDA_VISIBLE_DEVICES": "1",
+            "LLAMA_NUM_THREADS": "16"
+        },
+        "name": "Remote LLM Server (stdio)",
+        "timeout": 200,
+        "type": 0,
+        "uuid": "d4e5f6a7-b8c9-0123-4567-890abcdef012"
+    },
+    {
+        "baseUrl": "http://json-endpoint.local/api",
+        "description": "Custom HTTP endpoint for JSON responses.",
+        "endpoint": "",
+        "host": "",
+        "name": "Custom HTTP JSON Endpoint",
+        "port": "",
+        "requestHeaders": "{\"X-Auth\": \"json_token\"}",
+        "timeout": 110,
+        "type": 2,
+        "uuid": "e1f2a3b4-c5d6-7890-1234-ef0123456789"
+    },
+    {
+        "baseUrl": "http://sse-proxy.local/stream",
+        "description": "Proxy server for SSE streaming.",
+        "endpoint": "",
+        "host": "",
+        "name": "Custom SSE Proxy",
+        "port": "",
+        "requestHeaders": "{\"X-Proxy-Token\": \"proxy_token\"}",
+        "timeout": 130,
+        "type": 2,
+        "uuid": "b4c5d6e7-f809-0123-4567-123456789abc"
+    },
+    {
+        "baseUrl": "http://localhost:8080/stream",
+        "description": "A proprietary streaming HTTP endpoint for custom integrations.",
+        "endpoint": "/sse",
+        "host": "",
+        "name": "Custom Streamable HTTP Endpoint",
+        "port": "",
+        "requestHeaders": "{\"X-Custom-Auth\": \"some_token\"}",
+        "timeout": 120,
+        "type": 2,
+        "uuid": "c3d4e5f6-a7b8-9012-3456-7890abcdef01"
     },
     {
         "args": [
@@ -256,5 +289,17 @@
         "timeout": 220,
         "type": 0,
         "uuid": "f2a3b4c5-d6e7-8901-2345-f0123456789a"
+    },
+    {
+        "baseUrl": "http://custom-sse.local/stream",
+        "description": "Custom SSE endpoint for streaming.",
+        "endpoint": "",
+        "host": "",
+        "name": "Custom SSE HTTP Endpoint",
+        "port": "",
+        "requestHeaders": "{\"X-API-Key\": \"custom_sse_key\"}",
+        "timeout": 100,
+        "type": 2,
+        "uuid": "a7b8c9d0-e1f2-3456-7890-abcdef012345"
     }
 ]

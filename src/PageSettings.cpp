@@ -268,7 +268,7 @@ void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
     m_lineEditModelName->setText(llm->modelName);
     m_lineEditApiKey->setText(llm->apiKey);
     m_lineEditBaseUrl->setText(llm->baseUrl);
-    m_lineEditEndPoint->setText(llm->endPoint);
+    m_lineEditEndPoint->setText(llm->endpoint);
 }
 
 std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
@@ -279,7 +279,7 @@ std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
     llm->modelName = m_lineEditModelName->text();
     llm->apiKey = m_lineEditApiKey->text();
     llm->baseUrl = m_lineEditBaseUrl->text();
-    llm->endPoint = m_lineEditEndPoint->text();
+    llm->endpoint = m_lineEditEndPoint->text();
     return llm;
 }
 
@@ -816,11 +816,26 @@ void WidgetMcpServerInfo::initItems()
     // m_plainTextEditEnvVars
     m_plainTextEditEnvVars = new QPlainTextEdit(this);
     m_plainTextEditEnvVars->setPlaceholderText("KEY1=value1\nKEY2-value2");
-    // m_labelUrl
-    m_labelUrl = new QLabel("URL", this);
-    // m_lineEditUrl
-    m_lineEditUrl = new QLineEdit(this);
-    m_lineEditUrl->setPlaceholderText("http://localhost:3000/sse");
+    // m_labelHost
+    m_labelHost = new QLabel("Host", this);
+    // m_lineEditHost
+    m_lineEditHost = new QLineEdit(this);
+    m_lineEditHost->setPlaceholderText("127.0.0.1");
+    // m_labelPort
+    m_labelPort = new QLabel("Port", this);
+    // m_lineEditPort
+    m_lineEditPort = new QLineEdit(this);
+    m_lineEditPort->setPlaceholderText("8000");
+    // m_labelBaseUrl
+    m_labelBaseUrl = new QLabel("BaseUrl", this);
+    // m_lineEditBaseUrl
+    m_lineEditBaseUrl = new QLineEdit(this);
+    m_lineEditBaseUrl->setPlaceholderText("http://localhost:8000");
+    // m_labelEndpoint
+    m_labelEndpoint = new QLabel("Endpoint", this);
+    // m_lineEditEndpoint
+    m_lineEditEndpoint = new QLineEdit(this);
+    m_lineEditEndpoint->setPlaceholderText("/sse");
     // m_labelRequestHeaders
     m_labelRequestHeaders = new QLabel("请求头", this);
     // m_plainTextEditRequestHeaders
@@ -870,11 +885,17 @@ void WidgetMcpServerInfo::initLayout()
     gLayout->addWidget(m_plainTextEditArgs, 6, 1);
     gLayout->addWidget(m_labelEnvVars, 7, 0);
     gLayout->addWidget(m_plainTextEditEnvVars, 7, 1);
-    gLayout->addWidget(m_labelUrl, 8, 0);
-    gLayout->addWidget(m_lineEditUrl, 8, 1);
-    gLayout->addWidget(m_labelRequestHeaders, 9, 0);
-    gLayout->addWidget(m_plainTextEditRequestHeaders, 9, 1);
-    gLayout->addLayout(hLayoutButtons, 11, 1);
+    gLayout->addWidget(m_labelHost, 8, 0);
+    gLayout->addWidget(m_lineEditHost, 8, 1);
+    gLayout->addWidget(m_labelPort, 9, 0);
+    gLayout->addWidget(m_lineEditPort, 9, 1);
+    gLayout->addWidget(m_labelBaseUrl, 10, 0);
+    gLayout->addWidget(m_lineEditBaseUrl, 10, 1);
+    gLayout->addWidget(m_labelEndpoint, 11, 0);
+    gLayout->addWidget(m_lineEditEndpoint, 11, 1);
+    gLayout->addWidget(m_labelRequestHeaders, 12, 0);
+    gLayout->addWidget(m_plainTextEditRequestHeaders, 12, 1);
+    gLayout->addLayout(hLayoutButtons, 13, 1);
 }
 
 void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
@@ -899,7 +920,10 @@ void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
         strEnvVars.append(it.key()).append("=").append(it.value()).append("\n");
     }
     m_plainTextEditEnvVars->setPlainText(strEnvVars);
-    m_lineEditUrl->setText(mcpServer->url);
+    m_lineEditHost->setText(mcpServer->host);
+    m_lineEditPort->setText(mcpServer->port);
+    m_lineEditBaseUrl->setText(mcpServer->baseUrl);
+    m_lineEditEndpoint->setText(mcpServer->endpoint);
     m_plainTextEditRequestHeaders->setPlainText(mcpServer->requestHeaders);
 }
 
@@ -939,7 +963,7 @@ std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()
         }
     }
 
-    mcpServer->url = m_lineEditUrl->text();
+    mcpServer->baseUrl = m_lineEditBaseUrl->text();
     mcpServer->requestHeaders = m_plainTextEditRequestHeaders->toPlainText();
 
     return mcpServer;
@@ -955,8 +979,14 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         m_plainTextEditArgs->show();
         m_labelEnvVars->show();
         m_plainTextEditEnvVars->show();
-        m_labelUrl->hide();
-        m_lineEditUrl->hide();
+        m_labelHost->hide();
+        m_lineEditHost->hide();
+        m_labelPort->hide();
+        m_lineEditPort->hide();
+        m_labelBaseUrl->hide();
+        m_lineEditBaseUrl->hide();
+        m_labelEndpoint->hide();
+        m_lineEditEndpoint->hide();
         m_labelRequestHeaders->hide();
         m_plainTextEditRequestHeaders->hide();
         return;
@@ -969,12 +999,22 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         m_plainTextEditArgs->hide();
         m_labelEnvVars->hide();
         m_plainTextEditEnvVars->hide();
-        m_labelUrl->show();
-        m_lineEditUrl->show();
+        m_labelHost->show();
+        m_lineEditHost->show();
+        m_labelPort->show();
+        m_lineEditPort->show();
+        m_labelBaseUrl->show();
+        m_lineEditBaseUrl->show();
+        m_labelEndpoint->show();
+        m_lineEditEndpoint->show();
         m_labelRequestHeaders->show();
         m_plainTextEditRequestHeaders->show();
         return;
     }
+    if (index == McpServer::Type::sse)
+        m_lineEditEndpoint->setPlaceholderText("/sse");
+    else if (index = McpServer::Type::streambleHttp)
+        m_lineEditEndpoint->setPlaceholderText("/mcp");
     LOG_WARN("不存在的mcp服务器类型: {}", m_comboBoxType->currentText());
 }
 

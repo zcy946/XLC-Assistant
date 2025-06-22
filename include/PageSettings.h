@@ -248,8 +248,14 @@ private:
     QPlainTextEdit *m_plainTextEditArgs;
     QLabel *m_labelEnvVars;
     QPlainTextEdit *m_plainTextEditEnvVars;
-    QLabel *m_labelUrl;
-    QLineEdit *m_lineEditUrl;
+    QLabel *m_labelHost;
+    QLineEdit *m_lineEditHost;
+    QLabel *m_labelPort;
+    QLineEdit *m_lineEditPort;
+    QLabel *m_labelBaseUrl;
+    QLineEdit *m_lineEditBaseUrl;
+    QLabel *m_labelEndpoint;
+    QLineEdit *m_lineEditEndpoint;
     QLabel *m_labelRequestHeaders;
     QPlainTextEdit *m_plainTextEditRequestHeaders;
     QPushButton *m_pushButtonReset;
