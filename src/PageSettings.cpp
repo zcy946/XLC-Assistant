@@ -438,13 +438,13 @@ void WidgetAgentInfo::initItems()
             [this]()
             {
                 LOG_DEBUG("Agent[{}]: 尝试添加mcp服务器", m_lineEditUuid->text());
-                std::shared_ptr<QVector<QString>> uuidsMcpServer = std::make_shared<QVector<QString>>();
+                std::shared_ptr<QSet<QString>> uuidsMcpServer = std::make_shared<QSet<QString>>();
                 for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
                 {
                     QListWidgetItem *item = m_listWidgetMcpServers->item(i);
                     if (item)
                     {
-                        uuidsMcpServer->append(item->data(Qt::UserRole).toString());
+                        uuidsMcpServer->insert(item->data(Qt::UserRole).toString());
                     }
                 }
                 DialogAddMcpServer *dialog = new DialogAddMcpServer(uuidsMcpServer, this);
@@ -594,7 +594,7 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
         QListWidgetItem *item = m_listWidgetMcpServers->item(i);
         QString uuid = item->data(Qt::UserRole).toString();
         if (!uuid.isEmpty())
-            agent->mcpServers.append(uuid);
+            agent->mcpServers.insert(uuid);
     }
     return agent;
 }
@@ -616,7 +616,7 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
 }
 
 // DialogAddMcpServer
-DialogAddMcpServer::DialogAddMcpServer(std::shared_ptr<QVector<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
+DialogAddMcpServer::DialogAddMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
 {
     initUI();
@@ -653,16 +653,14 @@ void DialogAddMcpServer::initItems()
                 const QString uuidMcpServer = item->data(Qt::UserRole).toString();
                 if (item->checkState() == Qt::Checked)
                 {
-                    if (m_uuidsMcpServer->contains(uuidMcpServer))
-                        return;
-                    m_uuidsMcpServer->append(uuidMcpServer);
+                    m_uuidsMcpServer->insert(uuidMcpServer);
                     LOG_TRACE("挂载mcp服务器: {}", uuidMcpServer);
                 }
                 else if (item->checkState() == Qt::Unchecked)
                 {
                     if (m_uuidsMcpServer->contains(uuidMcpServer))
                     {
-                        m_uuidsMcpServer->removeAll(uuidMcpServer);
+                        m_uuidsMcpServer->remove(uuidMcpServer);
                         LOG_TRACE("取消挂载mcp服务器: {}", uuidMcpServer);
                     }
                 }

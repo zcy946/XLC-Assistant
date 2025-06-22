@@ -7,6 +7,7 @@
 #include <QObject>
 #include "Logger.hpp"
 #include <mcp_message.h>
+#include <QSet>
 
 struct LLM;
 struct McpServer;
@@ -290,7 +291,7 @@ struct Agent
     double temperature;
     double topP;
     int maxTokens;
-    QVector<QString> mcpServers; // 挂载的mcp服务器的uuid
+    QSet<QString> mcpServers; // 挂载的mcp服务器的uuid
     // TODO 添加 QSet<QString>conversations 以该agent为模板的对话的uuid
 
     Agent()
@@ -315,7 +316,7 @@ struct Agent
           double temperature,
           double topP,
           int maxTokens,
-          const QVector<QString> &mcpServers = QVector<QString>())
+          const QSet<QString> &mcpServers = QSet<QString>())
         : uuid(generateUuid()),
           name(name),
           description(description),
@@ -348,7 +349,7 @@ struct Agent
         QJsonArray mcpServersArray = jsonObject["mcpServers"].toArray();
         for (const QJsonValue &value : mcpServersArray)
         {
-            agent.mcpServers.append(value.toString());
+            agent.mcpServers.insert(value.toString());
         }
         return agent;
     }

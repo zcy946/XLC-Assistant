@@ -172,7 +172,7 @@ class DialogAddMcpServer : public QDialog
 {
     Q_OBJECT
 public:
-    DialogAddMcpServer(std::shared_ptr<QVector<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    DialogAddMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DialogAddMcpServer() = default;
 
 protected:
@@ -184,7 +184,7 @@ private:
     void initUI();
 
 private:
-    std::shared_ptr<QVector<QString>> m_uuidsMcpServer;
+    std::shared_ptr<QSet<QString>> m_uuidsMcpServer;
     QListWidget *m_listWidgetMcpServers;
     QPushButton *m_pushButtonSave;
     QPushButton *m_pushButtonCancel;
