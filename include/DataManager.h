@@ -291,7 +291,7 @@ struct Agent
     double topP;
     int maxTokens;
     QVector<QString> mcpServers; // 挂载的mcp服务器的uuid
-    // TODO 添加 QVector<QString>conversations 以该agent为模板的对话的uuid
+    // TODO 添加 QSet<QString>conversations 以该agent为模板的对话的uuid
 
     Agent()
         : name(),
