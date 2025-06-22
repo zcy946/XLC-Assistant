@@ -152,7 +152,7 @@ void DataManager::slot_onMcpServersLoaded(bool success)
     if (!success)
         return;
     // 异步挂载所有mcp服务器
-    // FIXME 使用算法，动态选中异步线程数量，对mcp服务器进行快速初始化
+    // FIXME 使用算法，智能选择异步线程数量，对mcp服务器进行分块初始化
     QtConcurrent::run(
         [this]()
         {
