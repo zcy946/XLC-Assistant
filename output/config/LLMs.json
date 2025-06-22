@@ -2,7 +2,7 @@
     {
         "apiKey": "sk-67827bd147dc43afbb9a982349c4be31",
         "baseUrl": "https://api.deepseek.com",
-        "endPoint": "/v1/chat/completions",
+        "endpoint": "/v1/chat/completions",
         "modelID": "deepseek-reasoner",
         "modelName": "DeepSeek-R1-0528",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef02"
@@ -10,7 +10,15 @@
     {
         "apiKey": "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",
         "baseUrl": "https://openrouter.ai/api",
-        "endPoint": "/v1/chat/completions",
+        "endpoint": "/v1/chat/completions",
+        "modelID": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+        "modelName": "Deepseek: Deepseek R1 0528 Qwen3 8B (free)",
+        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef03"
+    },
+    {
+        "apiKey": "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",
+        "baseUrl": "https://openrouter.ai/api",
+        "endpoint": "/v1/chat/completions",
         "modelID": "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",
         "modelName": "NVIDIA: Llama 3.1 Nemotron Ultra 253B v1 (free)",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef04"
@@ -18,7 +26,7 @@
     {
         "apiKey": "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",
         "baseUrl": "https://openrouter.ai/api",
-        "endPoint": "/v1/chat/completions",
+        "endpoint": "/v1/chat/completions",
         "modelID": "meta-llama/llama-4-maverick:free",
         "modelName": "Meta: Llama 4 Maverick (free)",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef05"
@@ -26,17 +34,9 @@
     {
         "apiKey": "sk-67827bd147dc43afbb9a982349c4be31",
         "baseUrl": "https://api.deepseek.com",
-        "endPoint": "/v1/chat/completions",
+        "endpoint": "/v1/chat/completions",
         "modelID": "deepseek-chat",
         "modelName": "DeepSeek-V3-0324",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef01"
-    },
-    {
-        "apiKey": "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",
-        "baseUrl": "https://openrouter.ai/api",
-        "endPoint": "/v1/chat/completions",
-        "modelID": "deepseek/deepseek-r1-0528-qwen3-8b:free",
-        "modelName": "Deepseek: Deepseek R1 0528 Qwen3 8B (free)",
-        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef03"
     }
 ]

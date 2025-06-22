@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <QSet>
 #include <QString>
 #include <QMutex>
 #include <QtConcurrent/QtConcurrent>
@@ -20,32 +21,32 @@ class MCPGateway : public QObject
     Q_OBJECT
 
 Q_SIGNALS:
-    void serverRegistered(const QString &serverId);
-    void serverUnregistered(const QString &serverId);
-    void registrationFailed(const QString &serverId, const QString &error);
-    void toolCallSucceeded(const QString &sessionId, const QString &toolName, const QString &resultJson);
-    void toolCallFailed(const QString &sessionId, const QString &toolName, const QString &error);
+    void serverRegistered(const QString &serverUuid);
+    void serverUnregistered(const QString &serverUuid);
+    void registrationFailed(const QString &serverUuid, const QString &error);
+    void toolCallSucceeded(const QString &conversationUuid, const QString &toolName, const QString &resultJson);
+    void toolCallFailed(const QString &conversationUuid, const QString &toolName, const QString &error);
 
 public:
     explicit MCPGateway(QObject *parent = nullptr);
 
-    mcp::json getToolsForServer(const QString &serverId);
+    mcp::json getToolsForServer(const QString &serverUuid);
 
-    mcp::json getToolsForServers(const QVector<QString> &serverIds);
+    mcp::json getToolsForServers(const QSet<QString> &serverUuids);
 
     // 获取所有已注册服务器提供的全部工具列表
     mcp::json getAllAvailableTools();
 
 public slots:
     // 当一个新Agent/话题启动时，调用此方法注册它的MCP服务器
-    // serverId 可以是 session_uuid，或者一个更通用的 agent_id
-    void registerServer(const QString &serverId, const QString &host, int port);
+    void registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint = "/sse");
+    void registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint = "/sse");
 
     // 注销服务器
-    void unregisterServer(const QString &serverId);
+    void unregisterServer(const QString &serverUuid);
 
     // 异步执行工具调用
-    void callTool(const QString &sessionId, const QString &toolName, const mcp::json &params);
+    void callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params);
 
 private:
     QMap<QString, std::shared_ptr<RegisteredServer>> m_servers;

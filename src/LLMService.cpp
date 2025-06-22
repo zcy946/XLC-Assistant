@@ -1,13 +1,13 @@
-#include "ModelService.h"
+#include "LLMService.h"
 #include <QtConcurrent>
 #include "global.h"
 
-ModelService::ModelService(QObject *parent)
+LLMService::LLMService(QObject *parent)
     : QObject(parent), m_maxMcpToolChainCall(3)
 {
 }
 
-void ModelService::processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, const mcp::json &tools, int max_retries)
+void LLMService::processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, const mcp::json &tools, int max_retries)
 {
     // 使用QtConcurrent::run来在后台线程执行耗时操作
     QtConcurrent::run(

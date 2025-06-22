@@ -2,25 +2,25 @@
 
 MCPGateway::MCPGateway(QObject *parent) : QObject(parent) {}
 
-mcp::json MCPGateway::getToolsForServer(const QString &serverId)
+mcp::json MCPGateway::getToolsForServer(const QString &serverUuid)
 {
     QMutexLocker locker(&m_mutex);
-    if (m_servers.contains(serverId))
+    if (m_servers.contains(serverUuid))
     {
-        return m_servers[serverId]->available_tools;    
+        return m_servers[serverUuid]->available_tools;
     }
-    return mcp::json::array(); // 返回空数组
+    return mcp::json::array();
 }
 
-mcp::json MCPGateway::getToolsForServers(const QVector<QString> &serverIds)
+mcp::json MCPGateway::getToolsForServers(const QSet<QString> &serverUuids)
 {
     QMutexLocker locker(&m_mutex);
     mcp::json merged_tools = mcp::json::array();
-    for (const auto &serverId : serverIds)
+    for (const auto &serverUuid : serverUuids)
     {
-        if (m_servers.contains(serverId))
+        if (m_servers.contains(serverUuid))
         {
-            for (const auto &tool : m_servers[serverId]->available_tools)
+            for (const auto &tool : m_servers[serverUuid]->available_tools)
             {
                 merged_tools.push_back(tool);
             }
@@ -33,9 +33,9 @@ mcp::json MCPGateway::getAllAvailableTools()
 {
     QMutexLocker locker(&m_mutex);
     mcp::json all_tools = mcp::json::array();
-    for (const auto &pair : m_servers)
+    for (const auto &server : m_servers)
     {
-        for (const auto &tool : pair->available_tools)
+        for (const auto &tool : server->available_tools)
         {
             all_tools.push_back(tool);
         }
@@ -43,16 +43,16 @@ mcp::json MCPGateway::getAllAvailableTools()
     return all_tools;
 }
 
-void MCPGateway::registerServer(const QString &serverId, const QString &host, int port)
+void MCPGateway::registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint)
 {
     QMutexLocker locker(&m_mutex);
-    if (m_servers.contains(serverId))
+    if (m_servers.contains(serverUuid))
     {
         // Already registered, maybe update?
         return;
     }
 
-    auto client = std::make_unique<mcp::sse_client>(host.toStdString(), port);
+    std::unique_ptr<mcp::sse_client> client = std::make_unique<mcp::sse_client>(host.toStdString(), port, endpoint.toStdString());
     if (client->initialize("GatewayClient", "0.1.0"))
     {
         auto mcpServer = std::make_shared<RegisteredServer>();
@@ -62,40 +62,81 @@ void MCPGateway::registerServer(const QString &serverId, const QString &host, in
         {
             mcp::json convertedTool = {
                 {"type", "function"},
-                {"function", {{"name", tool.name}, {"description", tool.description}, {"parameters", {{"type", "object"}, {"properties", tool.parameters_schema["properties"]}, {"required", tool.parameters_schema["required"]}}}}}};
+                {"function",
+                 {{"name", tool.name},
+                  {"description", tool.description},
+                  {"parameters",
+                   {{"type", "object"},
+                    {"properties", tool.parameters_schema["properties"]},
+                    {"required", tool.parameters_schema["required"]}}}}}};
             mcpServer->available_tools.push_back(convertedTool);
         }
-        m_servers.insert(serverId, mcpServer);
-        emit serverRegistered(serverId); // 通知外界，例如让ChatManager刷新可用工具列表
+        m_servers.insert(serverUuid, mcpServer);
+        emit serverRegistered(serverUuid); // 通知外界，例如让ChatManager刷新可用工具列表
     }
     else
     {
         // Handle error
-        emit registrationFailed(serverId, "Failed to initialize client.");
+        emit registrationFailed(serverUuid, "Failed to initialize sse client.");
+    }
+}
+
+void MCPGateway::registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint)
+{
+    QMutexLocker locker(&m_mutex);
+    if (m_servers.contains(serverUuid))
+    {
+        // Already registered, maybe update?
+        return;
+    }
+
+    std::unique_ptr<mcp::sse_client> client = std::make_unique<mcp::sse_client>(baseUrl.toStdString(), endpoint.toStdString());
+    if (client->initialize("GatewayClient", "0.1.0"))
+    {
+        auto mcpServer = std::make_shared<RegisteredServer>();
+        mcpServer->client = std::move(client);
+        // 获取并缓存这个服务器的工具
+        for (const auto &tool : mcpServer->client->get_tools())
+        {
+            mcp::json convertedTool = {
+                {"type", "function"},
+                {"function",
+                 {{"name", tool.name},
+                  {"description", tool.description},
+                  {"parameters",
+                   {{"type", "object"},
+                    {"properties", tool.parameters_schema["properties"]},
+                    {"required", tool.parameters_schema["required"]}}}}}};
+            mcpServer->available_tools.push_back(convertedTool);
+        }
+        m_servers.insert(serverUuid, mcpServer);
+        emit serverRegistered(serverUuid); // 通知外界，例如让ChatManager刷新可用工具列表
+    }
+    else
+    {
+        // Handle error
+        emit registrationFailed(serverUuid, "Failed to initialize sse client.");
     }
 }
 
 // 注销服务器
-void MCPGateway::unregisterServer(const QString &serverId)
+void MCPGateway::unregisterServer(const QString &serverUuid)
 {
     QMutexLocker locker(&m_mutex);
-    m_servers.remove(serverId);
-    emit serverUnregistered(serverId);
+    m_servers.remove(serverUuid);
+    emit serverUnregistered(serverUuid);
 }
 
 // 异步执行工具调用
-void MCPGateway::callTool(const QString &sessionId, const QString &toolName, const mcp::json &params)
+void MCPGateway::callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params)
 {
-    // 使用QtConcurrent::run在后台执行，避免阻塞网关线程
     QtConcurrent::run(
-        [this, sessionId, toolName, params]()
+        [this, conversationUuid, toolName, params]()
         {
             QMutexLocker locker(&m_mutex);
-
             // 查找哪个服务器拥有这个工具
             mcp::sse_client *targetClient = nullptr;
             QString targetServerId;
-
             for (auto it = m_servers.begin(); it != m_servers.end(); ++it)
             {
                 const auto &tools_on_server = it.value()->available_tools;
@@ -117,16 +158,16 @@ void MCPGateway::callTool(const QString &sessionId, const QString &toolName, con
                 try
                 {
                     mcp::json result = targetClient->call_tool(toolName.toStdString(), params);
-                    emit toolCallSucceeded(sessionId, toolName, QString::fromStdString(result.dump()));
+                    emit toolCallSucceeded(conversationUuid, toolName, QString::fromStdString(result.dump()));
                 }
                 catch (const std::exception &e)
                 {
-                    emit toolCallFailed(sessionId, toolName, QString("Execution error: %1").arg(e.what()));
+                    emit toolCallFailed(conversationUuid, toolName, QString("Execution error: %1").arg(e.what()));
                 }
             }
             else
             {
-                emit toolCallFailed(sessionId, toolName, "Tool not found on any registered server.");
+                emit toolCallFailed(conversationUuid, toolName, "Tool not found on any registered server.");
             }
         });
 }

@@ -8,10 +8,11 @@
 - [x] 从DataManager中**异步**读取mcp服务器和agent并渲染
 - [x] 实现Agents设置界面增删挂载的mcp服务器
 - [ ] 封装mcpclient为mcp网关，用于统一管理mcp服务器
-- [ ] 创建McpService类用于不同的Agent和Mcp网关交互
+- [x] 创建LLMService类用于不同的Agent和Mcp网关交互
 - [x] 抽象出Model类用于管理模型
 - [x] 将Agent的McpServers改为用QSet存储
 - [ ] 修复配置加载前未备份导致内存被替换的bug
+- [ ] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
 
 **进阶**
 
