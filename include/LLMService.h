@@ -2,10 +2,10 @@
 #define LLMSERVICE_H
 
 #include <QObject>
-#include "DataManager.h"
 #include <mcp_message.h>
 #include <httplib.h>
 
+struct Agent;
 class LLMService : public QObject
 {
     Q_OBJECT

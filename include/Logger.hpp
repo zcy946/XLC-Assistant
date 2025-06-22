@@ -10,12 +10,12 @@
 
 constexpr const char * FILE_NAME = "logs/logs.log";
 
-#define LOG_TRACE(...) Logger::trace({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
-#define LOG_DEBUG(...) Logger::debug({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
-#define LOG_INFO(...) Logger::info({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
-#define LOG_WARN(...) Logger::warn({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
-#define LOG_ERROR(...) Logger::error({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
-#define LOG_CRITICAL(...) Logger::critical({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_TRACE(...) Logger::trace({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_DEBUG(...) Logger::debug({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_INFO(...) Logger::info({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_WARN(...) Logger::warn({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_ERROR(...) Logger::error({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define XLC_LOG_CRITICAL(...) Logger::critical({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
 
 class Logger
 {

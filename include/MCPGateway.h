@@ -16,7 +16,7 @@ struct RegisteredServer
     mcp::json available_tools; // 缓存该服务器提供的工具列表
 };
 
-class MCPGateway : public QObject
+class McpGateway : public QObject
 {
     Q_OBJECT
 
@@ -28,7 +28,7 @@ Q_SIGNALS:
     void toolCallFailed(const QString &conversationUuid, const QString &toolName, const QString &error);
 
 public:
-    explicit MCPGateway(QObject *parent = nullptr);
+    explicit McpGateway(QObject *parent = nullptr);
 
     mcp::json getToolsForServer(const QString &serverUuid);
 

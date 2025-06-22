@@ -1,8 +1,8 @@
-#include "MCPGateway.h"
+#include "McpGateway.h"
 
-MCPGateway::MCPGateway(QObject *parent) : QObject(parent) {}
+McpGateway::McpGateway(QObject *parent) : QObject(parent) {}
 
-mcp::json MCPGateway::getToolsForServer(const QString &serverUuid)
+mcp::json McpGateway::getToolsForServer(const QString &serverUuid)
 {
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverUuid))
@@ -12,7 +12,7 @@ mcp::json MCPGateway::getToolsForServer(const QString &serverUuid)
     return mcp::json::array();
 }
 
-mcp::json MCPGateway::getToolsForServers(const QSet<QString> &serverUuids)
+mcp::json McpGateway::getToolsForServers(const QSet<QString> &serverUuids)
 {
     QMutexLocker locker(&m_mutex);
     mcp::json merged_tools = mcp::json::array();
@@ -29,7 +29,7 @@ mcp::json MCPGateway::getToolsForServers(const QSet<QString> &serverUuids)
     return merged_tools;
 }
 
-mcp::json MCPGateway::getAllAvailableTools()
+mcp::json McpGateway::getAllAvailableTools()
 {
     QMutexLocker locker(&m_mutex);
     mcp::json all_tools = mcp::json::array();
@@ -43,7 +43,7 @@ mcp::json MCPGateway::getAllAvailableTools()
     return all_tools;
 }
 
-void MCPGateway::registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint)
+void McpGateway::registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint)
 {
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverUuid))
@@ -60,6 +60,7 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &host, 
         // 获取并缓存这个服务器的工具
         for (const auto &tool : mcpServer->client->get_tools())
         {
+            // 如果键不存在，则分别使用空的 JSON 对象和空的 JSON 数组作为默认值
             mcp::json convertedTool = {
                 {"type", "function"},
                 {"function",
@@ -67,8 +68,8 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &host, 
                   {"description", tool.description},
                   {"parameters",
                    {{"type", "object"},
-                    {"properties", tool.parameters_schema["properties"]},
-                    {"required", tool.parameters_schema["required"]}}}}}};
+                    {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
+                    {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
             mcpServer->available_tools.push_back(convertedTool);
         }
         m_servers.insert(serverUuid, mcpServer);
@@ -81,7 +82,7 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &host, 
     }
 }
 
-void MCPGateway::registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint)
+void McpGateway::registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint)
 {
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverUuid))
@@ -89,7 +90,6 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &baseUr
         // Already registered, maybe update?
         return;
     }
-
     std::unique_ptr<mcp::sse_client> client = std::make_unique<mcp::sse_client>(baseUrl.toStdString(), endpoint.toStdString());
     if (client->initialize("GatewayClient", "0.1.0"))
     {
@@ -105,8 +105,8 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &baseUr
                   {"description", tool.description},
                   {"parameters",
                    {{"type", "object"},
-                    {"properties", tool.parameters_schema["properties"]},
-                    {"required", tool.parameters_schema["required"]}}}}}};
+                    {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
+                    {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
             mcpServer->available_tools.push_back(convertedTool);
         }
         m_servers.insert(serverUuid, mcpServer);
@@ -120,7 +120,7 @@ void MCPGateway::registerServer(const QString &serverUuid, const QString &baseUr
 }
 
 // 注销服务器
-void MCPGateway::unregisterServer(const QString &serverUuid)
+void McpGateway::unregisterServer(const QString &serverUuid)
 {
     QMutexLocker locker(&m_mutex);
     m_servers.remove(serverUuid);
@@ -128,7 +128,7 @@ void MCPGateway::unregisterServer(const QString &serverUuid)
 }
 
 // 异步执行工具调用
-void MCPGateway::callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params)
+void McpGateway::callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params)
 {
     QtConcurrent::run(
         [this, conversationUuid, toolName, params]()

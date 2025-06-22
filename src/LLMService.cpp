@@ -1,6 +1,7 @@
 #include "LLMService.h"
 #include <QtConcurrent>
 #include "global.h"
+#include "DataManager.h"
 
 LLMService::LLMService(QObject *parent)
     : QObject(parent), m_maxMcpToolChainCall(3)

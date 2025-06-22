@@ -62,6 +62,6 @@ void MainWindow::on_navigationBar_indexChanged(int index, const QString &text)
 {
     if (index < 0 || index > m_stackedLayout->count() - 1)
         return;
-    LOG_TRACE("导航至: {} - {}", index, text);
+    XLC_LOG_TRACE("导航至: {} - {}", index, text);
     m_stackedLayout->setCurrentIndex(index);
 }

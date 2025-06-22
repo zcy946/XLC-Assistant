@@ -25,7 +25,7 @@ void PageChat::initItems()
             [](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
-                LOG_TRACE("选中agent: {}", uuid);
+                XLC_LOG_TRACE("选中agent: {}", uuid);
             });
     // m_listWidgetHistory
     m_listWidgetHistory = new QListWidget(this);
@@ -33,7 +33,7 @@ void PageChat::initItems()
             [](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
-                LOG_TRACE("选中对话: {}", uuid);
+                XLC_LOG_TRACE("选中对话: {}", uuid);
             });
 #ifdef QT_DEBUG
     for (int i = 0; i < 50; ++i)
@@ -118,14 +118,14 @@ void WidgetChat::initItems()
             {
                 const QString userInput = this->m_plainTextEdit->toPlainText();
                 if (!userInput.isEmpty())
-                    LOG_DEBUG("发送消息: {}", userInput);
+                    XLC_LOG_DEBUG("发送消息: {}", userInput);
             });
     // m_pushButtonClearContext
     m_pushButtonClearContext = new QPushButton("清除上下文", this);
     connect(m_pushButtonClearContext, &QPushButton::clicked, this,
             []()
             {
-                LOG_DEBUG("清除上下文");
+                XLC_LOG_DEBUG("清除上下文");
             });
     // m_pushButtonNewChat
     m_pushButtonNewChat = new QPushButton(this);
@@ -133,7 +133,7 @@ void WidgetChat::initItems()
     connect(m_pushButtonNewChat, &QPushButton::clicked, this,
             []()
             {
-                LOG_DEBUG("新建对话");
+                XLC_LOG_DEBUG("新建对话");
             });
 }
 
@@ -158,7 +158,7 @@ void WidgetChat::initLayout()
         connect(button, &QPushButton::clicked, this,
                 [i]()
                 {
-                    LOG_DEBUG("tool{}", i);
+                    XLC_LOG_DEBUG("tool{}", i);
                 });
         flowLayoutTools->addWidget(button);
     }

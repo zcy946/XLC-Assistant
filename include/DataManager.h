@@ -8,7 +8,9 @@
 #include "Logger.hpp"
 #include <mcp_message.h>
 #include <QSet>
+#include "MCPGateWay.h"
 
+class LLMService;
 struct LLM;
 struct McpServer;
 struct Agent;
@@ -25,6 +27,9 @@ Q_SIGNALS:
     void sig_filePathChangedLLMs(const QString &filePath);
     void sig_filePathChangedMcpServers(const QString &filePath);
     void sig_filePathChangedAgents(const QString &filePath);
+
+private Q_SLOTS:
+    void slot_onMcpServersLoaded(bool success);
 
 public:
     static DataManager *getInstance();
@@ -90,6 +95,8 @@ private:
     QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;
     QHash<QString, std::shared_ptr<Agent>> m_agents;
     QHash<QString, std::shared_ptr<Conversation>> m_conversations;
+    LLMService *m_llmService;
+    McpGateway *m_mcpGatway;
 };
 
 struct LLM
@@ -170,7 +177,7 @@ struct McpServer
     QMap<QString, QString> envVars;
     // sse&streambleHttp参数
     QString host;
-    QString port;
+    int port;
     QString baseUrl;
     QString endpoint;
     QString requestHeaders;
@@ -224,7 +231,7 @@ struct McpServer
               const QVector<QString> &args,
               const QMap<QString, QString> &envVars,
               const QString &host,
-              const QString &port,
+              int port,
               const QString &endpoint,
               const QString &requestHeaders)
         : uuid(generateUuid()),
@@ -271,7 +278,7 @@ struct McpServer
         else if (server.type == sse || server.type == streambleHttp)
         {
             server.host = jsonObject["host"].toString();
-            server.port = jsonObject["port"].toString();
+            server.port = jsonObject["port"].toInt();
             server.baseUrl = jsonObject["baseUrl"].toString();
             server.endpoint = jsonObject["endpoint"].toString();
             server.requestHeaders = jsonObject["requestHeaders"].toString();
