@@ -11,6 +11,7 @@ PageChat::PageChat(QWidget *parent)
 {
     initUI();
     connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
+    connect(m_widgetChat, &WidgetChat::sig_messageSent, this, &PageChat::slot_onMessageSent);
 }
 
 void PageChat::initWidget()
@@ -19,17 +20,17 @@ void PageChat::initWidget()
 
 void PageChat::initItems()
 {
-    // m_listWidgetAgent
-    m_listWidgetAgent = new QListWidget(this);
-    connect(m_listWidgetAgent, &QListWidget::itemClicked, this,
+    // m_listWidgetAgents
+    m_listWidgetAgents = new QListWidget(this);
+    connect(m_listWidgetAgents, &QListWidget::itemClicked, this,
             [](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
                 XLC_LOG_TRACE("选中agent: {}", uuid);
             });
-    // m_listWidgetHistory
-    m_listWidgetHistory = new QListWidget(this);
-    connect(m_listWidgetHistory, &QListWidget::itemClicked, this,
+    // m_listWidgetConversations
+    m_listWidgetConversations = new QListWidget(this);
+    connect(m_listWidgetConversations, &QListWidget::itemClicked, this,
             [](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
@@ -42,19 +43,26 @@ void PageChat::initItems()
         // QListWidgetItem *itemAgent = new QListWidgetItem();
         // itemAgent->setText(nameAgent);
         // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
-        // m_listWidgetAgent->addItem(itemAgent);
+        // m_listWidgetAgents->addItem(itemAgent);
 
+        std::shared_ptr<Conversation> conversation = std::make_shared<Conversation>();
         QString nameConversation = "对话实例测试" + QString::number(i + 1);
         QListWidgetItem *itemConversation = new QListWidgetItem();
         itemConversation->setText(nameConversation);
-        itemConversation->setData(Qt::UserRole, QVariant::fromValue(generateUuid()));
-        m_listWidgetHistory->addItem(itemConversation);
+        itemConversation->setData(Qt::UserRole, QVariant::fromValue(conversation->uuid));
+        m_listWidgetConversations->addItem(itemConversation);
+        DataManager::getInstance()->addConversation(conversation);
+    }
+    m_listWidgetConversations->sortItems();
+    if (m_listWidgetConversations->currentItem() == nullptr)
+    {
+        m_listWidgetConversations->setCurrentRow(0);
     }
 #endif
     // m_tabWidgetSiderBar
     m_tabWidgetSiderBar = new QTabWidget(this);
-    m_tabWidgetSiderBar->addTab(m_listWidgetAgent, "助手");
-    m_tabWidgetSiderBar->addTab(m_listWidgetHistory, "话题");
+    m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "助手");
+    m_tabWidgetSiderBar->addTab(m_listWidgetConversations, "话题");
     // m_widgetChat
     m_widgetChat = new WidgetChat(this);
 }
@@ -82,8 +90,32 @@ void PageChat::slot_onAgentsLoaded(bool success)
         QListWidgetItem *itemAgent = new QListWidgetItem();
         itemAgent->setText(agent->name);
         itemAgent->setData(Qt::UserRole, QVariant::fromValue(agent->uuid));
-        m_listWidgetAgent->addItem(itemAgent);
+        m_listWidgetAgents->addItem(itemAgent);
     }
+    m_listWidgetAgents->sortItems();
+    // 默认选中并展示第一项
+    if (m_listWidgetAgents->currentItem() == nullptr)
+    {
+        m_listWidgetAgents->setCurrentRow(0);
+    }
+}
+
+void PageChat::slot_onMessageSent(const QString &message)
+{
+    const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
+    if (!agent)
+    {
+        XLC_LOG_WARN("不存在的agent: {}", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
+        return;
+    }
+    const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+    if (!conversation)
+    {
+        XLC_LOG_WARN("不存在的conversation: {}", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+        return;
+    }
+    conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
+    DataManager::getInstance()->handleMessageSent(conversation, agent, DataManager::getInstance()->getTools(agent->mcpServers));
 }
 
 /**
@@ -118,7 +150,10 @@ void WidgetChat::initItems()
             {
                 const QString userInput = this->m_plainTextEdit->toPlainText();
                 if (!userInput.isEmpty())
+                {
                     XLC_LOG_DEBUG("发送消息: {}", userInput);
+                    Q_EMIT sig_messageSent(userInput);
+                }
             });
     // m_pushButtonClearContext
     m_pushButtonClearContext = new QPushButton("清除上下文", this);

@@ -6,6 +6,7 @@
 #include <httplib.h>
 
 struct Agent;
+struct Conversation;
 class LLMService : public QObject
 {
     Q_OBJECT
@@ -26,7 +27,7 @@ public:
      * @param tools 可使用的工具列表.
      * @param max_retries 失败时最大重试次数（默认为3）.
      */
-    void processRequest(const QString &conversationUuid, const std::shared_ptr<Agent> &agent, const mcp::json &messages, const mcp::json &tools, int max_retries = 3);
+    void processRequest(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries = 3);
 
 private:
     /**

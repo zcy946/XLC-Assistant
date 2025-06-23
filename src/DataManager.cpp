@@ -783,3 +783,13 @@ QList<std::shared_ptr<Conversation>> DataManager::getConversations() const
 {
     return m_conversations.values();
 }
+
+void DataManager::handleMessageSent(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)
+{
+    m_llmService->processRequest(conversation, agent, tools, max_retries);
+}
+
+const mcp::json DataManager::getTools(const QSet<QString> mcpServers)
+{
+    return m_mcpGatway->getToolsForServers(mcpServers);
+}
