@@ -24,8 +24,15 @@ Q_SIGNALS:
     void serverRegistered(const QString &serverUuid);
     void serverUnregistered(const QString &serverUuid);
     void registrationFailed(const QString &serverUuid, const QString &error);
-    void toolCallSucceeded(const QString &conversationUuid, const QString &toolName, const QString &resultJson);
-    void toolCallFailed(const QString &conversationUuid, const QString &toolName, const QString &error);
+    void toolCallSucceeded(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &resultJson);
+    void toolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error);
+
+public Q_SLOTS:
+    void registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint = "/sse");
+    void registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint = "/sse");
+    void unregisterServer(const QString &serverUuid);
+    // 异步执行工具调用
+    void callTool(const QString &conversationUuid, const QString &callId, const QString &toolName, const mcp::json &params);
 
 public:
     explicit McpGateway(QObject *parent = nullptr);
@@ -36,17 +43,6 @@ public:
 
     // 获取所有已注册服务器提供的全部工具列表
     mcp::json getAllAvailableTools();
-
-public slots:
-    // 当一个新Agent/话题启动时，调用此方法注册它的MCP服务器
-    void registerServer(const QString &serverUuid, const QString &host, int port, const QString &endpoint = "/sse");
-    void registerServer(const QString &serverUuid, const QString &baseUrl, const QString &endpoint = "/sse");
-
-    // 注销服务器
-    void unregisterServer(const QString &serverUuid);
-
-    // 异步执行工具调用
-    void callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params);
 
 private:
     QMap<QString, std::shared_ptr<RegisteredServer>> m_servers;

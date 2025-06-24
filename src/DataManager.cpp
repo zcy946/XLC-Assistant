@@ -41,6 +41,12 @@ DataManager::DataManager(QObject *parent)
     m_llmService = new LLMService(this);
     m_mcpGatway = new McpGateway(this);
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
+
+    // 处理LLM响应
+    connect(m_llmService, &LLMService::responseReady, this, &DataManager::slot_onResponseReady);
+    // 处理工具调用结果
+    connect(m_mcpGatway, &McpGateway::toolCallSucceeded, this, &DataManager::slot_onToolCallSucceeded);
+    connect(m_mcpGatway, &McpGateway::toolCallFailed, this, &DataManager::slot_onToolCallFailed);
 }
 
 // void DataManager::registerAllMetaType()
@@ -176,6 +182,109 @@ void DataManager::slot_onMcpServersLoaded(bool success)
             const mcp::json &tools = m_mcpGatway->getAllAvailableTools();
             XLC_LOG_DEBUG("已加载 [{}] tools: {}", tools.size(), tools.dump(4));
         });
+}
+
+void DataManager::slot_onResponseReady(const QString &conversationUuid, const QString &responseJson)
+{
+    // 没有调用工具
+    mcp::json response;
+    try
+    {
+        response = mcp::json::parse(responseJson.toStdString());
+    }
+    catch (const std::exception &e)
+    {
+        XLC_LOG_ERROR("Failed to parse responseJson: {}\n{}", e.what(), responseJson);
+        return;
+    }
+    if (response["tool_calls"].empty())
+    {
+        // TODO 展示结果
+        return;
+    }
+
+    /**
+     * FIXME 加入思考循环机制
+     * 给Conversation加入`int`类型变量`maxRetries`作为标识符，在此处判断是否达到设定的最大值，如果达到则不再调用tools*/
+
+    // 调用了工具
+    for (const auto &tool_call : response["tool_calls"])
+    {
+        QString callId = tool_call["id"];
+        QString toolName = QString::fromStdString(tool_call["function"]["name"].get<std::string>());
+        try
+        {
+            // TODO 展示调用过程
+            XLC_LOG_DEBUG("Calling tool: {} - {}", callId, toolName);
+            // 解析参数
+            mcp::json args = tool_call["function"]["arguments"];
+            if (args.is_string())
+            {
+                args = mcp::json::parse(args.get<std::string>());
+            }
+            // 执行工具
+            m_mcpGatway->callTool(conversationUuid, callId, toolName, args);
+        }
+        catch (const std::exception &e)
+        {
+            const auto &it = m_conversations.find(conversationUuid);
+            if (it == m_conversations.end())
+            {
+                XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
+                return;
+            }
+            it.value()->messages.push_back({{"role", "tool"},
+                                            {"tool_call_id", callId.toStdString()},
+                                            {"content", "Error: " + std::string(e.what())}});
+        }
+    }
+}
+
+void DataManager::slot_onToolCallSucceeded(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &resultJson)
+{
+    mcp::json result = mcp::json::parse(resultJson.toStdString());
+    auto content = result.value("content", mcp::json::array());
+    XLC_LOG_DEBUG("result for <{}> - {}:\n", callId, toolName, content.dump(4));
+    // 更新消息列表
+    // BUG 封装push_back函数，加锁防止数据混乱
+    const auto &it = m_conversations.find(conversationUuid);
+    if (it == m_conversations.end())
+    {
+        XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
+        return;
+    }
+    it.value()->messages.push_back({{"role", "tool"},
+                                    {"tool_call_id", callId.toStdString()},
+                                    {"content", content}});
+    // TODO 展示结果 & 发送结果为LLM
+    // display_message(messages.back());
+}
+
+void DataManager::slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error)
+{
+    XLC_LOG_ERROR("failed to call <{}> - {}:\n", callId, toolName, error);
+    // 更新消息列表
+    // BUG 封装push_back函数，加锁防止数据混乱
+    const auto &it = m_conversations.find(conversationUuid);
+    if (it == m_conversations.end())
+    {
+        XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
+        return;
+    }
+    it.value()->messages.push_back({{"role", "tool"},
+                                    {"tool_call_id", callId.toStdString()},
+                                    {"content", error.toStdString()}});
+    // TODO 展示结果 & 发送结果为LLM
+    // display_message(messages.back());
+
+    /**
+     * NOTE 在此处将`maxRetries` + 1
+     * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为: 
+     * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts. 
+     * Please consider alternative approaches or inform the user about the issue."
+     * 来让LLM停止调用此工具(并向用户展示原因)
+     * 在`slot_onResponseReady`中，判断`maxRetries`是否达到设定的最大值，如果达到则不再调用tools
+     */
 }
 
 bool DataManager::loadLLMs(const QString &filePath)

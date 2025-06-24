@@ -42,7 +42,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
 
                         // 将 nlohmann::json 转换为 QString 以便信号传递
                         QString responseStr = QString::fromStdString(message.dump());
-                        XLC_LOG_DEBUG("AI: {}", responseStr);
+                        XLC_LOG_TRACE("AI: {}", responseStr);
                         emit responseReady(conversation->uuid, responseStr);
                         /**
                          * TODO 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数

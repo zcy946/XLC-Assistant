@@ -15,6 +15,7 @@
 - [x] 将Agent的McpServers改为用QSet存储
 - [x] 实现调用LLM对话
 - [ ] 解析LLM的响应实现工具调用
+- [ ] 加入`max_retries`来防止llm陷入调用死循环
 - [ ] 实现调用结果的展示
 - [ ] 修复Agent设置页，llmComboBox未选中真实项的bug
 - [ ] 修复配置加载前未备份导致内存被替换的bug
@@ -24,6 +25,7 @@
 ### 优化
 
 - [ ] 将存储设置改为常规设置，创建`config.json`管理`LLMs.json`、`Agents.json`、`McpServers.json`的存储位置以及是否使用mcp服务器等参数
+- [ ] 将`McpGateway`的`callTool`等函数中的`QString`类型的`json`数据改为使用Qt的Json存储
 - [ ] 修改mcp服务器设置页，实现自定义启停mcp服务器，从而降低客户端初始化的压力
 - [ ] 优化异常展示
 - [ ] 将LLMService和McpGateway作为单例实现

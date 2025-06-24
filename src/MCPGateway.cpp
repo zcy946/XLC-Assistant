@@ -128,10 +128,10 @@ void McpGateway::unregisterServer(const QString &serverUuid)
 }
 
 // 异步执行工具调用
-void McpGateway::callTool(const QString &conversationUuid, const QString &toolName, const mcp::json &params)
+void McpGateway::callTool(const QString &conversationUuid, const QString &callId, const QString &toolName, const mcp::json &params)
 {
     QtConcurrent::run(
-        [this, conversationUuid, toolName, params]()
+        [this, conversationUuid, callId, toolName, params]()
         {
             QMutexLocker locker(&m_mutex);
             // 查找哪个服务器拥有这个工具
@@ -158,16 +158,16 @@ void McpGateway::callTool(const QString &conversationUuid, const QString &toolNa
                 try
                 {
                     mcp::json result = targetClient->call_tool(toolName.toStdString(), params);
-                    emit toolCallSucceeded(conversationUuid, toolName, QString::fromStdString(result.dump()));
+                    emit toolCallSucceeded(conversationUuid, callId, toolName, QString::fromStdString(result.dump()));
                 }
                 catch (const std::exception &e)
                 {
-                    emit toolCallFailed(conversationUuid, toolName, QString("Execution error: %1").arg(e.what()));
+                    emit toolCallFailed(conversationUuid, callId, toolName, QString("Execution error: %1").arg(e.what()));
                 }
             }
             else
             {
-                emit toolCallFailed(conversationUuid, toolName, "Tool not found on any registered server.");
+                emit toolCallFailed(conversationUuid, callId, toolName, "Tool not found on any registered server.");
             }
         });
 }

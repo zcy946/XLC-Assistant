@@ -30,6 +30,9 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
+    void slot_onResponseReady(const QString &conversationUuid, const QString &responseJson);
+    void slot_onToolCallSucceeded(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &resultJson);
+    void slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error);
 
 public:
     static DataManager *getInstance();
