@@ -256,8 +256,10 @@ void DataManager::slot_onToolCallSucceeded(const QString &conversationUuid, cons
     it.value()->messages.push_back({{"role", "tool"},
                                     {"tool_call_id", callId.toStdString()},
                                     {"content", content}});
-    // TODO 展示结果 & 发送结果为LLM
+    // TODO 展示结果
     // display_message(messages.back());
+    // TODO 回应LLM
+
 }
 
 void DataManager::slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error)

@@ -443,6 +443,8 @@ struct Conversation
     QDateTime updatedTime;
     mcp::json messages;
 
+    // TODO 将Agent的uuid也存入Conversation
+
     Conversation()
         : uuid(generateUuid()),
           summary(),
