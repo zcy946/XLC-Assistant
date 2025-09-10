@@ -14,6 +14,7 @@
 - [x] 抽象出Model类用于管理模型
 - [x] 将Agent的McpServers改为用QSet存储
 - [x] 实现调用LLM对话
+- [ ] 修复无`tools`时，程序报错的bug
 - [ ] 解析LLM的响应实现工具调用
 - [ ] 加入`max_retries`来防止llm陷入调用死循环
 - [ ] 实现调用结果的展示

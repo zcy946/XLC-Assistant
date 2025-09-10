@@ -115,6 +115,7 @@ void PageChat::slot_onMessageSent(const QString &message)
         return;
     }
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
+    // FIXME 2025年9月10日 添加没有tools的情况
     DataManager::getInstance()->handleMessageSent(conversation, agent, DataManager::getInstance()->getTools(agent->mcpServers));
 }
 
