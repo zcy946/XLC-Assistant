@@ -28,8 +28,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
             m_client->set_connection_timeout(10);
 
-            int retry = 0;
-            while (retry <= max_retries)
+            for (int retry = 0; retry <= max_retries; ++retry)
             {
                 auto res = m_client->Post(llm->endpoint.toStdString(), body.dump(), "application/json");
 
@@ -70,7 +69,6 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     XLC_LOG_ERROR("{}", errorMsg);
                     emit errorOccurred(conversation->uuid, errorMsg);
                 }
-                retry++;
             }
         });
 }

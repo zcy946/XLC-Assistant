@@ -6,9 +6,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : BaseWidget(parent)
 {
-    initUI();
     // 加载数据
     DataManager::getInstance()->init();
+    initUI();
 }
 
 MainWindow::~MainWindow()
