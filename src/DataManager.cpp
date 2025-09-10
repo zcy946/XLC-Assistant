@@ -210,7 +210,7 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
     // 调用了工具
     for (const auto &tool_call : response["tool_calls"])
     {
-        QString callId = tool_call["id"];
+        QString callId = QString::fromStdString(tool_call["id"].get<std::string>());
         QString toolName = QString::fromStdString(tool_call["function"]["name"].get<std::string>());
         try
         {
