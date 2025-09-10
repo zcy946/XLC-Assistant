@@ -21,7 +21,7 @@ CNavigationContentWidget::CNavigationContentWidget(QWidget *parent)
     m_spacingBackground2Text = 3;
     m_sizeFont = 8;
     m_colorFont = QColor("#000000");
-    m_colorBackground = QColor("#F0F0F0");
+    m_colorBackground = QColor("#FFFFFF");
     m_colorIconBackgroundHovered = QColor("#E5F3FF");
     m_colorIconBackgroundSelected = QColor("#CCE8FF");
     m_colorBorderIconBackground = QColor("#99D1FF");
