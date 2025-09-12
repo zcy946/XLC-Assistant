@@ -16,14 +16,25 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
         {
             const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
             XLC_LOG_TRACE("from conversation[{}]: {}\n\tagent: \n\t\t{}\n\t\t{}\n\tllm: \n\t\t{}\n\t\t{}\n\t\t{}\n\ttools: \n\t\t{}", conversation->uuid, conversation->summary, agent->uuid, agent->name, llm->uuid, llm->modelID, llm->modelName, tools.dump(4));
-            nlohmann::json body =
-                {
+            nlohmann::json body;
+            if (tools.size() != 0)
+            {
+                body = {
                     {"model", llm->modelID.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
                     {"messages", conversation->messages},
                     {"tools", tools},
                     {"tool_choice", "auto"}};
+            }
+            else
+            {
+                body = {
+                    {"model", llm->modelID.toStdString()},
+                    {"max_tokens", agent->maxTokens},
+                    {"temperature", agent->temperature},
+                    {"messages", conversation->messages}};
+            }
             m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
             m_client->set_connection_timeout(10);

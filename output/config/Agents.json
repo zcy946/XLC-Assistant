@@ -3,7 +3,7 @@
         "children": 1,
         "context": 2048,
         "description": "开发测试使用Agent[无mcp服务器挂载]",
-        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "maxTokens": 1024,
         "mcpServers": [
         ],
@@ -12,20 +12,5 @@
         "temperature": 0.7,
         "topP": 0.9,
         "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef123456"
-    },
-    {
-        "children": 1,
-        "context": 2048,
-        "description": "开发测试使用Agent",
-        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
-        "maxTokens": 1024,
-        "mcpServers": [
-            "d0e1f2a3-b4c5-6789-0123-def057887878"
-        ],
-        "name": "开发测试Agent",
-        "systemPrompt": "你是一个擅长调用工具解决问题的小助手，再回答问题之前你应该看看有没有可以使用的工具。",
-        "temperature": 0.7,
-        "topP": 0.9,
-        "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef567924"
     }
 ]
