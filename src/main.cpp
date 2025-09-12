@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     app.setFont(getGlobalFont());
 
     MainWindow w;
-    w.resize(800, 600);
+    w.resize(1200, 700);
     w.show();
 
     app.exec();
