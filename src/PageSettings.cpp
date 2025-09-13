@@ -618,6 +618,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         itemMcpServer->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
         m_listWidgetMcpServers->addItem(itemMcpServer);
     }
+    m_listWidgetMcpServers->sortItems();
     m_listWidgetConversations->clear();
     for (const QString &uuid : agent->conversations)
     {
@@ -631,6 +632,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         itemConversation->setData(Qt::UserRole, QVariant::fromValue<QString>(conversation->uuid));
         m_listWidgetConversations->addItem(itemConversation);
     }
+    m_listWidgetConversations->sortItems();
 }
 
 std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
@@ -653,6 +655,7 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
         if (!uuid.isEmpty())
             agent->mcpServers.insert(uuid);
     }
+    agent->conversations.clear();
     for (int i = 0; i < m_listWidgetConversations->count(); ++i)
     {
         QListWidgetItem *item = m_listWidgetConversations->item(i);
@@ -1090,9 +1093,9 @@ PageSettingsData::PageSettingsData(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedLLMs, this, &PageSettingsData::slot_onFilePathChangedLLMs);
-    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedAgents, this, &PageSettingsData::slot_onFilePathChangedAgents);
-    connect(DataManager::getInstance(), &DataManager::sig_filePathChangedMcpServers, this, &PageSettingsData::slot_onFilePathChangedMcpServers);
+    connect(DataManager::getInstance(), &DataManager::sig_LLMsFilePathChange, this, &PageSettingsData::slot_onFilePathChangedLLMs);
+    connect(DataManager::getInstance(), &DataManager::sig_agentsFilePathChange, this, &PageSettingsData::slot_onFilePathChangedAgents);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersFilePathChange, this, &PageSettingsData::slot_onFilePathChangedMcpServers);
 }
 
 void PageSettingsData::initWidget()

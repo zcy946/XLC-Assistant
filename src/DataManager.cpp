@@ -259,7 +259,6 @@ void DataManager::slot_onToolCallSucceeded(const QString &conversationUuid, cons
     // TODO 展示结果
     // display_message(messages.back());
     // TODO 回应LLM
-
 }
 
 void DataManager::slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error)
@@ -281,8 +280,8 @@ void DataManager::slot_onToolCallFailed(const QString &conversationUuid, const Q
 
     /**
      * NOTE 在此处将`maxRetries` + 1
-     * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为: 
-     * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts. 
+     * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为:
+     * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts.
      * Please consider alternative approaches or inform the user about the issue."
      * 来让LLM停止调用此工具(并向用户展示原因)
      * 在`slot_onResponseReady`中，判断`maxRetries`是否达到设定的最大值，如果达到则不再调用tools
@@ -464,7 +463,7 @@ void DataManager::setFilePathLLMs(const QString &filePath)
         return;
     m_filePathLLMs = filePath;
     loadLLMsAsync();
-    Q_EMIT sig_filePathChangedLLMs(filePath);
+    Q_EMIT sig_LLMsFilePathChange(filePath);
 }
 
 const QString &DataManager::getFilePathLLMs() const
@@ -651,7 +650,7 @@ void DataManager::setFilePathMcpServers(const QString &filePath)
         return;
     m_filePathMcpServers = filePath;
     loadMcpServersAsync();
-    Q_EMIT sig_filePathChangedMcpServers(filePath);
+    Q_EMIT sig_mcpServersFilePathChange(filePath);
 }
 
 const QString &DataManager::getFilePathMcpServers() const
@@ -749,6 +748,7 @@ void DataManager::updateAgent(const std::shared_ptr<Agent> &agent)
     if (it != m_agents.end())
     {
         (*it.value()) = *agent;
+        Q_EMIT sig_agentUpdate(agent->uuid);
         XLC_LOG_DEBUG("Updated Agent with UUID: {}", agent->uuid);
         saveAgentsAsync(m_filePathAgents);
     }
@@ -789,7 +789,6 @@ void DataManager::DataManager::saveAgents(const QString &filePath) const
         XLC_LOG_ERROR("{}", errorMsg);
         return;
     }
-
     XLC_LOG_INFO("Successfully saved [{}] Agents to: [{}]", m_agents.count(), QFileInfo(filePath).absoluteFilePath());
 }
 
@@ -833,7 +832,7 @@ void DataManager::setFilePathAgents(const QString &filePath)
         return;
     m_filePathAgents = filePath;
     loadAgentsAsync();
-    Q_EMIT sig_filePathChangedAgents(filePath);
+    Q_EMIT sig_agentsFilePathChange(filePath);
 }
 
 const QString &DataManager::getFilePathAgents() const
@@ -893,6 +892,20 @@ std::shared_ptr<Conversation> DataManager::getConversation(const QString &uuid) 
 QList<std::shared_ptr<Conversation>> DataManager::getConversations() const
 {
     return m_conversations.values();
+}
+
+std::shared_ptr<Conversation> DataManager::createNewConversation(const QString &agentUuid)
+{
+    std::shared_ptr<Agent> targetAgent = getAgent(agentUuid);
+    if (!targetAgent)
+    {
+        XLC_LOG_ERROR("创建新对话失败，不存在的agent: {}", agentUuid);
+        return nullptr;
+    }
+    std::shared_ptr<Conversation> newConversation = Conversation::create(agentUuid);
+    // 更新对应agent的对话列表
+    targetAgent->conversations.insert(newConversation->uuid);
+    return newConversation;
 }
 
 void DataManager::handleMessageSent(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)

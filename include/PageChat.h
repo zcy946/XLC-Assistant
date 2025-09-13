@@ -14,6 +14,7 @@ class PageChat : public BaseWidget
     Q_OBJECT
 private Q_SLOTS:
     void slot_onAgentsLoaded(bool success);
+    void slot_onAgentUpdated(const QString &agentUuid);
     // 用户点击发送按钮
     void slot_onMessageSent(const QString &message);
 
@@ -30,6 +31,10 @@ private:
     QListWidget *m_listWidgetConversations;
     QTabWidget *m_tabWidgetSiderBar;
     WidgetChat *m_widgetChat;
+
+private:
+    void refreshAgents();
+    void refreshConversations();
 };
 
 class WidgetChat : public BaseWidget

@@ -24,9 +24,12 @@ Q_SIGNALS:
     void sig_mcpServersLoaded(bool success);
     void sig_agentsLoaded(bool success);
     void sig_conversationsLoaded(bool success);
-    void sig_filePathChangedLLMs(const QString &filePath);
-    void sig_filePathChangedMcpServers(const QString &filePath);
-    void sig_filePathChangedAgents(const QString &filePath);
+    void sig_LLMsFilePathChange(const QString &filePath);
+    void sig_mcpServersFilePathChange(const QString &filePath);
+    void sig_agentsFilePathChange(const QString &filePath);
+    void sig_LLMUpdate(const QString &uuid);
+    void sig_mcpUpdate(const QString &uuid);
+    void sig_agentUpdate(const QString &uuid);
 
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
@@ -79,6 +82,7 @@ public:
     void updateConversation(const Conversation &conversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
+    std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
 
     // 处理用户发送消息事件
     void handleMessageSent(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries = 3);
@@ -443,37 +447,77 @@ struct Agent
 };
 // Q_DECLARE_METATYPE(Agent)
 
-struct Conversation
+struct Conversation : public std::enable_shared_from_this<Conversation>
 {
     QString uuid;
-    QString uuidAgent;
-    QString summary; // 对话摘要
+    QString agentUuid;
+    QString summary;
     QDateTime createdTime;
     QDateTime updatedTime;
     mcp::json messages;
 
-    Conversation(const QString &uuidAgent)
+    static std::shared_ptr<Conversation> create(const QString &agentUuid)
+    {
+        // 通过内部 enabler 来调用 protected ctor
+        struct make_shared_enabler : public Conversation
+        {
+            make_shared_enabler(const QString &agentUuid)
+                : Conversation(agentUuid) {}
+            make_shared_enabler(const QString &uuid,
+                                const QString &agentUuid,
+                                const QString &summary,
+                                const QDateTime &createdTime,
+                                const QDateTime &updatedTime)
+                : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
+        };
+        return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(agentUuid));
+        /**
+         * NOTE
+         * 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
+           解决办法：用 make_shared_enabler（内部派生类）作为“桥”，让它调用 protected 构造函数，然后把结果当成 shared_ptr<Conversation> 返回。
+           效果：外部只能通过 Conversation::create(...) 来生成对象，既安全又保持 make_shared 的高效内存分配。 */
+    }
+
+    static std::shared_ptr<Conversation> create(const QString &uuid,
+                                                const QString &agentUuid,
+                                                const QString &summary,
+                                                const QDateTime &createdTime,
+                                                const QDateTime &updatedTime)
+    {
+        struct make_shared_enabler : public Conversation
+        {
+            make_shared_enabler(const QString &uuid,
+                                const QString &agentUuid,
+                                const QString &summary,
+                                const QDateTime &createdTime,
+                                const QDateTime &updatedTime)
+                : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
+        };
+
+        return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(uuid, agentUuid, summary, createdTime, updatedTime));
+    }
+
+protected:
+    Conversation(const QString &agentUuid)
         : uuid(generateUuid()),
-          uuidAgent(uuidAgent),
-          summary(),
+          agentUuid(agentUuid),
           createdTime(QDateTime::currentDateTime()),
           updatedTime(QDateTime::currentDateTime()),
-          messages(mcp::json())
-    {
-    }
-    Conversation(const QString &uuidAgent,
+          messages(mcp::json()) {}
+
+    Conversation(const QString &uuid,
+                 const QString &agentUuid,
                  const QString &summary,
                  const QDateTime &createdTime,
                  const QDateTime &updatedTime)
-        : uuid(generateUuid()),
-          uuidAgent(uuidAgent),
+        : uuid(uuid),
+          agentUuid(agentUuid),
           summary(summary),
           createdTime(createdTime),
           updatedTime(updatedTime),
-          messages(mcp::json())
-    {
-    }
+          messages(mcp::json()) {}
 };
+
 // Q_DECLARE_METATYPE(Conversation)
 
 #endif // DATAMANAGER_H
