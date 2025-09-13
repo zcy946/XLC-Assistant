@@ -8,7 +8,11 @@
 class BaseDialog : public QDialog
 {
 public:
-    explicit BaseDialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QDialog(parent, f) {};
+    explicit BaseDialog(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QDialog(parent, f)
+    {
+        // 移除帮助按钮标志
+        setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    };
     virtual ~BaseDialog() = default;
 
 protected:
