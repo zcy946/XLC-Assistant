@@ -45,7 +45,7 @@ void PageChat::initItems()
         // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
         // m_listWidgetAgents->addItem(itemAgent);
 
-        std::shared_ptr<Conversation> conversation = std::make_shared<Conversation>();
+        std::shared_ptr<Conversation> conversation = std::make_shared<Conversation>(DataManager::getInstance()->getAgents().first()->uuid);
         QString nameConversation = "对话实例测试" + QString::number(i + 1);
         QListWidgetItem *itemConversation = new QListWidgetItem();
         itemConversation->setText(nameConversation);

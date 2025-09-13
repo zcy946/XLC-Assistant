@@ -345,7 +345,7 @@ struct Agent
     double temperature;
     double topP;
     int maxTokens;
-    QSet<QString> mcpServers; // 挂载的mcp服务器的uuid
+    QSet<QString> mcpServers;    // 挂载的mcp服务器的uuid
     QSet<QString> conversations; // 使用该agent的对话的uuid
 
     Agent()
@@ -446,25 +446,27 @@ struct Agent
 struct Conversation
 {
     QString uuid;
+    QString uuidAgent;
     QString summary; // 对话摘要
     QDateTime createdTime;
     QDateTime updatedTime;
     mcp::json messages;
 
-    // TODO 将Agent的uuid也存入Conversation
-
-    Conversation()
+    Conversation(const QString &uuidAgent)
         : uuid(generateUuid()),
+          uuidAgent(uuidAgent),
           summary(),
           createdTime(QDateTime::currentDateTime()),
           updatedTime(QDateTime::currentDateTime()),
           messages(mcp::json())
     {
     }
-    Conversation(const QString &summary,
+    Conversation(const QString &uuidAgent,
+                 const QString &summary,
                  const QDateTime &createdTime,
                  const QDateTime &updatedTime)
         : uuid(generateUuid()),
+          uuidAgent(uuidAgent),
           summary(summary),
           createdTime(createdTime),
           updatedTime(updatedTime),
