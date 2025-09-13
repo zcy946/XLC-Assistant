@@ -338,7 +338,6 @@ struct Agent
     QString uuid;
     QString name;
     QString description;
-    int children; // 以该agent为模板的对话数量
     // llm参数
     int context;
     QString systemPrompt;
@@ -347,42 +346,42 @@ struct Agent
     double topP;
     int maxTokens;
     QSet<QString> mcpServers; // 挂载的mcp服务器的uuid
-    // TODO 添加 QSet<QString>conversations 以该agent为模板的对话的uuid
+    QSet<QString> conversations; // 使用该agent的对话的uuid
 
     Agent()
         : name(),
           description(),
-          children(),
           context(),
           systemPrompt(),
           llmUUid(),
           temperature(),
           topP(),
           maxTokens(),
-          mcpServers()
+          mcpServers(),
+          conversations()
     {
     }
     Agent(const QString &name,
           const QString &description,
-          int children,
           int context,
           const QString &systemPrompt,
           const QString &llmUUid,
           double temperature,
           double topP,
           int maxTokens,
-          const QSet<QString> &mcpServers = QSet<QString>())
+          const QSet<QString> &mcpServers = QSet<QString>(),
+          const QSet<QString> &conversations = QSet<QString>())
         : uuid(generateUuid()),
           name(name),
           description(description),
-          children(children),
           context(context),
           systemPrompt(systemPrompt),
           llmUUid(llmUUid),
           temperature(temperature),
           topP(topP),
           maxTokens(maxTokens),
-          mcpServers(mcpServers)
+          mcpServers(mcpServers),
+          conversations(conversations)
     {
     }
 
@@ -393,7 +392,6 @@ struct Agent
         agent.uuid = jsonObject["uuid"].toString();
         agent.name = jsonObject["name"].toString();
         agent.description = jsonObject["description"].toString();
-        agent.children = jsonObject["children"].toInt();
         agent.context = jsonObject["context"].toInt();
         agent.systemPrompt = jsonObject["systemPrompt"].toString();
         agent.llmUUid = jsonObject["llmUUid"].toString();
@@ -402,9 +400,14 @@ struct Agent
         agent.maxTokens = jsonObject["maxTokens"].toInt();
 
         QJsonArray mcpServersArray = jsonObject["mcpServers"].toArray();
-        for (const QJsonValue &value : mcpServersArray)
+        for (const QJsonValue &mcpServerUuid : mcpServersArray)
         {
-            agent.mcpServers.insert(value.toString());
+            agent.mcpServers.insert(mcpServerUuid.toString());
+        }
+        QJsonArray conversationsArray = jsonObject["conversations"].toArray();
+        for (const QJsonValue &conversationUuid : conversationsArray)
+        {
+            agent.conversations.insert(conversationUuid.toString());
         }
         return agent;
     }
@@ -416,7 +419,6 @@ struct Agent
         jsonObject["uuid"] = uuid;
         jsonObject["name"] = name;
         jsonObject["description"] = description;
-        jsonObject["children"] = children;
         jsonObject["context"] = context;
         jsonObject["systemPrompt"] = systemPrompt;
         jsonObject["llmUUid"] = llmUUid;
@@ -425,11 +427,17 @@ struct Agent
         jsonObject["maxTokens"] = maxTokens;
 
         QJsonArray mcpServersArray;
-        for (const QString &serverUuid : mcpServers)
+        for (const QString &mcpServerUuid : mcpServers)
         {
-            mcpServersArray.append(serverUuid);
+            mcpServersArray.append(mcpServerUuid);
         }
         jsonObject["mcpServers"] = mcpServersArray;
+        QJsonArray conversationsArray;
+        for (const QString &conversationUuid : conversations)
+        {
+            conversationsArray.append(conversationUuid);
+        }
+        jsonObject["conversations"] = conversationsArray;
         return jsonObject;
     }
 };

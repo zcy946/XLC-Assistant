@@ -154,7 +154,6 @@ private:
 private:
     QLineEdit *m_lineEditUuid;
     QLineEdit *m_lineEditName;
-    QSpinBox *m_spinBoxChildren;
     QPlainTextEdit *m_plainTextEditDescription;
     QComboBox *m_comboBoxLLM;
     QSpinBox *m_spinBoxContext;
@@ -163,7 +162,9 @@ private:
     QSpinBox *m_spinBoxMaxTokens;
     QPlainTextEdit *m_plainTextEditSystemPrompt;
     QListWidget *m_listWidgetMcpServers;
-    QMenu *m_contextMenu;
+    QMenu *m_contextMenuMcpServers;
+    QListWidget *m_listWidgetConversations;
+    QMenu *m_contextMenuConversations;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 };

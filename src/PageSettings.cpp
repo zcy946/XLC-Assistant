@@ -386,9 +386,6 @@ void WidgetAgentInfo::initItems()
     // m_lineEditName
     m_lineEditName = new QLineEdit(this);
     m_lineEditName->setPlaceholderText("名称");
-    // m_spinBoxChildren
-    m_spinBoxChildren = new QSpinBox(this);
-    m_spinBoxChildren->setRange(0, 9999999);
     // m_plainTextEditDescription
     m_plainTextEditDescription = new QPlainTextEdit(this);
     m_plainTextEditDescription->setPlaceholderText("描述");
@@ -414,27 +411,27 @@ void WidgetAgentInfo::initItems()
     // 添加右键菜单
     // 右键点击时会发出 customContextMenuRequested 信号
     m_listWidgetMcpServers->setContextMenuPolicy(Qt::CustomContextMenu);
-    // m_contextMenu
-    m_contextMenu = new QMenu(m_listWidgetMcpServers);
-    QAction *addAction = new QAction("添加", m_listWidgetMcpServers);
-    QAction *deleteAction = new QAction("删除", m_listWidgetMcpServers);
-    m_contextMenu->addAction(addAction);
-    m_contextMenu->addAction(deleteAction);
+    // m_contextMenuMcpServers
+    m_contextMenuMcpServers = new QMenu(m_listWidgetMcpServers);
+    QAction *actionAddMcpServer = new QAction("添加", m_listWidgetMcpServers);
+    QAction *actionDeleteMcpServer = new QAction("删除", m_listWidgetMcpServers);
+    m_contextMenuMcpServers->addAction(actionAddMcpServer);
+    m_contextMenuMcpServers->addAction(actionDeleteMcpServer);
     connect(m_listWidgetMcpServers, &QListWidget::customContextMenuRequested, this,
-            [this, deleteAction](const QPoint &pos)
+            [this, actionDeleteMcpServer](const QPoint &pos)
             {
                 QListWidgetItem *rightClickedItem = m_listWidgetMcpServers->itemAt(pos);
                 if (rightClickedItem)
                 {
-                    deleteAction->setEnabled(true);
+                    actionDeleteMcpServer->setEnabled(true);
                 }
                 else
                 {
-                    deleteAction->setEnabled(false);
+                    actionDeleteMcpServer->setEnabled(false);
                 }
-                m_contextMenu->exec(m_listWidgetMcpServers->mapToGlobal(pos));
+                m_contextMenuMcpServers->exec(m_listWidgetMcpServers->mapToGlobal(pos));
             });
-    connect(addAction, &QAction::triggered, this,
+    connect(actionAddMcpServer, &QAction::triggered, this,
             [this]()
             {
                 XLC_LOG_DEBUG("Agent[{}]: 尝试添加mcp服务器", m_lineEditUuid->text());
@@ -468,7 +465,7 @@ void WidgetAgentInfo::initItems()
                         });
                 dialog->exec();
             });
-    connect(deleteAction, &QAction::triggered, this,
+    connect(actionDeleteMcpServer, &QAction::triggered, this,
             [this]()
             {
                 // 删除当前选中项
@@ -478,6 +475,54 @@ void WidgetAgentInfo::initItems()
                     XLC_LOG_DEBUG("Agent[{}]: 删除已挂载mcp服务器: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
                     int row = m_listWidgetMcpServers->row(selectedItem);
                     delete m_listWidgetMcpServers->takeItem(row);
+                }
+            });
+
+    // m_listWidgetConversations
+    m_listWidgetConversations = new QListWidget(this);
+    m_listWidgetConversations->setContextMenuPolicy(Qt::CustomContextMenu);
+    // m_contextMenuConversations
+    m_contextMenuConversations = new QMenu(m_listWidgetConversations);
+    QAction *actionViewConversation = new QAction("查看", m_listWidgetConversations);
+    QAction *actionDeleteConversation = new QAction("删除", m_listWidgetConversations);
+    m_contextMenuConversations->addAction(actionViewConversation);
+    m_contextMenuConversations->addAction(actionDeleteConversation);
+    connect(m_listWidgetConversations, &QListWidget::customContextMenuRequested, this,
+            [this, actionViewConversation, actionDeleteConversation](const QPoint &pos)
+            {
+                QListWidgetItem *rightClickedItem = m_listWidgetConversations->itemAt(pos);
+                if (rightClickedItem)
+                {
+                    actionViewConversation->setEnabled(true);
+                    actionDeleteConversation->setEnabled(true);
+                }
+                else
+                {
+                    actionViewConversation->setEnabled(false);
+                    actionDeleteConversation->setEnabled(false);
+                }
+                m_contextMenuConversations->exec(m_listWidgetConversations->mapToGlobal(pos));
+            });
+    connect(actionViewConversation, &QAction::triggered, this,
+            [this]()
+            {
+                QListWidgetItem *selectedItem = m_listWidgetConversations->currentItem();
+                if (selectedItem)
+                {
+                    XLC_LOG_DEBUG("Agent[{}]: 尝试查看对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    // TODO 跳转至对话
+                }
+            });
+    connect(actionDeleteConversation, &QAction::triggered, this,
+            [this]()
+            {
+                // 删除当前选中项
+                QListWidgetItem *selectedItem = m_listWidgetConversations->currentItem();
+                if (selectedItem)
+                {
+                    XLC_LOG_DEBUG("Agent[{}]: 删除对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    int row = m_listWidgetConversations->row(selectedItem);
+                    delete m_listWidgetConversations->takeItem(row);
                 }
             });
 
@@ -517,7 +562,6 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(new QLabel("名称", this), 1, 0);
     gLayout->addWidget(m_lineEditName, 1, 1);
     gLayout->addWidget(new QLabel("实例数量", this), 2, 0);
-    gLayout->addWidget(m_spinBoxChildren, 2, 1);
     gLayout->addWidget(new QLabel("描述", this), 3, 0);
     gLayout->addWidget(m_plainTextEditDescription, 3, 1);
     gLayout->addWidget(new QLabel("模型", this), 4, 0);
@@ -534,7 +578,9 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(m_plainTextEditSystemPrompt, 9, 1);
     gLayout->addWidget(new QLabel("MCP服务器", this), 10, 0);
     gLayout->addWidget(m_listWidgetMcpServers, 10, 1);
-    gLayout->addLayout(hLayoutButtons, 11, 1);
+    gLayout->addWidget(new QLabel("对话列表", this), 11, 0);
+    gLayout->addWidget(m_listWidgetConversations, 11, 1);
+    gLayout->addLayout(hLayoutButtons, 12, 1);
 }
 
 void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
@@ -543,7 +589,6 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         return;
     m_lineEditUuid->setText(agent->uuid);
     m_lineEditName->setText(agent->name);
-    m_spinBoxChildren->setValue(agent->children);
     m_plainTextEditDescription->setPlainText(agent->description);
     const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
@@ -573,6 +618,19 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         itemMcpServer->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
         m_listWidgetMcpServers->addItem(itemMcpServer);
     }
+    m_listWidgetConversations->clear();
+    for (const QString &uuid : agent->conversations)
+    {
+        const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(uuid);
+        if (!conversation)
+        {
+            XLC_LOG_WARN("不存在的conversation: {}", uuid);
+            continue;
+        }
+        QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
+        itemConversation->setData(Qt::UserRole, QVariant::fromValue<QString>(conversation->uuid));
+        m_listWidgetConversations->addItem(itemConversation);
+    }
 }
 
 std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
@@ -580,7 +638,6 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
     std::shared_ptr<Agent> agent = std::make_shared<Agent>();
     agent->uuid = m_lineEditUuid->text();
     agent->name = m_lineEditName->text();
-    agent->children = m_spinBoxChildren->value();
     agent->description = m_plainTextEditDescription->toPlainText();
     agent->llmUUid = m_comboBoxLLM->currentData().toString();
     agent->context = m_spinBoxContext->value();
@@ -595,6 +652,13 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
         QString uuid = item->data(Qt::UserRole).toString();
         if (!uuid.isEmpty())
             agent->mcpServers.insert(uuid);
+    }
+    for (int i = 0; i < m_listWidgetConversations->count(); ++i)
+    {
+        QListWidgetItem *item = m_listWidgetConversations->item(i);
+        QString uuid = item->data(Qt::UserRole).toString();
+        if (!uuid.isEmpty())
+            agent->conversations.insert(uuid);
     }
     return agent;
 }

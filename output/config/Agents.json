@@ -1,9 +1,10 @@
 [
     {
-        "children": 1,
         "context": 2048,
+        "conversations": [
+        ],
         "description": "开发测试使用Agent[无mcp服务器挂载]",
-        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
+        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef02",
         "maxTokens": 1024,
         "mcpServers": [
         ],
