@@ -20,7 +20,7 @@ PageSettings::PageSettings(QWidget *parent)
     // pageSettingsMcp
     addPage("MCP 服务器", new PageSettingsMcp(this));
     // pageSettingData
-    addPage("存储设置", new PageSettingsData(this));
+    addPage("存储设置", new PageSettingsStorage(this));
     // pageAbout
     addPage("关于", new PageAbout(this));
 #ifdef QT_DEBUG
@@ -1340,21 +1340,21 @@ void DialogAddNewMcpServer::initLayout()
     vLayout->addLayout(hLayoutButtons);
 }
 
-// PageSettingsData
-PageSettingsData::PageSettingsData(QWidget *parent)
+// PageSettingsStorage
+PageSettingsStorage::PageSettingsStorage(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_LLMsFilePathChange, this, &PageSettingsData::slot_onFilePathChangedLLMs);
-    connect(DataManager::getInstance(), &DataManager::sig_agentsFilePathChange, this, &PageSettingsData::slot_onFilePathChangedAgents);
-    connect(DataManager::getInstance(), &DataManager::sig_mcpServersFilePathChange, this, &PageSettingsData::slot_onFilePathChangedMcpServers);
+    connect(DataManager::getInstance(), &DataManager::sig_LLMsFilePathChange, this, &PageSettingsStorage::slot_onFilePathChangedLLMs);
+    connect(DataManager::getInstance(), &DataManager::sig_agentsFilePathChange, this, &PageSettingsStorage::slot_onFilePathChangedAgents);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersFilePathChange, this, &PageSettingsStorage::slot_onFilePathChangedMcpServers);
 }
 
-void PageSettingsData::initWidget()
+void PageSettingsStorage::initWidget()
 {
 }
 
-void PageSettingsData::initItems()
+void PageSettingsStorage::initItems()
 {
     // m_lineEditFilePathLLMs
     m_lineEditFilePathLLMs = new QLineEdit(this);
@@ -1403,7 +1403,7 @@ void PageSettingsData::initItems()
             });
 }
 
-void PageSettingsData::initLayout()
+void PageSettingsStorage::initLayout()
 {
     // gLayoutStorage
     QGridLayout *gLayoutStorage = new QGridLayout();
@@ -1425,21 +1425,21 @@ void PageSettingsData::initLayout()
     vLayout->addStretch();
 }
 
-void PageSettingsData::slot_onFilePathChangedLLMs(const QString &filePath)
+void PageSettingsStorage::slot_onFilePathChangedLLMs(const QString &filePath)
 {
     if (filePath.isEmpty())
         return;
     m_lineEditFilePathLLMs->setText(QFileInfo(filePath).absoluteFilePath());
 }
 
-void PageSettingsData::slot_onFilePathChangedAgents(const QString &filePath)
+void PageSettingsStorage::slot_onFilePathChangedAgents(const QString &filePath)
 {
     if (filePath.isEmpty())
         return;
     m_lineEditFilePathAgents->setText(QFileInfo(filePath).absoluteFilePath());
 }
 
-void PageSettingsData::slot_onFilePathChangedMcpServers(const QString &filePath)
+void PageSettingsStorage::slot_onFilePathChangedMcpServers(const QString &filePath)
 {
     if (filePath.isEmpty())
         return;

@@ -19,7 +19,7 @@
 class PageSettingsLLM;
 class PageSettingsAgent;
 class PageSettingsMcp;
-class PageSettingsData;
+class PageSettingsStorage;
 class PageAbout;
 class PageSettings : public BaseWidget
 {
@@ -318,7 +318,7 @@ private:
     QPushButton *m_pushButtonCancel;
 };
 
-class PageSettingsData : public BaseWidget
+class PageSettingsStorage : public BaseWidget
 {
     Q_OBJECT
 private Q_SLOTS:
@@ -327,7 +327,7 @@ private Q_SLOTS:
     void slot_onFilePathChangedMcpServers(const QString &filePath);
 
 public:
-    explicit PageSettingsData(QWidget *parent = nullptr);
+    explicit PageSettingsStorage(QWidget *parent = nullptr);
 
 protected:
     void initWidget() override;
