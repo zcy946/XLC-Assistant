@@ -62,6 +62,9 @@ protected:
 private:
     QListWidget *m_listWidgetLLMs;
     WidgetLLMInfo *m_widgetLLMInfo;
+    QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonReset;
+    QPushButton *m_pushButtonSave;
 
 private:
     void showLLMInfo(const QString &uuid);
@@ -77,17 +80,16 @@ public:
      * 更新表单数据
      */
     void updateData(std::shared_ptr<LLM> llm);
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<LLM> getCurrentData();
+    const QString getUuid();
 
 protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
-
-private:
-    /**
-     * 获取当前表单数据
-     */
-    std::shared_ptr<LLM> getCurrentData();
 
 private:
     QLineEdit *m_lineEditUuid;
@@ -96,9 +98,6 @@ private:
     QLineEdit *m_lineEditApiKey;
     QLineEdit *m_lineEditBaseUrl;
     QLineEdit *m_lineEditEndPoint;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
 };
 
 class WidgetAgentInfo;
@@ -120,6 +119,9 @@ protected:
 private:
     QListWidget *m_listWidgetAgents;
     WidgetAgentInfo *m_widgetAgentInfo;
+    QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonReset;
+    QPushButton *m_pushButtonSave;
 
 private:
     void showAgentInfo(const QString &uuid);
@@ -139,17 +141,16 @@ public:
      * 更新表单数据
      */
     void updateData(std::shared_ptr<Agent> agent);
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<Agent> getCurrentData();
+    const QString getUuid();
 
 protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
-
-private:
-    /**
-     * 获取当前表单数据
-     */
-    std::shared_ptr<Agent> getCurrentData();
 
 private:
     QLineEdit *m_lineEditUuid;
@@ -165,9 +166,6 @@ private:
     QMenu *m_contextMenuMcpServers;
     QListWidget *m_listWidgetConversations;
     QMenu *m_contextMenuConversations;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
 };
 
 class DialogAddMcpServer : public BaseDialog
@@ -208,6 +206,9 @@ protected:
 private:
     QListWidget *m_listWidgetMcpServers;
     WidgetMcpServerInfo *m_widgetMcpServerInfo;
+    QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonReset;
+    QPushButton *m_pushButtonSave;
 
 private:
     void showMcpServerInfo(const QString &uuid);
@@ -226,17 +227,16 @@ public:
      * 更新表单数据
      */
     void updateData(std::shared_ptr<McpServer> mcpServer);
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<McpServer> getCurrentData();
+    const QString getUuid();
 
 protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
-
-private:
-    /**
-     * 获取当前表单数据
-     */
-    std::shared_ptr<McpServer> getCurrentData();
 
 private:
     QLineEdit *m_lineEditUuid;
@@ -260,9 +260,6 @@ private:
     QLineEdit *m_lineEditEndpoint;
     QLabel *m_labelRequestHeaders;
     QPlainTextEdit *m_plainTextEditRequestHeaders;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
 };
 
 class PageSettingsData : public BaseWidget

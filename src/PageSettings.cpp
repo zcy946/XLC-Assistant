@@ -105,15 +105,56 @@ void PageSettingsLLM::initItems()
     connect(m_listWidgetLLMs, &QListWidget::itemClicked, this, &PageSettingsLLM::slot_onListWidgetItemClicked);
     // m_widgetLLMInfo
     m_widgetLLMInfo = new WidgetLLMInfo(this);
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                XLC_LOG_DEBUG("添加新模型");
+                // TODO 添加新模型
+            });
+    // m_pushButtonReset
+    m_pushButtonReset = new QPushButton("重置", this);
+    connect(m_pushButtonReset, &QPushButton::clicked, this,
+            [this]()
+            {
+                const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
+                if (!llm)
+                    return;
+                m_widgetLLMInfo->updateData(llm);
+                XLC_LOG_DEBUG("重载llm: {}", m_widgetLLMInfo->getUuid());
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this,
+            [this]()
+            {
+                DataManager::getInstance()->updateLLM(m_widgetLLMInfo->getCurrentData());
+                XLC_LOG_DEBUG("保存llm: {}", m_widgetLLMInfo->getUuid());
+            });
 }
 
 void PageSettingsLLM::initLayout()
 {
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    // widgetOption
+    QWidget *widgetOption = new QWidget(this);
+    // vLayoutOption
+    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
+    vLayoutOption->addWidget(m_widgetLLMInfo);
+    vLayoutOption->addStretch();
+    vLayoutOption->addLayout(hLayoutButtons);
     // splitter
     QSplitter *splitter = new QSplitter(this);
     splitter->setChildrenCollapsible(false);
     splitter->addWidget(m_listWidgetLLMs);
-    splitter->addWidget(m_widgetLLMInfo);
+    splitter->addWidget(widgetOption);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 8);
     // vLayout
@@ -199,46 +240,12 @@ void WidgetLLMInfo::initItems()
     // m_lineEditEndPoint
     m_lineEditEndPoint = new QLineEdit(this);
     m_lineEditEndPoint->setPlaceholderText("/v1/chat/completions");
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
-            {
-                XLC_LOG_DEBUG("添加新模型");
-                // TODO 添加新模型
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_lineEditUuid->text());
-                if (!llm)
-                    return;
-                updateData(llm);
-                XLC_LOG_DEBUG("重载llm: {}", m_lineEditUuid->text());
-            });
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                DataManager::getInstance()->updateLLM(getCurrentData());
-                XLC_LOG_DEBUG("保存llm: {}", m_lineEditUuid->text());
-            });
 }
 
 void WidgetLLMInfo::initLayout()
 {
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
-    QGridLayout *gLayout = new QGridLayout();
+    QGridLayout *gLayout = new QGridLayout(this);
     gLayout->setContentsMargins(0, 0, 0, 0);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
     gLayout->addWidget(m_lineEditUuid, 0, 1);
@@ -252,11 +259,6 @@ void WidgetLLMInfo::initLayout()
     gLayout->addWidget(m_lineEditBaseUrl, 4, 1);
     gLayout->addWidget(new QLabel("接口", this), 5, 0);
     gLayout->addWidget(m_lineEditEndPoint, 5, 1);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->addLayout(gLayout);
-    vLayout->addStretch();
-    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
@@ -283,6 +285,11 @@ std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
     return llm;
 }
 
+const QString WidgetLLMInfo::getUuid()
+{
+    return m_lineEditUuid->text();
+}
+
 // PageSettingsAgent
 PageSettingsAgent::PageSettingsAgent(QWidget *parent)
     : BaseWidget(parent)
@@ -303,15 +310,56 @@ void PageSettingsAgent::initItems()
     connect(m_listWidgetAgents, &QListWidget::itemClicked, this, &PageSettingsAgent::slot_onListWidgetItemClicked);
     // m_widgetAgentInfo
     m_widgetAgentInfo = new WidgetAgentInfo(this);
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                XLC_LOG_DEBUG("添加新agent");
+                // TODO 添加新agent
+            });
+    // m_pushButtonReset
+    m_pushButtonReset = new QPushButton("重置", this);
+    connect(m_pushButtonReset, &QPushButton::clicked, this,
+            [this]()
+            {
+                const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
+                if (!agent)
+                    return;
+                m_widgetAgentInfo->updateData(agent);
+                XLC_LOG_DEBUG("重载agent: {}", m_widgetAgentInfo->getUuid());
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this,
+            [this]()
+            {
+                DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
+                XLC_LOG_DEBUG("保存agent: {}", m_widgetAgentInfo->getUuid());
+            });
 }
 
 void PageSettingsAgent::initLayout()
 {
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    // widgetOption
+    QWidget *widgetOption = new QWidget(this);
+    // vLayoutOption
+    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
+    vLayoutOption->addWidget(m_widgetAgentInfo);
+    vLayoutOption->addStretch();
+    vLayoutOption->addLayout(hLayoutButtons);
     // splitter
     QSplitter *splitter = new QSplitter(this);
     splitter->setChildrenCollapsible(false);
     splitter->addWidget(m_listWidgetAgents);
-    splitter->addWidget(m_widgetAgentInfo);
+    splitter->addWidget(widgetOption);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 8);
     // vLayout
@@ -525,46 +573,12 @@ void WidgetAgentInfo::initItems()
                     delete m_listWidgetConversations->takeItem(row);
                 }
             });
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
-            {
-                XLC_LOG_DEBUG("添加新agent");
-                // TODO 添加新agent
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
-                if (!agent)
-                    return;
-                updateData(agent);
-                XLC_LOG_DEBUG("重载agent: {}", m_lineEditUuid->text());
-            });
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                DataManager::getInstance()->updateAgent(getCurrentData());
-                XLC_LOG_DEBUG("保存agent: {}", m_lineEditUuid->text());
-            });
 }
 
 void WidgetAgentInfo::initLayout()
 {
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
-    QGridLayout *gLayout = new QGridLayout();
+    QGridLayout *gLayout = new QGridLayout(this);
     gLayout->setContentsMargins(0, 0, 0, 0);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
     gLayout->addWidget(m_lineEditUuid, 0, 1);
@@ -588,10 +602,6 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(m_listWidgetMcpServers, 9, 1);
     gLayout->addWidget(new QLabel("对话列表", this), 10, 0);
     gLayout->addWidget(m_listWidgetConversations, 10, 1);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->addLayout(gLayout);
-    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
@@ -675,6 +685,11 @@ std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
             agent->conversations.insert(uuid);
     }
     return agent;
+}
+
+const QString WidgetAgentInfo::getUuid()
+{
+    return m_lineEditUuid->text();
 }
 
 void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
@@ -787,15 +802,53 @@ void PageSettingsMcp::initItems()
     connect(m_listWidgetMcpServers, &QListWidget::itemClicked, this, &PageSettingsMcp::slot_onListWidgetItemClicked);
     // m_widgetMcpServerInfo
     m_widgetMcpServerInfo = new WidgetMcpServerInfo(this);
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                XLC_LOG_DEBUG("添加新mcp服务器");
+                // TODO 添加新mcp服务器
+            });
+    // m_pushButtonReset
+    m_pushButtonReset = new QPushButton("重置", this);
+    connect(m_pushButtonReset, &QPushButton::clicked, this,
+            [this]()
+            {
+                m_widgetMcpServerInfo->updateData(DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid()));
+                XLC_LOG_DEBUG("重载mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this,
+            [this]()
+            {
+                DataManager::getInstance()->updateMcpServer(m_widgetMcpServerInfo->getCurrentData());
+                XLC_LOG_DEBUG("保存mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
+            });
 }
 
 void PageSettingsMcp::initLayout()
 {
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonReset);
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    // widgetOption
+    QWidget *widgetOption = new QWidget(this);
+    // vLayoutOption
+    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
+    vLayoutOption->addWidget(m_widgetMcpServerInfo);
+    vLayoutOption->addStretch();
+    vLayoutOption->addLayout(hLayoutButtons);
     // splitter
     QSplitter *splitter = new QSplitter(this);
     splitter->setChildrenCollapsible(false);
     splitter->addWidget(m_listWidgetMcpServers);
-    splitter->addWidget(m_widgetMcpServerInfo);
+    splitter->addWidget(widgetOption);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 8);
     // vLayout
@@ -919,43 +972,12 @@ void WidgetMcpServerInfo::initItems()
     // m_plainTextEditRequestHeaders
     m_plainTextEditRequestHeaders = new QPlainTextEdit(this);
     m_plainTextEditRequestHeaders->setPlaceholderText("Content-Type=application/json\nAuthorization=Bearer token");
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
-            {
-                XLC_LOG_DEBUG("添加新mcp服务器");
-                // TODO 添加新mcp服务器
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                updateData(DataManager::getInstance()->getMcpServer(m_lineEditUuid->text()));
-                XLC_LOG_DEBUG("重载mcp服务器: {}", m_lineEditUuid->text());
-            });
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                DataManager::getInstance()->updateMcpServer(getCurrentData());
-                XLC_LOG_DEBUG("保存mcp服务器: {}", m_lineEditUuid->text());
-            });
 }
 
 void WidgetMcpServerInfo::initLayout()
 {
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
-    QGridLayout *gLayout = new QGridLayout();
+    QGridLayout *gLayout = new QGridLayout(this);
     gLayout->setContentsMargins(0, 0, 0, 0);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
     gLayout->addWidget(m_lineEditUuid, 0, 1);
@@ -983,10 +1005,6 @@ void WidgetMcpServerInfo::initLayout()
     gLayout->addWidget(m_lineEditEndpoint, 11, 1);
     gLayout->addWidget(m_labelRequestHeaders, 12, 0);
     gLayout->addWidget(m_plainTextEditRequestHeaders, 12, 1);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->addLayout(gLayout);
-    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
@@ -1061,6 +1079,11 @@ std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()
     mcpServer->requestHeaders = m_plainTextEditRequestHeaders->toPlainText();
 
     return mcpServer;
+}
+
+const QString WidgetMcpServerInfo::getUuid()
+{
+    return m_lineEditUuid->text();
 }
 
 void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
