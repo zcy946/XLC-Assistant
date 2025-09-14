@@ -185,12 +185,12 @@ private:
     QMenu *m_contextMenuConversations;
 };
 
-class DialogMountMcpServer : public BaseDialog
+class DialogAddNewAgent : public BaseDialog
 {
     Q_OBJECT
 public:
-    DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~DialogMountMcpServer() = default;
+    DialogAddNewAgent(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogAddNewAgent() = default;
 
 protected:
     void initWidget() override;
@@ -198,8 +198,7 @@ protected:
     void initLayout() override;
 
 private:
-    std::shared_ptr<QSet<QString>> m_uuidsMcpServer;
-    QListWidget *m_listWidgetMcpServers;
+    WidgetAgentInfo *m_widgetAgentInfo;
     QPushButton *m_pushButtonSave;
     QPushButton *m_pushButtonCancel;
 };
@@ -277,6 +276,43 @@ private:
     QLineEdit *m_lineEditEndpoint;
     QLabel *m_labelRequestHeaders;
     QPlainTextEdit *m_plainTextEditRequestHeaders;
+};
+
+class DialogMountMcpServer : public BaseDialog
+{
+    Q_OBJECT
+public:
+    DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogMountMcpServer() = default;
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    std::shared_ptr<QSet<QString>> m_uuidsMcpServer;
+    QListWidget *m_listWidgetMcpServers;
+    QPushButton *m_pushButtonSave;
+    QPushButton *m_pushButtonCancel;
+};
+
+class DialogAddNewMcpServer : public BaseDialog
+{
+    Q_OBJECT
+public:
+    DialogAddNewMcpServer(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogAddNewMcpServer() = default;
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    WidgetMcpServerInfo *m_widgetMcpServerInfo;
+    QPushButton *m_pushButtonSave;
+    QPushButton *m_pushButtonCancel;
 };
 
 class PageSettingsData : public BaseWidget

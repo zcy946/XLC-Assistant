@@ -110,9 +110,9 @@ void PageSettingsLLM::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("添加新模型");
+                XLC_LOG_DEBUG("尝试新增LLM");
                 DialogAddNewLLM *dialog = new DialogAddNewLLM(this);
-                connect(dialog, &DialogMountMcpServer::finished, this,
+                connect(dialog, &DialogAddNewLLM::finished, this,
                         [this, dialog](int result)
                         {
                             if (result == QDialog::Accepted)
@@ -310,7 +310,7 @@ DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
 void DialogAddNewLLM::initWidget()
 {
     setWindowTitle("新增LLM");
-    resize(400, 300);
+    resize(400, 250);
 }
 
 void DialogAddNewLLM::initItems()
@@ -361,10 +361,20 @@ void PageSettingsAgent::initItems()
     // m_pushButtonAdd
     m_pushButtonAdd = new QPushButton("添加", this);
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                XLC_LOG_DEBUG("添加新agent");
-                // TODO 添加新agent
+                XLC_LOG_DEBUG("尝试新增agent");
+                DialogAddNewAgent *dialog = new DialogAddNewAgent(this);
+                connect(dialog, &DialogAddNewAgent::finished, this,
+                        [this, dialog](int result)
+                        {
+                            if (result == QDialog::Accepted)
+                            {
+                                // TODO 同步信息
+                                XLC_LOG_TRACE("新增Agent: {}");
+                            }
+                        });
+                dialog->exec();
             });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
@@ -756,65 +766,31 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
     }
 }
 
-// DialogMountMcpServer
-DialogMountMcpServer::DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
-    : BaseDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
+// DialogAddNewAgent
+DialogAddNewAgent::DialogAddNewAgent(QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f)
 {
     initUI();
 }
 
-void DialogMountMcpServer::initWidget()
+void DialogAddNewAgent::initWidget()
 {
-    setWindowTitle("挂载Mcp服务器");
-    resize(400, 300);
+    setWindowTitle("新增Agent");
+    resize(400, 600);
 }
 
-void DialogMountMcpServer::initItems()
+void DialogAddNewAgent::initItems()
 {
-    // m_listWidgetMcpServers
-    m_listWidgetMcpServers = new QListWidget(this);
-    for (const std::shared_ptr<McpServer> &mcpServer : DataManager::getInstance()->getMcpServers())
-    {
-        QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
-        item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
-        if (m_uuidsMcpServer->contains(mcpServer->uuid))
-        {
-            item->setCheckState(Qt::Checked);
-        }
-        else
-        {
-            item->setCheckState(Qt::Unchecked);
-        }
-        m_listWidgetMcpServers->addItem(item);
-    }
-    m_listWidgetMcpServers->sortItems();
-    connect(m_listWidgetMcpServers, &QListWidget::itemChanged, this,
-            [this](QListWidgetItem *item)
-            {
-                const QString uuidMcpServer = item->data(Qt::UserRole).toString();
-                if (item->checkState() == Qt::Checked)
-                {
-                    m_uuidsMcpServer->insert(uuidMcpServer);
-                    XLC_LOG_TRACE("挂载mcp服务器: {}", uuidMcpServer);
-                }
-                else if (item->checkState() == Qt::Unchecked)
-                {
-                    if (m_uuidsMcpServer->contains(uuidMcpServer))
-                    {
-                        m_uuidsMcpServer->remove(uuidMcpServer);
-                        XLC_LOG_TRACE("取消挂载mcp服务器: {}", uuidMcpServer);
-                    }
-                }
-            });
+    m_widgetAgentInfo = new WidgetAgentInfo(this);
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogMountMcpServer::accept);
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogAddNewAgent::accept);
     // m_pushButtonCancel
     m_pushButtonCancel = new QPushButton("取消", this);
-    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogMountMcpServer::reject);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddNewAgent::reject);
 }
 
-void DialogMountMcpServer::initLayout()
+void DialogAddNewAgent::initLayout()
 {
     // hLayoutButtons
     QHBoxLayout *hLayoutButtons = new QHBoxLayout();
@@ -823,7 +799,7 @@ void DialogMountMcpServer::initLayout()
     hLayoutButtons->addWidget(m_pushButtonCancel);
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->addWidget(m_listWidgetMcpServers);
+    vLayout->addWidget(m_widgetAgentInfo);
     vLayout->addStretch();
     vLayout->addLayout(hLayoutButtons);
 }
@@ -850,10 +826,20 @@ void PageSettingsMcp::initItems()
     // m_pushButtonAdd
     m_pushButtonAdd = new QPushButton("添加", this);
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                XLC_LOG_DEBUG("添加新mcp服务器");
-                // TODO 添加新mcp服务器
+                XLC_LOG_DEBUG("尝试新增mcp服务器");
+                DialogAddNewMcpServer *dialog = new DialogAddNewMcpServer(this);
+                connect(dialog, &DialogAddNewMcpServer::finished, this,
+                        [this, dialog](int result)
+                        {
+                            if (result == QDialog::Accepted)
+                            {
+                                // TODO 同步信息
+                                XLC_LOG_TRACE("新增McpServer: {}");
+                            }
+                        });
+                dialog->exec();
             });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
@@ -1178,6 +1164,116 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         return;
     }
     XLC_LOG_WARN("不存在的mcp服务器类型: {}", m_comboBoxType->currentText());
+}
+
+// DialogMountMcpServer
+DialogMountMcpServer::DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
+{
+    initUI();
+}
+
+void DialogMountMcpServer::initWidget()
+{
+    setWindowTitle("挂载Mcp服务器");
+    resize(400, 300);
+}
+
+void DialogMountMcpServer::initItems()
+{
+    // m_listWidgetMcpServers
+    m_listWidgetMcpServers = new QListWidget(this);
+    for (const std::shared_ptr<McpServer> &mcpServer : DataManager::getInstance()->getMcpServers())
+    {
+        QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+        item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+        if (m_uuidsMcpServer->contains(mcpServer->uuid))
+        {
+            item->setCheckState(Qt::Checked);
+        }
+        else
+        {
+            item->setCheckState(Qt::Unchecked);
+        }
+        m_listWidgetMcpServers->addItem(item);
+    }
+    m_listWidgetMcpServers->sortItems();
+    connect(m_listWidgetMcpServers, &QListWidget::itemChanged, this,
+            [this](QListWidgetItem *item)
+            {
+                const QString uuidMcpServer = item->data(Qt::UserRole).toString();
+                if (item->checkState() == Qt::Checked)
+                {
+                    m_uuidsMcpServer->insert(uuidMcpServer);
+                    XLC_LOG_TRACE("挂载mcp服务器: {}", uuidMcpServer);
+                }
+                else if (item->checkState() == Qt::Unchecked)
+                {
+                    if (m_uuidsMcpServer->contains(uuidMcpServer))
+                    {
+                        m_uuidsMcpServer->remove(uuidMcpServer);
+                        XLC_LOG_TRACE("取消挂载mcp服务器: {}", uuidMcpServer);
+                    }
+                }
+            });
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogMountMcpServer::accept);
+    // m_pushButtonCancel
+    m_pushButtonCancel = new QPushButton("取消", this);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogMountMcpServer::reject);
+}
+
+void DialogMountMcpServer::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    hLayoutButtons->addWidget(m_pushButtonCancel);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(m_listWidgetMcpServers);
+    vLayout->addStretch();
+    vLayout->addLayout(hLayoutButtons);
+}
+
+// DialogAddNewMcpServer
+DialogAddNewMcpServer::DialogAddNewMcpServer(QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f)
+{
+    initUI();
+}
+
+void DialogAddNewMcpServer::initWidget()
+{
+    setWindowTitle("新增McpServer");
+    resize(400, 700);
+}
+
+void DialogAddNewMcpServer::initItems()
+{
+    m_widgetMcpServerInfo = new WidgetMcpServerInfo(this);
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogAddNewMcpServer::accept);
+    // m_pushButtonCancel
+    m_pushButtonCancel = new QPushButton("取消", this);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddNewMcpServer::reject);
+}
+
+void DialogAddNewMcpServer::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    hLayoutButtons->addWidget(m_pushButtonCancel);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(m_widgetMcpServerInfo);
+    vLayout->addStretch();
+    vLayout->addLayout(hLayoutButtons);
 }
 
 // PageSettingsData
