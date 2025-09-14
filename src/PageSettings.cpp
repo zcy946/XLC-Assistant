@@ -108,10 +108,20 @@ void PageSettingsLLM::initItems()
     // m_pushButtonAdd
     m_pushButtonAdd = new QPushButton("添加", this);
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
                 XLC_LOG_DEBUG("添加新模型");
-                // TODO 添加新模型
+                DialogAddNewLLM *dialog = new DialogAddNewLLM(this);
+                connect(dialog, &DialogMountMcpServer::finished, this,
+                        [this, dialog](int result)
+                        {
+                            if (result == QDialog::Accepted)
+                            {
+                                // TODO 同步信息
+                                XLC_LOG_TRACE("新增LLM: {}");
+                            }
+                        });
+                dialog->exec();
             });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
@@ -288,6 +298,44 @@ std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
 const QString WidgetLLMInfo::getUuid()
 {
     return m_lineEditUuid->text();
+}
+
+// DialogAddNewLLM
+DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f)
+{
+    initUI();
+}
+
+void DialogAddNewLLM::initWidget()
+{
+    setWindowTitle("新增LLM");
+    resize(400, 300);
+}
+
+void DialogAddNewLLM::initItems()
+{
+    m_widgetLLMInfo = new WidgetLLMInfo(this);
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogAddNewLLM::accept);
+    // m_pushButtonCancel
+    m_pushButtonCancel = new QPushButton("取消", this);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddNewLLM::reject);
+}
+
+void DialogAddNewLLM::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    hLayoutButtons->addWidget(m_pushButtonCancel);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(m_widgetLLMInfo);
+    vLayout->addStretch();
+    vLayout->addLayout(hLayoutButtons);
 }
 
 // PageSettingsAgent
@@ -760,11 +808,7 @@ void DialogMountMcpServer::initItems()
             });
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                Q_EMIT accept();
-            });
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogMountMcpServer::accept);
     // m_pushButtonCancel
     m_pushButtonCancel = new QPushButton("取消", this);
     connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogMountMcpServer::reject);
@@ -780,6 +824,7 @@ void DialogMountMcpServer::initLayout()
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->addWidget(m_listWidgetMcpServers);
+    vLayout->addStretch();
     vLayout->addLayout(hLayoutButtons);
 }
 

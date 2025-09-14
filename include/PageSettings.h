@@ -100,6 +100,24 @@ private:
     QLineEdit *m_lineEditEndPoint;
 };
 
+class DialogAddNewLLM : public BaseDialog
+{
+    Q_OBJECT
+public:
+    DialogAddNewLLM(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogAddNewLLM() = default;
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    WidgetLLMInfo *m_widgetLLMInfo;
+    QPushButton *m_pushButtonSave;
+    QPushButton *m_pushButtonCancel;
+};
+
 class WidgetAgentInfo;
 class PageSettingsAgent : public BaseWidget
 {
@@ -127,7 +145,6 @@ private:
     void showAgentInfo(const QString &uuid);
 };
 
-class DialogMountMcpServer;
 class WidgetAgentInfo : public BaseWidget
 {
     Q_OBJECT
