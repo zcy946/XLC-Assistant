@@ -300,11 +300,17 @@ const QString WidgetLLMInfo::getUuid()
     return m_lineEditUuid->text();
 }
 
+void WidgetLLMInfo::populateBasicInfo()
+{
+    m_lineEditUuid->setText(generateUuid());
+}
+
 // DialogAddNewLLM
 DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
     : BaseDialog(parent, f)
 {
     initUI();
+    m_widgetLLMInfo->populateBasicInfo();
 }
 
 void DialogAddNewLLM::initWidget()
@@ -750,8 +756,16 @@ const QString WidgetAgentInfo::getUuid()
     return m_lineEditUuid->text();
 }
 
+void WidgetAgentInfo::populateBasicInfo()
+{
+    m_lineEditUuid->setText(generateUuid());
+    slot_onLLMsLoaded(true);
+}
+
 void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
 {
+    if (!success)
+        return;
     QList<std::shared_ptr<LLM>> llms = DataManager::getInstance()->getLLMs();
     if (llms.count() <= 0)
         return;
@@ -771,6 +785,7 @@ DialogAddNewAgent::DialogAddNewAgent(QWidget *parent, Qt::WindowFlags f)
     : BaseDialog(parent, f)
 {
     initUI();
+    m_widgetAgentInfo->populateBasicInfo();
 }
 
 void DialogAddNewAgent::initWidget()
@@ -1117,6 +1132,11 @@ const QString WidgetMcpServerInfo::getUuid()
     return m_lineEditUuid->text();
 }
 
+void WidgetMcpServerInfo::populateBasicInfo()
+{
+    m_lineEditUuid->setText(generateUuid());
+}
+
 void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
 {
     if (index == McpServer::Type::stdio)
@@ -1243,6 +1263,7 @@ DialogAddNewMcpServer::DialogAddNewMcpServer(QWidget *parent, Qt::WindowFlags f)
     : BaseDialog(parent, f)
 {
     initUI();
+    m_widgetMcpServerInfo->populateBasicInfo();
 }
 
 void DialogAddNewMcpServer::initWidget()

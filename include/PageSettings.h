@@ -85,6 +85,7 @@ public:
      */
     std::shared_ptr<LLM> getCurrentData();
     const QString getUuid();
+    void populateBasicInfo();
 
 protected:
     void initWidget() override;
@@ -163,6 +164,7 @@ public:
      */
     std::shared_ptr<Agent> getCurrentData();
     const QString getUuid();
+    void populateBasicInfo();
 
 protected:
     void initWidget() override;
@@ -248,6 +250,7 @@ public:
      */
     std::shared_ptr<McpServer> getCurrentData();
     const QString getUuid();
+    void populateBasicInfo();
 
 protected:
     void initWidget() override;
