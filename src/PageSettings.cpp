@@ -679,7 +679,6 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     if (!llm)
     {
         XLC_LOG_WARN("不存在的llm: {}", agent->llmUUid);
-        m_comboBoxLLM->setCurrentText("null");
     }
     else
     {
@@ -777,6 +776,17 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
     for (const std::shared_ptr<LLM> &llm : llms)
     {
         m_comboBoxLLM->addItem(llm->modelName, llm->uuid);
+    }
+    // 选中正确的llm
+    if (!m_lineEditUuid->text().isEmpty() && !m_lineEditName->text().isEmpty())
+    {
+        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
+        if (!agent)
+            return;
+        std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
+        if (!llm)
+            return;
+        m_comboBoxLLM->setCurrentText(llm->modelName);
     }
 }
 

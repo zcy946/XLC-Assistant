@@ -14,11 +14,11 @@
 - [x] 抽象出Model类用于管理模型
 - [x] 将Agent的McpServers改为用QSet存储
 - [x] 实现调用LLM对话
-- [ ] 修复无`tools`时，程序报错的bug
+- [x] 修复无`tools`时，程序报错的bug
 - [ ] 解析LLM的响应实现工具调用
 - [ ] 加入`max_retries`来防止llm陷入调用死循环
 - [ ] 实现调用结果的展示
-- [ ] 修复Agent设置页，llmComboBox未选中真实项的bug
+- [x] 修复Agent设置页，llmComboBox未选中真实项的bug
 - [ ] 修复配置加载前未备份导致内存被替换的bug
 - [ ] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
 - [ ] 实现设置界面添加Agent、Mcp服务器
