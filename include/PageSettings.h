@@ -127,7 +127,7 @@ private:
     void showAgentInfo(const QString &uuid);
 };
 
-class DialogAddMcpServer;
+class DialogMountMcpServer;
 class WidgetAgentInfo : public BaseWidget
 {
     Q_OBJECT
@@ -168,12 +168,12 @@ private:
     QMenu *m_contextMenuConversations;
 };
 
-class DialogAddMcpServer : public BaseDialog
+class DialogMountMcpServer : public BaseDialog
 {
     Q_OBJECT
 public:
-    DialogAddMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~DialogAddMcpServer() = default;
+    DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogMountMcpServer() = default;
 
 protected:
     void initWidget() override;

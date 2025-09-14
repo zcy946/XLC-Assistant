@@ -482,7 +482,7 @@ void WidgetAgentInfo::initItems()
     connect(actionAddMcpServer, &QAction::triggered, this,
             [this]()
             {
-                XLC_LOG_DEBUG("Agent[{}]: 尝试添加mcp服务器", m_lineEditUuid->text());
+                XLC_LOG_DEBUG("Agent[{}]: 尝试添加（挂载）mcp服务器", m_lineEditUuid->text());
                 std::shared_ptr<QSet<QString>> uuidsMcpServer = std::make_shared<QSet<QString>>();
                 for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
                 {
@@ -492,8 +492,8 @@ void WidgetAgentInfo::initItems()
                         uuidsMcpServer->insert(item->data(Qt::UserRole).toString());
                     }
                 }
-                DialogAddMcpServer *dialog = new DialogAddMcpServer(uuidsMcpServer, this);
-                connect(dialog, &DialogAddMcpServer::finished, this,
+                DialogMountMcpServer *dialog = new DialogMountMcpServer(uuidsMcpServer, this);
+                connect(dialog, &DialogMountMcpServer::finished, this,
                         [this, dialog, uuidsMcpServer](int result)
                         {
                             if (result == QDialog::Accepted)
@@ -708,20 +708,20 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
     }
 }
 
-// DialogAddMcpServer
-DialogAddMcpServer::DialogAddMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
+// DialogMountMcpServer
+DialogMountMcpServer::DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
     : BaseDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
 {
     initUI();
 }
 
-void DialogAddMcpServer::initWidget()
+void DialogMountMcpServer::initWidget()
 {
     setWindowTitle("挂载Mcp服务器");
     resize(400, 300);
 }
 
-void DialogAddMcpServer::initItems()
+void DialogMountMcpServer::initItems()
 {
     // m_listWidgetMcpServers
     m_listWidgetMcpServers = new QListWidget(this);
@@ -767,10 +767,10 @@ void DialogAddMcpServer::initItems()
             });
     // m_pushButtonCancel
     m_pushButtonCancel = new QPushButton("取消", this);
-    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddMcpServer::reject);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogMountMcpServer::reject);
 }
 
-void DialogAddMcpServer::initLayout()
+void DialogMountMcpServer::initLayout()
 {
     // hLayoutButtons
     QHBoxLayout *hLayoutButtons = new QHBoxLayout();
