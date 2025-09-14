@@ -329,7 +329,7 @@ DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
 void DialogAddNewLLM::initWidget()
 {
     setWindowTitle("新增LLM");
-    resize(400, 250);
+    resize(500, 250);
 }
 
 void DialogAddNewLLM::initItems()
@@ -824,7 +824,7 @@ DialogAddNewAgent::DialogAddNewAgent(QWidget *parent, Qt::WindowFlags f)
 void DialogAddNewAgent::initWidget()
 {
     setWindowTitle("新增Agent");
-    resize(400, 600);
+    resize(500, 600);
 }
 
 void DialogAddNewAgent::initItems()
@@ -1035,7 +1035,7 @@ void WidgetMcpServerInfo::initItems()
     m_labelEnvVars = new QLabel("环境变量", this);
     // m_plainTextEditEnvVars
     m_plainTextEditEnvVars = new QPlainTextEdit(this);
-    m_plainTextEditEnvVars->setPlaceholderText("KEY1=value1\nKEY2-value2");
+    m_plainTextEditEnvVars->setPlaceholderText("KEY1=value1\nKEY2=value2");
     // m_labelHost
     m_labelHost = new QLabel("Host", this);
     // m_lineEditHost
@@ -1312,7 +1312,7 @@ DialogAddNewMcpServer::DialogAddNewMcpServer(QWidget *parent, Qt::WindowFlags f)
 void DialogAddNewMcpServer::initWidget()
 {
     setWindowTitle("新增McpServer");
-    resize(400, 700);
+    resize(500, 700);
 }
 
 void DialogAddNewMcpServer::initItems()
