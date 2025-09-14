@@ -140,7 +140,20 @@ void PageSettingsLLM::initItems()
             [this]()
             {
                 DataManager::getInstance()->updateLLM(m_widgetLLMInfo->getCurrentData());
-                XLC_LOG_DEBUG("保存llm: {}", m_widgetLLMInfo->getUuid());
+                // 刷新m_listWidgetLLMs
+                /**
+                 * 正常情况下，被更新的llm就是当前选中的llm
+                 */
+                QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
+                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetLLMInfo->getUuid())
+                {
+                    std::shared_ptr<LLM> currentLLM = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
+                    if (currentLLM)
+                    {
+                        selectedItem->setText(currentLLM->modelName);
+                    }
+                }
+                XLC_LOG_DEBUG("更新llm: {}", m_widgetLLMInfo->getUuid());
             });
 }
 
@@ -399,7 +412,17 @@ void PageSettingsAgent::initItems()
             [this]()
             {
                 DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
-                XLC_LOG_DEBUG("保存agent: {}", m_widgetAgentInfo->getUuid());
+                // 刷新m_listWidgetAgents
+                QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
+                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetAgentInfo->getUuid())
+                {
+                    std::shared_ptr<Agent> currentAgent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
+                    if (currentAgent)
+                    {
+                        selectedItem->setText(currentAgent->name);
+                    }
+                }
+                XLC_LOG_DEBUG("更新agent: {}", m_widgetAgentInfo->getUuid());
             });
 }
 
@@ -880,7 +903,17 @@ void PageSettingsMcp::initItems()
             [this]()
             {
                 DataManager::getInstance()->updateMcpServer(m_widgetMcpServerInfo->getCurrentData());
-                XLC_LOG_DEBUG("保存mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
+                // 刷新m_listWidgetMcpServers
+                QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
+                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetMcpServerInfo->getUuid())
+                {
+                    std::shared_ptr<McpServer> currentMcpServer = DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid());
+                    if (currentMcpServer)
+                    {
+                        selectedItem->setText(currentMcpServer->name);
+                    }
+                }
+                XLC_LOG_DEBUG("更新mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
             });
 }
 

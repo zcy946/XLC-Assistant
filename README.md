@@ -20,8 +20,8 @@
 - [ ] 实现调用结果的展示
 - [x] 修复Agent设置页，llmComboBox未选中真实项的bug
 - [ ] 修复配置加载前未备份导致内存被替换的bug
-- [ ] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
-- [ ] 实现设置界面添加Agent、Mcp服务器
+- [x] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
+- [ ] 实现设置界面添加Agent、Mcp服务器、LLM
 
 ### 优化
 
