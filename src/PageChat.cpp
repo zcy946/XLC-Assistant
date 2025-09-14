@@ -73,7 +73,6 @@ void PageChat::initItems()
             [this](int index)
             {
                 XLC_LOG_TRACE("切换至: {} - {}", index, m_tabWidgetSiderBar->tabText(index));
-                // TODO 加载对话填充m_listWidgetConversations
             });
     // m_widgetChat
     m_widgetChat = new WidgetChat(this);

@@ -255,8 +255,8 @@ void WidgetLLMInfo::initLayout()
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->addLayout(gLayout);
-    vLayout->addLayout(hLayoutButtons);
     vLayout->addStretch();
+    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
@@ -525,7 +525,14 @@ void WidgetAgentInfo::initItems()
                     delete m_listWidgetConversations->takeItem(row);
                 }
             });
-
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                XLC_LOG_DEBUG("添加新agent");
+                // TODO 添加新agent
+            });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
     connect(m_pushButtonReset, &QPushButton::clicked, this,
@@ -552,35 +559,39 @@ void WidgetAgentInfo::initLayout()
     // hLayoutButtons
     QHBoxLayout *hLayoutButtons = new QHBoxLayout();
     hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
     hLayoutButtons->addStretch();
     hLayoutButtons->addWidget(m_pushButtonReset);
     hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
-    QGridLayout *gLayout = new QGridLayout(this);
+    QGridLayout *gLayout = new QGridLayout();
+    gLayout->setContentsMargins(0, 0, 0, 0);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
     gLayout->addWidget(m_lineEditUuid, 0, 1);
     gLayout->addWidget(new QLabel("名称", this), 1, 0);
     gLayout->addWidget(m_lineEditName, 1, 1);
-    gLayout->addWidget(new QLabel("实例数量", this), 2, 0);
-    gLayout->addWidget(new QLabel("描述", this), 3, 0);
-    gLayout->addWidget(m_plainTextEditDescription, 3, 1);
-    gLayout->addWidget(new QLabel("模型", this), 4, 0);
-    gLayout->addWidget(m_comboBoxLLM, 4, 1);
-    gLayout->addWidget(new QLabel("上下文", this), 5, 0);
-    gLayout->addWidget(m_spinBoxContext, 5, 1);
-    gLayout->addWidget(new QLabel("模型温度", this), 6, 0);
-    gLayout->addWidget(m_doubleSpinBoxTemperature, 6, 1);
-    gLayout->addWidget(new QLabel("Top-p", this), 7, 0);
-    gLayout->addWidget(m_doubleSpinBoxTopP, 7, 1);
-    gLayout->addWidget(new QLabel("最大Token数", this), 8, 0);
-    gLayout->addWidget(m_spinBoxMaxTokens, 8, 1);
-    gLayout->addWidget(new QLabel("系统提示词", this), 9, 0);
-    gLayout->addWidget(m_plainTextEditSystemPrompt, 9, 1);
-    gLayout->addWidget(new QLabel("MCP服务器", this), 10, 0);
-    gLayout->addWidget(m_listWidgetMcpServers, 10, 1);
-    gLayout->addWidget(new QLabel("对话列表", this), 11, 0);
-    gLayout->addWidget(m_listWidgetConversations, 11, 1);
-    gLayout->addLayout(hLayoutButtons, 12, 1);
+    gLayout->addWidget(new QLabel("描述", this), 2, 0);
+    gLayout->addWidget(m_plainTextEditDescription, 2, 1);
+    gLayout->addWidget(new QLabel("模型", this), 3, 0);
+    gLayout->addWidget(m_comboBoxLLM, 3, 1);
+    gLayout->addWidget(new QLabel("上下文", this), 4, 0);
+    gLayout->addWidget(m_spinBoxContext, 4, 1);
+    gLayout->addWidget(new QLabel("模型温度", this), 5, 0);
+    gLayout->addWidget(m_doubleSpinBoxTemperature, 5, 1);
+    gLayout->addWidget(new QLabel("Top-p", this), 6, 0);
+    gLayout->addWidget(m_doubleSpinBoxTopP, 6, 1);
+    gLayout->addWidget(new QLabel("最大Token数", this), 7, 0);
+    gLayout->addWidget(m_spinBoxMaxTokens, 7, 1);
+    gLayout->addWidget(new QLabel("系统提示词", this), 8, 0);
+    gLayout->addWidget(m_plainTextEditSystemPrompt, 8, 1);
+    gLayout->addWidget(new QLabel("MCP服务器", this), 9, 0);
+    gLayout->addWidget(m_listWidgetMcpServers, 9, 1);
+    gLayout->addWidget(new QLabel("对话列表", this), 10, 0);
+    gLayout->addWidget(m_listWidgetConversations, 10, 1);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addLayout(gLayout);
+    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
@@ -908,6 +919,14 @@ void WidgetMcpServerInfo::initItems()
     // m_plainTextEditRequestHeaders
     m_plainTextEditRequestHeaders = new QPlainTextEdit(this);
     m_plainTextEditRequestHeaders->setPlaceholderText("Content-Type=application/json\nAuthorization=Bearer token");
+    // m_pushButtonAdd
+    m_pushButtonAdd = new QPushButton("添加", this);
+    connect(m_pushButtonAdd, &QPushButton::clicked, this,
+            []()
+            {
+                XLC_LOG_DEBUG("添加新mcp服务器");
+                // TODO 添加新mcp服务器
+            });
     // m_pushButtonReset
     m_pushButtonReset = new QPushButton("重置", this);
     connect(m_pushButtonReset, &QPushButton::clicked, this,
@@ -931,11 +950,13 @@ void WidgetMcpServerInfo::initLayout()
     // hLayoutButtons
     QHBoxLayout *hLayoutButtons = new QHBoxLayout();
     hLayoutButtons->setContentsMargins(0, 0, 0, 0);
+    hLayoutButtons->addWidget(m_pushButtonAdd);
     hLayoutButtons->addStretch();
     hLayoutButtons->addWidget(m_pushButtonReset);
     hLayoutButtons->addWidget(m_pushButtonSave);
     // gLayout
-    QGridLayout *gLayout = new QGridLayout(this);
+    QGridLayout *gLayout = new QGridLayout();
+    gLayout->setContentsMargins(0, 0, 0, 0);
     gLayout->addWidget(new QLabel("UUID", this), 0, 0);
     gLayout->addWidget(m_lineEditUuid, 0, 1);
     gLayout->addWidget(new QLabel("名称", this), 1, 0);
@@ -962,7 +983,10 @@ void WidgetMcpServerInfo::initLayout()
     gLayout->addWidget(m_lineEditEndpoint, 11, 1);
     gLayout->addWidget(m_labelRequestHeaders, 12, 0);
     gLayout->addWidget(m_plainTextEditRequestHeaders, 12, 1);
-    gLayout->addLayout(hLayoutButtons, 13, 1);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addLayout(gLayout);
+    vLayout->addLayout(hLayoutButtons);
 }
 
 void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)

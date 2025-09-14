@@ -165,6 +165,7 @@ private:
     QMenu *m_contextMenuMcpServers;
     QListWidget *m_listWidgetConversations;
     QMenu *m_contextMenuConversations;
+    QPushButton *m_pushButtonAdd;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 };
@@ -259,6 +260,7 @@ private:
     QLineEdit *m_lineEditEndpoint;
     QLabel *m_labelRequestHeaders;
     QPlainTextEdit *m_plainTextEditRequestHeaders;
+    QPushButton *m_pushButtonAdd;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 };
