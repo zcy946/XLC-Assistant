@@ -19,6 +19,8 @@ public:
     explicit CNavigationContentWidget(QWidget *parent = nullptr);
     void addItemSvg(const QString &text, const QString &filename);
     void addNonSelectableItemSvg(const QString &text, const QString &filename);
+    void setCurrentIndex(int index);
+    void setCurrentText(const QString &text);
 
 protected:
     QSize sizeHint() const override;
@@ -77,6 +79,8 @@ public:
      * 添加不可选中的item(仍能触发信号)
      */
     void addNonSelectableItemSvg(const QString &text, const QString &filename);
+    void setCurrentIndex(int index);
+    void setCurrentText(const QString &text);
 
 private:
     void initWidget();

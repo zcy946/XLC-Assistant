@@ -17,6 +17,7 @@ private Q_SLOTS:
     void slot_onAgentUpdated(const QString &agentUuid);
     // 用户点击发送按钮
     void slot_onMessageSent(const QString &message);
+    void slot_handlePageSwitched(const QVariant &data);
 
 public:
     explicit PageChat(QWidget *parent = nullptr);

@@ -7,6 +7,8 @@
 #include <QDesktopServices>
 #include <QGroupBox>
 #include <QFileDialog>
+#include "EventBus.h"
+#include <QJsonObject>
 
 // PageSettings
 PageSettings::PageSettings(QWidget *parent)
@@ -645,7 +647,12 @@ void WidgetAgentInfo::initItems()
                 if (selectedItem)
                 {
                     XLC_LOG_DEBUG("Agent[{}]: 尝试查看对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
-                    // TODO 跳转至对话
+                    // 跳转至对话
+                    QJsonObject objPageInfo;
+                    objPageInfo["id"] = static_cast<int>(EventBus::Pages::CONVERSATION);
+                    objPageInfo["agentUuid"] = m_lineEditUuid->text();
+                    objPageInfo["conversationUuid"] = selectedItem->data(Qt::UserRole).toString();
+                    EventBus::GetInstance()->publish(EventBus::EventType::PageSwitched, QVariant(objPageInfo));
                 }
             });
     connect(actionDeleteConversation, &QAction::triggered, this,

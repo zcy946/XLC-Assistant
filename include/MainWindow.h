@@ -11,7 +11,8 @@ class MainWindow : public BaseWidget
 {
     Q_OBJECT
 private Q_SLOTS:
-    void on_navigationBar_indexChanged(int index, const QString &text);
+    void handleNavigationBarIndexChanged(int index, const QString &text);
+    void handlePageSwitched(const QVariant &data);
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);

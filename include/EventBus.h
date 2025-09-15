@@ -26,13 +26,20 @@ public:
         MCP_SERVERS_UPDATED
     };
 
+    // Pages IDs
+    enum class Pages
+    {
+        CONVERSATION // 查看对话 - id, agentUuid, conversationUuid
+    };
+
     // Event Types
     enum class EventType
     {
         ButtonClicked,
         StateChanged,
         MessageSent,
-        MessageReceived
+        MessageReceived,
+        PageSwitched
     };
     Q_ENUM(EventType)
 
@@ -43,6 +50,7 @@ signals:
     void sig_stateChanged(const QVariant &data);
     void sig_messageSent(const QVariant &data);
     void sig_messageReceived(const QVariant &data);
+    void sig_pageSwitched(const QVariant &data);
 
 private:
     explicit EventBus(QObject *parent = nullptr);

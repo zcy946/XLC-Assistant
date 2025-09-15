@@ -2,6 +2,7 @@
 #include <QHBoxLayout>
 #include "Logger.hpp"
 #include "DataManager.h"
+#include "EventBus.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : BaseWidget(parent)
@@ -9,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 加载数据
     DataManager::getInstance()->init();
     initUI();
+    connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &MainWindow::handlePageSwitched);
 }
 
 MainWindow::~MainWindow()
@@ -26,7 +28,7 @@ void MainWindow::initItems()
     m_navigationBar->setFixedWidth(60);
     m_navigationBar->addItemSvg("聊天", "://image/message-3-line.svg");
     m_navigationBar->addItemSvg("设置", "://image/settings-3-line.svg");
-    connect(m_navigationBar, &CNavigationBar::indexChanged, this, &MainWindow::on_navigationBar_indexChanged);
+    connect(m_navigationBar, &CNavigationBar::indexChanged, this, &MainWindow::handleNavigationBarIndexChanged);
 #ifdef QT_DEBUG
     // 添加测试项目
     for (int i = 0; i < 20; i += 2)
@@ -58,10 +60,46 @@ void MainWindow::initLayout()
     h_layout->addLayout(m_stackedLayout);
 }
 
-void MainWindow::on_navigationBar_indexChanged(int index, const QString &text)
+void MainWindow::handleNavigationBarIndexChanged(int index, const QString &text)
 {
     if (index < 0 || index > m_stackedLayout->count() - 1)
         return;
     XLC_LOG_TRACE("导航至: {} - {}", index, text);
     m_stackedLayout->setCurrentIndex(index);
+}
+
+void MainWindow::handlePageSwitched(const QVariant &data)
+{
+    if (data.canConvert<QJsonObject>())
+    {
+        QJsonObject objPageInfo = data.value<QJsonObject>();
+        int id = objPageInfo["id"].toInt();
+        QString agentUuid = objPageInfo["agentUuid"].toString();
+        QString conversationUuid = objPageInfo["conversationUuid"].toString();
+
+        switch (static_cast<EventBus::Pages>(id))
+        {
+        case EventBus::Pages::CONVERSATION:
+        {
+            if (!agentUuid.isEmpty() && !conversationUuid.isEmpty())
+            {
+                m_navigationBar->setCurrentText("聊天");
+            }
+            else
+            {
+                XLC_LOG_ERROR("切换失败，agent或者conversation的uuid为空");
+            }
+            break;
+        }
+        default:
+        {
+            XLC_LOG_ERROR("不存在的Page id: {}", id);
+            break;
+        }
+        }
+    }
+    else
+    {
+        XLC_LOG_ERROR("切换失败，数据类型异常: {}", data.typeName());
+    }
 }

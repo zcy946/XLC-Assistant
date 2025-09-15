@@ -5,6 +5,7 @@
 #include <FlowLayout.h>
 #include "DataManager.h"
 #include "Logger.hpp"
+#include "EventBus.h"
 
 PageChat::PageChat(QWidget *parent)
     : BaseWidget(parent)
@@ -13,6 +14,7 @@ PageChat::PageChat(QWidget *parent)
     connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
     connect(m_widgetChat, &WidgetChat::sig_messageSent, this, &PageChat::slot_onMessageSent);
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
+    connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
 }
 
 void PageChat::initWidget()
@@ -69,6 +71,8 @@ void PageChat::initItems()
     m_tabWidgetSiderBar = new QTabWidget(this);
     m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "助手");
     m_tabWidgetSiderBar->addTab(m_listWidgetConversations, "话题");
+    // 默认选中 话题
+    m_tabWidgetSiderBar->setCurrentWidget(m_listWidgetConversations);
     connect(m_tabWidgetSiderBar, &QTabWidget::currentChanged, this,
             [this](int index)
             {
@@ -136,6 +140,62 @@ void PageChat::slot_onMessageSent(const QString &message)
     }
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
     DataManager::getInstance()->handleMessageSent(conversation, agent, DataManager::getInstance()->getTools(agent->mcpServers));
+}
+
+void PageChat::slot_handlePageSwitched(const QVariant &data)
+{
+    if (data.canConvert<QJsonObject>())
+    {
+        QJsonObject objPageInfo = data.value<QJsonObject>();
+        int id = objPageInfo["id"].toInt();
+        QString agentUuid = objPageInfo["agentUuid"].toString();
+        QString conversationUuid = objPageInfo["conversationUuid"].toString();
+
+        switch (static_cast<EventBus::Pages>(id))
+        {
+        case EventBus::Pages::CONVERSATION:
+        {
+            if (agentUuid.isEmpty() || conversationUuid.isEmpty())
+            {
+                XLC_LOG_ERROR("切换失败，agent或者conversation的uuid为空");
+                return;
+            }
+            // 选中对话列表
+            m_tabWidgetSiderBar->setCurrentWidget(m_listWidgetConversations);
+
+            for (int i = 0; i < m_listWidgetAgents->count(); ++i)
+            {
+                // 查找应当选中的agent
+                if (m_listWidgetAgents->item(i)->data(Qt::UserRole).toString() == agentUuid)
+                {
+                    m_listWidgetAgents->setCurrentRow(i);
+                    // 查找应当选中的conversation
+                    for (int j = 0; i < m_listWidgetConversations->count(); ++j)
+                    {
+                        if (m_listWidgetConversations->item(j)->data(Qt::UserRole).toString() == conversationUuid)
+                        {
+                            m_listWidgetConversations->setCurrentRow(j);
+                            return;
+                        }
+                    }
+                    XLC_LOG_WARN("找到了agent但未找到conversation: {}", conversationUuid);
+                    break;
+                }
+            }
+            XLC_LOG_WARN("未找到agent: {}", agentUuid);
+            break;
+        }
+        default:
+        {
+            XLC_LOG_ERROR("不存在的Page id: {}", id);
+            break;
+        }
+        }
+    }
+    else
+    {
+        XLC_LOG_ERROR("切换失败，数据类型异常: {}", data.typeName());
+    }
 }
 
 void PageChat::refreshAgents()

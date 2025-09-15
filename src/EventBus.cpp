@@ -1,4 +1,5 @@
-#include "eventbus.h"
+#include "EventBus.h"
+#include "Logger.hpp"
 #include <QDebug>
 
 EventBus::EventBus(QObject *parent) : QObject(parent) {}
@@ -21,8 +22,11 @@ void EventBus::publish(EventType eventType, const QVariant &data)
     case EventType::MessageReceived:
         Q_EMIT sig_messageReceived(data);
         break;
+    case EventType::PageSwitched:
+        Q_EMIT sig_pageSwitched(data);
+        break;
     default:
-        qWarning() << "Unhandled event type:" << static_cast<int>(eventType);
+        XLC_LOG_WARN("Unhandled event type: {} - {}", static_cast<int>(eventType), data.typeName());
         break;
     }
 }

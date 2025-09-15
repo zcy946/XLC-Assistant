@@ -39,6 +39,34 @@ void CNavigationContentWidget::addNonSelectableItemSvg(const QString &text, cons
     updateSize();
 }
 
+void CNavigationContentWidget::setCurrentIndex(int index)
+{
+    if (index < 0 || index > m_items.count() - 1)
+        return;
+    if (m_items[index].selectable)
+        m_indexSelected = index;
+    Q_EMIT indexChanged(index, m_items[index].text);
+    update();
+}
+
+void CNavigationContentWidget::setCurrentText(const QString &text)
+{
+    if (text.trimmed().isEmpty())
+        return;
+    for (int i = 0; i < m_items.count(); ++i)
+    {
+        if (m_items[i].text == text.trimmed())
+        {
+            if (!m_items[i].selectable)
+                return;
+            m_indexSelected = i;
+            Q_EMIT indexChanged(i, m_items[i].text);
+            update();
+            return;
+        }
+    }
+}
+
 QSize CNavigationContentWidget::sizeHint() const
 {
     int availableWidth = width();
@@ -127,7 +155,7 @@ void CNavigationContentWidget::mousePressEvent(QMouseEvent *event)
     {
         if (m_items[index].selectable)
             m_indexSelected = index;
-        emit indexChanged(index, m_items[m_indexSelected].text);
+        Q_EMIT indexChanged(index, m_items[m_indexSelected].text);
         update();
     }
 }
@@ -203,4 +231,14 @@ void CNavigationBar::addItemSvg(const QString &text, const QString &filename)
 void CNavigationBar::addNonSelectableItemSvg(const QString &text, const QString &filename)
 {
     m_contentWidget->addNonSelectableItemSvg(text, filename);
+}
+
+void CNavigationBar::setCurrentIndex(int index)
+{
+    m_contentWidget->setCurrentIndex(index);
+}
+
+void CNavigationBar::setCurrentText(const QString &text)
+{
+    m_contentWidget->setCurrentText(text);
 }
