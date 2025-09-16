@@ -153,35 +153,7 @@ void PageSettingsLLM::initItems()
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this,
-            [this]()
-            {
-                if (m_widgetLLMInfo->getUuid().isEmpty())
-                    return;
-                if (QMessageBox::Yes == QMessageBox::question(this,
-                                                              "确认删除", QString("是否确认删除LLM: %1？").arg(m_widgetLLMInfo->getUuid()),
-                                                              QMessageBox::Yes | QMessageBox::No,
-                                                              QMessageBox::Yes))
-                {
-                    DataManager::getInstance()->removeLLM(m_widgetLLMInfo->getUuid());
-                    // 在llm列表中删除
-                    QListWidgetItem *currentItem = m_listWidgetLLMs->currentItem();
-                    if (currentItem)
-                    {
-                        delete m_listWidgetLLMs->takeItem(m_listWidgetLLMs->row(currentItem));
-                    }
-                    // 选中列表中的第一项并展示
-                    m_listWidgetLLMs->setCurrentRow(0);
-                    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
-                    if (!llm)
-                        return;
-                    m_widgetLLMInfo->updateData(llm);
-                    // 通知其它页面更新
-                    QJsonObject jsonObj;
-                    jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-                    EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                }
-            });
+    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsLLM::slot_onPushButtonClickedRemove);
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
     connect(m_pushButtonSave, &QPushButton::clicked, this,
@@ -269,6 +241,35 @@ void PageSettingsLLM::slot_onLLMsLoaded(bool success)
         if (!llm)
             return;
         m_widgetLLMInfo->updateData(llm);
+    }
+}
+
+void PageSettingsLLM::slot_onPushButtonClickedRemove()
+{
+    if (m_widgetLLMInfo->getUuid().isEmpty())
+        return;
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  "确认删除", QString("是否确认删除LLM: %1？").arg(m_widgetLLMInfo->getUuid()),
+                                                  QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::Yes))
+    {
+        DataManager::getInstance()->removeLLM(m_widgetLLMInfo->getUuid());
+        // 在llm列表中删除
+        QListWidgetItem *currentItem = m_listWidgetLLMs->currentItem();
+        if (currentItem)
+        {
+            delete m_listWidgetLLMs->takeItem(m_listWidgetLLMs->row(currentItem));
+        }
+        // 选中列表中的第一项并展示
+        m_listWidgetLLMs->setCurrentRow(0);
+        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
+        if (!llm)
+            return;
+        m_widgetLLMInfo->updateData(llm);
+        // 通知其它页面更新
+        QJsonObject jsonObj;
+        jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
+        EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
     }
 }
 
@@ -479,35 +480,7 @@ void PageSettingsAgent::initItems()
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this,
-            [this]()
-            {
-                if (m_widgetAgentInfo->getUuid().isEmpty())
-                    return;
-                if (QMessageBox::Yes == QMessageBox::question(this,
-                                                              "确认删除", QString("是否确认删除Agent: %1？").arg(m_widgetAgentInfo->getUuid()),
-                                                              QMessageBox::Yes | QMessageBox::No,
-                                                              QMessageBox::Yes))
-                {
-                    DataManager::getInstance()->removeAgent(m_widgetAgentInfo->getUuid());
-                    // 在agent列表中删除
-                    QListWidgetItem *currentItem = m_listWidgetAgents->currentItem();
-                    if (currentItem)
-                    {
-                        delete m_listWidgetAgents->takeItem(m_listWidgetAgents->row(currentItem));
-                    }
-                    // 选中列表中的第一项并展示
-                    m_listWidgetAgents->setCurrentRow(0);
-                    const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
-                    if (!agent)
-                        return;
-                    m_widgetAgentInfo->updateData(agent);
-                    // 通知其它页面更新
-                    QJsonObject jsonObj;
-                    jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
-                    EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                }
-            });
+    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsAgent::slot_onPushButtonClickedRemove);
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
     connect(m_pushButtonSave, &QPushButton::clicked, this,
@@ -590,6 +563,35 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
         if (!agent)
             return;
         m_widgetAgentInfo->updateData(agent);
+    }
+}
+
+void PageSettingsAgent::slot_onPushButtonClickedRemove()
+{
+    if (m_widgetAgentInfo->getUuid().isEmpty())
+        return;
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  "确认删除", QString("是否确认删除Agent: %1？").arg(m_widgetAgentInfo->getUuid()),
+                                                  QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::Yes))
+    {
+        DataManager::getInstance()->removeAgent(m_widgetAgentInfo->getUuid());
+        // 在agent列表中删除
+        QListWidgetItem *currentItem = m_listWidgetAgents->currentItem();
+        if (currentItem)
+        {
+            delete m_listWidgetAgents->takeItem(m_listWidgetAgents->row(currentItem));
+        }
+        // 选中列表中的第一项并展示
+        m_listWidgetAgents->setCurrentRow(0);
+        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
+        if (!agent)
+            return;
+        m_widgetAgentInfo->updateData(agent);
+        // 通知其它页面更新
+        QJsonObject jsonObj;
+        jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
+        EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
     }
 }
 
@@ -1068,35 +1070,7 @@ void PageSettingsMcp::initItems()
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this,
-            [this]()
-            {
-                if (m_widgetMcpServerInfo->getUuid().isEmpty())
-                    return;
-                if (QMessageBox::Yes == QMessageBox::question(this,
-                                                              "确认删除", QString("是否确认删除McpServer: %1？").arg(m_widgetMcpServerInfo->getUuid()),
-                                                              QMessageBox::Yes | QMessageBox::No,
-                                                              QMessageBox::Yes))
-                {
-                    DataManager::getInstance()->removeMcpServer(m_widgetMcpServerInfo->getUuid());
-                    // 在MCPServer列表中删除
-                    QListWidgetItem *currentItem = m_listWidgetMcpServers->currentItem();
-                    if (currentItem)
-                    {
-                        delete m_listWidgetMcpServers->takeItem(m_listWidgetMcpServers->row(currentItem));
-                    }
-                    // 选中列表中的第一项并展示
-                    m_listWidgetMcpServers->setCurrentRow(0);
-                    const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>());
-                    if (!mcpServer)
-                        return;
-                    m_widgetMcpServerInfo->updateData(mcpServer);
-                    // 通知其它页面更新
-                    QJsonObject jsonObj;
-                    jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-                    EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                }
-            });
+    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsMcp::slot_onPushButtonClickedRemove);
     // m_pushButtonSave
     m_pushButtonSave = new QPushButton("保存", this);
     connect(m_pushButtonSave, &QPushButton::clicked, this,
@@ -1175,6 +1149,37 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
     {
         m_listWidgetMcpServers->setCurrentRow(0);
         m_widgetMcpServerInfo->updateData(DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>()));
+    }
+}
+
+void PageSettingsMcp::slot_onPushButtonClickedRemove()
+{
+    {
+        if (m_widgetMcpServerInfo->getUuid().isEmpty())
+            return;
+        if (QMessageBox::Yes == QMessageBox::question(this,
+                                                      "确认删除", QString("是否确认删除McpServer: %1？").arg(m_widgetMcpServerInfo->getUuid()),
+                                                      QMessageBox::Yes | QMessageBox::No,
+                                                      QMessageBox::Yes))
+        {
+            DataManager::getInstance()->removeMcpServer(m_widgetMcpServerInfo->getUuid());
+            // 在MCPServer列表中删除
+            QListWidgetItem *currentItem = m_listWidgetMcpServers->currentItem();
+            if (currentItem)
+            {
+                delete m_listWidgetMcpServers->takeItem(m_listWidgetMcpServers->row(currentItem));
+            }
+            // 选中列表中的第一项并展示
+            m_listWidgetMcpServers->setCurrentRow(0);
+            const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>());
+            if (!mcpServer)
+                return;
+            m_widgetMcpServerInfo->updateData(mcpServer);
+            // 通知其它页面更新
+            QJsonObject jsonObj;
+            jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
+            EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+        }
     }
 }
 

@@ -49,6 +49,7 @@ class PageSettingsLLM : public BaseWidget
 private Q_SLOTS:
     void slot_onListWidgetItemClicked(QListWidgetItem *item);
     void slot_onLLMsLoaded(bool success);
+    void slot_onPushButtonClickedRemove();
 
 public:
     explicit PageSettingsLLM(QWidget *parent = nullptr);
@@ -128,6 +129,7 @@ class PageSettingsAgent : public BaseWidget
 private Q_SLOTS:
     void slot_onListWidgetItemClicked(QListWidgetItem *item);
     void slot_onAgentsOrMcpServersLoaded(bool success);
+    void slot_onPushButtonClickedRemove();
 
 public:
     explicit PageSettingsAgent(QWidget *parent = nullptr);
@@ -220,6 +222,7 @@ class PageSettingsMcp : public BaseWidget
 private Q_SLOTS:
     void slot_onListWidgetItemClicked(QListWidgetItem *item);
     void slot_onMcpServersLoaded(bool success);
+    void slot_onPushButtonClickedRemove();
 
 public:
     explicit PageSettingsMcp(QWidget *parent = nullptr);
