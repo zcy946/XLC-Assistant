@@ -15,6 +15,7 @@ PageChat::PageChat(QWidget *parent)
     connect(m_widgetChat, &WidgetChat::sig_messageSent, this, &PageChat::slot_onMessageSent);
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
     connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
+    connect(EventBus::GetInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
 }
 
 void PageChat::initWidget()
@@ -195,6 +196,32 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
     else
     {
         XLC_LOG_ERROR("未能处理页面切换事件，数据类型异常: {}", data.typeName());
+    }
+}
+
+void PageChat::slot_handleStateChanged(const QVariant &data)
+{
+    if (data.canConvert<QJsonObject>())
+    {
+        QJsonObject jsonObj = data.value<QJsonObject>();
+        int id = jsonObj["id"].toInt();
+
+        switch (static_cast<EventBus::States>(id))
+        {
+        case EventBus::States::AGENT_UPDATED:
+        {
+            refreshAgents();
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    else
+    {
+        XLC_LOG_ERROR("未能处理状态改变事件，数据类型异常: {}", data.typeName());
     }
 }
 
