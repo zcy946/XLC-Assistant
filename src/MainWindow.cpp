@@ -100,6 +100,6 @@ void MainWindow::handlePageSwitched(const QVariant &data)
     }
     else
     {
-        XLC_LOG_ERROR("切换失败，数据类型异常: {}", data.typeName());
+        XLC_LOG_ERROR("未能处理页面切换事件，数据类型异常: {}", data.typeName());
     }
 }

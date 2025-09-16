@@ -131,6 +131,10 @@ void PageSettingsLLM::initItems()
                                 // 选中并展示新增LLM
                                 m_listWidgetLLMs->setCurrentItem(newItem);
                                 m_widgetLLMInfo->updateData(newLLM);
+                                // 通知其它页面更新(通知WidgetAgentInfo更新LLM列表)
+                                QJsonObject jsonObj;
+                                jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
+                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -165,6 +169,9 @@ void PageSettingsLLM::initItems()
                         selectedItem->setText(currentLLM->modelName);
                     }
                 }
+                QJsonObject jsonObj;
+                jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
+                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                 XLC_LOG_DEBUG("更新llm: {}", m_widgetLLMInfo->getUuid());
             });
 }
@@ -523,6 +530,7 @@ WidgetAgentInfo::WidgetAgentInfo(QWidget *parent)
 {
     initUI();
     connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &WidgetAgentInfo::slot_onLLMsLoaded);
+    connect(EventBus::GetInstance().get(), &EventBus::sig_stateChanged, this, &WidgetAgentInfo::slot_handleStateChanged);
 }
 
 void WidgetAgentInfo::initWidget()
@@ -720,6 +728,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     m_lineEditUuid->setText(agent->uuid);
     m_lineEditName->setText(agent->name);
     m_plainTextEditDescription->setPlainText(agent->description);
+    updateLLMList();
     const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
     {
@@ -806,10 +815,10 @@ void WidgetAgentInfo::populateBasicInfo()
     slot_onLLMsLoaded(true);
 }
 
-void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
+void WidgetAgentInfo::updateLLMList()
 {
-    if (!success)
-        return;
+    // 更新llm列表
+    m_comboBoxLLM->clear();
     QList<std::shared_ptr<LLM>> llms = DataManager::getInstance()->getLLMs();
     if (llms.count() <= 0)
         return;
@@ -822,16 +831,56 @@ void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
     {
         m_comboBoxLLM->addItem(llm->modelName, llm->uuid);
     }
+
     // 选中正确的llm
     if (!m_lineEditUuid->text().isEmpty() && !m_lineEditName->text().isEmpty())
     {
         std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
         if (!agent)
+        {
+            XLC_LOG_WARN("不存在的agent: {}", m_lineEditUuid->text());
             return;
+        }
         std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
         if (!llm)
+        {
+            XLC_LOG_WARN("不存在的LLM: {}", agent->llmUUid);
             return;
+        }
         m_comboBoxLLM->setCurrentText(llm->modelName);
+    }
+}
+
+void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
+{
+    if (!success)
+        return;
+    updateLLMList();
+}
+
+void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
+{
+    if (data.canConvert<QJsonObject>())
+    {
+        QJsonObject jsonObj = data.value<QJsonObject>();
+        int id = jsonObj["id"].toInt();
+
+        switch (static_cast<EventBus::States>(id))
+        {
+        case EventBus::States::LLM_UPDATED:
+        {
+            updateLLMList();
+            break;
+        }
+        default:
+        {
+            break;
+        }
+        }
+    }
+    else
+    {
+        XLC_LOG_ERROR("未能处理状态改变事件，数据类型异常: {}", data.typeName());
     }
 }
 

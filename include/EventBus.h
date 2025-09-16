@@ -22,7 +22,7 @@ public:
     // State IDs
     enum class States
     {
-        MODEL_UPDATED,
+        LLM_UPDATED,
         MCP_SERVERS_UPDATED
     };
 

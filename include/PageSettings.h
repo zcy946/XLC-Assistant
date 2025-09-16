@@ -152,6 +152,7 @@ class WidgetAgentInfo : public BaseWidget
     Q_OBJECT
 private Q_SLOTS:
     void slot_onLLMsLoaded(bool success);
+    void slot_handleStateChanged(const QVariant &data);
 
 public:
     explicit WidgetAgentInfo(QWidget *parent = nullptr);
@@ -171,6 +172,9 @@ protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
+
+private:
+    void updateLLMList();
 
 private:
     QLineEdit *m_lineEditUuid;
