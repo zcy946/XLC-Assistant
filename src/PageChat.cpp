@@ -230,7 +230,7 @@ void PageChat::refreshAgents()
     // 保留当前选中agent的uuid，用于再次选中
     QString selectedAgentUuid = -1;
     QListWidgetItem *selectedAgentItem = m_listWidgetAgents->currentItem();
-    if (selectedAgentItem)
+    if (selectedAgentItem && DataManager::getInstance()->getAgent(selectedAgentItem->data(Qt::UserRole).toString()))
     {
         selectedAgentUuid = selectedAgentItem->data(Qt::UserRole).toString();
     }

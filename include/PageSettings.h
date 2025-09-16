@@ -63,6 +63,7 @@ private:
     QListWidget *m_listWidgetLLMs;
     WidgetLLMInfo *m_widgetLLMInfo;
     QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonRemove;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 
@@ -140,6 +141,7 @@ private:
     QListWidget *m_listWidgetAgents;
     WidgetAgentInfo *m_widgetAgentInfo;
     QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonRemove;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 
@@ -231,6 +233,7 @@ private:
     QListWidget *m_listWidgetMcpServers;
     WidgetMcpServerInfo *m_widgetMcpServerInfo;
     QPushButton *m_pushButtonAdd;
+    QPushButton *m_pushButtonRemove;
     QPushButton *m_pushButtonReset;
     QPushButton *m_pushButtonSave;
 

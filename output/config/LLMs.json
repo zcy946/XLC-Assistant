@@ -3,14 +3,6 @@
         "apiKey": "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",
         "baseUrl": "https://openrouter.ai/api",
         "endpoint": "/v1/chat/completions",
-        "modelID": "meta-llama/llama-4-maverick:free",
-        "modelName": "Meta: Llama 4 Maverick (free)",
-        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef05"
-    },
-    {
-        "apiKey": "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",
-        "baseUrl": "https://openrouter.ai/api",
-        "endpoint": "/v1/chat/completions",
         "modelID": "deepseek/deepseek-r1-0528-qwen3-8b:free",
         "modelName": "Deepseek: Deepseek R1 0528 Qwen3 8B (free)",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef03"
@@ -38,5 +30,13 @@
         "modelID": "deepseek-reasoner",
         "modelName": "DeepSeek-R1-0528",
         "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef02"
+    },
+    {
+        "apiKey": "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",
+        "baseUrl": "https://openrouter.ai/api",
+        "endpoint": "/v1/chat/completions",
+        "modelID": "meta-llama/llama-4-maverick:free",
+        "modelName": "Meta: Llama 4 Maverick (free)",
+        "uuid": "091a2b3c-4d5e-5678-9012-6789abcdef05"
     }
 ]
