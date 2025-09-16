@@ -23,6 +23,7 @@ public:
     enum class States
     {
         LLM_UPDATED,
+        AGENT_UPDATED,
         MCP_SERVERS_UPDATED
     };
 

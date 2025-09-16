@@ -198,6 +198,7 @@ class DialogAddNewAgent : public BaseDialog
 public:
     DialogAddNewAgent(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DialogAddNewAgent() = default;
+    std::shared_ptr<Agent> getFormData();
 
 protected:
     void initWidget() override;

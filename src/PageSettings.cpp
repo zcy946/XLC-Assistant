@@ -413,8 +413,22 @@ void PageSettingsAgent::initItems()
                         {
                             if (result == QDialog::Accepted)
                             {
-                                // TODO 同步信息
-                                XLC_LOG_TRACE("新增Agent: {}");
+                                // 新增agent
+                                std::shared_ptr<Agent> newAgent = dialog->getFormData();
+                                XLC_LOG_TRACE("新增agent: {} - {}", newAgent->uuid, newAgent->name);
+                                DataManager::getInstance()->addAgent(newAgent);
+                                // 更新agent列表
+                                QListWidgetItem *newItem = new QListWidgetItem();
+                                newItem->setText(newAgent->name);
+                                newItem->setData(Qt::UserRole, QVariant::fromValue(newAgent->uuid));
+                                m_listWidgetAgents->addItem(newItem);
+                                // 选中并展示新增LLM
+                                m_listWidgetAgents->setCurrentItem(newItem);
+                                m_widgetAgentInfo->updateData(newAgent);
+                                // 通知其它页面更新
+                                QJsonObject jsonObj;
+                                jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
+                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -921,6 +935,11 @@ void DialogAddNewAgent::initLayout()
     vLayout->addWidget(m_widgetAgentInfo);
     vLayout->addStretch();
     vLayout->addLayout(hLayoutButtons);
+}
+
+std::shared_ptr<Agent> DialogAddNewAgent::getFormData()
+{
+    return m_widgetAgentInfo->getCurrentData();
 }
 
 // PageSettingsMcp
