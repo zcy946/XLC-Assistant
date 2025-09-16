@@ -107,6 +107,7 @@ class DialogAddNewLLM : public BaseDialog
 public:
     DialogAddNewLLM(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DialogAddNewLLM() = default;
+    std::shared_ptr<LLM> getFormData();
 
 protected:
     void initWidget() override;

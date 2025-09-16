@@ -119,8 +119,18 @@ void PageSettingsLLM::initItems()
                         {
                             if (result == QDialog::Accepted)
                             {
-                                // TODO 同步信息
-                                XLC_LOG_TRACE("新增LLM: {}");
+                                // 新增LLM
+                                std::shared_ptr<LLM> newLLM = dialog->getFormData();
+                                XLC_LOG_TRACE("新增LLM: {} - {}", newLLM->uuid, newLLM->modelName);
+                                DataManager::getInstance()->addLLM(newLLM);
+                                // 更新LLM列表
+                                QListWidgetItem *newItem = new QListWidgetItem();
+                                newItem->setText(newLLM->modelName);
+                                newItem->setData(Qt::UserRole, QVariant::fromValue(newLLM->uuid));
+                                m_listWidgetLLMs->addItem(newItem);
+                                // 选中并展示新增LLM
+                                m_listWidgetLLMs->setCurrentItem(newItem);
+                                m_widgetLLMInfo->updateData(newLLM);
                             }
                         });
                 dialog->exec();
@@ -357,6 +367,11 @@ void DialogAddNewLLM::initLayout()
     vLayout->addWidget(m_widgetLLMInfo);
     vLayout->addStretch();
     vLayout->addLayout(hLayoutButtons);
+}
+
+std::shared_ptr<LLM> DialogAddNewLLM::getFormData()
+{
+    return m_widgetLLMInfo->getCurrentData();
 }
 
 // PageSettingsAgent

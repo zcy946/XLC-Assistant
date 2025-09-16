@@ -23,6 +23,7 @@
 - [x] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
 - [ ] 实现设置界面添加Agent、Mcp服务器、LLM
 - [x] 实现设置-助手-对话列表右键的跳转展示功能
+- [ ] 修复当用户点击设置-助手设置-模型`Combobox`时，列表没有更新的bug
 
 ### 优化
 
@@ -30,6 +31,7 @@
 - [ ] 将`McpGateway`的`callTool`等函数中的`QString`类型的`json`数据改为使用Qt的Json存储
 - [ ] 修改mcp服务器设置页，实现自定义启停mcp服务器，从而降低客户端初始化的压力
 - [ ] 优化异常展示
+- [ ] 在各个`getCurrentData`函数内部判空
 - [ ] 将`LLMService`和`McpGateway`作为单例实现
 
 ### **进阶**
