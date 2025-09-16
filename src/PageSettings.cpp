@@ -973,8 +973,22 @@ void PageSettingsMcp::initItems()
                         {
                             if (result == QDialog::Accepted)
                             {
-                                // TODO 同步信息
-                                XLC_LOG_TRACE("新增McpServer: {}");
+                                // 新增MCPServer
+                                std::shared_ptr<McpServer> newMcpServer = dialog->getFormData();
+                                XLC_LOG_TRACE("新增MCPServer: {} - {}", newMcpServer->uuid, newMcpServer->name);
+                                DataManager::getInstance()->addMcpServer(newMcpServer);
+                                // 更新mcpServer列表
+                                QListWidgetItem *newItem = new QListWidgetItem();
+                                newItem->setText(newMcpServer->name);
+                                newItem->setData(Qt::UserRole, QVariant::fromValue(newMcpServer->uuid));
+                                m_listWidgetMcpServers->addItem(newItem);
+                                // 选中并展示新增MCPServer
+                                m_listWidgetMcpServers->setCurrentItem(newItem);
+                                m_widgetMcpServerInfo->updateData(newMcpServer);
+                                // 通知其它页面更新
+                                QJsonObject jsonObj;
+                                jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
+                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -1428,6 +1442,11 @@ void DialogAddNewMcpServer::initLayout()
     vLayout->addWidget(m_widgetMcpServerInfo);
     vLayout->addStretch();
     vLayout->addLayout(hLayoutButtons);
+}
+
+std::shared_ptr<McpServer> DialogAddNewMcpServer::getFormData()
+{
+    return m_widgetMcpServerInfo->getCurrentData();
 }
 
 // PageSettingsStorage

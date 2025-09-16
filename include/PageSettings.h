@@ -312,6 +312,7 @@ class DialogAddNewMcpServer : public BaseDialog
 public:
     DialogAddNewMcpServer(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DialogAddNewMcpServer() = default;
+    std::shared_ptr<McpServer> getFormData();
 
 protected:
     void initWidget() override;
