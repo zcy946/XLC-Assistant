@@ -113,7 +113,7 @@ void PageSettingsLLM::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("尝试新增LLM");
+                XLC_LOG_TRACE("尝试新增LLM");
                 DialogAddNewLLM *dialog = new DialogAddNewLLM(this);
                 connect(dialog, &DialogAddNewLLM::finished, this,
                         [this, dialog](int result)
@@ -440,7 +440,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("尝试新增agent");
+                XLC_LOG_TRACE("尝试新增agent");
                 DialogAddNewAgent *dialog = new DialogAddNewAgent(this);
                 connect(dialog, &DialogAddNewAgent::finished, this,
                         [this, dialog](int result)
@@ -675,7 +675,7 @@ void WidgetAgentInfo::initItems()
     connect(actionAddMcpServer, &QAction::triggered, this,
             [this]()
             {
-                XLC_LOG_DEBUG("Agent[{}]: 尝试添加（挂载）mcp服务器", m_lineEditUuid->text());
+                XLC_LOG_TRACE("Agent[{}]: 尝试添加（挂载）mcp服务器", m_lineEditUuid->text());
                 std::shared_ptr<QSet<QString>> uuidsMcpServer = std::make_shared<QSet<QString>>();
                 for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
                 {
@@ -750,7 +750,7 @@ void WidgetAgentInfo::initItems()
                 QListWidgetItem *selectedItem = m_listWidgetConversations->currentItem();
                 if (selectedItem)
                 {
-                    XLC_LOG_DEBUG("Agent[{}]: 尝试查看对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    XLC_LOG_TRACE("Agent[{}]: 尝试查看对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
                     // 跳转至对话
                     QJsonObject objPageInfo;
                     objPageInfo["id"] = static_cast<int>(EventBus::Pages::CONVERSATION);
@@ -1033,7 +1033,7 @@ void PageSettingsMcp::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("尝试新增mcp服务器");
+                XLC_LOG_TRACE("尝试新增mcp服务器");
                 DialogAddNewMcpServer *dialog = new DialogAddNewMcpServer(this);
                 connect(dialog, &DialogAddNewMcpServer::finished, this,
                         [this, dialog](int result)
