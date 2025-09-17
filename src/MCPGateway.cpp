@@ -87,7 +87,7 @@ void McpGateway::registerServer(const QString &serverUuid, const QString &baseUr
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverUuid))
     {
-        // Already registered, maybe update?
+        // 已经注册
         return;
     }
     std::unique_ptr<mcp::sse_client> client = std::make_unique<mcp::sse_client>(baseUrl.toStdString(), endpoint.toStdString());
