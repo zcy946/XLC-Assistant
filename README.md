@@ -25,6 +25,7 @@
 - [x] 实现删除Agent、Mcp服务器、LLM
 - [x] 实现设置-助手-对话列表右键的跳转展示功能
 - [x] 修复添加新LLM|更新LLM信息时，点击设置-助手设置-模型的combobox列表没有更新的bug
+- [ ] 为mcpserver结构体添加`isActive`是否激活变量
 
 ### 优化
 
