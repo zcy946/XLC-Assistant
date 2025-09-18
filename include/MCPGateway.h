@@ -13,7 +13,7 @@
 struct RegisteredServer
 {
     std::unique_ptr<mcp::sse_client> client;
-    mcp::json available_tools; // 缓存该服务器提供的工具列表
+    mcp::json availableTools; // 缓存该服务器提供的工具列表
 };
 
 class McpGateway : public QObject

@@ -117,3 +117,57 @@ QFuture<MCPClient*> MCPService::initClient(const MCPServer& server) {
 在应用程序退出过程中，`cleanup` 方法会遍历所有客户端并调用 `closeClient` 进行资源清理。
 
 这个 `cleanup` 方法在应用程序的 `will-quit` 事件中被调用。
+
+
+
+## `sse_client`类中需要`try-catch`包裹的 public 函数
+
+### 1. 初始化相关函数
+
+**`initialize()`** - 初始化客户端连接 mcp_sse_client.cpp:53-114
+
+- 可能抛出 `std::runtime_error`（SSE 连接失败、超时等）
+
+### 2. 请求发送函数
+
+**`send_request()`** - 发送请求并等待响应 mcp_sse_client.h:104-106
+
+- 内部调用 `send_jsonrpc()`，可能抛出 `mcp_exception`
+
+**`send_notification()`** - 发送通知消息 mcp_sse_client.h:112-114
+
+- 同样调用 `send_jsonrpc()`，可能抛出 `mcp_exception`
+
+### 3. 工具相关函数
+
+**`call_tool()`** - 调用服务器工具 mcp_sse_client.h:128-130
+
+- 内部调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:186-191
+
+**`get_tools()`** - 获取可用工具列表 mcp_sse_client.h:135-137
+
+- 内部调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:193-219
+
+### 4. 资源相关函数
+
+**`list_resources()`** - 列出可用资源 mcp_sse_client.h:149-150
+
+- 调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:225-231
+
+**`read_resource()`** - 读取资源内容 mcp_sse_client.h:155-157
+
+- 调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:233-237
+
+**`subscribe_to_resource()`** - 订阅资源变更 mcp_sse_client.h:162-164
+
+- 调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:239-243
+
+**`list_resource_templates()`** - 列出资源模板 mcp_sse_client.h:168-170
+
+- 调用 `send_request()`，可能抛出 `mcp_exception` mcp_sse_client.cpp:245-247
+
+### 5. 服务器能力函数
+
+**`get_server_capabilities()`** - 获取服务器能力 mcp_sse_client.h:119-121
+
+- 虽然只是返回缓存值，但如果在初始化失败后调用可能返回空值

@@ -7,7 +7,7 @@ mcp::json McpGateway::getToolsForServer(const QString &serverUuid)
     QMutexLocker locker(&m_mutex);
     if (m_servers.contains(serverUuid))
     {
-        return m_servers[serverUuid]->available_tools;
+        return m_servers[serverUuid]->availableTools;
     }
     return mcp::json::array();
 }
@@ -20,7 +20,7 @@ mcp::json McpGateway::getToolsForServers(const QSet<QString> &serverUuids)
     {
         if (m_servers.contains(serverUuid))
         {
-            for (const auto &tool : m_servers[serverUuid]->available_tools)
+            for (const auto &tool : m_servers[serverUuid]->availableTools)
             {
                 merged_tools.push_back(tool);
             }
@@ -35,7 +35,7 @@ mcp::json McpGateway::getAllAvailableTools()
     mcp::json all_tools = mcp::json::array();
     for (const auto &server : m_servers)
     {
-        for (const auto &tool : server->available_tools)
+        for (const auto &tool : server->availableTools)
         {
             all_tools.push_back(tool);
         }
@@ -70,7 +70,7 @@ void McpGateway::registerServer(const QString &serverUuid, const QString &host, 
                    {{"type", "object"},
                     {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
                     {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
-            mcpServer->available_tools.push_back(convertedTool);
+            mcpServer->availableTools.push_back(convertedTool);
         }
         m_servers.insert(serverUuid, mcpServer);
         emit serverRegistered(serverUuid); // 通知外界，例如让ChatManager刷新可用工具列表
@@ -107,7 +107,7 @@ void McpGateway::registerServer(const QString &serverUuid, const QString &baseUr
                    {{"type", "object"},
                     {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
                     {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
-            mcpServer->available_tools.push_back(convertedTool);
+            mcpServer->availableTools.push_back(convertedTool);
         }
         m_servers.insert(serverUuid, mcpServer);
         emit serverRegistered(serverUuid); // 通知外界，例如让ChatManager刷新可用工具列表
@@ -139,7 +139,7 @@ void McpGateway::callTool(const QString &conversationUuid, const QString &callId
             QString targetServerId;
             for (auto it = m_servers.begin(); it != m_servers.end(); ++it)
             {
-                const auto &tools_on_server = it.value()->available_tools;
+                const auto &tools_on_server = it.value()->availableTools;
                 for (const auto &tool : tools_on_server)
                 {
                     if (tool["name"].get<std::string>() == toolName.toStdString())

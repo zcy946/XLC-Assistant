@@ -198,7 +198,7 @@ struct McpServer
           name(),
           description(),
           type(sse),
-          timeout(60),
+          timeout(30),
           command(),
           args(),
           envVars(),
