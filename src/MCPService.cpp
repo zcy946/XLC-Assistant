@@ -336,17 +336,12 @@ void MCPService::closeClient(const QString &serverUuid)
         // 更新m_clients
         std::shared_ptr<MCPClient> mcpClientDeleted = m_clients.value(serverUuid);
         // 更新m_tools
-        QHash<QString, std::shared_ptr<MCPClient>>::iterator it = m_tools.begin();
-        while (it != m_tools.end())
+        for (QHash<QString, std::shared_ptr<MCPClient>>::iterator it = m_tools.begin(); it != m_tools.end(); ++it)
         {
             const QString &key = it.key();
             if (it.value() == mcpClientDeleted)
             {
                 it = m_tools.erase(it);
-            }
-            else
-            {
-                ++it;
             }
         }
         m_clients.remove(serverUuid);
