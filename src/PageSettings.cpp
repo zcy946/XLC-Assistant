@@ -56,11 +56,11 @@ void PageSettings::initItems()
                 const auto &it = m_pages.find(currentText);
                 if (it == m_pages.end())
                 {
-                    XLC_LOG_WARN("不存在的设置项: {}", currentText);
+                    XLC_LOG_WARN("Non-existent setting item ({})", currentText);
                     return;
                 }
                 m_stackedWidget->setCurrentWidget(it.value());
-                XLC_LOG_TRACE("选中设置项: {}", currentText);
+                XLC_LOG_TRACE("Setting item selected (item={})", currentText);
             });
 
     // m_stackedWidget
@@ -113,7 +113,7 @@ void PageSettingsLLM::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_TRACE("尝试新增LLM");
+                XLC_LOG_TRACE("Attempting to add LLM");
                 DialogAddNewLLM *dialog = new DialogAddNewLLM(this);
                 connect(dialog, &DialogAddNewLLM::finished, this,
                         [this, dialog](int result)
@@ -122,7 +122,7 @@ void PageSettingsLLM::initItems()
                             {
                                 // 新增LLM
                                 std::shared_ptr<LLM> newLLM = dialog->getFormData();
-                                XLC_LOG_TRACE("新增LLM: {} - {}", newLLM->uuid, newLLM->modelName);
+                                XLC_LOG_TRACE("Adding new LLM (uuid={}, modelName={})", newLLM->uuid, newLLM->modelName);
                                 DataManager::getInstance()->addLLM(newLLM);
                                 // 更新LLM列表
                                 QListWidgetItem *newItem = new QListWidgetItem();
@@ -149,7 +149,7 @@ void PageSettingsLLM::initItems()
                 if (!llm)
                     return;
                 m_widgetLLMInfo->updateData(llm);
-                XLC_LOG_DEBUG("重载llm: {}", m_widgetLLMInfo->getUuid());
+                XLC_LOG_DEBUG("Reloading LLM widget (UUID={})", m_widgetLLMInfo->getUuid());
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
@@ -176,7 +176,7 @@ void PageSettingsLLM::initItems()
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
                 EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("更新llm: {}", m_widgetLLMInfo->getUuid());
+                XLC_LOG_DEBUG("Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
             });
 }
 
@@ -214,7 +214,7 @@ void PageSettingsLLM::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &llmName = item->data(Qt::DisplayRole).value<QString>();
     const QString &llmUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("选中llm: {} - {}", llmName, llmUuid);
+    XLC_LOG_TRACE("LLM selected (name={}, uuid={})", llmName, llmUuid);
     showLLMInfo(llmUuid);
 }
 
@@ -278,7 +278,7 @@ void PageSettingsLLM::showLLMInfo(const QString &uuid)
     const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(uuid);
     if (!llm)
     {
-        XLC_LOG_WARN("不存在的llm: {}", uuid);
+        XLC_LOG_WARN("LLM not found (uuid={})", uuid);
         return;
     }
     m_widgetLLMInfo->updateData(llm);
@@ -440,7 +440,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_TRACE("尝试新增agent");
+                XLC_LOG_TRACE("Attempting to add agent");
                 DialogAddNewAgent *dialog = new DialogAddNewAgent(this);
                 connect(dialog, &DialogAddNewAgent::finished, this,
                         [this, dialog](int result)
@@ -449,7 +449,7 @@ void PageSettingsAgent::initItems()
                             {
                                 // 新增agent
                                 std::shared_ptr<Agent> newAgent = dialog->getFormData();
-                                XLC_LOG_TRACE("新增agent: {} - {}", newAgent->uuid, newAgent->name);
+                                XLC_LOG_TRACE("Adding new agent (uuid={}, name={})", newAgent->uuid, newAgent->name);
                                 DataManager::getInstance()->addAgent(newAgent);
                                 // 更新agent列表
                                 QListWidgetItem *newItem = new QListWidgetItem();
@@ -476,7 +476,7 @@ void PageSettingsAgent::initItems()
                 if (!agent)
                     return;
                 m_widgetAgentInfo->updateData(agent);
-                XLC_LOG_DEBUG("重载agent: {}", m_widgetAgentInfo->getUuid());
+                XLC_LOG_DEBUG("Reloading agent widget (uuid={})", m_widgetAgentInfo->getUuid());
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
@@ -497,7 +497,7 @@ void PageSettingsAgent::initItems()
                         selectedItem->setText(currentAgent->name);
                     }
                 }
-                XLC_LOG_DEBUG("更新agent: {}", m_widgetAgentInfo->getUuid());
+                XLC_LOG_DEBUG("Updating agent widget (uuid={})", m_widgetAgentInfo->getUuid());
             });
 }
 
@@ -535,7 +535,7 @@ void PageSettingsAgent::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &agentName = item->data(Qt::DisplayRole).value<QString>();
     const QString &agentUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("选中agent: {} - {}", agentName, agentUuid);
+    XLC_LOG_TRACE("Agent selected (name={}, uuid={})", agentName, agentUuid);
     showAgentInfo(agentUuid);
 }
 
@@ -600,7 +600,7 @@ void PageSettingsAgent::showAgentInfo(const QString &uuid)
     const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(uuid);
     if (!agent)
     {
-        XLC_LOG_WARN("不存在的agent: {}", uuid);
+        XLC_LOG_WARN("Agent not found (uuid={})", uuid);
         return;
     }
     m_widgetAgentInfo->updateData(agent);
@@ -675,7 +675,7 @@ void WidgetAgentInfo::initItems()
     connect(actionAddMcpServer, &QAction::triggered, this,
             [this]()
             {
-                XLC_LOG_TRACE("Agent[{}]: 尝试添加（挂载）mcp服务器", m_lineEditUuid->text());
+                XLC_LOG_TRACE("Agent: Attempting to add (mount) mcp server (uuid={})", m_lineEditUuid->text());
                 std::shared_ptr<QSet<QString>> uuidsMcpServer = std::make_shared<QSet<QString>>();
                 for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
                 {
@@ -701,7 +701,7 @@ void WidgetAgentInfo::initItems()
                                     item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
                                     m_listWidgetMcpServers->addItem(item);
                                 }
-                                XLC_LOG_TRACE("更新mcp服务器列表");
+                                XLC_LOG_TRACE("Updating MCP server list");
                             }
                         });
                 dialog->exec();
@@ -713,7 +713,7 @@ void WidgetAgentInfo::initItems()
                 QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
                 if (selectedItem)
                 {
-                    XLC_LOG_DEBUG("Agent[{}]: 删除已挂载mcp服务器: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    XLC_LOG_DEBUG("Deleting mounted mcp server (agentUuid={}, serverUuid={}, serverName={})", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
                     int row = m_listWidgetMcpServers->row(selectedItem);
                     delete m_listWidgetMcpServers->takeItem(row);
                 }
@@ -750,7 +750,7 @@ void WidgetAgentInfo::initItems()
                 QListWidgetItem *selectedItem = m_listWidgetConversations->currentItem();
                 if (selectedItem)
                 {
-                    XLC_LOG_TRACE("Agent[{}]: 尝试查看对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    XLC_LOG_TRACE("Attempting to view conversation (agentUuid={}, conversationId={}, title={})", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
                     // 跳转至对话
                     QJsonObject objPageInfo;
                     objPageInfo["id"] = static_cast<int>(EventBus::Pages::CONVERSATION);
@@ -766,7 +766,7 @@ void WidgetAgentInfo::initItems()
                 QListWidgetItem *selectedItem = m_listWidgetConversations->currentItem();
                 if (selectedItem)
                 {
-                    XLC_LOG_DEBUG("Agent[{}]: 删除对话: {} - {}", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
+                    XLC_LOG_DEBUG("Deleting conversation (agentUuid={}, conversationUuid={}, conversationName={})", m_lineEditUuid->text(), selectedItem->data(Qt::UserRole).toString(), selectedItem->text());
                     int row = m_listWidgetConversations->row(selectedItem);
                     delete m_listWidgetConversations->takeItem(row);
                 }
@@ -813,7 +813,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
     const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
     {
-        XLC_LOG_WARN("不存在的llm: {}", agent->llmUUid);
+        XLC_LOG_WARN("LLM not found ({})", agent->llmUUid);
     }
     else
     {
@@ -830,7 +830,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
         {
-            XLC_LOG_WARN("不存在的mcp服务器: {}", uuid);
+            XLC_LOG_WARN("MCP server not found ({})", uuid);
             continue;
         }
         QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
@@ -844,7 +844,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
-            XLC_LOG_WARN("不存在的conversation: {}", uuid);
+            XLC_LOG_WARN("Conversation not found (uuid={})", uuid);
             continue;
         }
         QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
@@ -919,13 +919,13 @@ void WidgetAgentInfo::updateLLMList()
         std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
         if (!agent)
         {
-            XLC_LOG_WARN("不存在的agent: {}", m_lineEditUuid->text());
+            XLC_LOG_WARN("Agent not found (uuid={})", m_lineEditUuid->text());
             return;
         }
         std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
         if (!llm)
         {
-            XLC_LOG_WARN("不存在的LLM: {}", agent->llmUUid);
+            XLC_LOG_WARN("LLM not found (llmUuid={})", agent->llmUUid);
             return;
         }
         m_comboBoxLLM->setCurrentText(llm->modelName);
@@ -961,7 +961,7 @@ void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
     }
     else
     {
-        XLC_LOG_ERROR("未能处理状态改变事件，数据类型异常: {}", data.typeName());
+        XLC_LOG_ERROR("Failed to process state change event, data type exception (dataType={})", data.typeName());
     }
 }
 
@@ -1033,7 +1033,7 @@ void PageSettingsMcp::initItems()
     connect(m_pushButtonAdd, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_TRACE("尝试新增mcp服务器");
+                XLC_LOG_TRACE("Attempting to add MCP server");
                 DialogAddNewMcpServer *dialog = new DialogAddNewMcpServer(this);
                 connect(dialog, &DialogAddNewMcpServer::finished, this,
                         [this, dialog](int result)
@@ -1042,7 +1042,7 @@ void PageSettingsMcp::initItems()
                             {
                                 // 新增MCPServer
                                 std::shared_ptr<McpServer> newMcpServer = dialog->getFormData();
-                                XLC_LOG_TRACE("新增MCPServer: {} - {}", newMcpServer->uuid, newMcpServer->name);
+                                XLC_LOG_TRACE("Added new MCP server (uuid={}, name={})", newMcpServer->uuid, newMcpServer->name);
                                 DataManager::getInstance()->addMcpServer(newMcpServer);
                                 // 更新mcpServer列表
                                 QListWidgetItem *newItem = new QListWidgetItem();
@@ -1066,7 +1066,7 @@ void PageSettingsMcp::initItems()
             [this]()
             {
                 m_widgetMcpServerInfo->updateData(DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid()));
-                XLC_LOG_DEBUG("重载mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
+                XLC_LOG_DEBUG("Reloading MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
     // m_pushButtonRemove
     m_pushButtonRemove = new QPushButton("删除", this);
@@ -1087,7 +1087,7 @@ void PageSettingsMcp::initItems()
                         selectedItem->setText(currentMcpServer->name);
                     }
                 }
-                XLC_LOG_DEBUG("更新mcp服务器: {}", m_widgetMcpServerInfo->getUuid());
+                XLC_LOG_DEBUG("Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
 }
 
@@ -1125,7 +1125,7 @@ void PageSettingsMcp::slot_onListWidgetItemClicked(QListWidgetItem *item)
 {
     const QString &mcpServerName = item->data(Qt::DisplayRole).value<QString>();
     const QString &mcpServerUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("选中mcp服务器: {} - {}", mcpServerName, mcpServerUuid);
+    XLC_LOG_TRACE("MCP server selected (name={}, uuid={})", mcpServerName, mcpServerUuid);
     showMcpServerInfo(mcpServerUuid);
 }
 
@@ -1188,7 +1188,7 @@ void PageSettingsMcp::showMcpServerInfo(const QString &uuid)
     const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
     if (!mcpServer)
     {
-        XLC_LOG_WARN("不存在的mcpServer: {}", uuid);
+        XLC_LOG_WARN("MCP server not found (serverUuid={})", uuid);
         return;
     }
     // 展示mcp服务器信息
@@ -1432,7 +1432,7 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         m_plainTextEditRequestHeaders->show();
         return;
     }
-    XLC_LOG_WARN("不存在的mcp服务器类型: {}", m_comboBoxType->currentText());
+    XLC_LOG_WARN("Non-existent MCP server type (type={})", m_comboBoxType->currentText());
 }
 
 // DialogMountMcpServer
@@ -1474,14 +1474,14 @@ void DialogMountMcpServer::initItems()
                 if (item->checkState() == Qt::Checked)
                 {
                     m_uuidsMcpServer->insert(uuidMcpServer);
-                    XLC_LOG_TRACE("挂载mcp服务器: {}", uuidMcpServer);
+                    XLC_LOG_TRACE("Mounting MCP server (uuidMcpServer={})", uuidMcpServer);
                 }
                 else if (item->checkState() == Qt::Unchecked)
                 {
                     if (m_uuidsMcpServer->contains(uuidMcpServer))
                     {
                         m_uuidsMcpServer->remove(uuidMcpServer);
-                        XLC_LOG_TRACE("取消挂载mcp服务器: {}", uuidMcpServer);
+                        XLC_LOG_TRACE("Unmounting mcp server (uuid={})", uuidMcpServer);
                     }
                 }
             });
@@ -1579,7 +1579,7 @@ void PageSettingsStorage::initItems()
                 if (!fileName.isEmpty())
                 {
                     DataManager::getInstance()->setFilePathLLMs(fileName);
-                    XLC_LOG_DEBUG("设置llms文件路径为: {}", fileName);
+                    XLC_LOG_DEBUG("Setting LLMs file path (fileName={})", fileName);
                 }
             });
     // m_lineEditFilePathAgents
@@ -1594,7 +1594,7 @@ void PageSettingsStorage::initItems()
                 if (!fileName.isEmpty())
                 {
                     DataManager::getInstance()->setFilePathAgents(fileName);
-                    XLC_LOG_DEBUG("设置agents文件路径为: {}", fileName);
+                    XLC_LOG_DEBUG("Setting agents file path (fileName={})", fileName);
                 }
             });
     // m_lineEditFilePathMcpServers
@@ -1609,7 +1609,7 @@ void PageSettingsStorage::initItems()
                 if (!fileName.isEmpty())
                 {
                     DataManager::getInstance()->setFilePathMcpServers(fileName);
-                    XLC_LOG_DEBUG("设置mcp服务器文件路径为: {}", fileName);
+                    XLC_LOG_DEBUG("Setting MCP server file path (fileName={})", fileName);
                 }
             });
 }

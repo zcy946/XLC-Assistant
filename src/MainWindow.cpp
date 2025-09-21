@@ -64,7 +64,7 @@ void MainWindow::handleNavigationBarIndexChanged(int index, const QString &text)
 {
     if (index < 0 || index > m_stackedLayout->count() - 1)
         return;
-    XLC_LOG_TRACE("导航至: {} - {}", index, text);
+    XLC_LOG_TRACE("Navigating to index (index={}, text={})", index, text);
     m_stackedLayout->setCurrentIndex(index);
 }
 
@@ -87,19 +87,19 @@ void MainWindow::handlePageSwitched(const QVariant &data)
             }
             else
             {
-                XLC_LOG_ERROR("切换失败，agent或者conversation的uuid为空");
+                XLC_LOG_ERROR("Failed to switch, agent or conversation UUID is empty.");
             }
             break;
         }
         default:
         {
-            XLC_LOG_ERROR("不存在的Page id: {}", id);
+            XLC_LOG_ERROR("Page not found (id={})", id);
             break;
         }
         }
     }
     else
     {
-        XLC_LOG_ERROR("未能处理页面切换事件，数据类型异常: {}", data.typeName());
+        XLC_LOG_ERROR("Failed to process page switch event (typename={}): unexpected data type", data.typeName());
     }
 }

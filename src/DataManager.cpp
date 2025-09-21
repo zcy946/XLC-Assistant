@@ -874,7 +874,7 @@ std::shared_ptr<Conversation> DataManager::createNewConversation(const QString &
     std::shared_ptr<Agent> targetAgent = getAgent(agentUuid);
     if (!targetAgent)
     {
-        XLC_LOG_ERROR("创建新对话失败，不存在的agent: {}", agentUuid);
+        XLC_LOG_ERROR("Failed to create new conversation (agentUuid={}): agent not found ", agentUuid);
         return nullptr;
     }
     std::shared_ptr<Conversation> newConversation = Conversation::create(agentUuid);

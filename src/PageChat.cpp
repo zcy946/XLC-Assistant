@@ -30,7 +30,7 @@ void PageChat::initItems()
             [this](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
-                XLC_LOG_TRACE("选中agent: {}", uuid);
+                XLC_LOG_TRACE("Agent selected (uuid={})", uuid);
                 refreshConversations();
             });
     // m_listWidgetConversations
@@ -39,7 +39,7 @@ void PageChat::initItems()
             [](QListWidgetItem *item)
             {
                 const QString &uuid = item->data(Qt::UserRole).toString();
-                XLC_LOG_TRACE("选中对话: {}", uuid);
+                XLC_LOG_TRACE("Conversation selected (uuid={})", uuid);
                 // TODO 刷新WidgetChat
             });
 #ifdef QT_DEBUG
@@ -77,7 +77,7 @@ void PageChat::initItems()
     connect(m_tabWidgetSiderBar, &QTabWidget::currentChanged, this,
             [this](int index)
             {
-                XLC_LOG_TRACE("切换至: {} - {}", index, m_tabWidgetSiderBar->tabText(index));
+                XLC_LOG_TRACE("Switched tab (index={}, text={})", index, m_tabWidgetSiderBar->tabText(index));
             });
     // m_widgetChat
     m_widgetChat = new WidgetChat(this);
@@ -130,13 +130,13 @@ void PageChat::slot_onMessageSent(const QString &message)
     const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
     if (!agent)
     {
-        XLC_LOG_WARN("不存在的agent: {}", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Agent not found ({})", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
         return;
     }
     const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
     if (!conversation)
     {
-        XLC_LOG_WARN("不存在的conversation: {}", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Conversation not found (conversationId={})", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
         return;
     }
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
@@ -158,7 +158,7 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
         {
             if (agentUuid.isEmpty() || conversationUuid.isEmpty())
             {
-                XLC_LOG_ERROR("切换失败，agent或者conversation的uuid为空");
+                XLC_LOG_ERROR("Switch failed(agentUuid={}, conversationUuid={}): agent or conversation UUID is empty ", agentUuid, conversationUuid);
                 return;
             }
             // 选中对话列表
@@ -179,23 +179,23 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
                             return;
                         }
                     }
-                    XLC_LOG_WARN("找到了agent但未找到conversation: {}", conversationUuid);
+                    XLC_LOG_WARN("Switch failed (conversationUuid={}): agent found but conversation not found", conversationUuid);
                     break;
                 }
             }
-            XLC_LOG_WARN("未找到agent: {}", agentUuid);
+            XLC_LOG_WARN("Switch failed (agentUuid={}): agent not found", agentUuid);
             break;
         }
         default:
         {
-            XLC_LOG_ERROR("不存在的Page id: {}", id);
+            XLC_LOG_ERROR("Switch failed ({}): page ID not found", id);
             break;
         }
         }
     }
     else
     {
-        XLC_LOG_ERROR("未能处理页面切换事件，数据类型异常: {}", data.typeName());
+        XLC_LOG_ERROR("Failed to process page switch event (type={}): data type abnormal", data.typeName());
     }
 }
 
@@ -221,7 +221,7 @@ void PageChat::slot_handleStateChanged(const QVariant &data)
     }
     else
     {
-        XLC_LOG_ERROR("未能处理状态改变事件，数据类型异常: {}", data.typeName());
+        XLC_LOG_ERROR("Failed to process status change event(typeName={}): data type exception", data.typeName());
     }
 }
 
@@ -259,7 +259,7 @@ void PageChat::refreshAgents()
         }
     }
     m_listWidgetAgents->setCurrentRow(0);
-    XLC_LOG_DEBUG("agent: [{}] 已被删除，无法选中，已默认选中第一项", selectedAgentUuid);
+    XLC_LOG_DEBUG("Agent already deleted, cannot be selected (selectedAgentUuid={})", selectedAgentUuid);
 }
 
 void PageChat::refreshConversations()
@@ -275,7 +275,7 @@ void PageChat::refreshConversations()
     QListWidgetItem *selectedAgentItem = m_listWidgetAgents->currentItem();
     if (!selectedAgentItem)
     {
-        XLC_LOG_DEBUG("没有选中任何agent，无需更新conversations列表");
+        XLC_LOG_DEBUG("No agent selected, no need to update conversations list.");
         return;
     }
     std::shared_ptr<Agent> currentAgent = DataManager::getInstance()->getAgent(selectedAgentItem->data(Qt::UserRole).toString());
@@ -308,7 +308,7 @@ void PageChat::refreshConversations()
         }
     }
     m_listWidgetConversations->setCurrentRow(0);
-    XLC_LOG_DEBUG("conversation: [{}] 已被删除，无法选中，已默认选中第一项", selectedConversationUuid);
+    XLC_LOG_DEBUG("Conversation has been deleted and cannot be selected; first item selected by default (selectedConversationUuid={})", selectedConversationUuid);
 }
 
 /**
