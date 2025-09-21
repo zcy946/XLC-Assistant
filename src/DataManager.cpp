@@ -26,15 +26,15 @@ DataManager::DataManager(QObject *parent)
 {
     // 检测配置文件
     if (!QFile(FILE_LLMS).exists())
-        XLC_LOG_WARN("LLMs file does not exist: {}", FILE_LLMS);
+        XLC_LOG_WARN("LLMs file does not exist (file={})", FILE_LLMS);
     else
         m_filePathLLMs = FILE_LLMS;
     if (!QFile(FILE_MCPSERVERS).exists())
-        XLC_LOG_WARN("McpServers file does not exist: {}", FILE_MCPSERVERS);
+        XLC_LOG_WARN("McpServers file does not exist (file={})", FILE_MCPSERVERS);
     else
         m_filePathMcpServers = FILE_MCPSERVERS;
     if (!QFile(FILE_AGENTS).exists())
-        XLC_LOG_WARN("Agents file does not exist: {}", FILE_AGENTS);
+        XLC_LOG_WARN("Agents file does not exist (file={})", FILE_AGENTS);
     else
         m_filePathAgents = FILE_AGENTS;
 
@@ -79,7 +79,7 @@ void DataManager::loadDataAsync()
                 Q_EMIT sig_conversationsLoaded(success);
                 if (success)
                 {
-                    XLC_LOG_INFO("Successfully loaded [{}] Conversations from database", m_conversations.count());
+                    XLC_LOG_INFO("Loaded conversations from database (count={})", m_conversations.count());
                 }
                 futureWatcherConversations->deleteLater();
             });
@@ -101,7 +101,7 @@ void DataManager::loadLLMsAsync()
                 Q_EMIT sig_LLMsLoaded(success);
                 if (success)
                 {
-                    XLC_LOG_INFO("Successfully loaded [{}] LLMs from: [{}]", m_llms.count(), QFileInfo(m_filePathLLMs).absoluteFilePath());
+                    XLC_LOG_INFO("Successfully loaded LLMs (count={}, path={})", m_llms.count(), QFileInfo(m_filePathLLMs).absoluteFilePath());
                 }
                 futureWatcherLLMs->deleteLater();
             });
@@ -123,7 +123,7 @@ void DataManager::loadMcpServersAsync()
                 Q_EMIT sig_mcpServersLoaded(success);
                 if (success)
                 {
-                    XLC_LOG_INFO("Successfully loaded [{}] McpServers from: [{}]", m_mcpServers.count(), QFileInfo(m_filePathMcpServers).absoluteFilePath());
+                    XLC_LOG_INFO("Successfully loaded MCPServers (count={}, filePath={})", m_mcpServers.count(), QFileInfo(m_filePathMcpServers).absoluteFilePath());
                 }
                 futureWatcherMcpServers->deleteLater();
             });
@@ -145,7 +145,7 @@ void DataManager::loadAgentsAsync()
                 Q_EMIT sig_agentsLoaded(success);
                 if (success)
                 {
-                    XLC_LOG_INFO("Successfully loaded [{}] Agents from: [{}]", m_agents.count(), QFileInfo(m_filePathAgents).absoluteFilePath());
+                    XLC_LOG_INFO("Successfully loaded agents (count={}, filePath={})", m_agents.count(), QFileInfo(m_filePathAgents).absoluteFilePath());
                 }
                 futureWatcherAgents->deleteLater();
             });
@@ -168,7 +168,7 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
     }
     catch (const std::exception &e)
     {
-        XLC_LOG_ERROR("Failed to parse responseJson: {}\n{}", e.what(), responseJson);
+        XLC_LOG_ERROR("Failed to parse response JSON (error={}, json={})", e.what(), responseJson);
         return;
     }
     if (response["tool_calls"].empty())
@@ -189,7 +189,7 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
         try
         {
             // TODO 展示调用过程
-            XLC_LOG_DEBUG("Calling tool: {} - {}", callId, toolName);
+            XLC_LOG_DEBUG("Calling tool (callId={}, toolName={})", callId, toolName);
             // 解析参数
             mcp::json args = tool_call["function"]["arguments"];
             if (args.is_string())
@@ -204,7 +204,7 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
             const auto &it = m_conversations.find(conversationUuid);
             if (it == m_conversations.end())
             {
-                XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
+                XLC_LOG_WARN("Conversation not found (conversationUuid={})", conversationUuid);
                 return;
             }
             it.value()->messages.push_back({{"role", "tool"},
@@ -219,13 +219,13 @@ void DataManager::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool
     if (success)
     {
         auto content = result.value("content", mcp::json::array());
-        XLC_LOG_DEBUG("Result for call <{}> - {}:\n", callToolArgs.callId, callToolArgs.toolName, content.dump(4));
+        XLC_LOG_DEBUG("Call result (callId={}, toolName={}, result={})", callToolArgs.callId, callToolArgs.toolName, content.dump(4));
         // 更新消息列表
         // BUG 封装push_back函数，加锁防止数据混乱
         const auto &it = m_conversations.find(callToolArgs.conversationUuid);
         if (it == m_conversations.end())
         {
-            XLC_LOG_WARN("不存在的conversation: {}", callToolArgs.conversationUuid);
+            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
             return;
         }
         it.value()->messages.push_back({{"role", "tool"},
@@ -237,13 +237,13 @@ void DataManager::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool
     }
     else
     {
-        XLC_LOG_ERROR("Failed to call <{}> - {}:\n", callToolArgs.callId, callToolArgs.toolName, errorMessage);
+        XLC_LOG_ERROR("Tool call failed (callId={}, toolName={}, errorMessage={})", callToolArgs.callId, callToolArgs.toolName, errorMessage);
         // 更新消息列表
         // BUG 封装push_back函数，加锁防止数据混乱
         const auto &it = m_conversations.find(callToolArgs.conversationUuid);
         if (it == m_conversations.end())
         {
-            XLC_LOG_WARN("不存在的conversation: {}", callToolArgs.conversationUuid);
+            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
             return;
         }
         it.value()->messages.push_back({{"role", "tool"},
@@ -307,17 +307,17 @@ bool DataManager::loadLLMs(const QString &filePath)
             // 检查 UUID 是否有效
             if (newLLM.uuid.isEmpty())
             {
-                XLC_LOG_WARN("LLM entry missing UUID. Skipping entry.");
+                XLC_LOG_WARN("Failed to load LLMs: LLM entry missing UUID. Skipping.");
                 continue;
             }
 
             // 使用 std::make_shared 创建智能指针并存储到 QHash 中
             m_llms.insert(newLLM.uuid, std::make_shared<LLM>(newLLM));
-            XLC_LOG_TRACE("Loaded LLM: {}, modelName: {}", newLLM.modelID, newLLM.modelName);
+            XLC_LOG_TRACE("Successed to load LLM (modelId={}, modelName={})", newLLM.modelID, newLLM.modelName);
         }
         else
         {
-            XLC_LOG_WARN("LLMs array contains non-object element. Skipping.");
+            XLC_LOG_WARN("Failed to load LLMs: LLMs array contains non-object element. Skipping.");
         }
     }
     return true;
@@ -332,7 +332,7 @@ void DataManager::addLLM(const std::shared_ptr<LLM> &llm)
     }
     else
     {
-        XLC_LOG_WARN("Attempted to add a null LLM shared_ptr.");
+        XLC_LOG_WARN("Failed to add LLM: Attempted to add a null LLM shared_ptr.");
     }
 }
 
@@ -346,19 +346,19 @@ void DataManager::updateLLM(const std::shared_ptr<LLM> &llm)
 {
     if (!llm)
     {
-        XLC_LOG_WARN("Attempted to update a null LLM shared_ptr.");
+        XLC_LOG_WARN("Failed to update LLM: Attempted to update a null LLM shared_ptr.");
         return;
     }
     auto it = m_llms.find(llm->uuid.trimmed());
     if (it != m_llms.end())
     {
         (*it.value()) = *llm;
-        XLC_LOG_DEBUG("Updated LLM with UUID: {}", llm->uuid);
+        XLC_LOG_DEBUG("Successed to update LLM (uuid={})", llm->uuid);
         saveLLMsAsync(m_filePathLLMs);
     }
     else
     {
-        XLC_LOG_WARN("LLM with UUID {} not found for update. No action taken.", llm->uuid);
+        XLC_LOG_WARN("Failed to update LLM (LLMUuid={}): LLM not found", llm->uuid);
     }
 }
 
@@ -378,7 +378,7 @@ void DataManager::saveLLMs(const QString &filePath) const
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        QString errorMsg = QString("Could not open LLMs file for writing: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Failed to save LLMs (filepath=%1, error=%2): Could not open LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return;
     }
@@ -389,12 +389,12 @@ void DataManager::saveLLMs(const QString &filePath) const
 
     if (bytesWritten == -1)
     {
-        QString errorMsg = QString("Failed to write to LLMs file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Failed to save LLMs (filepath=%1, error=%2): Failed to write to LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return;
     }
 
-    XLC_LOG_INFO("Successfully saved [{}] LLMs to: [{}]", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
+    XLC_LOG_INFO("Save LLMS successed (count={}, filepath={})", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
 }
 
 void DataManager::saveLLMsAsync(const QString &filePath) const
@@ -408,7 +408,7 @@ void DataManager::saveLLMsAsync(const QString &filePath) const
     connect(futureWatcherLLMs, &QFutureWatcher<void>::finished, this,
             [this, futureWatcherLLMs, filePath]()
             {
-                XLC_LOG_DEBUG("Asynchronous save of LLMs finished for: [{}]", QFileInfo(filePath).absoluteFilePath());
+                XLC_LOG_DEBUG("Asynchronous save of LLMs finished (filepath={})", QFileInfo(filePath).absoluteFilePath());
                 futureWatcherLLMs->deleteLater();
             });
     futureWatcherLLMs->setFuture(futureLLMs);
@@ -451,7 +451,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QString errorMsg = QString("Could not open McpServers file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Load MCP Servers failed(filepath=%1, errormessage=%2): Could not open McpServers file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -462,14 +462,14 @@ bool DataManager::loadMcpServers(const QString &filePath)
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull())
     {
-        QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
+        QString errorMsg = QString("Load MCP Servers failed (filepath=%1): Failed to create JSONDocument from file").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
 
     if (!doc.isArray())
     {
-        QString errorMsg = QString("McpServers JSON root is not an array in file: %1").arg(filePath);
+        QString errorMsg = QString("Load MCP Servers failed (filepath=%1): McpServers JSON root is not an array in file").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -496,7 +496,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
 
             // 使用 std::make_shared 创建智能指针并存储到 QHash 中
             m_mcpServers.insert(newServer.uuid, std::make_shared<McpServer>(newServer));
-            XLC_LOG_TRACE("Loaded McpServer: {}, UUID: {}", newServer.name, newServer.uuid);
+            XLC_LOG_TRACE("Loaded server (name={}, uuid={})", newServer.name, newServer.uuid);
         }
         else
         {
