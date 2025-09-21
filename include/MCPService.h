@@ -44,6 +44,7 @@ class MCPService : public QObject
 Q_SIGNALS:
     void sig_clientReady(const QString &serverUuid, std::shared_ptr<MCPClient> client);
     void sig_clientError(const QString &serverUuid, const QString &errorMessage);
+    void sig_toolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
 
 public:
     /**
@@ -76,7 +77,7 @@ private:
     QMutex m_mutexClients;
     QHash<QString, QFuture<std::shared_ptr<MCPClient>>> m_pendingClients; // 服务器uuid - QFuture<mcpClient>
     QMutex m_mutexPendingClients;
-    QHash<QString, std::shared_ptr<MCPTool>> m_tools;                     // (MCPTool)id - mcpClient
+    QHash<QString, std::shared_ptr<MCPTool>> m_tools; // (MCPTool)id - mcpClient
     QMutex m_mutexTools;
 };
 

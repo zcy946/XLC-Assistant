@@ -11,6 +11,7 @@
 #include "MCPGateWay.h"
 
 class LLMService;
+struct CallToolArgs;
 struct LLM;
 struct McpServer;
 struct Agent;
@@ -34,8 +35,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
     void slot_onResponseReady(const QString &conversationUuid, const QString &responseJson);
-    void slot_onToolCallSucceeded(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &resultJson);
-    void slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error);
+    void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
 
 public:
     static DataManager *getInstance();
@@ -107,7 +107,6 @@ private:
     QHash<QString, std::shared_ptr<Agent>> m_agents;
     QHash<QString, std::shared_ptr<Conversation>> m_conversations;
     LLMService *m_llmService;
-    McpGateway *m_mcpGatway;
 };
 
 struct LLM

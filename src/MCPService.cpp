@@ -105,30 +105,29 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
     try
     {
         // 初始化连接
-        XLC_LOG_DEBUG("正在初始化与MCP服务器 [{}] 的连接...", server->uuid);
+        XLC_LOG_DEBUG("Initializing connection (MCPServer={})", server->uuid);
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
         {
-            XLC_LOG_ERROR("未能初始化与MCP服务器 [{}] 的连接", server->uuid);
+            XLC_LOG_ERROR("Failed to initialize connection to MCP server (MCPServer={})", server->uuid);
             return nullptr;
         }
         // Ping 服务器
-        XLC_LOG_DEBUG("正在 ping MCP服务器 [{}]...", server->uuid);
+        XLC_LOG_DEBUG("Pinging MCP server (MCPServer={})", server->uuid);
         if (!client->ping())
         {
-            std::cerr << "Failed to ping server" << std::endl;
-            XLC_LOG_ERROR("未能 ping 到MCP服务器 [{}]", server->uuid);
+            XLC_LOG_ERROR("Failed ping to MCP server (MCPServer={})", server->uuid);
             return nullptr;
         }
         // 获取capabilities
-        XLC_LOG_DEBUG("正在获取MCP服务器 [{}] 的capabilities...", server->uuid);
+        XLC_LOG_DEBUG("Getting capabilities for MCP server (MCPServer={})", server->uuid);
         mcp::json capabilities = client->get_server_capabilities();
-        XLC_LOG_DEBUG("MCP服务器 [{}] 的capabilities: {}", server->uuid, capabilities.dump(4));
+        XLC_LOG_TRACE("MCP server capabilities (MCPServer={}): {}", server->uuid, capabilities.dump(4));
         // 创建 MCPClient 对象
         auto mcpClient = std::make_shared<MCPClient>();
         // 获取tools
-        XLC_LOG_DEBUG("正在获取MCP服务器 [{}] 的tools...", server->uuid);
+        XLC_LOG_DEBUG("Getting tools for MCP server (MCPServer={})", server->uuid);
         mcpClient->tools = registerTools(server->uuid, client.get());
-        XLC_LOG_DEBUG("获取到 {} 个来自MCP服务器 [{}] 的tool", mcpClient->tools.size(), server->uuid);
+        XLC_LOG_DEBUG("Get {} tools from MCP server (MCPServer={})", mcpClient->tools.size(), server->uuid);
         mcpClient->client = std::move(client);
         return mcpClient;
     }
@@ -169,30 +168,29 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     try
     {
         // 初始化连接
-        XLC_LOG_DEBUG("正在初始化与MCP服务器 [{}] 的连接...", server->uuid);
+        XLC_LOG_DEBUG("Initializing connection to MCP server (MCPServer={})", server->uuid);
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
         {
-            XLC_LOG_ERROR("未能初始化与MCP服务器 [{}] 的连接", server->uuid);
+            XLC_LOG_ERROR("Failed initialize connection to MCP server (MCPServer={}", server->uuid);
             return nullptr;
         }
         // Ping 服务器
-        XLC_LOG_DEBUG("正在 ping MCP服务器 [{}]...", server->uuid);
+        XLC_LOG_DEBUG("Pinging MCP server (MCPServer={})", server->uuid);
         if (!client->ping())
         {
-            std::cerr << "Failed to ping server" << std::endl;
-            XLC_LOG_ERROR("未能 ping 到MCP服务器 [{}]", server->uuid);
+            XLC_LOG_ERROR("Failed ping to MCP server (MCPServer={})", server->uuid);
             return nullptr;
         }
         // 获取capabilities
-        XLC_LOG_DEBUG("正在获取MCP服务器 [{}] 的capabilities...", server->uuid);
+        XLC_LOG_DEBUG("Getting capabilities for MCP server (MCPServer={})", server->uuid);
         mcp::json capabilities = client->get_server_capabilities();
-        XLC_LOG_DEBUG("MCP服务器 [{}] 的capabilities: {}", server->uuid, capabilities.dump(4));
+        XLC_LOG_DEBUG("MCP server capabilities ({}): {}", server->uuid, capabilities.dump(4));
         // 创建 MCPClient 对象
         auto mcpClient = std::make_shared<MCPClient>();
         // 获取tools
-        XLC_LOG_DEBUG("正在获取MCP服务器 [{}] 的tools...", server->uuid);
+        XLC_LOG_DEBUG("Attempting get tools from MCP server (MCPServer={})", server->uuid);
         mcpClient->tools = registerTools(server->uuid, client.get());
-        XLC_LOG_DEBUG("获取到 {} 个来自MCP服务器 [{}] 的tool", mcpClient->tools.size(), server->uuid);
+        XLC_LOG_DEBUG("Get {} tools from MCP server (MCPServer={})", mcpClient->tools.size(), server->uuid);
         mcpClient->client = std::move(client);
         return mcpClient;
     }
@@ -226,12 +224,12 @@ std::shared_ptr<MCPClient> MCPService::createMCPClient(const QString &serverUuid
     case McpServer::Type::streambleHttp:
     {
         // 暂不支持的服务器类型
-        XLC_LOG_WARN("暂不支持的MCPServer类型: {} - streambleHttp", static_cast<int>(mcpServer->type));
+        XLC_LOG_WARN("Unsupported MCPServer type: {} - streambleHttp", static_cast<int>(mcpServer->type));
         break;
     }
     default:
     {
-        XLC_LOG_WARN("未知MCPServer类型: {}", static_cast<int>(mcpServer->type));
+        XLC_LOG_WARN("Unknown MCPServer type: {}", static_cast<int>(mcpServer->type));
         break;
     }
     }
@@ -264,14 +262,14 @@ QVector<QString> MCPService::registerTools(const QString &serverUuid, mcp::clien
 
 void MCPService::initClient(const QString &serverUuid)
 {
-    XLC_LOG_DEBUG("尝试为服务器 [{}] 初始化客户端。", serverUuid);
+    XLC_LOG_DEBUG("Attempting initialize client for server (serverUuid={}).", serverUuid);
 
     // 检查客户端是否已经初始化完成
     {
         QMutexLocker locker(&m_mutexClients);
         if (m_clients.contains(serverUuid))
         {
-            XLC_LOG_DEBUG("服务器 [{}] 的客户端已就绪，无需重复初始化。", serverUuid);
+            XLC_LOG_DEBUG("Client is ready, no need for re-initialization (server={})", serverUuid);
             // 如果需要，可以在这里重新发射 sig_clientReady 信号，通知新的监听者客户端已就绪。
             // Q_EMIT sig_clientReady(serverUuid, m_clients[serverUuid]);
             return;
@@ -283,14 +281,14 @@ void MCPService::initClient(const QString &serverUuid)
         QMutexLocker locker(&m_mutexPendingClients);
         if (m_pendingClients.contains(serverUuid))
         {
-            XLC_LOG_DEBUG("服务器 [{}] 的客户端正在初始化中，等待现有过程完成。", serverUuid);
+            XLC_LOG_DEBUG("Client is initializing (MCPServer={})", serverUuid);
             // 如果有多个调用者，并且都想知道何时完成，他们可以连接到现有的 future 的 watcher，
             // 但为了简化，这里只是跳过重复启动。
             return;
         }
     }
 
-    XLC_LOG_INFO("为服务器 [{}] 启动新的异步客户端初始化。", serverUuid);
+    XLC_LOG_DEBUG("Initializing MCP server ({})", serverUuid);
 
     // 启动新的异步初始化任务
     QFuture<std::shared_ptr<MCPClient>> future = QtConcurrent::run(
@@ -319,7 +317,7 @@ void MCPService::initClient(const QString &serverUuid)
                     std::shared_ptr<MCPClient> client = finishedFuture.result();
                     if (client)
                     {
-                        XLC_LOG_DEBUG("服务器 [{}] 的客户端初始化成功！", serverUuid);
+                        XLC_LOG_DEBUG("Client initialization succeeded (serverUuid={})", serverUuid);
                         {
                             QMutexLocker locker(&m_mutexClients);
                             m_clients.insert(serverUuid, client); // 存储已就绪的客户端
@@ -328,19 +326,19 @@ void MCPService::initClient(const QString &serverUuid)
                     }
                     else
                     {
-                        XLC_LOG_WARN("服务器 [{}] 的客户端初始化失败（createMCPClient 返回 nullptr）！", serverUuid);
+                        XLC_LOG_WARN("Client initialization failed (serverUuid={})", serverUuid);
                         Q_EMIT sig_clientError(serverUuid, "初始化失败：客户端对象为空或创建失败。");
                     }
                 }
                 else if (finishedFuture.isCanceled())
                 {
-                    XLC_LOG_WARN("服务器 [{}] 的客户端初始化被取消。", serverUuid);
+                    XLC_LOG_WARN("Client initialization cancelled (serverUuid={})", serverUuid);
                     Q_EMIT sig_clientError(serverUuid, "初始化被取消。");
                 }
                 else
                 {
                     // 对于 QtConcurrent::run 来说，通常不会出现这种情况，但为了健壮性考虑
-                    XLC_LOG_WARN("服务器 [{}] 的 Future 已完成但结果不可用或被取消（异常状态）。", serverUuid);
+                    XLC_LOG_WARN("Server future completed but result unavailable or cancelled (exception state) (serverUuid={})", serverUuid);
                     Q_EMIT sig_clientError(serverUuid, "Future 状态异常。");
                 }
                 watcher->deleteLater(); // 销毁 watcher
@@ -380,7 +378,9 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         auto it_McpTool = m_tools.find(callToolArgs.toolName);
         if (it_McpTool == m_tools.end())
         {
-            XLC_LOG_WARN("{} 调用失败，不存在的tool: {}", callToolArgs.callId, callToolArgs.toolName);
+            QString errorMessage = QString("Call failed (callId=%1, tool=%2): tool not found").arg(callToolArgs.callId).arg(callToolArgs.toolName);
+            XLC_LOG_WARN("{}", errorMessage);
+            Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             return;
         }
         mcpTool = it_McpTool.value();
@@ -393,7 +393,9 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         auto it_McpClient = m_clients.find(mcpTool->serverUuid);
         if (it_McpClient == m_clients.end())
         {
-            XLC_LOG_WARN("{} 调用失败，不存在的mcp客户端: {}", callToolArgs.callId, mcpTool->serverUuid);
+            QString errorMessage = QString("Call failed (callId=%1, server=%2): server not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid);
+            XLC_LOG_WARN("{}", errorMessage);
+            Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             return;
         }
         mcpClient = it_McpClient.value();
@@ -401,32 +403,51 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
 
     if (!mcpClient->tools.contains(callToolArgs.toolName))
     {
-        XLC_LOG_WARN("{} 调用失败，mcp客户端 {} 中不存在名为 {} 的tool", callToolArgs.callId, mcpTool->serverUuid, callToolArgs.toolName);
+        QString errorMessage = QString("Call failed (callId=%1, server=%2, tool=%3): original tool not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid).arg(callToolArgs.toolName);
+        XLC_LOG_WARN("{}", errorMessage);
+        Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
         return;
     }
 
     // 异步调用tool
     QtConcurrent::run(
-        [mcpClient, mcpTool, callToolArgs]()
+        [this, mcpClient, mcpTool, callToolArgs]()
         {
             try
             {
                 mcp::json result = mcpClient->client->call_tool(mcpTool->name.toStdString(), callToolArgs.parameters);
-                // TODO 调用成功
-                XLC_LOG_TRACE("{} - {} 调用成功: {}", callToolArgs.callId, mcpTool->name, result.dump(4));
+                // 调用成功
+                XLC_LOG_TRACE("Call succeeded (callId={}, tool={}): result={}", callToolArgs.callId, mcpTool->name, result.dump(4));
+                Q_EMIT sig_toolCallFinished(callToolArgs, true, result, Q_NULLPTR);
             }
-            // TODO 调用失败
+            // 调用失败
             catch (const mcp::mcp_exception &e)
             {
-                XLC_LOG_ERROR("{} - {} 调用失败，MCP error: {}", callToolArgs.callId, mcpTool->name, e.what());
+                QString errorMessage = QString("Call failed (callId=%1, tool=%2): mcp error=%3")
+                                           .arg(callToolArgs.callId)
+                                           .arg(mcpTool->name)
+                                           .arg(e.what());
+                XLC_LOG_WARN("{}", errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             }
             catch (const std::exception &e)
             {
-                XLC_LOG_ERROR("{} - {} 调用失败，Standard error: {}", callToolArgs.callId, mcpTool->name, e.what());
+                QString errorMessage = QString("Call failed (callId=%1, tool=%2): standard error=%3")
+                                           .arg(callToolArgs.callId)
+                                           .arg(mcpTool->name)
+                                           .arg(e.what());
+
+                XLC_LOG_WARN("{}", errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             }
             catch (...)
             {
-                XLC_LOG_ERROR("{} - {} 调用失败，Unknown error occurred", callToolArgs.callId, mcpTool->name);
+                QString errorMessage = QString("Call failed (callId=%1, tool=%2): Unknown error occurred")
+                                           .arg(callToolArgs.callId)
+                                           .arg(mcpTool->name);
+
+                XLC_LOG_WARN("{}", errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             }
         });
 }

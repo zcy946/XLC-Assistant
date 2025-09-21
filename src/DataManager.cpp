@@ -5,6 +5,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include "LLMService.h"
+#include "MCPService.h"
 
 DataManager *DataManager::s_instance = nullptr;
 
@@ -39,14 +40,12 @@ DataManager::DataManager(QObject *parent)
 
     // 初始化成员变量
     m_llmService = new LLMService(this);
-    m_mcpGatway = new McpGateway(this);
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
 
     // 处理LLM响应
     connect(m_llmService, &LLMService::responseReady, this, &DataManager::slot_onResponseReady);
     // 处理工具调用结果
-    connect(m_mcpGatway, &McpGateway::toolCallSucceeded, this, &DataManager::slot_onToolCallSucceeded);
-    connect(m_mcpGatway, &McpGateway::toolCallFailed, this, &DataManager::slot_onToolCallFailed);
+    connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &DataManager::slot_onToolCallFinished);
 }
 
 // void DataManager::registerAllMetaType()
@@ -157,31 +156,6 @@ void DataManager::slot_onMcpServersLoaded(bool success)
 {
     if (!success)
         return;
-    // 异步挂载所有mcp服务器
-    // HACK 使用算法，智能选择异步线程数量，对mcp服务器进行分块初始化
-    QtConcurrent::run(
-        [this]()
-        {
-            for (const std::shared_ptr<McpServer> &mcpServer : m_mcpServers)
-            {
-                if (!mcpServer->baseUrl.isEmpty())
-                {
-                    if (mcpServer->endpoint.isEmpty())
-                        m_mcpGatway->registerServer(mcpServer->uuid, mcpServer->baseUrl);
-                    else
-                        m_mcpGatway->registerServer(mcpServer->uuid, mcpServer->baseUrl, mcpServer->endpoint);
-                }
-                else if (!mcpServer->host.isEmpty() && mcpServer->port != 0)
-                {
-                    if (mcpServer->endpoint.isEmpty())
-                        m_mcpGatway->registerServer(mcpServer->uuid, mcpServer->host, mcpServer->port);
-                    else
-                        m_mcpGatway->registerServer(mcpServer->uuid, mcpServer->host, mcpServer->port, mcpServer->endpoint);
-                }
-            }
-            const mcp::json &tools = m_mcpGatway->getAllAvailableTools();
-            XLC_LOG_DEBUG("已加载 [{}] tools: {}", tools.size(), tools.dump(4));
-        });
 }
 
 void DataManager::slot_onResponseReady(const QString &conversationUuid, const QString &responseJson)
@@ -223,7 +197,7 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
                 args = mcp::json::parse(args.get<std::string>());
             }
             // 执行工具
-            m_mcpGatway->callTool(conversationUuid, callId, toolName, args);
+            MCPService::getInstance()->callTool(CallToolArgs{conversationUuid, callId, toolName, args});
         }
         catch (const std::exception &e)
         {
@@ -240,52 +214,53 @@ void DataManager::slot_onResponseReady(const QString &conversationUuid, const QS
     }
 }
 
-void DataManager::slot_onToolCallSucceeded(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &resultJson)
+void DataManager::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage)
 {
-    mcp::json result = mcp::json::parse(resultJson.toStdString());
-    auto content = result.value("content", mcp::json::array());
-    XLC_LOG_DEBUG("result for <{}> - {}:\n", callId, toolName, content.dump(4));
-    // 更新消息列表
-    // BUG 封装push_back函数，加锁防止数据混乱
-    const auto &it = m_conversations.find(conversationUuid);
-    if (it == m_conversations.end())
+    if (success)
     {
-        XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
-        return;
+        auto content = result.value("content", mcp::json::array());
+        XLC_LOG_DEBUG("Result for call <{}> - {}:\n", callToolArgs.callId, callToolArgs.toolName, content.dump(4));
+        // 更新消息列表
+        // BUG 封装push_back函数，加锁防止数据混乱
+        const auto &it = m_conversations.find(callToolArgs.conversationUuid);
+        if (it == m_conversations.end())
+        {
+            XLC_LOG_WARN("不存在的conversation: {}", callToolArgs.conversationUuid);
+            return;
+        }
+        it.value()->messages.push_back({{"role", "tool"},
+                                        {"tool_call_id", callToolArgs.callId.toStdString()},
+                                        {"content", content}});
+        // TODO 展示结果
+        // display_message(messages.back());
+        // TODO 回应LLM
     }
-    it.value()->messages.push_back({{"role", "tool"},
-                                    {"tool_call_id", callId.toStdString()},
-                                    {"content", content}});
-    // TODO 展示结果
-    // display_message(messages.back());
-    // TODO 回应LLM
-}
-
-void DataManager::slot_onToolCallFailed(const QString &conversationUuid, const QString &callId, const QString &toolName, const QString &error)
-{
-    XLC_LOG_ERROR("failed to call <{}> - {}:\n", callId, toolName, error);
-    // 更新消息列表
-    // BUG 封装push_back函数，加锁防止数据混乱
-    const auto &it = m_conversations.find(conversationUuid);
-    if (it == m_conversations.end())
+    else
     {
-        XLC_LOG_WARN("不存在的conversation: {}", conversationUuid);
-        return;
-    }
-    it.value()->messages.push_back({{"role", "tool"},
-                                    {"tool_call_id", callId.toStdString()},
-                                    {"content", error.toStdString()}});
-    // TODO 展示结果 & 发送结果为LLM
-    // display_message(messages.back());
+        XLC_LOG_ERROR("Failed to call <{}> - {}:\n", callToolArgs.callId, callToolArgs.toolName, errorMessage);
+        // 更新消息列表
+        // BUG 封装push_back函数，加锁防止数据混乱
+        const auto &it = m_conversations.find(callToolArgs.conversationUuid);
+        if (it == m_conversations.end())
+        {
+            XLC_LOG_WARN("不存在的conversation: {}", callToolArgs.conversationUuid);
+            return;
+        }
+        it.value()->messages.push_back({{"role", "tool"},
+                                        {"tool_call_id", callToolArgs.callId.toStdString()},
+                                        {"content", errorMessage.toStdString()}});
+        // TODO 展示结果 & 发送结果为LLM
+        // display_message(messages.back());
 
-    /**
-     * NOTE 在此处将`maxRetries` + 1
-     * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为:
-     * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts.
-     * Please consider alternative approaches or inform the user about the issue."
-     * 来让LLM停止调用此工具(并向用户展示原因)
-     * 在`slot_onResponseReady`中，判断`maxRetries`是否达到设定的最大值，如果达到则不再调用tools
-     */
+        /**
+         * NOTE 在此处将`maxRetries` + 1
+         * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为:
+         * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts.
+         * Please consider alternative approaches or inform the user about the issue."
+         * 来让LLM停止调用此工具(并向用户展示原因)
+         * 在`slot_onResponseReady`中，判断`maxRetries`是否达到设定的最大值，如果达到则不再调用tools
+         */
+    }
 }
 
 bool DataManager::loadLLMs(const QString &filePath)
@@ -915,5 +890,10 @@ void DataManager::handleMessageSent(const std::shared_ptr<Conversation> &convers
 
 const mcp::json DataManager::getTools(const QSet<QString> mcpServers)
 {
-    return m_mcpGatway->getToolsForServers(mcpServers);
+    mcp::json toolsJson = mcp::json();
+    for (const QString mcpServerUuid : mcpServers)
+    {
+        toolsJson.push_back(MCPService::getInstance()->getToolsFromServer(mcpServerUuid));
+    }
+    return toolsJson;
 }
