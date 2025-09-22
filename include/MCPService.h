@@ -45,6 +45,7 @@ Q_SIGNALS:
     void sig_clientReady(const QString &serverUuid, std::shared_ptr<MCPClient> client);
     void sig_clientError(const QString &serverUuid, const QString &errorMessage);
     void sig_toolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
+    // void sig_checkMcpConnectivityFinished(const QString &serverUuid, bool success);
 
 public:
     /**
@@ -53,7 +54,6 @@ public:
         this.getPrompt = this.getPrompt.bind(this)
         this.listResources = this.listResources.bind(this)
         this.getResource = this.getResource.bind(this)
-        checkMcpConnectivity;
      */
     static MCPService *getInstance();
     ~MCPService() = default;
@@ -62,6 +62,8 @@ public:
     void callTool(const CallToolArgs &callToolArgs);
     mcp::json getToolsFromServer(const QString &serverUuid);
     mcp::json getToolsFromServers(const QSet<QString> mcpServers);
+    // void checkMcpConnectivity(const QString &serverUuid);
+    bool isInitialized(const QString &serverUuid);
 
 private:
     explicit MCPService(QObject *parent = nullptr);

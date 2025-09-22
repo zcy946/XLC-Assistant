@@ -133,12 +133,12 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
     }
     catch (const mcp::mcp_exception &e)
     {
-        XLC_LOG_ERROR("MCPServer [{}] error: {} - {}", static_cast<int>(e.code()), e.what());
+        XLC_LOG_ERROR("Create stdio client failed (code={}, message={}): mcp error", static_cast<int>(e.code()), e.what());
         return nullptr;
     }
     catch (const std::exception &e)
     {
-        XLC_LOG_ERROR("MCPServer [{}] error: {}", e.what());
+        XLC_LOG_ERROR("Create stdio client failed (message={})", e.what());
         return nullptr;
     }
 }
@@ -167,6 +167,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     client->set_timeout(server->timeout);
     try
     {
+        // BUG 无法连接至服务器
         // 初始化连接
         XLC_LOG_DEBUG("Initializing connection to MCP server (MCPServer={})", server->uuid);
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
@@ -196,12 +197,12 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     }
     catch (const mcp::mcp_exception &e)
     {
-        XLC_LOG_ERROR("MCPServer [{}] error: {} - {}", static_cast<int>(e.code()), e.what());
+        XLC_LOG_ERROR("Create sse client failed (code={}, message={}): mcp error", static_cast<int>(e.code()), e.what());
         return nullptr;
     }
     catch (const std::exception &e)
     {
-        XLC_LOG_ERROR("MCPServer [{}] error: {}", e.what());
+        XLC_LOG_ERROR("Create sse client failed (message={})", e.what());
         return nullptr;
     }
 }
@@ -238,32 +239,48 @@ std::shared_ptr<MCPClient> MCPService::createMCPClient(const QString &serverUuid
 
 QVector<QString> MCPService::registerTools(const QString &serverUuid, mcp::client *client)
 {
-    QVector<QString> tools;
-    QMutexLocker locker(&m_mutexTools);
-    for (const auto &tool : client->get_tools())
+    try
     {
-        // 如果键不存在，则分别使用空的 JSON 对象和空的 JSON 数组作为默认值
-        mcp::json convertedTool = {
-            {"type", "function"},
-            {"function",
-             {{"name", tool.name},
-              {"description", tool.description},
-              {"parameters",
-               {{"type", "object"},
-                {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
-                {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
-        std::shared_ptr<MCPTool> mcpTool = std::make_shared<MCPTool>(QString::fromStdString(tool.name), serverUuid, convertedTool);
-        tools.push_back(mcpTool->id);
-        // 更新工具列表
-        m_tools.insert(mcpTool->id, mcpTool);
+        QVector<QString> tools;
+        QMutexLocker locker(&m_mutexTools);
+        for (const auto &tool : client->get_tools())
+        {
+            // 如果键不存在，则分别使用空的 JSON 对象和空的 JSON 数组作为默认值
+            mcp::json convertedTool = {
+                {"type", "function"},
+                {"function",
+                 {{"name", tool.name},
+                  {"description", tool.description},
+                  {"parameters",
+                   {{"type", "object"},
+                    {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
+                    {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
+            std::shared_ptr<MCPTool> mcpTool = std::make_shared<MCPTool>(QString::fromStdString(tool.name), serverUuid, convertedTool);
+            tools.push_back(mcpTool->id);
+            // 更新工具列表
+            m_tools.insert(mcpTool->id, mcpTool);
+        }
+        return tools;
     }
-    return tools;
+    catch (const mcp::mcp_exception &e)
+    {
+        XLC_LOG_ERROR("Register tools failed (mcp error={})", e.what());
+        return QVector<QString>();
+    }
+    catch (const std::exception &e)
+    {
+        XLC_LOG_ERROR("Register tools failed (error={})", e.what());
+        return QVector<QString>();
+    }
 }
 
 void MCPService::initClient(const QString &serverUuid)
 {
-    XLC_LOG_DEBUG("Initializing client for server (serverUuid={}).", serverUuid);
-
+    if (!DataManager::getInstance()->getMcpServer(serverUuid))
+    {
+        XLC_LOG_DEBUG("Initialize client failed (serverUuid={}): MCP server not found", serverUuid);
+        return;
+    }
     // 检查客户端是否已经初始化完成
     {
         QMutexLocker locker(&m_mutexClients);
@@ -288,7 +305,7 @@ void MCPService::initClient(const QString &serverUuid)
         }
     }
 
-    XLC_LOG_DEBUG("Initializing MCP server ({})", serverUuid);
+    XLC_LOG_DEBUG("Initializing MCP server (serverUuid={})", serverUuid);
 
     // 启动新的异步初始化任务
     QFuture<std::shared_ptr<MCPClient>> future = QtConcurrent::run(
@@ -454,13 +471,25 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
 
 mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
 {
-    // TODO 先判断是否有对应client，如果没有则初始化然后再获取工具（可能的方案：调用initClient函数获取future）
     std::shared_ptr<MCPClient> client;
     {
         QMutexLocker locker(&m_mutexClients);
         auto it_McpClient = m_clients.find(serverUuid);
         if (it_McpClient == m_clients.end())
+        {
+            QString errorMsg;
+            {
+                QMutexLocker lockerPendingClients(&m_mutexPendingClients);
+                if (!m_pendingClients.contains(serverUuid))
+                {
+                    initClient(serverUuid);
+                    errorMsg = QString("Get tools failed (serverUuid={}): client not initialized, calling initClient()");
+                }
+            }
+            errorMsg = QString("Get tools failed (serverUuid={}): client is initializing");
+            XLC_LOG_WARN("errorMsg", serverUuid);
             return mcp::json::array();
+        }
         client = it_McpClient.value();
     }
 
@@ -487,4 +516,55 @@ mcp::json MCPService::getToolsFromServers(const QSet<QString> mcpServers)
     }
     XLC_LOG_TRACE("Get tools succeeded (toolJsonStr={})", toolsJson.dump(4));
     return toolsJson;
+}
+
+// void MCPService::checkMcpConnectivity(const QString &serverUuid)
+// {
+//     QFuture<bool> future = QtConcurrent::run(
+//         [this, serverUuid]()
+//         {
+//             QMutexLocker lockerClients(&m_mutexClients);
+//             auto it = m_clients.find(serverUuid);
+//             if (it != m_clients.end())
+//             {
+//                 try
+//                 {
+//                     it.value()->client->get_tools();
+//                     XLC_LOG_INFO("Check MCP connectivity successed (serverUuid={})", serverUuid);
+//                     return true;
+//                 }
+//                 catch (const mcp::mcp_exception &e)
+//                 {
+//                     XLC_LOG_INFO("Check MCP connectivity failed (serverUuid={}, errormsg={}): mcp error", serverUuid, e.what());
+//                     return false;
+//                 }
+//                 catch (const std::exception &e)
+//                 {
+//                     XLC_LOG_INFO("Check MCP connectivity failed (serverUuid={}, errormsg={}): error", serverUuid, e.what());
+//                     return false;
+//                 }
+//             }
+//             else
+//             {
+//                 XLC_LOG_INFO("Check MCP connectivity failed (serverUuid={}): client not found", serverUuid);
+//                 return false;
+//             }
+//         });
+
+//     QFutureWatcher<bool> *watcher = new QFutureWatcher<bool>();
+//     connect(watcher, &QFutureWatcher<bool>::finished, this,
+//             [this, watcher, serverUuid]()
+//             {
+//                 Q_EMIT sig_checkMcpConnectivityFinished(serverUuid, watcher->future().result());
+//                 watcher->deleteLater();
+//             });
+//     watcher->setFuture(future);
+// }
+
+bool MCPService::isInitialized(const QString &serverUuid)
+{
+    QMutexLocker locker(&m_mutexClients);
+    if (m_clients.contains(serverUuid))
+        return true;
+    return false;
 }

@@ -132,17 +132,36 @@ void PageChat::slot_onMessageSent(const QString &message)
     const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
     if (!agent)
     {
-        XLC_LOG_WARN("Agent not found ({})", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Send message failed (agentUuid={}): agent not found", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
         return;
     }
     const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
     if (!conversation)
     {
-        XLC_LOG_WARN("Conversation not found (conversationId={})", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Send message failed (conversationUuid={}): conversation not found", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
         return;
     }
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
-    LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
+    // 检查 MCP 服务器是否初始化
+    bool allMcpServersReady = true;
+    for (const QString &mcpServerUuid : agent->mcpServers)
+    {
+        if (!MCPService::getInstance()->isInitialized(mcpServerUuid))
+        {
+            allMcpServersReady = false;
+
+            // 初始化未初始化的MCP服务器
+            MCPService::getInstance()->initClient(mcpServerUuid);
+        }
+    }
+    if (allMcpServersReady)
+    {
+        LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
+    }
+    else
+    {
+        XLC_LOG_WARN("Send message failed (conversationUuid={}): MCP servers not yet all initialized ", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+    }
 }
 
 void PageChat::slot_handlePageSwitched(const QVariant &data)
