@@ -11,7 +11,7 @@ class LLMService : public QObject
 {
     Q_OBJECT
 Q_SIGNALS:
-    void sig_responseReady(const QString &conversationUuid, const QString &responseJson);
+    // void sig_responseReady(const QString &conversationUuid, const QString &responseJson);
     void sig_errorOccurred(const QString &conversationUuid, const QString &errorMessage);
 
 public:
@@ -33,6 +33,7 @@ private:
     explicit LLMService(QObject *parent = nullptr);
     LLMService(const LLMService &) = delete;
     LLMService &operator=(const LLMService &) = delete;
+    void processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage);
 
 private:
     static LLMService *s_instance;

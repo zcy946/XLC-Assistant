@@ -4,7 +4,6 @@
 #include <QJsonDocument>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
-#include "LLMService.h"
 #include "MCPService.h"
 
 DataManager *DataManager::s_instance = nullptr;
@@ -40,8 +39,6 @@ DataManager::DataManager(QObject *parent)
 
     // 处理MCPServers加载完毕信号
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
-    // 处理LLM响应
-    connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &DataManager::slot_onResponseReady);
     // 处理工具调用结果
     connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &DataManager::slot_onToolCallFinished);
 }
@@ -154,62 +151,6 @@ void DataManager::slot_onMcpServersLoaded(bool success)
 {
     if (!success)
         return;
-}
-
-void DataManager::slot_onResponseReady(const QString &conversationUuid, const QString &responseJson)
-{
-    // 没有调用工具
-    mcp::json response;
-    try
-    {
-        response = mcp::json::parse(responseJson.toStdString());
-    }
-    catch (const std::exception &e)
-    {
-        XLC_LOG_ERROR("Failed to parse response JSON (error={}, json={})", e.what(), responseJson);
-        return;
-    }
-    if (response["tool_calls"].empty())
-    {
-        // TODO 展示结果
-        return;
-    }
-
-    /**
-     * FIXME 加入思考循环机制
-     * 给Conversation加入`int`类型变量`maxRetries`作为标识符，在此处判断是否达到设定的最大值，如果达到则不再调用tools*/
-
-    // 调用了工具
-    for (const auto &tool_call : response["tool_calls"])
-    {
-        QString callId = QString::fromStdString(tool_call["id"].get<std::string>());
-        QString toolName = QString::fromStdString(tool_call["function"]["name"].get<std::string>());
-        try
-        {
-            // TODO 展示调用过程
-            XLC_LOG_DEBUG("Calling tool (callId={}, toolName={})", callId, toolName);
-            // 解析参数
-            mcp::json args = tool_call["function"]["arguments"];
-            if (args.is_string())
-            {
-                args = mcp::json::parse(args.get<std::string>());
-            }
-            // 执行工具
-            MCPService::getInstance()->callTool(CallToolArgs{conversationUuid, callId, toolName, args});
-        }
-        catch (const std::exception &e)
-        {
-            const auto &it = m_conversations.find(conversationUuid);
-            if (it == m_conversations.end())
-            {
-                XLC_LOG_WARN("Conversation not found (conversationUuid={})", conversationUuid);
-                return;
-            }
-            it.value()->messages.push_back({{"role", "tool"},
-                                            {"tool_call_id", callId.toStdString()},
-                                            {"content", "Error: " + std::string(e.what())}});
-        }
-    }
 }
 
 void DataManager::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage)

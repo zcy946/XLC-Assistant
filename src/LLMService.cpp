@@ -2,6 +2,7 @@
 #include <QtConcurrent>
 #include "global.h"
 #include "DataManager.h"
+#include "MCPService.h"
 
 LLMService *LLMService::s_instance = nullptr;
 
@@ -28,7 +29,15 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
         [this, conversation, agent, tools, max_retries]()
         {
             const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
-            XLC_LOG_TRACE("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, tools={})", conversation->uuid, conversation->summary, agent->uuid, agent->name, llm->uuid, llm->modelID, llm->modelName, tools.dump(4));
+            XLC_LOG_TRACE("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, tools={})",
+                          conversation->uuid,
+                          conversation->summary,
+                          agent->uuid,
+                          agent->name,
+                          llm->uuid,
+                          llm->modelID,
+                          llm->modelName,
+                          tools.dump(4));
             nlohmann::json body;
             if (tools.is_array() && !tools.empty())
             {
@@ -54,45 +63,84 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
 
             for (int retry = 0; retry <= max_retries; ++retry)
             {
-                auto res = m_client->Post(llm->endpoint.toStdString(), body.dump(), "application/json");
-
-                if (res && res->status == 200)
+                XLC_LOG_TRACE("Posting to LLM (baseURL={}, endpoint={}, body={})", llm->baseUrl, llm->endpoint, body.dump(4));
+                httplib::Result result = m_client->Post(llm->endpoint.toStdString(), body.dump(), "application/json");
+                if (result && result->status == 200)
                 {
                     try
                     {
-                        nlohmann::json json_data = nlohmann::json::parse(res->body);
-                        nlohmann::json message = json_data["choices"][0]["message"];
+                        nlohmann::json json_data = nlohmann::json::parse(result->body);
+                        nlohmann::json responseMessage = json_data["choices"][0]["message"];
 
                         // 将 nlohmann::json 转换为 QString 以便信号传递
-                        QString responseStr = QString::fromStdString(message.dump());
-                        XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseStr);
-                        emit sig_responseReady(conversation->uuid, responseStr);
-                        /**
-                         * TODO 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数
-                         *  - 如果不需要则break - 存储记录
-                         *  - 如果需要则调用所有工具 - 存储各个记录 - (m_maxMcpToolChainCall - 1) - 继续调用processRequest*/
-                        return;
+                        XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseMessage.dump(4));
+                        // 处理LLM响应
+                        processResponse(conversation, responseMessage);
+                        // emit sig_responseReady(conversation->uuid, responseStr);
                     }
                     catch (const std::exception &e)
                     {
-                        QString errorMsg = QString("Failed to parse response: %1").arg(e.what());
+                        QString errorMsg = QString("Process request failed (conversationUuid=%1, errorMsg=%2): failed to parse response")
+                                               .arg(conversation->uuid)
+                                               .arg(e.what());
                         emit sig_errorOccurred(conversation->uuid, errorMsg);
                     }
+                    return;
                 }
                 else
                 {
-                    QString errorMsg = "Failed to get response from LLM. ";
-                    if (res)
+                    QString errorMsg = QString("Post LLM failed (conversationUuid=%1, retries=%2)")
+                                           .arg(conversation->uuid)
+                                           .arg(retry + 1);
+                    if (result)
                     {
-                        errorMsg += QString("Status: %1, Body: %2").arg(res->status).arg(QString::fromStdString(res->body));
+                        errorMsg += QString(" Status: %1, Body: %2").arg(result->status).arg(QString::fromStdString(result->body));
                     }
                     else
                     {
-                        errorMsg += QString("Error: %1").arg(httplib::to_string(res.error()).c_str());
+                        errorMsg += QString(" Error: %1").arg(httplib::to_string(result.error()).c_str());
                     }
-                    XLC_LOG_ERROR("{}", errorMsg);
-                    emit sig_errorOccurred(conversation->uuid, errorMsg);
+                    XLC_LOG_WARN("{}", errorMsg);
                 }
             }
+            QString errorMsg = QString("Process request failed (conversationUuid=%1, retries=%2, baseURL=%3, endpoint=%4): failed to post to LLM after multiple retries")
+                                   .arg(conversation->uuid)
+                                   .arg(max_retries)
+                                   .arg(llm->baseUrl)
+                                   .arg(llm->endpoint);
+            XLC_LOG_ERROR("{}", errorMsg);
+            emit sig_errorOccurred(conversation->uuid, errorMsg);
         });
+}
+
+void LLMService::processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage)
+{
+    // 记录回答
+    conversation->messages.push_back(responseMessage);
+
+    // 没有调用工具
+    // if (responseMessage["tool_calls"].empty())
+    if (!responseMessage.contains("tool_calls"))
+    {
+        // TODO 展示结果
+        return;
+    }
+
+    // 调用了工具
+    for (const auto &tool_call : responseMessage["tool_calls"])
+    {
+        QString callId = QString::fromStdString(tool_call["id"].get<std::string>());
+        QString toolName = QString::fromStdString(tool_call["function"]["name"].get<std::string>());
+        // TODO 展示调用过程
+        XLC_LOG_DEBUG("Calling tool (callId={}, toolName={})", callId, toolName);
+        // 解析参数
+        mcp::json args = tool_call["function"]["arguments"];
+        if (args.is_string())
+        {
+            args = mcp::json::parse(args.get<std::string>());
+        }
+        // 执行工具
+        MCPService::getInstance()->callTool(CallToolArgs{conversation->uuid, callId, toolName, args});
+        // TODO 处理调用结果连接MCPService的sig_toolCallFinished信号，通过conversation->uuid分类
+    }
 }

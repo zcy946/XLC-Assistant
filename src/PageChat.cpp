@@ -141,6 +141,7 @@ void PageChat::slot_onMessageSent(const QString &message)
         XLC_LOG_WARN("Send message failed (conversationUuid={}): conversation not found", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
         return;
     }
+    // 记录问题
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
     // 检查 MCP 服务器是否初始化
     bool allMcpServersReady = true;

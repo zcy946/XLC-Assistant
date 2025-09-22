@@ -8,7 +8,6 @@
 #include "Logger.hpp"
 #include <mcp_message.h>
 #include <QSet>
-#include "MCPGateWay.h"
 
 class LLMService;
 struct CallToolArgs;
@@ -34,7 +33,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
-    void slot_onResponseReady(const QString &conversationUuid, const QString &responseJson);
     void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
 
 public:
@@ -98,10 +96,10 @@ private:
     QString m_filePathLLMs;
     QString m_filePathMcpServers;
     QString m_filePathAgents;
-    QHash<QString, std::shared_ptr<LLM>> m_llms;
-    QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;
-    QHash<QString, std::shared_ptr<Agent>> m_agents;
-    QHash<QString, std::shared_ptr<Conversation>> m_conversations;
+    QHash<QString, std::shared_ptr<LLM>> m_llms;                   // uuid - ptr
+    QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;       // uuid - ptr
+    QHash<QString, std::shared_ptr<Agent>> m_agents;               // uuid - ptr
+    QHash<QString, std::shared_ptr<Conversation>> m_conversations; // uuid - ptr
 };
 
 struct LLM
