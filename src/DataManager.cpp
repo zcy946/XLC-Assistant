@@ -38,12 +38,10 @@ DataManager::DataManager(QObject *parent)
     else
         m_filePathAgents = FILE_AGENTS;
 
-    // 初始化成员变量
-    m_llmService = new LLMService(this);
+    // 处理MCPServers加载完毕信号
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
-
     // 处理LLM响应
-    connect(m_llmService, &LLMService::responseReady, this, &DataManager::slot_onResponseReady);
+    connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &DataManager::slot_onResponseReady);
     // 处理工具调用结果
     connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &DataManager::slot_onToolCallFinished);
 }
@@ -716,15 +714,15 @@ void DataManager::updateAgent(const std::shared_ptr<Agent> &agent)
 {
     if (!agent)
     {
-        XLC_LOG_WARN("Attempted to update a null Agent shared_ptr.");
+        XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", agent->uuid);
         return;
     }
     auto it = m_agents.find(agent->uuid.trimmed());
     if (it != m_agents.end())
     {
-        (*it.value()) = *agent;
+       (*it.value()) = *agent;
         Q_EMIT sig_agentUpdate(agent->uuid);
-        XLC_LOG_DEBUG("Updated Agent with UUID: {}", agent->uuid);
+        XLC_LOG_DEBUG("Updated Agent successed (uuid={})", agent->uuid);
         saveAgentsAsync(m_filePathAgents);
     }
     else
@@ -881,19 +879,4 @@ std::shared_ptr<Conversation> DataManager::createNewConversation(const QString &
     // 更新对应agent的对话列表
     targetAgent->conversations.insert(newConversation->uuid);
     return newConversation;
-}
-
-void DataManager::handleMessageSent(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)
-{
-    m_llmService->processRequest(conversation, agent, tools, max_retries);
-}
-
-const mcp::json DataManager::getTools(const QSet<QString> mcpServers)
-{
-    mcp::json toolsJson = mcp::json();
-    for (const QString mcpServerUuid : mcpServers)
-    {
-        toolsJson.push_back(MCPService::getInstance()->getToolsFromServer(mcpServerUuid));
-    }
-    return toolsJson;
 }

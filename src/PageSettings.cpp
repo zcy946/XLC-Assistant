@@ -486,6 +486,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonSave, &QPushButton::clicked, this,
             [this]()
             {
+                XLC_LOG_DEBUG("Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
                 DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
                 // 刷新m_listWidgetAgents
                 QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
@@ -497,7 +498,6 @@ void PageSettingsAgent::initItems()
                         selectedItem->setText(currentAgent->name);
                     }
                 }
-                XLC_LOG_DEBUG("Updating agent widget (uuid={})", m_widgetAgentInfo->getUuid());
             });
 }
 
@@ -1474,14 +1474,14 @@ void DialogMountMcpServer::initItems()
                 if (item->checkState() == Qt::Checked)
                 {
                     m_uuidsMcpServer->insert(uuidMcpServer);
-                    XLC_LOG_TRACE("Mounting MCP server (uuidMcpServer={})", uuidMcpServer);
+                    XLC_LOG_TRACE("Mounted MCP server (uuidMcpServer={})", uuidMcpServer);
                 }
                 else if (item->checkState() == Qt::Unchecked)
                 {
                     if (m_uuidsMcpServer->contains(uuidMcpServer))
                     {
                         m_uuidsMcpServer->remove(uuidMcpServer);
-                        XLC_LOG_TRACE("Unmounting mcp server (uuid={})", uuidMcpServer);
+                        XLC_LOG_TRACE("Unmounted mcp server (uuid={})", uuidMcpServer);
                     }
                 }
             });

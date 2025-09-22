@@ -6,6 +6,8 @@
 #include "DataManager.h"
 #include "Logger.hpp"
 #include "EventBus.h"
+#include "MCPService.h"
+#include "LLMService.h"
 
 PageChat::PageChat(QWidget *parent)
     : BaseWidget(parent)
@@ -140,7 +142,7 @@ void PageChat::slot_onMessageSent(const QString &message)
         return;
     }
     conversation->messages.push_back({{"role", "user"}, {"content", message.toStdString()}});
-    DataManager::getInstance()->handleMessageSent(conversation, agent, DataManager::getInstance()->getTools(agent->mcpServers));
+    LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
 }
 
 void PageChat::slot_handlePageSwitched(const QVariant &data)

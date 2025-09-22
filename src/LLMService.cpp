@@ -3,6 +3,19 @@
 #include "global.h"
 #include "DataManager.h"
 
+LLMService *LLMService::s_instance = nullptr;
+
+LLMService *LLMService::getInstance()
+{
+    if (!s_instance)
+    {
+        s_instance = new LLMService();
+        // 在应用程序退出时自动清理单例实例
+        connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
+    }
+    return s_instance;
+}
+
 LLMService::LLMService(QObject *parent)
     : QObject(parent), m_maxMcpToolChainCall(3)
 {
@@ -15,9 +28,9 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
         [this, conversation, agent, tools, max_retries]()
         {
             const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
-            XLC_LOG_TRACE("from conversation[{}]: {}\n\tagent: \n\t\t{}\n\t\t{}\n\tllm: \n\t\t{}\n\t\t{}\n\t\t{}\n\ttools: \n\t\t{}", conversation->uuid, conversation->summary, agent->uuid, agent->name, llm->uuid, llm->modelID, llm->modelName, tools.dump(4));
+            XLC_LOG_TRACE("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, tools={})", conversation->uuid, conversation->summary, agent->uuid, agent->name, llm->uuid, llm->modelID, llm->modelName, tools.dump(4));
             nlohmann::json body;
-            if (tools.size() != 0)
+            if (tools.is_array() && !tools.empty())
             {
                 body = {
                     {"model", llm->modelID.toStdString()},
@@ -52,8 +65,8 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
 
                         // 将 nlohmann::json 转换为 QString 以便信号传递
                         QString responseStr = QString::fromStdString(message.dump());
-                        XLC_LOG_TRACE("AI: {}", responseStr);
-                        emit responseReady(conversation->uuid, responseStr);
+                        XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseStr);
+                        emit sig_responseReady(conversation->uuid, responseStr);
                         /**
                          * TODO 这个信号的槽函数应该在获取到响应后，应使用 m_maxMcpToolChainCall 值循环，查看是否需要调用函数
                          *  - 如果不需要则break - 存储记录
@@ -63,7 +76,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     catch (const std::exception &e)
                     {
                         QString errorMsg = QString("Failed to parse response: %1").arg(e.what());
-                        emit errorOccurred(conversation->uuid, errorMsg);
+                        emit sig_errorOccurred(conversation->uuid, errorMsg);
                     }
                 }
                 else
@@ -78,7 +91,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                         errorMsg += QString("Error: %1").arg(httplib::to_string(res.error()).c_str());
                     }
                     XLC_LOG_ERROR("{}", errorMsg);
-                    emit errorOccurred(conversation->uuid, errorMsg);
+                    emit sig_errorOccurred(conversation->uuid, errorMsg);
                 }
             }
         });

@@ -11,11 +11,11 @@ class LLMService : public QObject
 {
     Q_OBJECT
 Q_SIGNALS:
-    void responseReady(const QString &conversationUuid, const QString &responseJson);
-    void errorOccurred(const QString &conversationUuid, const QString &errorMessage);
+    void sig_responseReady(const QString &conversationUuid, const QString &responseJson);
+    void sig_errorOccurred(const QString &conversationUuid, const QString &errorMessage);
 
 public:
-    explicit LLMService(QObject *parent = nullptr);
+    static LLMService *getInstance();
     ~LLMService() = default;
     /**
      * @brief 向指定agent发送消息.
@@ -30,6 +30,12 @@ public:
     void processRequest(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools = mcp::json(), int max_retries = 3);
 
 private:
+    explicit LLMService(QObject *parent = nullptr);
+    LLMService(const LLMService &) = delete;
+    LLMService &operator=(const LLMService &) = delete;
+
+private:
+    static LLMService *s_instance;
     /**
      * @brief 链式调用次数.
      *

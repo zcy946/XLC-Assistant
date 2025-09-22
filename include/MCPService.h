@@ -61,6 +61,7 @@ public:
     void closeClient(const QString &serverUuid);
     void callTool(const CallToolArgs &callToolArgs);
     mcp::json getToolsFromServer(const QString &serverUuid);
+    mcp::json getToolsFromServers(const QSet<QString> mcpServers);
 
 private:
     explicit MCPService(QObject *parent = nullptr);

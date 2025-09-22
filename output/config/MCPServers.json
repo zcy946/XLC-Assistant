@@ -6,7 +6,7 @@
         "host": "127.0.0.1",
         "name": "本地开发测试服务器",
         "port": 8888,
-        "requestHeaders": "{\"Authorization\": \"Bearer hf_your_token\"}",
+        "requestHeaders": "",
         "timeout": 60,
         "type": 1,
         "uuid": "d0e1f2a3-b4c5-6789-0123-def057887878"

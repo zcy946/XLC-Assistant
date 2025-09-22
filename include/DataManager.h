@@ -84,10 +84,6 @@ public:
     QList<std::shared_ptr<Conversation>> getConversations() const;
     std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
 
-    // 处理用户发送消息事件
-    void handleMessageSent(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries = 3);
-    const mcp::json getTools(const QSet<QString> mcpServers);
-
 private:
     explicit DataManager(QObject *parent = nullptr);
     DataManager(const DataManager &) = delete;
@@ -106,7 +102,6 @@ private:
     QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;
     QHash<QString, std::shared_ptr<Agent>> m_agents;
     QHash<QString, std::shared_ptr<Conversation>> m_conversations;
-    LLMService *m_llmService;
 };
 
 struct LLM

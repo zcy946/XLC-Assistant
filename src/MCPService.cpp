@@ -262,7 +262,7 @@ QVector<QString> MCPService::registerTools(const QString &serverUuid, mcp::clien
 
 void MCPService::initClient(const QString &serverUuid)
 {
-    XLC_LOG_DEBUG("Attempting initialize client for server (serverUuid={}).", serverUuid);
+    XLC_LOG_DEBUG("Initializing client for server (serverUuid={}).", serverUuid);
 
     // 检查客户端是否已经初始化完成
     {
@@ -454,6 +454,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
 
 mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
 {
+    // TODO 先判断是否有对应client，如果没有则初始化然后再获取工具（可能的方案：调用initClient函数获取future）
     std::shared_ptr<MCPClient> client;
     {
         QMutexLocker locker(&m_mutexClients);
@@ -473,5 +474,17 @@ mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
             toolsJson.push_back((*it_McpTool)->convertedTool);
         }
     }
+    return toolsJson;
+}
+
+mcp::json MCPService::getToolsFromServers(const QSet<QString> mcpServers)
+{
+    mcp::json toolsJson = mcp::json::array();
+    for (const QString mcpServerUuid : mcpServers)
+    {
+        mcp::json serverTools = getToolsFromServer(mcpServerUuid);
+        toolsJson.insert(toolsJson.end(), serverTools.begin(), serverTools.end());
+    }
+    XLC_LOG_TRACE("Get tools succeeded (toolJsonStr={})", toolsJson.dump(4));
     return toolsJson;
 }
