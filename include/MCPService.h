@@ -16,7 +16,7 @@ struct MCPTool
     QString name;            // 工具原有的名字
     QString serverUuid;      // 所在mcp服务器uuid
     mcp::json convertedTool; // 转换为json的工具
-    MCPTool(const QString &name, const QString &serverUuid, const mcp::json &convertedTool);
+    MCPTool(const QString &name, const QString &serverUuid, const mcp::json &convertedTool = mcp::json());
 
 private:
     // 通过serverUuid和toolName构建新的用于LLM调用的toolName
@@ -36,6 +36,7 @@ struct CallToolArgs
     QString toolName;         // 调用的函数名称（MCPTool中的id）
     mcp::json parameters;     // 参数
 };
+Q_DECLARE_METATYPE(CallToolArgs)
 
 class MCPService : public QObject
 {

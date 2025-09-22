@@ -72,6 +72,8 @@ MCPService *MCPService::getInstance()
     if (!s_instance)
     {
         s_instance = new MCPService();
+        // 注册自定义类型（在不同线程之间安全地传递自定义数据，需要通过 qRegisterMetaType() 显式地告诉 Qt 如何处理这些数据类型。）
+        qRegisterMetaType<CallToolArgs>("CallToolArgs");
         // 在应用程序退出时自动清理单例实例
         connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
     }
@@ -148,13 +150,15 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     std::unique_ptr<mcp::sse_client> client;
     if (!server->baseUrl.isEmpty())
     {
+        // base URL
         if (server->endpoint.isEmpty())
             client = std::make_unique<mcp::sse_client>(server->baseUrl.toStdString(), "/sse");
         else
-            client = std::make_unique<mcp::sse_client>(server->baseUrl.toStdString(), server->endpoint.toInt());
+            client = std::make_unique<mcp::sse_client>(server->baseUrl.toStdString(), server->endpoint.toStdString());
     }
     else if (!server->host.isEmpty() && server->port != 0)
     {
+        // host + port
         if (server->endpoint.isEmpty())
             client = std::make_unique<mcp::sse_client>(server->host.toStdString(), server->port);
         else
@@ -167,7 +171,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     client->set_timeout(server->timeout);
     try
     {
-        // BUG 无法连接至服务器
+        // NOTE 当服务器为localhost时，客户端填写127.0.0.1将无法连接到服务器必须添加localhost；反过来则没有这个问题
         // 初始化连接
         XLC_LOG_DEBUG("Initializing connection to MCP server (MCPServer={})", server->uuid);
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
@@ -245,17 +249,17 @@ QVector<QString> MCPService::registerTools(const QString &serverUuid, mcp::clien
         QMutexLocker locker(&m_mutexTools);
         for (const auto &tool : client->get_tools())
         {
-            // 如果键不存在，则分别使用空的 JSON 对象和空的 JSON 数组作为默认值
+            std::shared_ptr<MCPTool> mcpTool = std::make_shared<MCPTool>(QString::fromStdString(tool.name), serverUuid);
             mcp::json convertedTool = {
                 {"type", "function"},
                 {"function",
-                 {{"name", tool.name},
+                 {{"name", mcpTool->id.toStdString()},
                   {"description", tool.description},
                   {"parameters",
                    {{"type", "object"},
                     {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
                     {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
-            std::shared_ptr<MCPTool> mcpTool = std::make_shared<MCPTool>(QString::fromStdString(tool.name), serverUuid, convertedTool);
+            mcpTool->convertedTool = convertedTool;
             tools.push_back(mcpTool->id);
             // 更新工具列表
             m_tools.insert(mcpTool->id, mcpTool);
@@ -334,7 +338,7 @@ void MCPService::initClient(const QString &serverUuid)
                     std::shared_ptr<MCPClient> client = finishedFuture.result();
                     if (client)
                     {
-                        XLC_LOG_DEBUG("Client initialization succeeded (serverUuid={})", serverUuid);
+                        XLC_LOG_INFO("Client initialization succeeded (serverUuid={})", serverUuid);
                         {
                             QMutexLocker locker(&m_mutexClients);
                             m_clients.insert(serverUuid, client); // 存储已就绪的客户端
@@ -435,6 +439,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                 mcp::json result = mcpClient->client->call_tool(mcpTool->name.toStdString(), callToolArgs.parameters);
                 // 调用成功
                 XLC_LOG_TRACE("Call succeeded (callId={}, tool={}): result={}", callToolArgs.callId, mcpTool->name, result.dump(4));
+                // TODO 处理调用结果
                 Q_EMIT sig_toolCallFinished(callToolArgs, true, result, Q_NULLPTR);
             }
             // 调用失败
