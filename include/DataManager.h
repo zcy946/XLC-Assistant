@@ -33,7 +33,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
-    void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
 
 public:
     static DataManager *getInstance();
@@ -65,7 +64,7 @@ public:
 
     bool loadAgents(const QString &filePath);
     void removeAgent(const QString &uuid);
-    void updateAgent(const std::shared_ptr<Agent> &agent);
+    void updateAgent(const std::shared_ptr<Agent> &newAgent);
     void saveAgents(const QString &filePath) const;
     void saveAgentsAsync(const QString &filePath) const;
     void addAgent(const std::shared_ptr<Agent> &agent);
@@ -446,8 +445,12 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString summary;
     QDateTime createdTime;
     QDateTime updatedTime;
+
+private:
+    // TODO 给messages加锁
     mcp::json messages;
 
+public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid)
     {
         // 通过内部 enabler 来调用 protected ctor
@@ -489,13 +492,70 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
         return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(uuid, agentUuid, summary, createdTime, updatedTime));
     }
 
+    bool hasSystemPrompt()
+    {
+        if (!messages.is_array() || messages.empty())
+        {
+            return false;
+        }
+        const auto &firstItem = messages.front();
+        if (!firstItem.is_object())
+        {
+            return false;
+        }
+        if (firstItem.contains("role") && firstItem["role"].is_string() && firstItem["role"] == "system")
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void resetSystemPrompt()
+    {
+        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
+        if (!agent)
+        {
+            return;
+        }
+        if (agent->systemPrompt.isEmpty())
+            return;
+
+        mcp::json systemPromptItem = mcp::json();
+        systemPromptItem["content"] = agent->systemPrompt.toStdString();
+        systemPromptItem["role"] = "system";
+
+        if (hasSystemPrompt())
+        {
+            messages.front() = systemPromptItem;
+        }
+        else
+        {
+            if (messages.empty())
+                messages.push_back(systemPromptItem);
+            else
+                messages.insert(messages.begin(), systemPromptItem);
+        }
+    }
+
+    void addMessage(const mcp::json &newMessage)
+    {
+        messages.push_back(newMessage);
+    }
+
+    const mcp::json &getMessages()
+    {
+        return messages;
+    }
+
 protected:
     Conversation(const QString &agentUuid)
         : uuid(generateUuid()),
           agentUuid(agentUuid),
           createdTime(QDateTime::currentDateTime()),
           updatedTime(QDateTime::currentDateTime()),
-          messages(mcp::json()) {}
+          messages(mcp::json())
+    {
+    }
 
     Conversation(const QString &uuid,
                  const QString &agentUuid,
@@ -507,7 +567,9 @@ protected:
           summary(summary),
           createdTime(createdTime),
           updatedTime(updatedTime),
-          messages(mcp::json()) {}
+          messages(mcp::json())
+    {
+    }
 };
 
 // Q_DECLARE_METATYPE(Conversation)

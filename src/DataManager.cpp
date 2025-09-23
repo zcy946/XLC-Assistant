@@ -4,7 +4,6 @@
 #include <QJsonDocument>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
-#include "MCPService.h"
 
 DataManager *DataManager::s_instance = nullptr;
 
@@ -39,8 +38,6 @@ DataManager::DataManager(QObject *parent)
 
     // 处理MCPServers加载完毕信号
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
-    // 处理工具调用结果
-    connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &DataManager::slot_onToolCallFinished);
 }
 
 // void DataManager::registerAllMetaType()
@@ -151,55 +148,6 @@ void DataManager::slot_onMcpServersLoaded(bool success)
 {
     if (!success)
         return;
-}
-
-void DataManager::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage)
-{
-    if (success)
-    {
-        auto content = result.value("content", mcp::json::array());
-        XLC_LOG_DEBUG("Call result (callId={}, toolName={}, result={})", callToolArgs.callId, callToolArgs.toolName, content.dump(4));
-        // 更新消息列表
-        // BUG 封装push_back函数，加锁防止数据混乱
-        const auto &it = m_conversations.find(callToolArgs.conversationUuid);
-        if (it == m_conversations.end())
-        {
-            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
-            return;
-        }
-        it.value()->messages.push_back({{"role", "tool"},
-                                        {"tool_call_id", callToolArgs.callId.toStdString()},
-                                        {"content", content}});
-        // TODO 展示结果
-        // display_message(messages.back());
-        // TODO 回应LLM
-    }
-    else
-    {
-        XLC_LOG_ERROR("Tool call failed (callId={}, toolName={}, errorMessage={})", callToolArgs.callId, callToolArgs.toolName, errorMessage);
-        // 更新消息列表
-        // BUG 封装push_back函数，加锁防止数据混乱
-        const auto &it = m_conversations.find(callToolArgs.conversationUuid);
-        if (it == m_conversations.end())
-        {
-            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
-            return;
-        }
-        it.value()->messages.push_back({{"role", "tool"},
-                                        {"tool_call_id", callToolArgs.callId.toStdString()},
-                                        {"content", errorMessage.toStdString()}});
-        // TODO 展示结果 & 发送结果为LLM
-        // display_message(messages.back());
-
-        /**
-         * NOTE 在此处将`maxRetries` + 1
-         * 在此处判断如果`maxRetries`否达到设定的最大值则将content中的内容替换为:
-         * "Tool 'mcp_tool_name' failed repeatedly and has reached maximum retry attempts.
-         * Please consider alternative approaches or inform the user about the issue."
-         * 来让LLM停止调用此工具(并向用户展示原因)
-         * 在`slot_onResponseReady`中，判断`maxRetries`是否达到设定的最大值，如果达到则不再调用tools
-         */
-    }
 }
 
 bool DataManager::loadLLMs(const QString &filePath)
@@ -651,24 +599,39 @@ void DataManager::removeAgent(const QString &uuid)
     saveAgentsAsync(m_filePathAgents);
 }
 
-void DataManager::updateAgent(const std::shared_ptr<Agent> &agent)
+void DataManager::updateAgent(const std::shared_ptr<Agent> &newAgent)
 {
-    if (!agent)
+    if (!newAgent)
     {
-        XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", agent->uuid);
+        XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", newAgent->uuid);
         return;
     }
-    auto it = m_agents.find(agent->uuid.trimmed());
+    auto it = m_agents.find(newAgent->uuid.trimmed());
     if (it != m_agents.end())
     {
-       (*it.value()) = *agent;
-        Q_EMIT sig_agentUpdate(agent->uuid);
-        XLC_LOG_DEBUG("Updated Agent successed (uuid={})", agent->uuid);
+        bool isSystemPromptModified = false;
+        if (newAgent->systemPrompt != (*it)->systemPrompt)
+            isSystemPromptModified = true;
+
+        (*it.value()) = *newAgent;
+        Q_EMIT sig_agentUpdate(newAgent->uuid);
+        XLC_LOG_DEBUG("Updated Agent successed (uuid={})", newAgent->uuid);
         saveAgentsAsync(m_filePathAgents);
+
+        // 更新各个conversation的systemprompt
+        if (isSystemPromptModified)
+        {
+            for (const QString &conversationUuid : (*it)->conversations)
+            {
+                std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(conversationUuid);
+                if (conversation)
+                    conversation->resetSystemPrompt();
+            }
+        }
     }
     else
     {
-        XLC_LOG_WARN("Agent with UUID {} not found for update. No action taken.", agent->uuid);
+        XLC_LOG_WARN("Agent with UUID {} not found for update. No action taken.", newAgent->uuid);
     }
 }
 

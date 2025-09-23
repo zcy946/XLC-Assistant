@@ -1,8 +1,6 @@
 #include "LLMService.h"
 #include <QtConcurrent>
 #include "global.h"
-#include "DataManager.h"
-#include "MCPService.h"
 
 LLMService *LLMService::s_instance = nullptr;
 
@@ -18,8 +16,9 @@ LLMService *LLMService::getInstance()
 }
 
 LLMService::LLMService(QObject *parent)
-    : QObject(parent), m_maxMcpToolChainCall(3)
+    : QObject(parent)
 {
+    connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &LLMService::slot_onToolCallFinished);
 }
 
 void LLMService::processRequest(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)
@@ -28,8 +27,13 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
     QtConcurrent::run(
         [this, conversation, agent, tools, max_retries]()
         {
+            // 检查系统提示词
+            if (!conversation->hasSystemPrompt())
+            {
+                conversation->resetSystemPrompt();
+            }
             const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
-            XLC_LOG_TRACE("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, tools={})",
+            XLC_LOG_DEBUG("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, toolsCount={})",
                           conversation->uuid,
                           conversation->summary,
                           agent->uuid,
@@ -37,7 +41,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                           llm->uuid,
                           llm->modelID,
                           llm->modelName,
-                          tools.dump(4));
+                          tools.size());
             nlohmann::json body;
             if (tools.is_array() && !tools.empty())
             {
@@ -45,7 +49,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"model", llm->modelID.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
-                    {"messages", conversation->messages},
+                    {"messages", conversation->getMessages()},
                     {"tools", tools},
                     {"tool_choice", "auto"}};
             }
@@ -55,7 +59,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"model", llm->modelID.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
-                    {"messages", conversation->messages}};
+                    {"messages", conversation->getMessages()}};
             }
             m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
@@ -72,7 +76,6 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                         nlohmann::json json_data = nlohmann::json::parse(result->body);
                         nlohmann::json responseMessage = json_data["choices"][0]["message"];
 
-                        // 将 nlohmann::json 转换为 QString 以便信号传递
                         XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseMessage.dump(4));
                         // 处理LLM响应
                         processResponse(conversation, responseMessage);
@@ -116,10 +119,9 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
 void LLMService::processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage)
 {
     // 记录回答
-    conversation->messages.push_back(responseMessage);
+    conversation->addMessage(responseMessage);
 
     // 没有调用工具
-    // if (responseMessage["tool_calls"].empty())
     if (!responseMessage.contains("tool_calls"))
     {
         // TODO 展示结果
@@ -141,6 +143,104 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
         }
         // 执行工具
         MCPService::getInstance()->callTool(CallToolArgs{conversation->uuid, callId, toolName, args});
-        // TODO 处理调用结果连接MCPService的sig_toolCallFinished信号，通过conversation->uuid分类
     }
+}
+
+std::string LLMService::formatMcpToolResponse(const mcp::json &result, const std::string &toolName, bool isVisionModel)
+{
+    std::string content = "Here is the result of mcp tool use `" + toolName + "`:\n";
+
+    if (result.contains("content") && result["content"].is_array())
+    {
+        const auto &contentArray = result["content"];
+
+        if (isVisionModel)
+        {
+            for (const auto &item : contentArray)
+            {
+                if (item.contains("type"))
+                {
+                    std::string type = item["type"];
+
+                    if (type == "text")
+                    {
+                        std::string text = item.contains("text") ? item["text"] : "no content";
+                        content += text + "\n";
+                    }
+                    else if (type == "image")
+                    {
+                        std::string mimeType = item.contains("mimeType") ? item["mimeType"] : "image/png";
+                        std::string data = item.contains("data") ? item["data"] : "";
+                        content += "Here is a image result: data:" + mimeType + ";base64," + data + "\n";
+                    }
+                    else if (type == "audio")
+                    {
+                        std::string mimeType = item.contains("mimeType") ? item["mimeType"] : "audio/mp3";
+                        std::string data = item.contains("data") ? item["data"] : "";
+                        content += "Here is a audio result: data:" + mimeType + ";base64," + data + "\n";
+                    }
+                    else
+                    {
+                        content += "Here is a unsupported result type: " + type + "\n";
+                    }
+                }
+            }
+        }
+        else
+        {
+            // 对于非视觉模型，将整个数组序列化为 JSON 字符串
+            content += contentArray.dump() + "\n";
+        }
+    }
+    else
+    {
+        content += "no content\n";
+    }
+
+    return content;
+};
+
+void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage)
+{
+    std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(callToolArgs.conversationUuid);
+    if (!conversation)
+    {
+        // TODO 处理异常错误
+        XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
+        return;
+    }
+
+    if (success)
+    {
+        // 更新消息列表
+        std::string formattedContent = formatMcpToolResponse(result, callToolArgs.toolName.toStdString(), false);
+        conversation->addMessage({{"role", "tool"},
+                                  {"tool_call_id", callToolArgs.callId.toStdString()},
+                                  {"content", formattedContent}});
+        // TODO 展示结果
+        // display_message(messages.back());
+    }
+    else
+    {
+        if (!conversation)
+        {
+            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
+            return;
+        }
+        conversation->addMessage({{"role", "tool"},
+                                  {"tool_call_id", callToolArgs.callId.toStdString()},
+                                  {"content", errorMessage.toStdString()}});
+        // TODO 展示结果
+        // display_message(messages.back());
+    }
+
+    // 回应LLM
+    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(conversation->agentUuid);
+    if (!agent)
+    {
+        // TODO 处理异常错误
+        XLC_LOG_WARN("Agent not found (conversationUuid={}, agentUuid={})", conversation->uuid, conversation->agentUuid);
+        return;
+    }
+    processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
 }

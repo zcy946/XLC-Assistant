@@ -15,26 +15,28 @@
 - [x] 将Agent的McpServers改为用QSet存储
 - [x] 实现调用LLM对话
 - [x] 修复无`tools`时，程序报错的bug
-- [ ] 解析LLM的响应实现工具调用
-- [ ] 加入`max_retries`来防止llm陷入调用死循环
-- [ ] 实现调用结果的展示
+- [x] 解析LLM的响应实现工具调用
 - [x] 修复Agent设置页，llmComboBox未选中真实项的bug
-- [ ] 修复配置加载前未备份导致内存被替换的bug
+- [ ] 修复配置加载前未备份导致内存被替换的bug (忘记是什么了😅(・∀・(・∀・(・∀・*))
 - [x] 修复设置界面更新Agent/mcp服务器/模型后listwidget中的item未被刷新的bug
 - [x] 实现设置界面添加Agent、Mcp服务器、LLM
 - [x] 实现删除Agent、Mcp服务器、LLM
 - [x] 实现设置-助手-对话列表右键的跳转展示功能
 - [x] 修复添加新LLM|更新LLM信息时，点击设置-助手设置-模型的combobox列表没有更新的bug
 - [ ] 为mcpserver结构体添加`isActive`是否激活变量
+- [ ] 使用`QListView`重构简单的消息列表
+- [ ] 实现清除上下文、新建对话
+- [ ] 实现右键助手列表弹出菜单（编辑）
+- [ ] 实现调用结果的展示
 
 ### 优化
 
 - [ ] 将存储设置改为常规设置，创建`config.json`管理`LLMs.json`、`Agents.json`、`McpServers.json`的存储位置以及是否使用mcp服务器等参数
-- [ ] 将`McpGateway`的`callTool`等函数中的`QString`类型的`json`数据改为使用Qt的Json存储
 - [ ] 修改mcp服务器设置页，实现自定义启停mcp服务器，从而降低客户端初始化的压力
 - [ ] 优化异常展示
 - [ ] 在各个`getCurrentData`函数内部判空
-- [ ] 将`LLMService`和`McpGateway`作为单例实现
+- [x] 将`LLMService`和`McpGateway`作为单例实现
+- [ ] 为`Conversation`结构体的`messages`相关操作加锁
 
 ### **进阶**
 
@@ -43,7 +45,7 @@
 
 
 
-### Note
+## Note
 
 关于实现mcp服务器初始化（`initClient`函数）的相关思路：
 

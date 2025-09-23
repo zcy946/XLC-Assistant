@@ -4,6 +4,7 @@
 #include <QObject>
 #include <mcp_message.h>
 #include <httplib.h>
+#include "MCPService.h"
 
 struct Agent;
 struct Conversation;
@@ -13,6 +14,9 @@ class LLMService : public QObject
 Q_SIGNALS:
     // void sig_responseReady(const QString &conversationUuid, const QString &responseJson);
     void sig_errorOccurred(const QString &conversationUuid, const QString &errorMessage);
+
+private Q_SLOTS:
+    void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
 
 public:
     static LLMService *getInstance();
@@ -34,16 +38,10 @@ private:
     LLMService(const LLMService &) = delete;
     LLMService &operator=(const LLMService &) = delete;
     void processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage);
+    std::string formatMcpToolResponse(const mcp::json &result, const std::string &toolName, bool isVisionModel = false);
 
 private:
     static LLMService *s_instance;
-    /**
-     * @brief 链式调用次数.
-     *
-     * 此变量限制“思考-行动”循环中的最大迭代次数，
-     * 其中“行动”指LLM决定调用外部工具来解决问题。
-     */
-    int m_maxMcpToolChainCall;
     std::unique_ptr<httplib::Client> m_client;
 };
 

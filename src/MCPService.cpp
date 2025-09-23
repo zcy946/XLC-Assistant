@@ -72,8 +72,6 @@ MCPService *MCPService::getInstance()
     if (!s_instance)
     {
         s_instance = new MCPService();
-        // 注册自定义类型（在不同线程之间安全地传递自定义数据，需要通过 qRegisterMetaType() 显式地告诉 Qt 如何处理这些数据类型。）
-        qRegisterMetaType<CallToolArgs>("CallToolArgs");
         // 在应用程序退出时自动清理单例实例
         connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
     }
@@ -83,6 +81,9 @@ MCPService *MCPService::getInstance()
 MCPService::MCPService(QObject *parent)
     : QObject(parent)
 {
+    // 注册自定义类型（在不同线程之间安全地传递自定义数据，需要通过 qRegisterMetaType() 显式地告诉 Qt 如何处理这些数据类型。）
+    qRegisterMetaType<CallToolArgs>("CallToolArgs");
+    qRegisterMetaType<mcp::json>("mcp::json");
 }
 
 std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServer> server)
@@ -123,13 +124,13 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
         // 获取capabilities
         XLC_LOG_DEBUG("Getting capabilities for MCP server (MCPServer={})", server->uuid);
         mcp::json capabilities = client->get_server_capabilities();
-        XLC_LOG_TRACE("MCP server capabilities (MCPServer={}): {}", server->uuid, capabilities.dump(4));
+        XLC_LOG_DEBUG("MCP server capabilities (MCPServer={}): {}", server->uuid, capabilities.dump(4));
         // 创建 MCPClient 对象
         auto mcpClient = std::make_shared<MCPClient>();
         // 获取tools
         XLC_LOG_DEBUG("Getting tools for MCP server (MCPServer={})", server->uuid);
         mcpClient->tools = registerTools(server->uuid, client.get());
-        XLC_LOG_DEBUG("Get {} tools from MCP server (MCPServer={})", mcpClient->tools.size(), server->uuid);
+        XLC_LOG_DEBUG("Retrieved tools from MCP server (count={}, serverUuid={})", mcpClient->tools.size(), server->uuid);
         mcpClient->client = std::move(client);
         return mcpClient;
     }
@@ -195,7 +196,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
         // 获取tools
         XLC_LOG_DEBUG("Attempting get tools from MCP server (MCPServer={})", server->uuid);
         mcpClient->tools = registerTools(server->uuid, client.get());
-        XLC_LOG_DEBUG("Get {} tools from MCP server (MCPServer={})", mcpClient->tools.size(), server->uuid);
+        XLC_LOG_DEBUG("Retrieved tools from MCP server (count={}, serverUuid={})", mcpClient->tools.size(), server->uuid);
         mcpClient->client = std::move(client);
         return mcpClient;
     }
@@ -399,7 +400,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         auto it_McpTool = m_tools.find(callToolArgs.toolName);
         if (it_McpTool == m_tools.end())
         {
-            QString errorMessage = QString("Call failed (callId=%1, tool=%2): tool not found").arg(callToolArgs.callId).arg(callToolArgs.toolName);
+            QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): tool not found").arg(callToolArgs.callId).arg(callToolArgs.toolName);
             XLC_LOG_WARN("{}", errorMessage);
             Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             return;
@@ -414,7 +415,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         auto it_McpClient = m_clients.find(mcpTool->serverUuid);
         if (it_McpClient == m_clients.end())
         {
-            QString errorMessage = QString("Call failed (callId=%1, server=%2): server not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid);
+            QString errorMessage = QString("Call tool failed (callId=%1, server=%2): mcp client not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid);
             XLC_LOG_WARN("{}", errorMessage);
             Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
             return;
@@ -424,7 +425,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
 
     if (!mcpClient->tools.contains(callToolArgs.toolName))
     {
-        QString errorMessage = QString("Call failed (callId=%1, server=%2, tool=%3): original tool not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid).arg(callToolArgs.toolName);
+        QString errorMessage = QString("Call tool failed (callId=%1, server=%2, tool=%3): original tool not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid).arg(callToolArgs.toolName);
         XLC_LOG_WARN("{}", errorMessage);
         Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
         return;
@@ -437,15 +438,38 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
             try
             {
                 mcp::json result = mcpClient->client->call_tool(mcpTool->name.toStdString(), callToolArgs.parameters);
-                // 调用成功
-                XLC_LOG_TRACE("Call succeeded (callId={}, tool={}): result={}", callToolArgs.callId, mcpTool->name, result.dump(4));
-                // TODO 处理调用结果
-                Q_EMIT sig_toolCallFinished(callToolArgs, true, result, Q_NULLPTR);
+                // 根据 isError 字段判断是否调用成功
+                if (result.contains("isError") && result["isError"].is_boolean() && !result["isError"])
+                {
+                    // 调用成功
+                    XLC_LOG_TRACE("Call tool succeeded (callId={}, tool={}): {}", callToolArgs.callId, mcpTool->name, result.dump(4));
+                    // 处理调用结果
+                    Q_EMIT sig_toolCallFinished(callToolArgs, true, result, Q_NULLPTR);
+                }
+                else
+                {
+                    // 调用失败
+                    QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): %3")
+                                               .arg(callToolArgs.callId)
+                                               .arg(mcpTool->name)
+                                               .arg("no error details available");
+                    // 如果有 content 字段，并且内容是字符串，提取错误信息
+                    if (result.contains("content") && result["content"].is_array() && !result["content"].empty() &&
+                        result["content"][0].contains("text") && result["content"][0]["text"].is_string())
+                    {
+                        errorMessage = QString("Call tool failed (callId=%1, tool=%2): %3")
+                                           .arg(callToolArgs.callId)
+                                           .arg(mcpTool->name)
+                                           .arg(QString::fromStdString(result["content"][0]["text"].get<std::string>()));
+                    }
+                    XLC_LOG_ERROR("{}", errorMessage);
+                    Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+                }
             }
             // 调用失败
             catch (const mcp::mcp_exception &e)
             {
-                QString errorMessage = QString("Call failed (callId=%1, tool=%2): mcp error=%3")
+                QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): mcp error=%3")
                                            .arg(callToolArgs.callId)
                                            .arg(mcpTool->name)
                                            .arg(e.what());
@@ -454,7 +478,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
             }
             catch (const std::exception &e)
             {
-                QString errorMessage = QString("Call failed (callId=%1, tool=%2): standard error=%3")
+                QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): standard error=%3")
                                            .arg(callToolArgs.callId)
                                            .arg(mcpTool->name)
                                            .arg(e.what());
@@ -464,7 +488,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
             }
             catch (...)
             {
-                QString errorMessage = QString("Call failed (callId=%1, tool=%2): Unknown error occurred")
+                QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): no error details available")
                                            .arg(callToolArgs.callId)
                                            .arg(mcpTool->name);
 
