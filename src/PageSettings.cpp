@@ -675,33 +675,32 @@ void WidgetAgentInfo::initItems()
     connect(actionAddMcpServer, &QAction::triggered, this,
             [this]()
             {
-                XLC_LOG_TRACE("Agent: Attempting to add (mount) mcp server (uuid={})", m_lineEditUuid->text());
-                std::shared_ptr<QSet<QString>> uuidsMcpServer = std::make_shared<QSet<QString>>();
-                for (int i = 0; i < m_listWidgetMcpServers->count(); ++i)
+                XLC_LOG_DEBUG("Attempting to add (mount) mcp server (agentUuid={})", m_lineEditUuid->text());
+                // 获取所有已挂载的mcp服务器uuid
+                std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
+                if (!agent)
                 {
-                    QListWidgetItem *item = m_listWidgetMcpServers->item(i);
-                    if (item)
-                    {
-                        uuidsMcpServer->insert(item->data(Qt::UserRole).toString());
-                    }
+                    XLC_LOG_WARN("Failed to display the list of available MCP servers (agentUuid={}): agent not found", m_lineEditUuid->text());
+                    return;
                 }
-                DialogMountMcpServer *dialog = new DialogMountMcpServer(uuidsMcpServer, this);
+                std::shared_ptr<QSet<QString>> mountedMCPServerUuidsPtr = std::make_shared<QSet<QString>>(agent->mcpServers);
+                DialogMountMcpServer *dialog = new DialogMountMcpServer(mountedMCPServerUuidsPtr, this);
                 connect(dialog, &DialogMountMcpServer::finished, this,
-                        [this, dialog, uuidsMcpServer](int result)
+                        [this, mountedMCPServerUuidsPtr](int result)
                         {
                             if (result == QDialog::Accepted)
                             {
                                 m_listWidgetMcpServers->clear();
-                                for (QString uuid : *uuidsMcpServer)
+                                for (QString uuid : *mountedMCPServerUuidsPtr)
                                 {
                                     const std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
-                                    if (!mcpServer)
+                                    if (!mcpServer || (!mcpServer->isActive && !mountedMCPServerUuidsPtr->contains(mcpServer->uuid)))
                                         continue;
-                                    QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+                                    QListWidgetItem *item = new QListWidgetItem(mcpServer->isActive ? mcpServer->name : mcpServer->name + " [未启用]", m_listWidgetMcpServers);
                                     item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
                                     m_listWidgetMcpServers->addItem(item);
                                 }
-                                XLC_LOG_TRACE("Updating MCP server list");
+                                XLC_LOG_DEBUG("Updated MCP server list");
                             }
                         });
                 dialog->exec();
@@ -833,7 +832,7 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
             XLC_LOG_WARN("MCP server not found ({})", uuid);
             continue;
         }
-        QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+        QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->isActive ? mcpServer->name : mcpServer->name + " [未启用]", m_listWidgetMcpServers);
         itemMcpServer->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
         m_listWidgetMcpServers->addItem(itemMcpServer);
     }
@@ -932,6 +931,30 @@ void WidgetAgentInfo::updateLLMList()
     }
 }
 
+void WidgetAgentInfo::updateMCPServerList()
+{
+    m_listWidgetMcpServers->clear();
+    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
+    if (!agent)
+    {
+        XLC_LOG_WARN("Update MCP server list failed (agentUuid={}): agent not found", m_lineEditUuid->text());
+        return;
+    }
+    for (const QString &uuid : agent->mcpServers)
+    {
+        const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
+        if (!mcpServer)
+        {
+            XLC_LOG_WARN("Update MCP server list (serverUuid={}): MCP server not found", uuid);
+            continue;
+        }
+        QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->isActive ? mcpServer->name : mcpServer->name + " [未启用]", m_listWidgetMcpServers);
+        itemMcpServer->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+        m_listWidgetMcpServers->addItem(itemMcpServer);
+    }
+    m_listWidgetMcpServers->sortItems();
+}
+
 void WidgetAgentInfo::slot_onLLMsLoaded(bool success)
 {
     if (!success)
@@ -951,6 +974,11 @@ void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
         case EventBus::States::LLM_UPDATED:
         {
             updateLLMList();
+            break;
+        }
+        case EventBus::States::MCP_SERVERS_UPDATED:
+        {
+            updateMCPServerList();
             break;
         }
         default:
@@ -1087,6 +1115,9 @@ void PageSettingsMcp::initItems()
                         selectedItem->setText(currentMcpServer->name);
                     }
                 }
+                QJsonObject jsonObj;
+                jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
+                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                 XLC_LOG_DEBUG("Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
 }
@@ -1207,6 +1238,8 @@ void WidgetMcpServerInfo::initWidget()
 
 void WidgetMcpServerInfo::initItems()
 {
+    // m_checkBoxIsActive
+    m_checkBoxIsActive = new QCheckBox(this);
     // m_lineEditUuid
     m_lineEditUuid = new QLineEdit(this);
     m_lineEditUuid->setReadOnly(true);
@@ -1274,38 +1307,41 @@ void WidgetMcpServerInfo::initLayout()
     // gLayout
     QGridLayout *gLayout = new QGridLayout(this);
     gLayout->setContentsMargins(0, 0, 0, 0);
-    gLayout->addWidget(new QLabel("UUID", this), 0, 0);
-    gLayout->addWidget(m_lineEditUuid, 0, 1);
-    gLayout->addWidget(new QLabel("名称", this), 1, 0);
-    gLayout->addWidget(m_lineEditName, 1, 1);
-    gLayout->addWidget(new QLabel("描述", this), 2, 0);
-    gLayout->addWidget(m_plainTextEditDescription, 2, 1);
-    gLayout->addWidget(new QLabel("类型", this), 3, 0);
-    gLayout->addWidget(m_comboBoxType, 3, 1);
-    gLayout->addWidget(new QLabel("超时", this), 4, 0);
-    gLayout->addWidget(m_spinBoxTimeout, 4, 1);
-    gLayout->addWidget(m_labelCommand, 5, 0);
-    gLayout->addWidget(m_lineEditCommand, 5, 1);
-    gLayout->addWidget(m_labelArgs, 6, 0);
-    gLayout->addWidget(m_plainTextEditArgs, 6, 1);
-    gLayout->addWidget(m_labelEnvVars, 7, 0);
-    gLayout->addWidget(m_plainTextEditEnvVars, 7, 1);
-    gLayout->addWidget(m_labelHost, 8, 0);
-    gLayout->addWidget(m_lineEditHost, 8, 1);
-    gLayout->addWidget(m_labelPort, 9, 0);
-    gLayout->addWidget(m_lineEditPort, 9, 1);
-    gLayout->addWidget(m_labelBaseUrl, 10, 0);
-    gLayout->addWidget(m_lineEditBaseUrl, 10, 1);
-    gLayout->addWidget(m_labelEndpoint, 11, 0);
-    gLayout->addWidget(m_lineEditEndpoint, 11, 1);
-    gLayout->addWidget(m_labelRequestHeaders, 12, 0);
-    gLayout->addWidget(m_plainTextEditRequestHeaders, 12, 1);
+    gLayout->addWidget(new QLabel("启用状态", this), 0, 0);
+    gLayout->addWidget(m_checkBoxIsActive, 0, 1);
+    gLayout->addWidget(new QLabel("UUID", this), 1, 0);
+    gLayout->addWidget(m_lineEditUuid, 1, 1);
+    gLayout->addWidget(new QLabel("名称", this), 2, 0);
+    gLayout->addWidget(m_lineEditName, 2, 1);
+    gLayout->addWidget(new QLabel("描述", this), 3, 0);
+    gLayout->addWidget(m_plainTextEditDescription, 3, 1);
+    gLayout->addWidget(new QLabel("类型", this), 4, 0);
+    gLayout->addWidget(m_comboBoxType, 4, 1);
+    gLayout->addWidget(new QLabel("超时", this), 5, 0);
+    gLayout->addWidget(m_spinBoxTimeout, 5, 1);
+    gLayout->addWidget(m_labelCommand, 6, 0);
+    gLayout->addWidget(m_lineEditCommand, 6, 1);
+    gLayout->addWidget(m_labelArgs, 7, 0);
+    gLayout->addWidget(m_plainTextEditArgs, 7, 1);
+    gLayout->addWidget(m_labelEnvVars, 8, 0);
+    gLayout->addWidget(m_plainTextEditEnvVars, 8, 1);
+    gLayout->addWidget(m_labelHost, 9, 0);
+    gLayout->addWidget(m_lineEditHost, 9, 1);
+    gLayout->addWidget(m_labelPort, 10, 0);
+    gLayout->addWidget(m_lineEditPort, 10, 1);
+    gLayout->addWidget(m_labelBaseUrl, 11, 0);
+    gLayout->addWidget(m_lineEditBaseUrl, 11, 1);
+    gLayout->addWidget(m_labelEndpoint, 12, 0);
+    gLayout->addWidget(m_lineEditEndpoint, 12, 1);
+    gLayout->addWidget(m_labelRequestHeaders, 13, 0);
+    gLayout->addWidget(m_plainTextEditRequestHeaders, 13, 1);
 }
 
 void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
 {
     if (!mcpServer)
         return;
+    m_checkBoxIsActive->setChecked(mcpServer->isActive);
     m_lineEditUuid->setText(mcpServer->uuid);
     m_lineEditName->setText(mcpServer->name);
     m_plainTextEditDescription->setPlainText(mcpServer->description);
@@ -1334,6 +1370,7 @@ void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
 std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()
 {
     std::shared_ptr<McpServer> mcpServer = std::make_shared<McpServer>();
+    mcpServer->isActive = m_checkBoxIsActive->isChecked();
     mcpServer->uuid = m_lineEditUuid->text();
     mcpServer->name = m_lineEditName->text();
     mcpServer->description = m_plainTextEditDescription->toPlainText();
@@ -1436,8 +1473,8 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
 }
 
 // DialogMountMcpServer
-DialogMountMcpServer::DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent, Qt::WindowFlags f)
-    : BaseDialog(parent, f), m_uuidsMcpServer(uuidsMcpServer)
+DialogMountMcpServer::DialogMountMcpServer(std::shared_ptr<QSet<QString>> mountedMCPServerUuidsPtr, QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f), m_mountedMCPServerUuidsPtr(mountedMCPServerUuidsPtr)
 {
     initUI();
 }
@@ -1454,15 +1491,27 @@ void DialogMountMcpServer::initItems()
     m_listWidgetMcpServers = new QListWidget(this);
     for (const std::shared_ptr<McpServer> &mcpServer : DataManager::getInstance()->getMcpServers())
     {
-        QListWidgetItem *item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
-        item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
-        if (m_uuidsMcpServer->contains(mcpServer->uuid))
+        // 仅展示已挂载或已启用的服务器供用户选择
+        QListWidgetItem *item;
+        if (m_mountedMCPServerUuidsPtr->contains(mcpServer->uuid))
         {
+            if (mcpServer->isActive)
+                item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+            else
+                item = new QListWidgetItem(mcpServer->name + " [未启用]", m_listWidgetMcpServers);
+            item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
             item->setCheckState(Qt::Checked);
         }
         else
         {
-            item->setCheckState(Qt::Unchecked);
+            if (mcpServer->isActive)
+            {
+                item = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
+                item->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
+                item->setCheckState(Qt::Unchecked);
+            }
+            else
+                continue;
         }
         m_listWidgetMcpServers->addItem(item);
     }
@@ -1473,14 +1522,14 @@ void DialogMountMcpServer::initItems()
                 const QString uuidMcpServer = item->data(Qt::UserRole).toString();
                 if (item->checkState() == Qt::Checked)
                 {
-                    m_uuidsMcpServer->insert(uuidMcpServer);
+                    m_mountedMCPServerUuidsPtr->insert(uuidMcpServer);
                     XLC_LOG_TRACE("Mounted MCP server (uuidMcpServer={})", uuidMcpServer);
                 }
                 else if (item->checkState() == Qt::Unchecked)
                 {
-                    if (m_uuidsMcpServer->contains(uuidMcpServer))
+                    if (m_mountedMCPServerUuidsPtr->contains(uuidMcpServer))
                     {
-                        m_uuidsMcpServer->remove(uuidMcpServer);
+                        m_mountedMCPServerUuidsPtr->remove(uuidMcpServer);
                         XLC_LOG_TRACE("Unmounted mcp server (uuid={})", uuidMcpServer);
                     }
                 }

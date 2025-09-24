@@ -1,5 +1,6 @@
 [
     {
+        "isActive": true,
         "baseUrl": "",
         "description": "一个用于开发测试的mcp服务器",
         "endpoint": "",

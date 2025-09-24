@@ -6,6 +6,7 @@
 #include <QStackedWidget>
 #include <QMap>
 #include "DataManager.h"
+#include <QCheckBox>
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QSpinBox>
@@ -179,6 +180,7 @@ protected:
 
 private:
     void updateLLMList();
+    void updateMCPServerList();
 
 private:
     QLineEdit *m_lineEditUuid;
@@ -270,6 +272,7 @@ protected:
     void initLayout() override;
 
 private:
+    QCheckBox *m_checkBoxIsActive;
     QLineEdit *m_lineEditUuid;
     QLineEdit *m_lineEditName;
     QPlainTextEdit *m_plainTextEditDescription;
@@ -297,7 +300,7 @@ class DialogMountMcpServer : public BaseDialog
 {
     Q_OBJECT
 public:
-    DialogMountMcpServer(std::shared_ptr<QSet<QString>> uuidsMcpServer, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    DialogMountMcpServer(std::shared_ptr<QSet<QString>> mountedMCPServerUuidsPtr, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     ~DialogMountMcpServer() = default;
 
 protected:
@@ -306,7 +309,7 @@ protected:
     void initLayout() override;
 
 private:
-    std::shared_ptr<QSet<QString>> m_uuidsMcpServer;
+    std::shared_ptr<QSet<QString>> m_mountedMCPServerUuidsPtr;
     QListWidget *m_listWidgetMcpServers;
     QPushButton *m_pushButtonSave;
     QPushButton *m_pushButtonCancel;

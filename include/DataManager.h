@@ -9,7 +9,6 @@
 #include <mcp_message.h>
 #include <QSet>
 
-class LLMService;
 struct CallToolArgs;
 struct LLM;
 struct McpServer;
@@ -168,6 +167,7 @@ struct McpServer
         sse = 1,
         streambleHttp = 2
     };
+    bool isActive;
     QString uuid;
     QString name;
     QString description;
@@ -185,7 +185,8 @@ struct McpServer
     QString requestHeaders;
 
     McpServer()
-        : uuid(generateUuid()),
+        : isActive(false),
+          uuid(generateUuid()),
           name(),
           description(),
           type(sse),
@@ -200,7 +201,8 @@ struct McpServer
           requestHeaders()
     {
     }
-    McpServer(const QString &name,
+    McpServer(bool isActive,
+              const QString &name,
               const QString &description,
               Type type,
               int timeout,
@@ -210,7 +212,8 @@ struct McpServer
               const QString &baseUrl,
               const QString &endpoint,
               const QString &requestHeaders)
-        : uuid(generateUuid()),
+        : isActive(isActive),
+          uuid(generateUuid()),
           name(name),
           description(description),
           type(type),
@@ -225,7 +228,8 @@ struct McpServer
           requestHeaders(requestHeaders)
     {
     }
-    McpServer(const QString &name,
+    McpServer(bool isActive,
+              const QString &name,
               const QString &description,
               Type type,
               int timeout,
@@ -236,7 +240,8 @@ struct McpServer
               int port,
               const QString &endpoint,
               const QString &requestHeaders)
-        : uuid(generateUuid()),
+        : isActive(isActive),
+          uuid(generateUuid()),
           name(name),
           description(description),
           type(type),
@@ -256,6 +261,7 @@ struct McpServer
     static McpServer fromJson(const QJsonObject &jsonObject)
     {
         McpServer server;
+        server.isActive = jsonObject["isActive"].toBool();
         server.uuid = jsonObject["uuid"].toString();
         server.name = jsonObject["name"].toString();
         server.description = jsonObject["description"].toString();
@@ -292,6 +298,7 @@ struct McpServer
     QJsonObject toJsonObject() const
     {
         QJsonObject jsonObject;
+        jsonObject["isActive"] = isActive;
         jsonObject["uuid"] = uuid;
         jsonObject["name"] = name;
         jsonObject["description"] = description;
