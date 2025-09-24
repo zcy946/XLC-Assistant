@@ -131,7 +131,7 @@ void PageSettingsLLM::initItems()
                                 m_listWidgetLLMs->addItem(newItem);
                                 // 选中并展示新增LLM
                                 m_listWidgetLLMs->setCurrentItem(newItem);
-                                m_widgetLLMInfo->updateData(newLLM);
+                                m_widgetLLMInfo->updateFormData(newLLM);
                                 // 通知其它页面更新(通知WidgetAgentInfo更新LLM列表)
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
@@ -148,7 +148,7 @@ void PageSettingsLLM::initItems()
                 const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
                 if (!llm)
                     return;
-                m_widgetLLMInfo->updateData(llm);
+                m_widgetLLMInfo->updateFormData(llm);
                 XLC_LOG_DEBUG("Reloading LLM widget (UUID={})", m_widgetLLMInfo->getUuid());
             });
     // m_pushButtonRemove
@@ -240,7 +240,7 @@ void PageSettingsLLM::slot_onLLMsLoaded(bool success)
         const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
-        m_widgetLLMInfo->updateData(llm);
+        m_widgetLLMInfo->updateFormData(llm);
     }
 }
 
@@ -265,7 +265,7 @@ void PageSettingsLLM::slot_onPushButtonClickedRemove()
         const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
-        m_widgetLLMInfo->updateData(llm);
+        m_widgetLLMInfo->updateFormData(llm);
         // 通知其它页面更新
         QJsonObject jsonObj;
         jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
@@ -281,7 +281,7 @@ void PageSettingsLLM::showLLMInfo(const QString &uuid)
         XLC_LOG_WARN("LLM not found (uuid={})", uuid);
         return;
     }
-    m_widgetLLMInfo->updateData(llm);
+    m_widgetLLMInfo->updateFormData(llm);
 }
 
 // WidgetLLMInfo
@@ -337,7 +337,7 @@ void WidgetLLMInfo::initLayout()
     gLayout->addWidget(m_lineEditEndPoint, 5, 1);
 }
 
-void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
+void WidgetLLMInfo::updateFormData(std::shared_ptr<LLM> llm)
 {
     if (!llm)
         return;
@@ -347,6 +347,16 @@ void WidgetLLMInfo::updateData(std::shared_ptr<LLM> llm)
     m_lineEditApiKey->setText(llm->apiKey);
     m_lineEditBaseUrl->setText(llm->baseUrl);
     m_lineEditEndPoint->setText(llm->endpoint);
+}
+
+void WidgetLLMInfo::clearFormData()
+{
+    m_lineEditUuid->setText("");
+    m_lineEditModelID->setText("");
+    m_lineEditModelName->setText("");
+    m_lineEditApiKey->setText("");
+    m_lineEditBaseUrl->setText("");
+    m_lineEditEndPoint->setText("");
 }
 
 std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
@@ -458,7 +468,7 @@ void PageSettingsAgent::initItems()
                                 m_listWidgetAgents->addItem(newItem);
                                 // 选中并展示新增LLM
                                 m_listWidgetAgents->setCurrentItem(newItem);
-                                m_widgetAgentInfo->updateData(newAgent);
+                                m_widgetAgentInfo->updateFormData(newAgent);
                                 // 通知其它页面更新
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
@@ -475,7 +485,7 @@ void PageSettingsAgent::initItems()
                 const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
                 if (!agent)
                     return;
-                m_widgetAgentInfo->updateData(agent);
+                m_widgetAgentInfo->updateFormData(agent);
                 XLC_LOG_DEBUG("Reloading agent widget (uuid={})", m_widgetAgentInfo->getUuid());
             });
     // m_pushButtonRemove
@@ -562,7 +572,7 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
         const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
-        m_widgetAgentInfo->updateData(agent);
+        m_widgetAgentInfo->updateFormData(agent);
     }
 }
 
@@ -587,7 +597,7 @@ void PageSettingsAgent::slot_onPushButtonClickedRemove()
         const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
-        m_widgetAgentInfo->updateData(agent);
+        m_widgetAgentInfo->updateFormData(agent);
         // 通知其它页面更新
         QJsonObject jsonObj;
         jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
@@ -603,7 +613,7 @@ void PageSettingsAgent::showAgentInfo(const QString &uuid)
         XLC_LOG_WARN("Agent not found (uuid={})", uuid);
         return;
     }
-    m_widgetAgentInfo->updateData(agent);
+    m_widgetAgentInfo->updateFormData(agent);
 }
 
 // WidgetAgentInfo
@@ -801,7 +811,7 @@ void WidgetAgentInfo::initLayout()
     gLayout->addWidget(m_listWidgetConversations, 10, 1);
 }
 
-void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
+void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
 {
     if (!agent)
         return;
@@ -851,6 +861,22 @@ void WidgetAgentInfo::updateData(std::shared_ptr<Agent> agent)
         m_listWidgetConversations->addItem(itemConversation);
     }
     m_listWidgetConversations->sortItems();
+}
+
+void WidgetAgentInfo::clearFormData()
+{
+    m_lineEditUuid->setText("");
+    m_lineEditName->setText("");
+    m_plainTextEditDescription->setPlainText("");
+    updateLLMList();
+    m_comboBoxLLM->setCurrentIndex(0);
+    m_spinBoxContext->setValue(0);
+    m_doubleSpinBoxTemperature->setValue(0);
+    m_doubleSpinBoxTopP->setValue(0);
+    m_spinBoxMaxTokens->setValue(0);
+    m_plainTextEditSystemPrompt->setPlainText("");
+    m_listWidgetMcpServers->clear();
+    m_listWidgetConversations->clear();
 }
 
 std::shared_ptr<Agent> WidgetAgentInfo::getCurrentData()
@@ -931,16 +957,21 @@ void WidgetAgentInfo::updateLLMList()
     }
 }
 
-void WidgetAgentInfo::updateMCPServerList()
+void WidgetAgentInfo::updateMCPServerList(const std::shared_ptr<Agent> &agent)
 {
     m_listWidgetMcpServers->clear();
-    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
-    if (!agent)
+    std::shared_ptr<Agent> currentAgent = agent;
+    if (!currentAgent)
     {
-        XLC_LOG_WARN("Update MCP server list failed (agentUuid={}): agent not found", m_lineEditUuid->text());
-        return;
+        currentAgent = DataManager::getInstance()->getAgent(m_lineEditUuid->text());
+        if (!currentAgent)
+        {
+            XLC_LOG_WARN("Update MCP server list failed (agentUuid={}): agent not found", m_lineEditUuid->text());
+            return;
+        }
     }
-    for (const QString &uuid : agent->mcpServers)
+    
+    for (const QString &uuid : currentAgent->mcpServers)
     {
         const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
@@ -1079,7 +1110,7 @@ void PageSettingsMcp::initItems()
                                 m_listWidgetMcpServers->addItem(newItem);
                                 // 选中并展示新增MCPServer
                                 m_listWidgetMcpServers->setCurrentItem(newItem);
-                                m_widgetMcpServerInfo->updateData(newMcpServer);
+                                m_widgetMcpServerInfo->updateFormData(newMcpServer);
                                 // 通知其它页面更新
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
@@ -1093,7 +1124,7 @@ void PageSettingsMcp::initItems()
     connect(m_pushButtonReset, &QPushButton::clicked, this,
             [this]()
             {
-                m_widgetMcpServerInfo->updateData(DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid()));
+                m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid()));
                 XLC_LOG_DEBUG("Reloading MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
     // m_pushButtonRemove
@@ -1179,7 +1210,7 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
     if (m_listWidgetMcpServers->currentItem() == nullptr)
     {
         m_listWidgetMcpServers->setCurrentRow(0);
-        m_widgetMcpServerInfo->updateData(DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>()));
+        m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>()));
     }
 }
 
@@ -1205,7 +1236,7 @@ void PageSettingsMcp::slot_onPushButtonClickedRemove()
             const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>());
             if (!mcpServer)
                 return;
-            m_widgetMcpServerInfo->updateData(mcpServer);
+            m_widgetMcpServerInfo->updateFormData(mcpServer);
             // 通知其它页面更新
             QJsonObject jsonObj;
             jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
@@ -1223,7 +1254,7 @@ void PageSettingsMcp::showMcpServerInfo(const QString &uuid)
         return;
     }
     // 展示mcp服务器信息
-    m_widgetMcpServerInfo->updateData(mcpServer);
+    m_widgetMcpServerInfo->updateFormData(mcpServer);
 }
 
 // WidgetMcpServerInfo
@@ -1337,7 +1368,7 @@ void WidgetMcpServerInfo::initLayout()
     gLayout->addWidget(m_plainTextEditRequestHeaders, 13, 1);
 }
 
-void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
+void WidgetMcpServerInfo::updateFormData(std::shared_ptr<McpServer> mcpServer)
 {
     if (!mcpServer)
         return;
@@ -1365,6 +1396,24 @@ void WidgetMcpServerInfo::updateData(std::shared_ptr<McpServer> mcpServer)
     m_lineEditBaseUrl->setText(mcpServer->baseUrl);
     m_lineEditEndpoint->setText(mcpServer->endpoint);
     m_plainTextEditRequestHeaders->setPlainText(mcpServer->requestHeaders);
+}
+
+void WidgetMcpServerInfo::clearFormData()
+{
+    m_checkBoxIsActive->setChecked(false);
+    m_lineEditUuid->setText("");
+    m_lineEditName->setText("");
+    m_plainTextEditDescription->setPlainText("");
+    m_comboBoxType->setCurrentIndex(0);
+    m_spinBoxTimeout->setValue(0);
+    m_lineEditCommand->setText("");
+    m_plainTextEditArgs->setPlainText("");
+    m_plainTextEditEnvVars->setPlainText("");
+    m_lineEditHost->setText("");
+    m_lineEditPort->setText("");
+    m_lineEditBaseUrl->setText("");
+    m_lineEditEndpoint->setText("");
+    m_plainTextEditRequestHeaders->setPlainText("");
 }
 
 std::shared_ptr<McpServer> WidgetMcpServerInfo::getCurrentData()

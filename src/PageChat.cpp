@@ -52,16 +52,19 @@ void PageChat::initItems()
         // itemAgent->setText(nameAgent);
         // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
         // m_listWidgetAgents->addItem(itemAgent);
-
-        std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(DataManager::getInstance()->getAgents().first()->uuid);
-        if (newConversation)
+        if (!DataManager::getInstance()->getAgents().isEmpty())
         {
-            newConversation->summary = "对话实例测试" + QString::number(i + 1);
-            QListWidgetItem *itemConversation = new QListWidgetItem();
-            itemConversation->setText(newConversation->summary);
-            itemConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
-            m_listWidgetConversations->addItem(itemConversation);
-            DataManager::getInstance()->addConversation(newConversation);
+            std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgents().first();
+            std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agent->uuid);
+            if (newConversation)
+            {
+                newConversation->summary = "对话实例测试" + QString::number(i + 1);
+                QListWidgetItem *itemConversation = new QListWidgetItem();
+                itemConversation->setText(newConversation->summary);
+                itemConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
+                m_listWidgetConversations->addItem(itemConversation);
+                DataManager::getInstance()->addConversation(newConversation);
+            }
         }
     }
     m_listWidgetConversations->sortItems();

@@ -82,7 +82,11 @@ public:
     /**
      * 更新表单数据
      */
-    void updateData(std::shared_ptr<LLM> llm);
+    void updateFormData(std::shared_ptr<LLM> llm);
+    /**
+     * 清除表单数据
+     */
+    void clearFormData();
     /**
      * 获取当前表单数据
      */
@@ -165,7 +169,11 @@ public:
     /**
      * 更新表单数据
      */
-    void updateData(std::shared_ptr<Agent> agent);
+    void updateFormData(std::shared_ptr<Agent> agent);
+    /**
+     * 清除表单数据
+     */
+    void clearFormData();
     /**
      * 获取当前表单数据
      */
@@ -180,7 +188,7 @@ protected:
 
 private:
     void updateLLMList();
-    void updateMCPServerList();
+    void updateMCPServerList(const std::shared_ptr<Agent> &agent = nullptr);
 
 private:
     QLineEdit *m_lineEditUuid;
@@ -258,7 +266,11 @@ public:
     /**
      * 更新表单数据
      */
-    void updateData(std::shared_ptr<McpServer> mcpServer);
+    void updateFormData(std::shared_ptr<McpServer> mcpServer);
+    /**
+     * 清除表单数据
+     */
+    void clearFormData();
     /**
      * 获取当前表单数据
      */
