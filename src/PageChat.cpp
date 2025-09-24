@@ -68,11 +68,12 @@ void PageChat::initItems()
         }
     }
     m_listWidgetConversations->sortItems();
+#endif
     if (m_listWidgetConversations->currentItem() == nullptr)
     {
         m_listWidgetConversations->setCurrentRow(0);
     }
-#endif
+
     // m_tabWidgetSiderBar
     m_tabWidgetSiderBar = new QTabWidget(this);
     m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "助手");
@@ -85,7 +86,7 @@ void PageChat::initItems()
                 XLC_LOG_TRACE("Switched tab (index={}, text={})", index, m_tabWidgetSiderBar->tabText(index));
             });
     // m_widgetChat
-    m_widgetChat = new WidgetChat(this);
+    m_widgetChat = new WidgetChat(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString(), this);
 }
 
 void PageChat::initLayout()
@@ -339,7 +340,8 @@ void PageChat::refreshConversations()
 /**
  * WidgetChat
  */
-WidgetChat::WidgetChat(QWidget *parent)
+WidgetChat::WidgetChat(const QString &conversationUuid, QWidget *parent)
+    : BaseWidget(parent), m_conversationUuid(conversationUuid)
 {
     initUI();
 }
@@ -352,12 +354,12 @@ void WidgetChat::initItems()
 {
     // m_listWidgetMessages
     m_listWidgetMessages = new QListWidget(this);
-#ifdef QT_DEBUG
-    for (int i = 0; i < 50; ++i)
-    {
-        m_listWidgetMessages->addItem("测试消息" + QString::number(i + 1));
-    }
-#endif
+    // #ifdef QT_DEBUG
+    //     for (int i = 0; i < 50; ++i)
+    //     {
+    //         m_listWidgetMessages->addItem("测试消息" + QString::number(i + 1));
+    //     }
+    // #endif
     // m_plainTextEdit
     m_plainTextEdit = new QPlainTextEdit(this);
     // m_pushButtonSend
@@ -376,9 +378,16 @@ void WidgetChat::initItems()
     // m_pushButtonClearContext
     m_pushButtonClearContext = new QPushButton("清除上下文", this);
     connect(m_pushButtonClearContext, &QPushButton::clicked, this,
-            []()
+            [this]()
             {
-                XLC_LOG_DEBUG("清除上下文");
+                std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(m_conversationUuid);
+                if (!conversation)
+                {
+                    XLC_LOG_WARN("Clear context failed (conversationUuid={}): conversation not found", m_conversationUuid);
+                    return;
+                }
+                conversation->clearContext();
+                XLC_LOG_INFO("Clear context successed");
             });
     // m_pushButtonNewChat
     m_pushButtonNewChat = new QPushButton(this);

@@ -554,6 +554,12 @@ public:
         return messages;
     }
 
+    // 清除上下文
+    void clearContext()
+    {
+        messages.clear();
+    }
+
 protected:
     Conversation(const QString &agentUuid)
         : uuid(generateUuid()),

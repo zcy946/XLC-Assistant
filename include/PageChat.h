@@ -46,12 +46,15 @@ Q_SIGNALS:
     void sig_messageSent(const QString &message);
 
 public:
-    explicit WidgetChat(QWidget *parent = nullptr);
+    explicit WidgetChat(const QString &conversationUuid, QWidget *parent = nullptr);
 
 protected:
     void initWidget() override;
     void initItems() override;
     void initLayout() override;
+
+private:
+    const QString m_conversationUuid;
 
 private:
     QListWidget *m_listWidgetMessages;
