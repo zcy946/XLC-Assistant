@@ -3,5 +3,9 @@
         <file>image/message-3-line.svg</file>
         <file>image/settings-3-line.svg</file>
         <file>image/fire-line.svg</file>
+        <file>image/avatar_other.png</file>
+        <file>image/avatar_robot.png</file>
+        <file>image/avatar_self.png</file>
+        <file>image/default_avatar.png</file>
     </qresource>
 </RCC>

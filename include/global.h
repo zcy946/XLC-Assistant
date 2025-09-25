@@ -55,4 +55,11 @@ inline QString generateUuid()
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
 }
 
+/**
+ * 获取当前时间 yyyy-mm-dd hh:mm:ss
+ */
+inline QString getCurrentDateTime()
+{
+    return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+}
 #endif // GLOBAL_H
