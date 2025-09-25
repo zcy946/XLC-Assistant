@@ -1,5 +1,6 @@
 #include "CMessageListWidget.h"
 #include <QPainterPath>
+#include <QPixmapCache>
 #include "Logger.hpp"
 
 // CMessageListModel
@@ -79,23 +80,9 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         nick = "Unknow";
 
     // 绘制头像
-    QPixmap pixmapAvatar(avatarFilePath);
-    if (pixmapAvatar.isNull())
-    {
-        pixmapAvatar.load(DEFAULT_AVATAR);
-    }
-    pixmapAvatar = pixmapAvatar.scaled(AVATAR_SIZE, AVATAR_SIZE, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-    QPixmap pixmapRoundAvatar(AVATAR_SIZE, AVATAR_SIZE);
-    pixmapRoundAvatar.fill(Qt::transparent);
-    QPainterPath path;
-    path.addEllipse(0, 0, AVATAR_SIZE, AVATAR_SIZE);
-    QPainter roundPainter(&pixmapRoundAvatar);
-    roundPainter.setRenderHint(QPainter::Antialiasing);
-    roundPainter.setClipPath(path);
-    roundPainter.drawPixmap(0, 0, pixmapAvatar);
-
     QRect rectAvatar(option.rect.topLeft() + QPoint(PADDING, PADDING), QSize(AVATAR_SIZE, AVATAR_SIZE));
-    painter->drawPixmap(rectAvatar.topLeft(), pixmapRoundAvatar);
+    QPixmap avatar = getRoundedAvatar(avatarFilePath, AVATAR_SIZE);
+    painter->drawPixmap(rectAvatar, avatar);
 
     QFontMetrics fontMetrics(option.font);
 
@@ -105,9 +92,9 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->setPen(Qt::black);
     painter->drawText(rectNick, nick);
 
-    // 绘制datetime
+    // 绘制时间戳
     QFont fontDateTime(getGlobalFont());
-    // fontDateTime.setPointSize(8);
+    fontDateTime.setPointSize(8);
     QRect rectDateTime(rectNick.left(),
                        rectAvatar.bottom() - QFontMetrics(fontDateTime).height(),
                        rectNick.width(),
@@ -147,14 +134,77 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
     // 文本区域宽度
     QFontMetrics fontMetrics(option.font);
     int textWidth = viewWidth - PADDING - AVATAR_SIZE - NICK_MARGIN - PADDING; // 左 padding + 头像 + 头像到昵称的距离 + 右 padding
-
-    if (textWidth < 50) // 宽度太小保护一下
+    if (textWidth < 50)                                                        // 宽度太小保护一下
         textWidth = 50;
 
     // 计算文本高度
-    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0,
-                                              Qt::TextWordWrap, text);
+    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);
     int textHeight = rectText.height();
+
+    // 计算总高度
     int totalHeight = PADDING + avatarHeight + TEXT_MARGIN + textHeight + TEXT_MARGIN; // 上 padding + 头像 + 文本外边距 + 文本 + 文本外边距
     return QSize(viewWidth, totalHeight);
+}
+
+QPixmap CMessageDelegate::getRoundedAvatar(const QString &avatarFilePath, int size) const
+{
+    // 生成缓存 key（路径 + 尺寸）
+    QString key = QString("%1_%2").arg(avatarFilePath).arg(size);
+    QPixmap pixmap;
+    if (QPixmapCache::find(key, &pixmap))
+        return pixmap;
+
+    // 加载原始图片
+    QImage img;
+    if (!avatarFilePath.isEmpty())
+    {
+        img = QImage(avatarFilePath);
+        if (img.isNull())
+        {
+            img.load(DEFAULT_AVATAR);
+        }
+    }
+    else
+    {
+        img = QImage(DEFAULT_AVATAR);
+    }
+
+    // 高 DPI 适配
+    qreal dpr = qApp->devicePixelRatio(); // 或 painter->device()->devicePixelRatioF()
+    QSize targetSize(size * dpr, size * dpr);
+
+    // 缩放到目标大小
+    img = img.scaled(targetSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+
+    // 创建透明背景 QPixmap
+    QPixmap rounded(targetSize);
+    rounded.fill(Qt::transparent);
+
+    // 圆角裁剪
+    QPainter p(&rounded);
+    p.setRenderHint(QPainter::Antialiasing, true);
+    p.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    QPainterPath path;
+    path.addEllipse(0, 0, targetSize.width(), targetSize.height());
+    p.setClipPath(path);
+    p.drawImage(0, 0, img);
+    p.end();
+
+    // 存入缓存
+    QPixmapCache::insert(key, rounded);
+
+    return rounded;
+}
+
+// CMessageListWidget
+CMessageListWidget::CMessageListWidget(QWidget *parent)
+    : QListView(parent)
+{
+}
+
+void CMessageListWidget::resizeEvent(QResizeEvent *event)
+{
+    QListView::resizeEvent(event);
+    doItemsLayout(); // 强制让所有 item 重新调用 sizeHint()
 }

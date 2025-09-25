@@ -31,13 +31,13 @@ struct CMessage
     QSize cachedTextSize;
     QSize cachedItemSize;
 
-    CMessage(const QString &id, const QString &text, Role role, const QString &createdDateTime, const QString &avatarFilePath)
-        : id(id), text(text), role(role), createdDateTime(createdDateTime), avatarFilePath(avatarFilePath)
+    CMessage(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdDateTime)
+        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdDateTime(createdDateTime)
     {
     }
 
-    CMessage(const QString &text, Role role = USER, const QString &createdDateTime = getCurrentDateTime(), const QString &avatarFilePath = DEFAULT_AVATAR)
-        : id(generateUuid()), text(text), role(role), createdDateTime(createdDateTime)
+    CMessage(const QString &text, Role role = USER, const QString &avatarFilePath = DEFAULT_AVATAR, const QString &createdDateTime = getCurrentDateTime())
+        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), createdDateTime(createdDateTime)
     {
     }
 };
@@ -76,28 +76,24 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private:
-    const char *COLOR_FONT_DATETIME = "#9E9E9E";
-    const int AVATAR_SIZE = 40;             // 头像大小
-    const int PADDING = 10;                 // 整体边距
-    const int NICK_MARGIN = 5;              // 头像到昵称的距离
-    const int TEXT_MARGIN = 15;             // 文本的上下外边距
+    QPixmap getRoundedAvatar(const QString &avatarFilePath, int size) const;
+
+private:
+    const char *COLOR_FONT_DATETIME = "#9E9E9E"; // 时间戳的字体颜色
+    const int AVATAR_SIZE = 40;                  // 头像大小
+    const int PADDING = 10;                      // 整体边距
+    const int NICK_MARGIN = 10;                  // 头像到昵称的距离
+    const int TEXT_MARGIN = 15;                  // 文本的上下外边距
 };
 
 class CMessageListWidget : public QListView
 {
     Q_OBJECT
 public:
-    explicit CMessageListWidget(QWidget *parent = nullptr)
-        : QListView(parent)
-    {
-    }
+    explicit CMessageListWidget(QWidget *parent = nullptr);
 
 protected:
-    void resizeEvent(QResizeEvent *event) override
-    {
-        QListView::resizeEvent(event);
-        doItemsLayout(); // 强制让所有 item 重新调用 sizeHint()
-    }
+    void resizeEvent(QResizeEvent *event) override;
 };
 
 #endif // CMESSAGELISTWIDGET_H

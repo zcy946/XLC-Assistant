@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
                          QString messageText = inputLine->text();
                          if (!messageText.isEmpty())
                          {
-                             CMessage msg(messageText, CMessage::USER);
+                             CMessage msg(messageText, CMessage::USER, "://image/avatar_self.png");
                              chatModel->addMessage(msg);
                              inputLine->clear();
                              listView->scrollToBottom(); // Scroll to the latest message
@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
                      });
 
     // Add some initial messages
-    chatModel->addMessage(CMessage("Hello there!", CMessage::ASSISTANT)); // Replace with other avatar path
-    chatModel->addMessage(CMessage("Hi! How are you?", CMessage::USER));
-    chatModel->addMessage(CMessage("I'm doing great, thank you! I have a very long message that should test the wrapping and resizing of the bubble. This message should definitely wrap to multiple lines to ensure the height calculation is correct.", CMessage::ASSISTANT));
-    chatModel->addMessage(CMessage("That's good to hear. Here is a shorter message.", CMessage::USER));
-    chatModel->addMessage(CMessage("This is another message from the other person.", CMessage::ASSISTANT));
+    chatModel->addMessage(CMessage("Hello there!", CMessage::ASSISTANT, "://image/avatar_robot.png")); // Replace with other avatar path
+    chatModel->addMessage(CMessage("Hi! How are you?", CMessage::USER, "://image/avatar_self.png"));
+    chatModel->addMessage(CMessage("I'm doing great, thank you! I have a very long message that should test the wrapping and resizing of the bubble. This message should definitely wrap to multiple lines to ensure the height calculation is correct.", CMessage::ASSISTANT, "://image/avatar_robot.png"));
+    chatModel->addMessage(CMessage("That's good to hear. Here is a shorter message.", CMessage::USER, "://image/avatar_self.png"));
+    chatModel->addMessage(CMessage("This is another message from the other person.", CMessage::ASSISTANT, "://image/avatar_robot.png"));
 
     window.resize(400, 600);
     window.setWindowTitle("QListView Chat Demo");
