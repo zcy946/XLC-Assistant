@@ -220,7 +220,7 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
         conversation->addMessage({{"role", "tool"},
                                   {"tool_call_id", callToolArgs.callId.toStdString()},
                                   {"content", formattedContent}});
-        // TODO 展示结果
+        // TODO 展示调用结果
         // display_message(messages.back());
     }
     else
@@ -233,7 +233,7 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
         conversation->addMessage({{"role", "tool"},
                                   {"tool_call_id", callToolArgs.callId.toStdString()},
                                   {"content", errorMessage.toStdString()}});
-        // TODO 展示结果
+        // TODO 展示调用结果
         // display_message(messages.back());
     }
 
