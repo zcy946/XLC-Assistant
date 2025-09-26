@@ -50,6 +50,19 @@ void CMessageListModel::addMessage(const CMessage &message)
     endInsertRows();
 }
 
+const CMessage *CMessageListModel::messageAt(int row) const
+{
+    if (row >= m_messages.size())
+        return nullptr;
+    return &m_messages.at(row);
+}
+
+void CMessageListModel::clearCachedSizes()
+{
+    for (CMessage &message : m_messages)
+        message.cachedItemSize = QSize();
+}
+
 // CMessageDelegate
 CMessageDelegate::CMessageDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -122,28 +135,29 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
     if (!index.isValid())
         return QSize();
 
-    // 获取用于计算的数据
-    QString text = index.data(CMessageListModel::Text).toString();
+    // 获取message
+    CMessage *message = const_cast<CMessage *>(
+        static_cast<const CMessageListModel *>(index.model())->messageAt(index.row()));
+
+    if (!message->cachedItemSize.isEmpty())
+    {
+        return message->cachedItemSize;
+    }
 
     // 拿到 listView 的宽度（比 option.rect 更准确）
     int viewWidth = option.widget ? option.widget->width() : option.rect.width();
-
-    // 头像区域高度
-    int avatarHeight = AVATAR_SIZE;
-
-    // 文本区域宽度
     QFontMetrics fontMetrics(option.font);
     int textWidth = viewWidth - PADDING - AVATAR_SIZE - NICK_MARGIN - PADDING; // 左 padding + 头像 + 头像到昵称的距离 + 右 padding
     if (textWidth < 50)                                                        // 宽度太小保护一下
         textWidth = 50;
+    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, message->text);
 
-    // 计算文本高度
-    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);
+    int avatarHeight = AVATAR_SIZE;
     int textHeight = rectText.height();
-
-    // 计算总高度
     int totalHeight = PADDING + avatarHeight + TEXT_MARGIN + textHeight + TEXT_MARGIN; // 上 padding + 头像 + 文本外边距 + 文本 + 文本外边距
-    return QSize(viewWidth, totalHeight);
+
+    message->cachedItemSize = QSize(viewWidth, totalHeight);
+    return message->cachedItemSize;
 }
 
 QPixmap CMessageDelegate::getRoundedAvatar(const QString &avatarFilePath, int size) const
@@ -206,5 +220,9 @@ CMessageListWidget::CMessageListWidget(QWidget *parent)
 void CMessageListWidget::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
-    doItemsLayout(); // 强制让所有 item 重新调用 sizeHint()
+    // 清空缓存（遍历 model 清掉 cachedItemSize）
+    auto model = qobject_cast<CMessageListModel *>(this->model());
+    if (model)
+        model->clearCachedSizes();
+    doItemsLayout();
 }

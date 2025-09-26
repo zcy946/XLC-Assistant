@@ -101,12 +101,11 @@ int main(int argc, char *argv[])
                          }
                      });
 
-    // Add some initial messages
-    chatModel->addMessage(CMessage("Hello there!", CMessage::ASSISTANT, "://image/avatar_robot.png")); // Replace with other avatar path
-    chatModel->addMessage(CMessage("Hi! How are you?", CMessage::USER, "://image/avatar_self.png"));
-    chatModel->addMessage(CMessage("I'm doing great, thank you! I have a very long message that should test the wrapping and resizing of the bubble. This message should definitely wrap to multiple lines to ensure the height calculation is correct.", CMessage::ASSISTANT, "://image/avatar_robot.png"));
-    chatModel->addMessage(CMessage("That's good to hear. Here is a shorter message.", CMessage::USER, "://image/avatar_self.png"));
-    chatModel->addMessage(CMessage("This is another message from the other person.", CMessage::ASSISTANT, "://image/avatar_robot.png"));
+    for (int i = 0; i < 1000; ++i)
+    {
+        QString text = QString("%1 - 测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本").arg(i + 1);
+        chatModel->addMessage(CMessage(text, CMessage::USER));
+    }
 
     window.resize(400, 600);
     window.setWindowTitle("QListView Chat Demo");

@@ -28,8 +28,8 @@ struct CMessage
     QString avatarFilePath;
 
     // 缓存尺寸信息
-    QSize cachedTextSize;
-    QSize cachedItemSize;
+    mutable QSize cachedTextSize;
+    mutable QSize cachedItemSize;
 
     CMessage(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdDateTime)
         : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdDateTime(createdDateTime)
@@ -50,8 +50,6 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-
-public:
     enum MessageRoles
     {
         ID = Qt::UserRole + 1,
@@ -61,6 +59,8 @@ public:
         AvatarFilePath = Qt::UserRole + 5
     };
     void addMessage(const CMessage &message);
+    const CMessage *messageAt(int row) const;
+    void clearCachedSizes();
 
 private:
     QVector<CMessage> m_messages;
