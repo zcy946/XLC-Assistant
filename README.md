@@ -39,11 +39,12 @@
 - [ ] 在各个`getCurrentData`函数内部判空
 - [x] 将`LLMService`和`McpGateway`作为单例实现
 - [ ] 为`Conversation`结构体的`messages`相关操作加锁
+- [ ] 使用虚拟化列表解决消息过多导致缩放窗口时卡顿的问题[解决Qt的列表加载大量数据卡顿的问题_qt tree列表 数据卡顿-CSDN博客](https://blog.csdn.net/t13506920069/article/details/132202854)[Search | DeepWiki（telegram的优化策略）](https://deepwiki.com/search/qt_84db5755-55cd-4c50-a9db-571574eb151f)
 
 ### **进阶**
 
 - [ ] 从数据库加载对话数据
-- [ ] 使用QListView制作消息列表控件
+- [x] 使用QListView制作消息列表控件
 
 
 

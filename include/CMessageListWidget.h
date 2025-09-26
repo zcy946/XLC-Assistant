@@ -91,9 +91,14 @@ class CMessageListWidget : public QListView
     Q_OBJECT
 public:
     explicit CMessageListWidget(QWidget *parent = nullptr);
+    void addMessage(const CMessage &message);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
+
+private:
+    CMessageListModel *m_model;
+    CMessageDelegate *m_delegate;
 };
 
 #endif // CMESSAGELISTWIDGET_H

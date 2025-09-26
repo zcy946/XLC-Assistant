@@ -67,16 +67,7 @@ int main(int argc, char *argv[])
     QVBoxLayout *mainLayout = new QVBoxLayout(&window);
 
     CMessageListWidget *listView = new CMessageListWidget(&window);
-    CMessageListModel *chatModel = new CMessageListModel(&window);
-    CMessageDelegate *chatDelegate = new CMessageDelegate(&window);
-
-    listView->setModel(chatModel);
-    listView->setItemDelegate(chatDelegate);
-    listView->setSelectionMode(QAbstractItemView::NoSelection);                        // No selection
-    listView->setUniformItemSizes(false);                                              // Crucial for variable height items
-    listView->setEditTriggers(QAbstractItemView::NoEditTriggers);                      // No editing
-    listView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);                // Smooth scroll
-    listView->setStyleSheet("QListView { background-color: #F5F5F5; border: none; }"); // Chat background
+    
 
     mainLayout->addWidget(listView);
 
@@ -95,16 +86,16 @@ int main(int argc, char *argv[])
                          if (!messageText.isEmpty())
                          {
                              CMessage msg(messageText, CMessage::USER, "://image/avatar_self.png");
-                             chatModel->addMessage(msg);
+                             listView->addMessage(msg);
                              inputLine->clear();
                              listView->scrollToBottom(); // Scroll to the latest message
                          }
                      });
 
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 50; ++i)
     {
         QString text = QString("%1 - 测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本测试超长文本").arg(i + 1);
-        chatModel->addMessage(CMessage(text, CMessage::USER));
+        listView->addMessage(CMessage(text, CMessage::USER));
     }
 
     window.resize(400, 600);

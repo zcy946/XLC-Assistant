@@ -34,10 +34,6 @@ QVariant CMessageListModel::data(const QModelIndex &index, int role) const
         return message.createdDateTime;
     case MessageRoles::AvatarFilePath:
         return message.avatarFilePath;
-    case Qt::DecorationRole: // 用于直接加载潜在头像图片
-        // 若图片较小，可在此处直接加载，
-        // 或交由委托处理以获得更佳性能。
-        return QVariant();
     default:
         return QVariant();
     }
@@ -215,12 +211,27 @@ QPixmap CMessageDelegate::getRoundedAvatar(const QString &avatarFilePath, int si
 CMessageListWidget::CMessageListWidget(QWidget *parent)
     : QListView(parent)
 {
+    m_model = new CMessageListModel(this);
+    m_delegate = new CMessageDelegate(this);
+
+    setModel(m_model);
+    setItemDelegate(m_delegate);
+    setSelectionMode(QAbstractItemView::NoSelection);   // No selection
+    setUniformItemSizes(false);                         // Crucial for variable height items
+    setEditTriggers(QAbstractItemView::NoEditTriggers); // No editing
+    // NOTE 取消掉丝滑滚动，使用虚拟化列表可以快速实现多消息不卡顿
+    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // Smooth scroll
+}
+
+void CMessageListWidget::addMessage(const CMessage &message)
+{
+    m_model->addMessage(message);
 }
 
 void CMessageListWidget::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
-    // 清空缓存（遍历 model 清掉 cachedItemSize）
+    // 清空缓存
     auto model = qobject_cast<CMessageListModel *>(this->model());
     if (model)
         model->clearCachedSizes();
