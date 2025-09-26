@@ -12,6 +12,7 @@
 #include "global.h"
 
 constexpr char *DEFAULT_AVATAR = "://image/default_avatar.png";
+constexpr char *DEFAULT_AVATAR_LLM = "://image/avatar_robot.png";
 
 struct CMessage
 {

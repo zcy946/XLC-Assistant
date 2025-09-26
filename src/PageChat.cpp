@@ -353,13 +353,16 @@ void WidgetChat::initWidget()
 void WidgetChat::initItems()
 {
     // m_listWidgetMessages
-    m_listWidgetMessages = new QListWidget(this);
-    // #ifdef QT_DEBUG
-    //     for (int i = 0; i < 50; ++i)
-    //     {
-    //         m_listWidgetMessages->addItem("测试消息" + QString::number(i + 1));
-    //     }
-    // #endif
+    m_listWidgetMessages = new CMessageListWidget(this);
+#ifdef QT_DEBUG
+    for (int i = 0; i < 50; ++i)
+    {
+        if (i % 2 == 0)
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), CMessage::Role::USER, DEFAULT_AVATAR));
+        else
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), CMessage::Role::ASSISTANT, DEFAULT_AVATAR_LLM));
+    }
+#endif
     // m_plainTextEdit
     m_plainTextEdit = new QPlainTextEdit(this);
     // m_pushButtonSend

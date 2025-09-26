@@ -216,10 +216,11 @@ CMessageListWidget::CMessageListWidget(QWidget *parent)
 
     setModel(m_model);
     setItemDelegate(m_delegate);
-    setSelectionMode(QAbstractItemView::NoSelection);   // No selection
-    setUniformItemSizes(false);                         // Crucial for variable height items
-    setEditTriggers(QAbstractItemView::NoEditTriggers); // No editing
-    // NOTE 取消掉丝滑滚动，使用虚拟化列表可以快速实现多消息不卡顿
+    setSelectionMode(QAbstractItemView::NoSelection);   // 不可选择
+    setUniformItemSizes(false);                         // 非统一大小
+    setEditTriggers(QAbstractItemView::NoEditTriggers); // 不可编辑
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // NOTE 使用虚拟化列表可以实现多消息不卡顿
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // Smooth scroll
 }
 

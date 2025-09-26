@@ -7,6 +7,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTabWidget>
+#include "CMessageListWidget.h"
 
 class WidgetChat;
 class PageChat : public BaseWidget
@@ -57,7 +58,7 @@ private:
     const QString m_conversationUuid;
 
 private:
-    QListWidget *m_listWidgetMessages;
+    CMessageListWidget *m_listWidgetMessages;
     QPlainTextEdit *m_plainTextEdit;
     QPushButton *m_pushButtonSend;
     QPushButton *m_pushButtonClearContext;
