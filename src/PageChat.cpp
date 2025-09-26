@@ -18,6 +18,7 @@ PageChat::PageChat(QWidget *parent)
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
     connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
     connect(EventBus::GetInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
+    connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &PageChat::slot_handleResponse);
 }
 
 void PageChat::initWidget()
@@ -45,7 +46,7 @@ void PageChat::initItems()
                 // TODO 刷新WidgetChat
             });
 #ifdef QT_DEBUG
-    for (int i = 0; i < 50; ++i)
+    for (int i = 0; i < 5; ++i)
     {
         // QString nameAgent = "agent实例测试" + QString::number(i + 1);
         // QListWidgetItem *itemAgent = new QListWidgetItem();
@@ -86,7 +87,11 @@ void PageChat::initItems()
                 XLC_LOG_TRACE("Switched tab (index={}, text={})", index, m_tabWidgetSiderBar->tabText(index));
             });
     // m_widgetChat
-    m_widgetChat = new WidgetChat(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString(), this);
+    QListWidgetItem *itemConversation = m_listWidgetConversations->currentItem();
+    if (itemConversation)
+        m_widgetChat = new WidgetChat(itemConversation->data(Qt::UserRole).toString(), this);
+    else
+        m_widgetChat = new WidgetChat(Q_NULLPTR, this);
 }
 
 void PageChat::initLayout()
@@ -133,16 +138,30 @@ void PageChat::slot_onAgentUpdated(const QString &agentUuid)
 
 void PageChat::slot_onMessageSent(const QString &message)
 {
-    const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
-    if (!agent)
+    QListWidgetItem *itemSelectedAgent = m_listWidgetAgents->currentItem();
+    if (!itemSelectedAgent)
     {
-        XLC_LOG_WARN("Send message failed (agentUuid={}): agent not found", m_listWidgetAgents->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Send message failed : select or create a agent");
         return;
     }
-    const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+    QString agentUuid = itemSelectedAgent->data(Qt::UserRole).toString();
+    const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(agentUuid);
+    if (!agent)
+    {
+        XLC_LOG_WARN("Send message failed (agentUuid={}): agent not found", agentUuid);
+        return;
+    }
+    QListWidgetItem *itemSelectedConversation = m_listWidgetConversations->currentItem();
+    if (!itemSelectedConversation)
+    {
+        XLC_LOG_WARN("Send message failed (agentUuid={}): select or create a conversation", agentUuid);
+        return;
+    }
+    QString conversationUuid = itemSelectedConversation->data(Qt::UserRole).toString();
+    const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(conversationUuid);
     if (!conversation)
     {
-        XLC_LOG_WARN("Send message failed (conversationUuid={}): conversation not found", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Send message failed (agentUuid={}, conversationUuid={}): conversation not found", agentUuid, conversationUuid);
         return;
     }
     // 检查 MCP 服务器是否初始化
@@ -159,13 +178,14 @@ void PageChat::slot_onMessageSent(const QString &message)
     }
     if (allMcpServersReady)
     {
+        m_widgetChat->addNewMessage({message, CMessage::Role::USER});
         // 记录问题
         conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
         LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
     }
     else
     {
-        XLC_LOG_WARN("Send message failed (conversationUuid={}): MCP servers not yet all initialized ", m_listWidgetConversations->currentItem()->data(Qt::UserRole).toString());
+        XLC_LOG_WARN("Send message failed (agentUuid={}, conversationUuid={}): MCP servers not yet all initialized ", agentUuid, conversationUuid);
     }
 }
 
@@ -248,6 +268,14 @@ void PageChat::slot_handleStateChanged(const QVariant &data)
     else
     {
         XLC_LOG_ERROR("Failed to process status change event(typeName={}): data type exception", data.typeName());
+    }
+}
+
+void PageChat::slot_handleResponse(const QString &conversationUuid, const QString &responseMessage)
+{
+    if (m_widgetChat->getConversationUuid() == conversationUuid)
+    {
+        m_widgetChat->addNewMessage({responseMessage, CMessage::Role::ASSISTANT, DEFAULT_AVATAR_LLM});
     }
 }
 
@@ -438,4 +466,15 @@ void WidgetChat::initLayout()
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->addWidget(m_splitter);
     vLayout->addLayout(hLayoutTools);
+}
+
+void WidgetChat::addNewMessage(CMessage message)
+{
+    m_listWidgetMessages->addMessage(message);
+    m_listWidgetMessages->scrollToBottom();
+}
+
+const QString WidgetChat::getConversationUuid()
+{
+    return m_conversationUuid;
 }

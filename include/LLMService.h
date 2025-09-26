@@ -12,7 +12,7 @@ class LLMService : public QObject
 {
     Q_OBJECT
 Q_SIGNALS:
-    // void sig_responseReady(const QString &conversationUuid, const QString &responseJson);
+    void sig_responseReady(const QString &conversationUuid, const QString &responseMessage);
     void sig_errorOccurred(const QString &conversationUuid, const QString &errorMessage);
 
 private Q_SLOTS:

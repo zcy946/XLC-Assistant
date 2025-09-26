@@ -237,7 +237,10 @@ void PageSettingsLLM::slot_onLLMsLoaded(bool success)
     if (m_listWidgetLLMs->currentItem() == nullptr)
     {
         m_listWidgetLLMs->setCurrentRow(0);
-        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
+        QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
+        if (!selectedItem)
+            return;
+        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
         m_widgetLLMInfo->updateFormData(llm);
@@ -262,7 +265,10 @@ void PageSettingsLLM::slot_onPushButtonClickedRemove()
         }
         // 选中列表中的第一项并展示
         m_listWidgetLLMs->setCurrentRow(0);
-        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_listWidgetLLMs->currentItem()->data(Qt::UserRole).value<QString>());
+        QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
+        if (!selectedItem)
+            return;
+        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
         m_widgetLLMInfo->updateFormData(llm);
@@ -569,7 +575,10 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
     if (m_listWidgetAgents->currentItem() == nullptr)
     {
         m_listWidgetAgents->setCurrentRow(0);
-        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
+        QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
+        if (!selectedItem)
+            return;
+        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
         m_widgetAgentInfo->updateFormData(agent);
@@ -594,7 +603,10 @@ void PageSettingsAgent::slot_onPushButtonClickedRemove()
         }
         // 选中列表中的第一项并展示
         m_listWidgetAgents->setCurrentRow(0);
-        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_listWidgetAgents->currentItem()->data(Qt::UserRole).value<QString>());
+        QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
+        if (!selectedItem)
+            return;
+        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
         m_widgetAgentInfo->updateFormData(agent);
@@ -970,7 +982,7 @@ void WidgetAgentInfo::updateMCPServerList(const std::shared_ptr<Agent> &agent)
             return;
         }
     }
-    
+
     for (const QString &uuid : currentAgent->mcpServers)
     {
         const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
@@ -1210,7 +1222,10 @@ void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
     if (m_listWidgetMcpServers->currentItem() == nullptr)
     {
         m_listWidgetMcpServers->setCurrentRow(0);
-        m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>()));
+        QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
+        if (!selectedItem)
+            return;
+        m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>()));
     }
 }
 
@@ -1233,7 +1248,10 @@ void PageSettingsMcp::slot_onPushButtonClickedRemove()
             }
             // 选中列表中的第一项并展示
             m_listWidgetMcpServers->setCurrentRow(0);
-            const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(m_listWidgetMcpServers->currentItem()->data(Qt::UserRole).value<QString>());
+            QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
+            if (!selectedItem)
+                return;
+            const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>());
             if (!mcpServer)
                 return;
             m_widgetMcpServerInfo->updateFormData(mcpServer);

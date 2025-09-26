@@ -79,7 +79,6 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                         XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseMessage.dump(4));
                         // 处理LLM响应
                         processResponse(conversation, responseMessage);
-                        // emit sig_responseReady(conversation->uuid, responseStr);
                     }
                     catch (const std::exception &e)
                     {
@@ -124,7 +123,11 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
     // 没有调用工具
     if (!responseMessage.contains("tool_calls"))
     {
-        // TODO 展示结果
+        // 展示结果
+        if (responseMessage.contains("content"))
+            emit sig_responseReady(conversation->uuid, QString::fromStdString(responseMessage["content"].get<std::string>()));
+        else
+            XLC_LOG_WARN("process response failed (conversationUuid={}): content not found in response", conversation->uuid);
         return;
     }
 

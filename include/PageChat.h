@@ -20,6 +20,7 @@ private Q_SLOTS:
     void slot_onMessageSent(const QString &message);
     void slot_handlePageSwitched(const QVariant &data);
     void slot_handleStateChanged(const QVariant &data);
+    void slot_handleResponse(const QString &conversationUuid, const QString &responseMessage);
 
 public:
     explicit PageChat(QWidget *parent = nullptr);
@@ -48,6 +49,8 @@ Q_SIGNALS:
 
 public:
     explicit WidgetChat(const QString &conversationUuid, QWidget *parent = nullptr);
+    void addNewMessage(CMessage message);
+    const QString getConversationUuid();
 
 protected:
     void initWidget() override;
