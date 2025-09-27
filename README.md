@@ -49,78 +49,66 @@
 
 ## Note
 
-关于实现mcp服务器初始化（`initClient`函数）的相关思路：
+## 1. `conversations` 表
 
-- **当某个服务器被调用时：**检查是否存在已经被激活的mcp服务器。如果没有就将此mcp服务器的id存入`pendingClients`中，然后使用QtConcurrent配合QFutureWatcher对此mcp服务器进行初始化（具体细节为：在QtConcurrent中初始化client并将client存入McpService的client容器中，在QFutureWatcher的finished槽中将该mcp服务器的id从`pendingClients`剔除）。（pendingClients的结构`QMap<QString, QFuture<MCPClient*>> pendingClients;  `）
+对应 `Conversation` 结构体：
 
-- **用户添加mcp服务器时：**当用户添加了新的mcp服务器后，执行mcp服务器初始化相关流程。
-- **用户挂载mcp服务器时：**当用户在聊天页面挂载了mcp服务器后，检查该mcp服务器是否已经被初始化，如果没有则检查该服务器id是否存在于`pendingClients`列表中，如果存在则直接返回。如果没有被初始化则执行初始化相关流程。
-- **用户获取mcp服务器工具列表或者其他信息时：**根据情况判断是否需要对相关mcp服务器进行初始化。
-- **在自动检查mcp服务器是否存活相关线程中：**如果存在mcp服务器保活相关功能，则应该在例如ping了服务器后根据情况执行mcp服务器初始化流程。
-
-**最好在QtConcurrent中调用`initClient`函数！！！**（判断返回的future是否为空，）
-
-## QFuture 并发控制机制解释
-
-`QMap<QString, QFuture<MCPClient*>> pendingClients` 的工作原理类似于 Cherry Studio 中的 Promise 机制： MCPService.ts:137
-
-### 运作原理：
-
-1. **存储异步操作**：`QFuture` 代表一个正在进行的异步初始化操作
-2. **防止重复初始化**：当多个请求同时需要同一服务器时：
-
-```c++
-QFuture<MCPClient*> MCPService::initClient(const MCPServer& server) {  
-    QString serverKey = getServerKey(server);  
-      
-    // 检查是否已有正在进行的初始化  
-    if (pendingClients.contains(serverKey)) {  
-        return pendingClients[serverKey]; // 返回同一个 QFuture  
-    }  
-      
-    // 开始新的异步初始化  
-    QFuture<MCPClient*> future = QtConcurrent::run([this, server]() {  
-        return createMCPClient(server);  
-    });  
-      
-    // 存储 QFuture 供其他并发请求使用  
-    pendingClients[serverKey] = future;  
-      
-    // 完成后清理  
-    QFutureWatcher<MCPClient*>* watcher = new QFutureWatcher<MCPClient*>;  
-    connect(watcher, &QFutureWatcher<MCPClient*>::finished, [this, serverKey, watcher]() {  
-        pendingClients.remove(serverKey);  
-        watcher->deleteLater();  
-    });  
-    watcher->setFuture(future);  
-      
-    return future;  
-}
+```sql
+CREATE TABLE conversations (
+    id TEXT PRIMARY KEY,                 -- 会话ID (UUID)
+    agent_id TEXT NOT NULL,              -- 关联的 Agent ID
+    summary TEXT,                        -- 会话摘要
+    created_time TEXT NOT NULL,          -- 创建时间 (ISO 8601 格式: YYYY-MM-DD HH:MM:SS)
+    updated_time TEXT NOT NULL,          -- 更新时间
+);
 ```
 
-### 并发场景示例：
+索引建议：
 
-- **请求 A**：调用 `initClient(server1)`，创建 QFuture 并存储
-- **请求 B**：同时调用 `initClient(server1)`，发现已有 QFuture，直接返回
-- **结果**：两个请求等待同一个初始化过程，避免重复连接
+```sql
+CREATE INDEX idx_conversations_agent_id ON conversations(agent_id);
+CREATE INDEX idx_conversations_updated_time ON conversations(updated_time);
+```
 
-这种机制确保了即使多个操作同时需要同一服务器，也只会进行一次初始化，类似于 Cherry Studio 的实现。
+------
 
-## closeClient 函数的调用时机
+## 2. `messages` 表
 
-### 1. 服务器移除时
+对应 `CMessage` 结构体：
 
-当用户删除 MCP 服务器配置时，`removeServer` 方法会先检查是否存在活跃的客户端连接，如果存在则调用 `closeClient` 进行清理。
+```sql
+CREATE TABLE messages (
+    seq INTEGER PRIMARY KEY AUTOINCREMENT,   -- 消息序号，唯一递增
+    id TEXT UNIQUE NOT NULL,                 -- 消息ID (UUID)
+    conversation_id TEXT NOT NULL,       -- 关联的会话ID
+    role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'SYSTEM')), -- 消息角色
+    text TEXT NOT NULL,                  -- 消息内容
+    created_time TEXT NOT NULL,          -- 创建时间 (ISO 8601)
+    avatar_file_path TEXT,               -- 头像文件路径
 
-### 3. 连接检查失败时
+    FOREIGN KEY(conversation_id) REFERENCES conversations(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+```
 
-在 `checkMcpConnectivity` 方法中，如果连接检查失败，会调用 `closeClient` 确保客户端状态清洁。
+索引建议：
 
-### 4. 应用程序清理时
+```sql
+CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX idx_messages_created_time ON messages(created_time);
+```
 
-在应用程序退出过程中，`cleanup` 方法会遍历所有客户端并调用 `closeClient` 进行资源清理。
+------
 
-这个 `cleanup` 方法在应用程序的 `will-quit` 事件中被调用。
+## 3. 关系设计说明
+
+- `conversations` 与 `messages` 是 **一对多**。
+- 删除一个 `conversation` 时，相关 `messages` 自动删除（`ON DELETE CASCADE`）。
+- `messages.role` 用 **枚举约束** (`CHECK`) 确保只允许三种值。
+- `created_time`、`updated_time` 用 `TEXT` 存储 ISO 8601，方便 SQLite 内置函数比较。
+
+------
 
 
 

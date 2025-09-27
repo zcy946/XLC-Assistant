@@ -40,12 +40,13 @@ DataManager::DataManager(QObject *parent)
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
 }
 
-// void DataManager::registerAllMetaType()
-// {
-//     qRegisterMetaType<McpServer>("McpServer");
-//     qRegisterMetaType<Agent>("Agent");
-//     qRegisterMetaType<Conversation>("Conversation");
-// }
+void DataManager::registerAllMetaType()
+{
+    // qRegisterMetaType<McpServer>("McpServer");
+    // qRegisterMetaType<Agent>("Agent");
+    // qRegisterMetaType<Conversation>("Conversation");
+    // qRegisterMetaType<Message>("Message");
+}
 
 void DataManager::init()
 {

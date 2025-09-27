@@ -9,6 +9,7 @@
 #include <mcp_message.h>
 #include <QSet>
 #include <QMutex>
+#include "DataBaseManager.h"
 
 struct CallToolArgs;
 struct LLM;
@@ -37,7 +38,7 @@ private Q_SLOTS:
 public:
     static DataManager *getInstance();
     ~DataManager() = default;
-    // static void registerAllMetaType();
+    static void registerAllMetaType();
     void init();
 
     bool loadLLMs(const QString &filePath);
@@ -552,6 +553,26 @@ public:
     {
         QMutexLocker locker(&mutex);
         messages.push_back(newMessage);
+        updatedTime = QDateTime::currentDateTime();
+
+        // 插入数据库
+        QString message = QString::fromStdString(newMessage["content"].get<std::string>());
+        Message::Role role;
+        std::string strRole = newMessage["role"].get<std::string>();
+        if (strRole == "user")
+            role = Message::USER;
+        else if (strRole == "assistant")
+            role = Message::ASSISTANT;
+        else if (strRole == "tool")
+            role = Message::SYSTEM;
+        else
+            role = Message::SYSTEM;
+        Message temp_message(message, role);
+        Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid, temp_message.id,
+                                                                    static_cast<int>(temp_message.role),
+                                                                    temp_message.text,
+                                                                    temp_message.createdTime,
+                                                                    temp_message.avatarFilePath);
     }
 
     const mcp::json getMessages()

@@ -19,6 +19,7 @@ PageChat::PageChat(QWidget *parent)
     connect(EventBus::getInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
     connect(EventBus::getInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
     connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &PageChat::slot_handleResponse);
+    connect(LLMService::getInstance(), &LLMService::sig_toolCalled, this, &PageChat::slot_handleToolCalled);
 }
 
 void PageChat::initWidget()
@@ -178,7 +179,7 @@ void PageChat::slot_onMessageSent(const QString &message)
     }
     if (allMcpServersReady)
     {
-        m_widgetChat->addNewMessage({message, CMessage::Role::USER});
+        m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
         // 记录问题
         conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
         LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
@@ -275,7 +276,15 @@ void PageChat::slot_handleResponse(const QString &conversationUuid, const QStrin
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage({responseMessage, CMessage::Role::ASSISTANT, DEFAULT_AVATAR_LLM});
+        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
+    }
+}
+
+void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QString &message)
+{
+    if (m_widgetChat->getConversationUuid() == conversationUuid)
+    {
+        m_widgetChat->addNewMessage(CMessage(message, Message::Role::SYSTEM));
     }
 }
 
@@ -386,9 +395,9 @@ void WidgetChat::initItems()
     for (int i = 0; i < 50; ++i)
     {
         if (i % 2 == 0)
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), CMessage::Role::USER, DEFAULT_AVATAR));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER));
         else
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), CMessage::Role::ASSISTANT, DEFAULT_AVATAR_LLM));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT));
     }
 #endif
     // m_plainTextEdit

@@ -21,6 +21,7 @@ private Q_SLOTS:
     void slot_handlePageSwitched(const QVariant &data);
     void slot_handleStateChanged(const QVariant &data);
     void slot_handleResponse(const QString &conversationUuid, const QString &responseMessage);
+    void slot_handleToolCalled(const QString &conversationUuid, const QString &message);
 
 public:
     explicit PageChat(QWidget *parent = nullptr);

@@ -11,36 +11,12 @@
 #include <QListView>
 #include "global.h"
 
-constexpr char *DEFAULT_AVATAR = "://image/default_avatar.png";
-constexpr char *DEFAULT_AVATAR_LLM = "://image/avatar_robot.png";
-
-struct CMessage
+struct CMessage : public Message
 {
-    QString id;
-    QString text;
-    enum Role
-    {
-        USER,
-        ASSISTANT,
-        SYSTEM
-    };
-    Role role;
-    QString createdDateTime;
-    QString avatarFilePath;
-
+    CMessage(const QString &message, Message::Role role, const QString &avatarFilePath = QString()) : Message(message, role, avatarFilePath) {}
     // 缓存尺寸信息
     mutable QSize cachedTextSize;
     mutable QSize cachedItemSize;
-
-    CMessage(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdDateTime)
-        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdDateTime(createdDateTime)
-    {
-    }
-
-    CMessage(const QString &text, Role role = USER, const QString &avatarFilePath = DEFAULT_AVATAR, const QString &createdDateTime = getCurrentDateTime())
-        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), createdDateTime(createdDateTime)
-    {
-    }
 };
 
 class CMessageListModel : public QAbstractListModel
@@ -56,7 +32,7 @@ public:
         ID = Qt::UserRole + 1,
         Text = Qt::UserRole + 2,
         Role = Qt::UserRole + 3,
-        CreatedDateTime = Qt::UserRole + 4,
+        CreatedTime = Qt::UserRole + 4,
         AvatarFilePath = Qt::UserRole + 5
     };
     void addMessage(const CMessage &message);

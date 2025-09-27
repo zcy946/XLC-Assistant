@@ -27,7 +27,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # 查找包
 set(MCP_DIR "E:/github/1MyFork/cpp-mcp/install/cmake")
 find_package(spdlog CONFIG REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets Gui Svg Concurrent REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui Svg Concurrent Sql REQUIRED)
 find_package(MCP REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
@@ -53,6 +53,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::Gui
     Qt5::Svg
     Qt5::Concurrent
+    Qt5::Sql
     MCP::mcp
 )
 
