@@ -1208,8 +1208,8 @@ const mcp::json Conversation::getMessages()
      *      if (messages.size() != messageCount) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
      *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
      *      ↓
-     *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QVariant[存储message的json数组])），在此槽函数中先判断pendingConversations中是否存在对应uuid
-     *      如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
+     *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QVariant[存储message的json数组])），
+     *      在此槽函数中先判断pendingConversations中是否存在对应uuid，如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
      *      ↓
      *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
      *  */ 
