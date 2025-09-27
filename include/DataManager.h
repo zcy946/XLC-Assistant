@@ -219,6 +219,7 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString summary;
     QDateTime createdTime;
     QDateTime updatedTime;
+    // TODO 加入messageCount字段，记录消息数量
 
 private:
     QMutex mutex;

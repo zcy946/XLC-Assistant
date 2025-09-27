@@ -729,6 +729,7 @@ void DataManager::addConversation(const std::shared_ptr<Conversation> &conversat
     if (conversation)
     {
         m_conversations.insert(conversation->uuid.trimmed(), conversation);
+        // TODO 将对话添加到数据库
     }
     else
     {
@@ -1199,6 +1200,19 @@ void Conversation::addMessage(const mcp::json &newMessage)
 
 const mcp::json Conversation::getMessages()
 {
+    // TODO 在loadAgents获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
+    /**
+     * TODO 先返回当前messages，
+     *      ↓
+     *      再将messageCount与当前messages.size()作比较
+     *      if (messages.size() != messageCount) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
+     *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
+     *      ↓
+     *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QVariant[存储message的json数组])），在此槽函数中先判断pendingConversations中是否存在对应uuid
+     *      如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
+     *      ↓
+     *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
+     *  */ 
     QMutexLocker locker(&mutex);
     return messages;
 }
