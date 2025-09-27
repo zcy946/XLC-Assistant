@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 加载数据
     DataManager::getInstance()->init();
     initUI();
-    connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &MainWindow::handlePageSwitched);
+    connect(EventBus::getInstance().get(), &EventBus::sig_pageSwitched, this, &MainWindow::handlePageSwitched);
 }
 
 MainWindow::~MainWindow()

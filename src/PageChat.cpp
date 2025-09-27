@@ -16,8 +16,8 @@ PageChat::PageChat(QWidget *parent)
     connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
     connect(m_widgetChat, &WidgetChat::sig_messageSent, this, &PageChat::slot_onMessageSent);
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
-    connect(EventBus::GetInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
-    connect(EventBus::GetInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
+    connect(EventBus::getInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
+    connect(EventBus::getInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
     connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &PageChat::slot_handleResponse);
 }
 
