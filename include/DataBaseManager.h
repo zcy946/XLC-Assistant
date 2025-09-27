@@ -66,3 +66,8 @@ private:
 };
 
 #endif // DATABASEMANAGER_H
+
+/**
+ * NOTE QSqlDatabase 的局部特性
+ * QSqlDatabase具有局部特写，在使用的时候要确保执行query的线程和打开的数据库连接QSqlDatabase处于同一线程中。
+ *  */ 
