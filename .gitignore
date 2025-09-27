@@ -19,3 +19,4 @@ test.cpp
 output/config/Agents.json.bak
 output/config/LLMs.json.bak
 output/config/MCPServers.json.bak
+output/xlc_assistant.db
