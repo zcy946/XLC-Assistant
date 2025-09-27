@@ -77,7 +77,7 @@ void PageChat::initItems()
 
     // m_tabWidgetSiderBar
     m_tabWidgetSiderBar = new QTabWidget(this);
-    m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "助手");
+    m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "智能体");
     m_tabWidgetSiderBar->addTab(m_listWidgetConversations, "话题");
     // 默认选中 话题
     m_tabWidgetSiderBar->setCurrentWidget(m_listWidgetConversations);

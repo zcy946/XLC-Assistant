@@ -17,7 +17,7 @@ PageSettings::PageSettings(QWidget *parent)
 {
     initUI();
     // pageSettingsAgent
-    addPage("助手设置", new PageSettingsAgent(this));
+    addPage("智能体", new PageSettingsAgent(this));
     // pageSettingsLLM
     addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsMcp
