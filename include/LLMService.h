@@ -14,6 +14,7 @@ class LLMService : public QObject
 Q_SIGNALS:
     void sig_responseReady(const QString &conversationUuid, const QString &responseMessage);
     void sig_errorOccurred(const QString &conversationUuid, const QString &errorMessage);
+    void sig_toolCalled(const QString &conversationUuid, const QString &message);
 
 private Q_SLOTS:
     void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);

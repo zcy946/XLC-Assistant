@@ -8,6 +8,8 @@
 #include "Logger.hpp"
 #include <mcp_message.h>
 #include <QSet>
+#include <QMutex>
+#include "DataBaseManager.h"
 
 struct CallToolArgs;
 struct LLM;
@@ -36,7 +38,7 @@ private Q_SLOTS:
 public:
     static DataManager *getInstance();
     ~DataManager() = default;
-    // static void registerAllMetaType();
+    static void registerAllMetaType();
     void init();
 
     bool loadLLMs(const QString &filePath);
@@ -75,7 +77,7 @@ public:
     bool loadConversations();
     void addConversation(const std::shared_ptr<Conversation> &conversation);
     void removeConversation(const QString &uuid);
-    void updateConversation(const Conversation &conversation);
+    void updateConversation(std::shared_ptr<Conversation> newConversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
     std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
@@ -109,53 +111,15 @@ struct LLM
     QString baseUrl;
     QString endpoint;
 
-    LLM()
-        : uuid(generateUuid()),
-          modelID(),
-          modelName(),
-          apiKey(),
-          baseUrl(),
-          endpoint("/v1/chat/completions")
-    {
-    }
-
+    LLM();
     LLM(const QString &modelID,
         const QString &modelName,
         const QString &apiKey,
         const QString &baseUrl,
-        const QString &endpoint = QString())
-        : uuid(generateUuid()),
-          modelID(modelID),
-          modelName(modelName),
-          apiKey(apiKey),
-          baseUrl(baseUrl),
-          endpoint(endpoint)
-    {
-    }
+        const QString &endpoint = QString());
+    static LLM fromJson(const QJsonObject &jsonObject);
 
-    static LLM fromJson(const QJsonObject &jsonObject)
-    {
-        LLM llm;
-        llm.uuid = jsonObject["uuid"].toString();
-        llm.modelID = jsonObject["modelID"].toString();
-        llm.modelName = jsonObject["modelName"].toString();
-        llm.apiKey = jsonObject["apiKey"].toString();
-        llm.baseUrl = jsonObject["baseUrl"].toString();
-        llm.endpoint = jsonObject["endpoint"].toString();
-        return llm;
-    }
-
-    QJsonObject toJsonObject() const
-    {
-        QJsonObject jsonObject;
-        jsonObject["uuid"] = uuid;
-        jsonObject["modelID"] = modelID;
-        jsonObject["modelName"] = modelName;
-        jsonObject["apiKey"] = apiKey;
-        jsonObject["baseUrl"] = baseUrl;
-        jsonObject["endpoint"] = endpoint;
-        return jsonObject;
-    }
+    QJsonObject toJsonObject() const;
 };
 // Q_DECLARE_METATYPE(LLM)
 
@@ -184,23 +148,7 @@ struct McpServer
     QString endpoint;
     QString requestHeaders;
 
-    McpServer()
-        : isActive(false),
-          uuid(generateUuid()),
-          name(),
-          description(),
-          type(sse),
-          timeout(30),
-          command(),
-          args(),
-          envVars(),
-          host(),
-          port(),
-          baseUrl(),
-          endpoint("/sse"),
-          requestHeaders()
-    {
-    }
+    McpServer();
     McpServer(bool isActive,
               const QString &name,
               const QString &description,
@@ -211,23 +159,7 @@ struct McpServer
               const QMap<QString, QString> &envVars,
               const QString &baseUrl,
               const QString &endpoint,
-              const QString &requestHeaders)
-        : isActive(isActive),
-          uuid(generateUuid()),
-          name(name),
-          description(description),
-          type(type),
-          timeout(timeout),
-          command(command),
-          args(args),
-          envVars(envVars),
-          host(),
-          port(),
-          baseUrl(baseUrl),
-          endpoint(endpoint),
-          requestHeaders(requestHeaders)
-    {
-    }
+              const QString &requestHeaders);
     McpServer(bool isActive,
               const QString &name,
               const QString &description,
@@ -239,99 +171,11 @@ struct McpServer
               const QString &host,
               int port,
               const QString &endpoint,
-              const QString &requestHeaders)
-        : isActive(isActive),
-          uuid(generateUuid()),
-          name(name),
-          description(description),
-          type(type),
-          timeout(timeout),
-          command(command),
-          args(args),
-          envVars(envVars),
-          host(host),
-          port(port),
-          baseUrl(),
-          endpoint(endpoint),
-          requestHeaders(requestHeaders)
-    {
-    }
-
+              const QString &requestHeaders);
     // 从 QJsonObject 解析 McpServer
-    static McpServer fromJson(const QJsonObject &jsonObject)
-    {
-        McpServer server;
-        server.isActive = jsonObject["isActive"].toBool();
-        server.uuid = jsonObject["uuid"].toString();
-        server.name = jsonObject["name"].toString();
-        server.description = jsonObject["description"].toString();
-        server.type = static_cast<Type>(jsonObject["type"].toInt());
-        server.timeout = jsonObject["timeout"].toInt();
-
-        if (server.type == stdio)
-        {
-            server.command = jsonObject["command"].toString();
-            QJsonArray argsArray = jsonObject["args"].toArray();
-            for (const QJsonValue &value : argsArray)
-            {
-                server.args.append(value.toString());
-            }
-
-            QJsonObject envVarsObject = jsonObject["envVars"].toObject();
-            for (auto it = envVarsObject.begin(); it != envVarsObject.end(); ++it)
-            {
-                server.envVars.insert(it.key(), it.value().toString());
-            }
-        }
-        else if (server.type == sse || server.type == streambleHttp)
-        {
-            server.host = jsonObject["host"].toString();
-            server.port = jsonObject["port"].toInt();
-            server.baseUrl = jsonObject["baseUrl"].toString();
-            server.endpoint = jsonObject["endpoint"].toString();
-            server.requestHeaders = jsonObject["requestHeaders"].toString();
-        }
-        return server;
-    }
-
+    static McpServer fromJson(const QJsonObject &jsonObject);
     // 将 McpServer 序列化为 QJsonObject
-    QJsonObject toJsonObject() const
-    {
-        QJsonObject jsonObject;
-        jsonObject["isActive"] = isActive;
-        jsonObject["uuid"] = uuid;
-        jsonObject["name"] = name;
-        jsonObject["description"] = description;
-        jsonObject["type"] = type;
-        jsonObject["timeout"] = timeout;
-
-        if (type == stdio)
-        {
-            jsonObject["command"] = command;
-            QJsonArray argsArray;
-            for (const QString &arg : args)
-            {
-                argsArray.append(arg);
-            }
-            jsonObject["args"] = argsArray;
-
-            QJsonObject envVarsObject;
-            for (auto it = envVars.begin(); it != envVars.end(); ++it)
-            {
-                envVarsObject.insert(it.key(), it.value());
-            }
-            jsonObject["envVars"] = envVarsObject;
-        }
-        else if (type == sse || type == streambleHttp)
-        {
-            jsonObject["host"] = host;
-            jsonObject["port"] = port;
-            jsonObject["baseUrl"] = baseUrl;
-            jsonObject["endpoint"] = endpoint;
-            jsonObject["requestHeaders"] = requestHeaders;
-        }
-        return jsonObject;
-    }
+    QJsonObject toJsonObject() const;
 };
 // Q_DECLARE_METATYPE(McpServer)
 
@@ -350,19 +194,7 @@ struct Agent
     QSet<QString> mcpServers;    // 挂载的mcp服务器的uuid
     QSet<QString> conversations; // 使用该agent的对话的uuid
 
-    Agent()
-        : name(),
-          description(),
-          context(),
-          systemPrompt(),
-          llmUUid(),
-          temperature(),
-          topP(),
-          maxTokens(),
-          mcpServers(),
-          conversations()
-    {
-    }
+    Agent();
     Agent(const QString &name,
           const QString &description,
           int context,
@@ -372,76 +204,11 @@ struct Agent
           double topP,
           int maxTokens,
           const QSet<QString> &mcpServers = QSet<QString>(),
-          const QSet<QString> &conversations = QSet<QString>())
-        : uuid(generateUuid()),
-          name(name),
-          description(description),
-          context(context),
-          systemPrompt(systemPrompt),
-          llmUUid(llmUUid),
-          temperature(temperature),
-          topP(topP),
-          maxTokens(maxTokens),
-          mcpServers(mcpServers),
-          conversations(conversations)
-    {
-    }
-
+          const QSet<QString> &conversations = QSet<QString>());
     // 从 QJsonObject 解析 Agent
-    static Agent fromJson(const QJsonObject &jsonObject)
-    {
-        Agent agent;
-        agent.uuid = jsonObject["uuid"].toString();
-        agent.name = jsonObject["name"].toString();
-        agent.description = jsonObject["description"].toString();
-        agent.context = jsonObject["context"].toInt();
-        agent.systemPrompt = jsonObject["systemPrompt"].toString();
-        agent.llmUUid = jsonObject["llmUUid"].toString();
-        agent.temperature = jsonObject["temperature"].toDouble();
-        agent.topP = jsonObject["topP"].toDouble();
-        agent.maxTokens = jsonObject["maxTokens"].toInt();
-
-        QJsonArray mcpServersArray = jsonObject["mcpServers"].toArray();
-        for (const QJsonValue &mcpServerUuid : mcpServersArray)
-        {
-            agent.mcpServers.insert(mcpServerUuid.toString());
-        }
-        QJsonArray conversationsArray = jsonObject["conversations"].toArray();
-        for (const QJsonValue &conversationUuid : conversationsArray)
-        {
-            agent.conversations.insert(conversationUuid.toString());
-        }
-        return agent;
-    }
-
+    static Agent fromJson(const QJsonObject &jsonObject);
     // 将 Agent 序列化为 QJsonObject
-    QJsonObject toJsonObject() const
-    {
-        QJsonObject jsonObject;
-        jsonObject["uuid"] = uuid;
-        jsonObject["name"] = name;
-        jsonObject["description"] = description;
-        jsonObject["context"] = context;
-        jsonObject["systemPrompt"] = systemPrompt;
-        jsonObject["llmUUid"] = llmUUid;
-        jsonObject["temperature"] = temperature;
-        jsonObject["topP"] = topP;
-        jsonObject["maxTokens"] = maxTokens;
-
-        QJsonArray mcpServersArray;
-        for (const QString &mcpServerUuid : mcpServers)
-        {
-            mcpServersArray.append(mcpServerUuid);
-        }
-        jsonObject["mcpServers"] = mcpServersArray;
-        QJsonArray conversationsArray;
-        for (const QString &conversationUuid : conversations)
-        {
-            conversationsArray.append(conversationUuid);
-        }
-        jsonObject["conversations"] = conversationsArray;
-        return jsonObject;
-    }
+    QJsonObject toJsonObject() const;
 };
 // Q_DECLARE_METATYPE(Agent)
 
@@ -452,137 +219,33 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString summary;
     QDateTime createdTime;
     QDateTime updatedTime;
+    // TODO 加入messageCount字段，记录消息数量
 
 private:
-    // TODO 给messages加锁
+    QMutex mutex;
     mcp::json messages;
 
 public:
-    static std::shared_ptr<Conversation> create(const QString &agentUuid)
-    {
-        // 通过内部 enabler 来调用 protected ctor
-        struct make_shared_enabler : public Conversation
-        {
-            make_shared_enabler(const QString &agentUuid)
-                : Conversation(agentUuid) {}
-            make_shared_enabler(const QString &uuid,
-                                const QString &agentUuid,
-                                const QString &summary,
-                                const QDateTime &createdTime,
-                                const QDateTime &updatedTime)
-                : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
-        };
-        return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(agentUuid));
-        /**
-         * NOTE
-         * 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
-           解决办法：用 make_shared_enabler（内部派生类）作为“桥”，让它调用 protected 构造函数，然后把结果当成 shared_ptr<Conversation> 返回。
-           效果：外部只能通过 Conversation::create(...) 来生成对象，既安全又保持 make_shared 的高效内存分配。 */
-    }
-
+    static std::shared_ptr<Conversation> create(const QString &agentUuid);
     static std::shared_ptr<Conversation> create(const QString &uuid,
                                                 const QString &agentUuid,
                                                 const QString &summary,
                                                 const QDateTime &createdTime,
-                                                const QDateTime &updatedTime)
-    {
-        struct make_shared_enabler : public Conversation
-        {
-            make_shared_enabler(const QString &uuid,
-                                const QString &agentUuid,
-                                const QString &summary,
-                                const QDateTime &createdTime,
-                                const QDateTime &updatedTime)
-                : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
-        };
-
-        return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(uuid, agentUuid, summary, createdTime, updatedTime));
-    }
-
-    bool hasSystemPrompt()
-    {
-        if (!messages.is_array() || messages.empty())
-        {
-            return false;
-        }
-        const auto &firstItem = messages.front();
-        if (!firstItem.is_object())
-        {
-            return false;
-        }
-        if (firstItem.contains("role") && firstItem["role"].is_string() && firstItem["role"] == "system")
-        {
-            return true;
-        }
-        return false;
-    }
-
-    void resetSystemPrompt()
-    {
-        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
-        if (!agent)
-        {
-            return;
-        }
-        if (agent->systemPrompt.isEmpty())
-            return;
-
-        mcp::json systemPromptItem = mcp::json();
-        systemPromptItem["content"] = agent->systemPrompt.toStdString();
-        systemPromptItem["role"] = "system";
-
-        if (hasSystemPrompt())
-        {
-            messages.front() = systemPromptItem;
-        }
-        else
-        {
-            if (messages.empty())
-                messages.push_back(systemPromptItem);
-            else
-                messages.insert(messages.begin(), systemPromptItem);
-        }
-    }
-
-    void addMessage(const mcp::json &newMessage)
-    {
-        messages.push_back(newMessage);
-    }
-
-    const mcp::json &getMessages()
-    {
-        return messages;
-    }
-
+                                                const QDateTime &updatedTime);
+    bool hasSystemPrompt();
+    void resetSystemPrompt();
+    void addMessage(const mcp::json &newMessage);
+    const mcp::json getMessages();
     // 清除上下文
-    void clearContext()
-    {
-        messages.clear();
-    }
+    void clearContext();
 
 protected:
-    Conversation(const QString &agentUuid)
-        : uuid(generateUuid()),
-          agentUuid(agentUuid),
-          createdTime(QDateTime::currentDateTime()),
-          updatedTime(QDateTime::currentDateTime()),
-          messages(mcp::json())
-    {
-    }
-
+    Conversation(const QString &agentUuid);
     Conversation(const QString &uuid,
                  const QString &agentUuid,
                  const QString &summary,
                  const QDateTime &createdTime,
-                 const QDateTime &updatedTime)
-        : uuid(uuid),
-          agentUuid(agentUuid),
-          summary(summary),
-          createdTime(createdTime),
-          updatedTime(updatedTime),
-          messages(mcp::json())
-    {
-    }
+                 const QDateTime &updatedTime);
 };
 
 // Q_DECLARE_METATYPE(Conversation)

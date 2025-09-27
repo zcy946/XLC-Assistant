@@ -30,8 +30,8 @@ QVariant CMessageListModel::data(const QModelIndex &index, int role) const
         return message.text;
     case MessageRoles::Role:
         return message.role;
-    case MessageRoles::CreatedDateTime:
-        return message.createdDateTime;
+    case MessageRoles::CreatedTime:
+        return message.createdTime;
     case MessageRoles::AvatarFilePath:
         return message.avatarFilePath;
     default:
@@ -75,15 +75,15 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
     // 获取数据
     QString text = index.data(CMessageListModel::Text).toString();
-    CMessage::Role role = static_cast<CMessage::Role>(index.data(CMessageListModel::Role).toInt());
-    QString createDateTime = index.data(CMessageListModel::CreatedDateTime).toString();
+    Message::Role role = static_cast<Message::Role>(index.data(CMessageListModel::Role).toInt());
+    QString createDateTime = index.data(CMessageListModel::CreatedTime).toString();
     QString avatarFilePath = index.data(CMessageListModel::AvatarFilePath).toString();
     QString nick;
-    if (role == CMessage::Role::USER)
+    if (role == Message::Role::USER)
         nick = "User";
-    else if (role == CMessage::Role::ASSISTANT)
+    else if (role == Message::Role::ASSISTANT)
         nick = "Assistant";
-    else if (role == CMessage::Role::SYSTEM)
+    else if (role == Message::Role::SYSTEM)
         nick = "System";
     else
         nick = "Unknow";
@@ -171,12 +171,12 @@ QPixmap CMessageDelegate::getRoundedAvatar(const QString &avatarFilePath, int si
         img = QImage(avatarFilePath);
         if (img.isNull())
         {
-            img.load(DEFAULT_AVATAR);
+            img.load(AVATAR_SYSTEM);
         }
     }
     else
     {
-        img = QImage(DEFAULT_AVATAR);
+        img = QImage(AVATAR_SYSTEM);
     }
 
     // 高 DPI 适配

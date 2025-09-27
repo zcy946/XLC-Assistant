@@ -17,7 +17,7 @@ PageSettings::PageSettings(QWidget *parent)
 {
     initUI();
     // pageSettingsAgent
-    addPage("助手设置", new PageSettingsAgent(this));
+    addPage("智能体", new PageSettingsAgent(this));
     // pageSettingsLLM
     addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsMcp
@@ -135,7 +135,7 @@ void PageSettingsLLM::initItems()
                                 // 通知其它页面更新(通知WidgetAgentInfo更新LLM列表)
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -175,7 +175,7 @@ void PageSettingsLLM::initItems()
                 }
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                 XLC_LOG_DEBUG("Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
             });
 }
@@ -275,7 +275,7 @@ void PageSettingsLLM::slot_onPushButtonClickedRemove()
         // 通知其它页面更新
         QJsonObject jsonObj;
         jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-        EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+        EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
     }
 }
 
@@ -478,7 +478,7 @@ void PageSettingsAgent::initItems()
                                 // 通知其它页面更新
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
-                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -613,7 +613,7 @@ void PageSettingsAgent::slot_onPushButtonClickedRemove()
         // 通知其它页面更新
         QJsonObject jsonObj;
         jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
-        EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+        EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
     }
 }
 
@@ -633,7 +633,7 @@ WidgetAgentInfo::WidgetAgentInfo(QWidget *parent)
 {
     initUI();
     connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &WidgetAgentInfo::slot_onLLMsLoaded);
-    connect(EventBus::GetInstance().get(), &EventBus::sig_stateChanged, this, &WidgetAgentInfo::slot_handleStateChanged);
+    connect(EventBus::getInstance().get(), &EventBus::sig_stateChanged, this, &WidgetAgentInfo::slot_handleStateChanged);
 }
 
 void WidgetAgentInfo::initWidget()
@@ -777,7 +777,7 @@ void WidgetAgentInfo::initItems()
                     objPageInfo["id"] = static_cast<int>(EventBus::Pages::CONVERSATION);
                     objPageInfo["agentUuid"] = m_lineEditUuid->text();
                     objPageInfo["conversationUuid"] = selectedItem->data(Qt::UserRole).toString();
-                    EventBus::GetInstance()->publish(EventBus::EventType::PageSwitched, QVariant(objPageInfo));
+                    EventBus::getInstance()->publish(EventBus::EventType::PageSwitched, QVariant(objPageInfo));
                 }
             });
     connect(actionDeleteConversation, &QAction::triggered, this,
@@ -1126,7 +1126,7 @@ void PageSettingsMcp::initItems()
                                 // 通知其它页面更新
                                 QJsonObject jsonObj;
                                 jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-                                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                             }
                         });
                 dialog->exec();
@@ -1160,7 +1160,7 @@ void PageSettingsMcp::initItems()
                 }
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-                EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
                 XLC_LOG_DEBUG("Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
 }
@@ -1258,7 +1258,7 @@ void PageSettingsMcp::slot_onPushButtonClickedRemove()
             // 通知其它页面更新
             QJsonObject jsonObj;
             jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-            EventBus::GetInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
+            EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
         }
     }
 }

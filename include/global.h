@@ -20,6 +20,71 @@ constexpr const char *ENDPOINT = "/v1/chat/completions";
 constexpr const char *MODEL = "deepseek-chat";
 constexpr const char *API_KEY = "sk-67827bd147dc43afbb9a982349c4be31";
 
+constexpr const char *AVATAR_SYSTEM = "://image/avatar_system.png";
+constexpr const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
+constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
+
+QString getCurrentDateTime();
+QString generateUuid();
+struct Message
+{
+    QString id;
+    QString text;
+    enum Role
+    {
+        USER = 0,
+        ASSISTANT = 1,
+        SYSTEM = 2
+    };
+    Role role;
+    QString createdTime;
+    QString avatarFilePath;
+    // TODO 加入tool_calls[TEXT]和tool_call_id[TEXT]字段
+
+    Message()
+        : id(generateUuid()), createdTime(getCurrentDateTime())
+    {
+        switch (role)
+        {
+        case Role::USER:
+            this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
+            break;
+        case Role::ASSISTANT:
+            this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
+            break;
+        default:
+            this->avatarFilePath = QString(AVATAR_SYSTEM);
+            break;
+        }
+    }
+
+    Message(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdTime)
+        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    {
+    }
+
+    Message(const QString &text, Role role = USER, const QString &avatarFilePath = QString(), const QString &createdTime = getCurrentDateTime())
+        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    {
+        if (this->avatarFilePath.isEmpty())
+        {
+            switch (role)
+            {
+            case Role::USER:
+                this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
+                break;
+            case Role::ASSISTANT:
+                this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
+                break;
+            default:
+                this->avatarFilePath = QString(AVATAR_SYSTEM);
+                break;
+            }
+        }
+    }
+};
+// Q_DECLARE_METATYPE(Message)
+
 /**
  * 获取默认字体
  */
