@@ -25,7 +25,7 @@
 - [x] 修复添加新LLM|更新LLM信息时，点击设置-助手设置-模型的combobox列表没有更新的bug
 - [x] 为mcpserver结构体添加`isActive`代表是否启用
 - [x] 实现清除上下文
-- [x] 使用`QListView`重构简单的消息列表
+- [ ] 使用`QListView`重构简单的消息列表
 - [ ] 实现新建对话
 - [ ] 实现右键助手列表弹出菜单（编辑）
 - [ ] 实现调用结果的展示
@@ -39,11 +39,11 @@
 - [ ] 在各个`getCurrentData`函数内部判空
 - [x] 将`LLMService`和`McpGateway`作为单例实现
 - [ ] 为`Conversation`结构体的`messages`相关操作加锁
-- [ ] 使用虚拟化列表解决消息过多导致缩放窗口时卡顿的问题[解决Qt的列表加载大量数据卡顿的问题_qt tree列表 数据卡顿-CSDN博客](https://blog.csdn.net/t13506920069/article/details/132202854)[Search | DeepWiki（telegram的优化策略）](https://deepwiki.com/search/qt_84db5755-55cd-4c50-a9db-571574eb151f)
 
 ### **进阶**
 
 - [ ] 从数据库加载对话数据
+- [ ] 使用QListView制作消息列表控件
 
 
 

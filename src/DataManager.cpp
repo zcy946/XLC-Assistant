@@ -740,17 +740,18 @@ void DataManager::removeConversation(const QString &uuid)
     m_conversations.remove(uuid.trimmed());
 }
 
-void DataManager::updateConversation(const Conversation &conversation)
+void DataManager::updateConversation(std::shared_ptr<Conversation> newConversation)
 {
-    auto it = m_conversations.find(conversation.uuid.trimmed());
+    QString uuid = newConversation->uuid.trimmed();
+    auto it = m_conversations.find(uuid);
     if (it != m_conversations.end())
     {
-        (*it.value()) = conversation;
-        XLC_LOG_DEBUG("Updated Conversation with UUID: {}", conversation.uuid);
+        it.value() = newConversation;
+        XLC_LOG_DEBUG("Updated Conversation with UUID: {}", uuid);
     }
     else
     {
-        XLC_LOG_WARN("Conversation with UUID {} not found for update. No action taken.", conversation.uuid);
+        XLC_LOG_WARN("Conversation with UUID {} not found for update. No action taken.", uuid);
     }
 }
 

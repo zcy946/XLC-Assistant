@@ -8,6 +8,7 @@
 #include "Logger.hpp"
 #include <mcp_message.h>
 #include <QSet>
+#include <QMutex>
 
 struct CallToolArgs;
 struct LLM;
@@ -75,7 +76,7 @@ public:
     bool loadConversations();
     void addConversation(const std::shared_ptr<Conversation> &conversation);
     void removeConversation(const QString &uuid);
-    void updateConversation(const Conversation &conversation);
+    void updateConversation(std::shared_ptr<Conversation> newConversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
     std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
@@ -454,7 +455,7 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QDateTime updatedTime;
 
 private:
-    // TODO 给messages加锁
+    QMutex mutex;
     mcp::json messages;
 
 public:
@@ -501,6 +502,7 @@ public:
 
     bool hasSystemPrompt()
     {
+        QMutexLocker locker(&mutex);
         if (!messages.is_array() || messages.empty())
         {
             return false;
@@ -533,10 +535,12 @@ public:
 
         if (hasSystemPrompt())
         {
+            QMutexLocker locker(&mutex);
             messages.front() = systemPromptItem;
         }
         else
         {
+            QMutexLocker locker(&mutex);
             if (messages.empty())
                 messages.push_back(systemPromptItem);
             else
@@ -546,17 +550,20 @@ public:
 
     void addMessage(const mcp::json &newMessage)
     {
+        QMutexLocker locker(&mutex);
         messages.push_back(newMessage);
     }
 
-    const mcp::json &getMessages()
+    const mcp::json getMessages()
     {
+        QMutexLocker locker(&mutex);
         return messages;
     }
 
     // 清除上下文
     void clearContext()
     {
+        QMutexLocker locker(&mutex);
         messages.clear();
     }
 
