@@ -133,7 +133,7 @@ class PageSettingsAgent : public BaseWidget
     Q_OBJECT
 private Q_SLOTS:
     void slot_onListWidgetItemClicked(QListWidgetItem *item);
-    void slot_onAgentsOrMcpServersLoaded(bool success);
+    void slot_onAgentsOrMcpServersOrConversationsLoaded(bool success);
     void slot_onPushButtonClickedRemove();
 
 public:

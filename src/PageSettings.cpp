@@ -436,8 +436,9 @@ PageSettingsAgent::PageSettingsAgent(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersLoaded);
-    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
 }
 
 void PageSettingsAgent::initWidget()
@@ -555,7 +556,7 @@ void PageSettingsAgent::slot_onListWidgetItemClicked(QListWidgetItem *item)
     showAgentInfo(agentUuid);
 }
 
-void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
+void PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded(bool success)
 {
     if (!success)
         return;
@@ -845,6 +846,8 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     m_doubleSpinBoxTopP->setValue(agent->topP);
     m_spinBoxMaxTokens->setValue(agent->maxTokens);
     m_plainTextEditSystemPrompt->setPlainText(agent->systemPrompt);
+
+    // 更新MCP服务器列表
     m_listWidgetMcpServers->clear();
     for (const QString &uuid : agent->mcpServers)
     {
@@ -859,6 +862,8 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         m_listWidgetMcpServers->addItem(itemMcpServer);
     }
     m_listWidgetMcpServers->sortItems();
+
+    // 更新对话列表
     m_listWidgetConversations->clear();
     for (const QString &uuid : agent->conversations)
     {
