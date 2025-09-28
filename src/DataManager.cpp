@@ -1181,7 +1181,6 @@ void Conversation::addMessage(const mcp::json &newMessage)
 {
     QMutexLocker locker(&mutex);
     messages.push_back(newMessage);
-    updatedTime = QDateTime::currentDateTime();
 
     // 插入数据库
     QString message = QString::fromStdString(newMessage["content"].get<std::string>());
@@ -1223,6 +1222,8 @@ void Conversation::addMessage(const mcp::json &newMessage)
                                                                 temp_message.avatarFilePath,
                                                                 temp_message.toolCalls,
                                                                 temp_message.toolCallId);
+    // 更新对话更新时间
+    updatedTime = QDateTime::fromString(temp_message.createdTime, "yyyy-MM-dd HH:mm:ss");
 }
 
 const mcp::json Conversation::getMessages()
