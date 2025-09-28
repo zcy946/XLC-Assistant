@@ -34,7 +34,9 @@ struct Message
     {
         USER = 0,
         ASSISTANT = 1,
-        SYSTEM = 2
+        TOOL = 2,
+        SYSTEM = 3,
+        UNKNOWN = 4
     };
     Role role;
     QString createdTime;

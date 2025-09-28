@@ -89,7 +89,7 @@ void DataBaseWorker::initializeDatabase()
                 seq INTEGER PRIMARY KEY AUTOINCREMENT,
                 id TEXT UNIQUE NOT NULL,
                 conversation_id TEXT NOT NULL,
-                role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'SYSTEM')),
+                role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'TOOL', 'SYSTEM', 'UNKNOWN')),
                 text TEXT NOT NULL,
                 created_time TEXT NOT NULL,
                 avatar_file_path TEXT,
@@ -100,7 +100,7 @@ void DataBaseWorker::initializeDatabase()
             );
         )"))
     {
-        XLC_LOG_ERROR("Initialize database failed (query={}): {}}", query.lastQuery(), query.lastError().text());
+        XLC_LOG_ERROR("Initialize database failed (query={}): {}", query.lastQuery(), query.lastError().text());
         return;
     }
     // 创建 idx_conversations_agent_id 索引
@@ -153,10 +153,13 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
         strRole = "ASSISTANT";
         break;
     case 2:
+        strRole = "TOOL";
+        break;
+    case 3:
         strRole = "SYSTEM";
         break;
     default:
-        strRole = "SYSTEM";
+        strRole = "UNKNOWN";
         break;
     }
     QSqlQuery query(m_dataBase);

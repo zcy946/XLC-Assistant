@@ -1106,10 +1106,10 @@ std::shared_ptr<Conversation> Conversation::create(const QString &agentUuid)
 }
 
 std::shared_ptr<Conversation> Conversation::create(const QString &uuid,
-                                            const QString &agentUuid,
-                                            const QString &summary,
-                                            const QDateTime &createdTime,
-                                            const QDateTime &updatedTime)
+                                                   const QString &agentUuid,
+                                                   const QString &summary,
+                                                   const QDateTime &createdTime,
+                                                   const QDateTime &updatedTime)
 {
     struct make_shared_enabler : public Conversation
     {
@@ -1187,9 +1187,11 @@ void Conversation::addMessage(const mcp::json &newMessage)
     else if (strRole == "assistant")
         role = Message::ASSISTANT;
     else if (strRole == "tool")
+        role = Message::TOOL;
+    else if (strRole == "system")
         role = Message::SYSTEM;
     else
-        role = Message::SYSTEM;
+        role = Message::UNKNOWN;
     Message temp_message(message, role);
     Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid, temp_message.id,
                                                                 static_cast<int>(temp_message.role),
@@ -1212,7 +1214,7 @@ const mcp::json Conversation::getMessages()
      *      在此槽函数中先判断pendingConversations中是否存在对应uuid，如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
      *      ↓
      *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
-     *  */ 
+     *  */
     QMutexLocker locker(&mutex);
     return messages;
 }
@@ -1229,20 +1231,22 @@ Conversation::Conversation(const QString &agentUuid)
       agentUuid(agentUuid),
       createdTime(QDateTime::currentDateTime()),
       updatedTime(QDateTime::currentDateTime()),
-      messages(mcp::json())
+      messages(mcp::json()),
+      messageCount(-1)
 {
 }
 
 Conversation::Conversation(const QString &uuid,
-             const QString &agentUuid,
-             const QString &summary,
-             const QDateTime &createdTime,
-             const QDateTime &updatedTime)
+                           const QString &agentUuid,
+                           const QString &summary,
+                           const QDateTime &createdTime,
+                           const QDateTime &updatedTime)
     : uuid(uuid),
       agentUuid(agentUuid),
       summary(summary),
       createdTime(createdTime),
       updatedTime(updatedTime),
-      messages(mcp::json())
+      messages(mcp::json()),
+      messageCount(-1)
 {
 }

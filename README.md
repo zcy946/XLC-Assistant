@@ -81,7 +81,7 @@ CREATE TABLE messages (
     seq INTEGER PRIMARY KEY AUTOINCREMENT,   -- 消息序号，唯一递增
     id TEXT UNIQUE NOT NULL,                 -- 消息ID (UUID)
     conversation_id TEXT NOT NULL,       -- 关联的会话ID
-    role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'SYSTEM')), -- 消息角色
+    role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'TOOL', 'SYSTEM', 'UNKNOWN')), -- 消息角色
     text TEXT NOT NULL,                  -- 消息内容
     created_time TEXT NOT NULL,          -- 创建时间 (ISO 8601)
     avatar_file_path TEXT,               -- 头像文件路径
