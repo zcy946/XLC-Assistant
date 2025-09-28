@@ -1180,24 +1180,44 @@ void Conversation::addMessage(const mcp::json &newMessage)
 
     // 插入数据库
     QString message = QString::fromStdString(newMessage["content"].get<std::string>());
+    QString toolCalls;
+    QString toolCallId;
     Message::Role role;
     std::string strRole = newMessage["role"].get<std::string>();
     if (strRole == "user")
         role = Message::USER;
     else if (strRole == "assistant")
+    {
         role = Message::ASSISTANT;
+        auto it = newMessage.find("tool_calls");
+        if (it != newMessage.end())
+        {
+            toolCalls = QString::fromStdString(it.value().dump());
+        }
+    }
     else if (strRole == "tool")
+    {
         role = Message::TOOL;
+        auto it = newMessage.find("tool_call_id");
+        if (it != newMessage.end())
+        {
+            toolCallId = QString::fromStdString(it.value().get<std::string>());
+        }
+    }
     else if (strRole == "system")
         role = Message::SYSTEM;
     else
         role = Message::UNKNOWN;
-    Message temp_message(message, role);
-    Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid, temp_message.id,
+
+    Message temp_message(message, role, Q_NULLPTR, toolCalls, toolCallId);
+    Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid,
+                                                                temp_message.id,
                                                                 static_cast<int>(temp_message.role),
                                                                 temp_message.text,
                                                                 temp_message.createdTime,
-                                                                temp_message.avatarFilePath);
+                                                                temp_message.avatarFilePath,
+                                                                temp_message.toolCalls,
+                                                                temp_message.toolCallId);
 }
 
 const mcp::json Conversation::getMessages()

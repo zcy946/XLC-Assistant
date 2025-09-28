@@ -26,7 +26,9 @@ Q_SIGNALS:
                               int role,
                               const QString &text,
                               const QString &createdTime,
-                              const QString &avatarFilePath);
+                              const QString &avatarFilePath,
+                              const QString &toolCalls,
+                              const QString &toolCallId);
 
 public:
     ~DataBaseManager();
@@ -50,7 +52,9 @@ public Q_SLOTS:
                                int role,
                                const QString &text,
                                const QString &createdTime,
-                               const QString &avatarFilePath);
+                               const QString &avatarFilePath,
+                               const QString &toolCalls,
+                               const QString &toolCallId);
 
 public:
     explicit DataBaseWorker(const QString &dataBaseFile, QObject *parent = nullptr);
@@ -70,4 +74,4 @@ private:
 /**
  * NOTE QSqlDatabase 的局部特性
  * QSqlDatabase具有局部特写，在使用的时候要确保执行query的线程和打开的数据库连接QSqlDatabase处于同一线程中。
- *  */ 
+ *  */

@@ -85,6 +85,8 @@ CREATE TABLE messages (
     text TEXT NOT NULL,                  -- 消息内容
     created_time TEXT NOT NULL,          -- 创建时间 (ISO 8601)
     avatar_file_path TEXT,               -- 头像文件路径
+    tool_calls TEXT,					 -- 当LLM调用工具时存在的字段
+    tool_call_id TEXT,					 -- 当将MCPServer返回的调用结果发送给LLM时存在
 
     FOREIGN KEY(conversation_id) REFERENCES conversations(id)
         ON DELETE CASCADE

@@ -43,7 +43,8 @@ struct Message
     Role role;
     QString createdTime;
     QString avatarFilePath;
-    // TODO 加入tool_calls[TEXT]和tool_call_id[TEXT]字段
+    QString toolCalls;
+    QString toolCallId;
 
     Message()
         : id(generateUuid()), createdTime(getCurrentDateTime())
@@ -68,13 +69,19 @@ struct Message
         }
     }
 
-    Message(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdTime)
-        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    Message(const QString &id, const QString &text, Role role,
+            const QString &avatarFilePath,
+            const QString &toolCalls, const QString &toolCallId,
+            const QString &createdTime)
+        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), toolCalls(toolCalls), toolCallId(toolCallId), createdTime(createdTime)
     {
     }
 
-    Message(const QString &text, Role role = USER, const QString &avatarFilePath = QString(), const QString &createdTime = getCurrentDateTime())
-        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    Message(const QString &text,
+            Role role = USER, const QString &avatarFilePath = QString(),
+            const QString &toolCalls = QString(), const QString &toolCallId = QString(),
+            const QString &createdTime = getCurrentDateTime())
+        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), toolCalls(toolCalls), toolCallId(toolCallId), createdTime(createdTime)
     {
         if (this->avatarFilePath.isEmpty())
         {

@@ -121,8 +121,20 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
     conversation->addMessage(responseMessage);
 
     // 展示响应消息
-    if (responseMessage.contains("content"))
-        Q_EMIT sig_responseReady(conversation->uuid, QString::fromStdString(responseMessage["content"].get<std::string>()));
+    auto it_Content = responseMessage.find("content");
+    if (it_Content != responseMessage.end())
+    {
+        auto it_toolCalls = responseMessage.find("tool_calls");
+        if (it_toolCalls != responseMessage.end())
+        {
+            Q_EMIT sig_responseReady(conversation->uuid,
+                                     QString::fromStdString(it_Content.value().get<std::string>() + "\ntool_calls:\n" + it_toolCalls.value().dump(4)));
+        }
+        else
+        {
+            Q_EMIT sig_responseReady(conversation->uuid, QString::fromStdString(it_Content.value().get<std::string>()));
+        }
+    }
     else
         XLC_LOG_WARN("process response failed (conversationUuid={}): content not found in response", conversation->uuid);
 
@@ -222,9 +234,9 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
                                   {"content", formattedContent}});
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
-                                                         .arg(success)
-                                                         .arg(callToolArgs.callId)
-                                                         .arg(QString::fromStdString(formattedContent)));
+                                                      .arg(success)
+                                                      .arg(callToolArgs.callId)
+                                                      .arg(QString::fromStdString(formattedContent)));
     }
     else
     {
@@ -238,9 +250,9 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
                                   {"content", errorMessage.toStdString()}});
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, errorMessage=%3)")
-                                                         .arg(success)
-                                                         .arg(callToolArgs.callId)
-                                                         .arg(errorMessage));
+                                                      .arg(success)
+                                                      .arg(callToolArgs.callId)
+                                                      .arg(errorMessage));
     }
 
     // 回应LLM
