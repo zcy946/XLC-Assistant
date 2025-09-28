@@ -13,7 +13,19 @@
 
 struct CMessage : public Message
 {
-    CMessage(const QString &message, Message::Role role, const QString &avatarFilePath = QString()) : Message(message, role, avatarFilePath) {}
+    CMessage(const QString &content, Message::Role role,
+             const QString &createdTime,
+             const QString &toolCalls = QString(), const QString &toolCallId = QString())
+        : Message(content, role, createdTime, toolCalls, toolCallId)
+    {
+    }
+    CMessage(const QString &id, const QString &content, Message::Role role,
+             const QString &createdTime,
+             const QString &toolCalls, const QString &toolCallId,
+             const QString &avatarFilePath)
+        : Message(id, content, role, createdTime, toolCalls, toolCallId, avatarFilePath)
+    {
+    }
     // 缓存尺寸信息
     mutable QSize cachedTextSize;
     mutable QSize cachedItemSize;
@@ -38,6 +50,7 @@ public:
     void addMessage(const CMessage &message);
     const CMessage *messageAt(int row) const;
     void clearCachedSizes();
+    void clearAllMessage();
 
 private:
     QVector<CMessage> m_messages;
@@ -69,6 +82,8 @@ class CMessageListWidget : public QListView
 public:
     explicit CMessageListWidget(QWidget *parent = nullptr);
     void addMessage(const CMessage &message);
+    // 清除消息
+    void clearAllMessage();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

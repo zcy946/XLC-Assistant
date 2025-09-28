@@ -6,6 +6,7 @@
 #include <QSqlDatabase>
 #include <QThread>
 #include "global.h"
+#include <QJsonArray>
 
 class DataBaseWorker;
 class DataBaseManager : public QObject, public Singleton<DataBaseManager>
@@ -14,6 +15,10 @@ class DataBaseManager : public QObject, public Singleton<DataBaseManager>
     friend class Singleton<DataBaseManager>;
 
 Q_SIGNALS:
+    // 获取所有对话信息
+    void sig_getAllConversationInfo();
+    // 所有对话信息被获取
+    void sig_allConversationInfoAcquired(bool success, QJsonArray jsonArrayConversations);
     // 新增conversation
     void sig_insertNewConversation(const QString &agentUuid,
                                    const QString &uuid,
@@ -26,7 +31,9 @@ Q_SIGNALS:
                               int role,
                               const QString &text,
                               const QString &createdTime,
-                              const QString &avatarFilePath);
+                              const QString &avatarFilePath,
+                              const QString &toolCalls,
+                              const QString &toolCallId);
 
 public:
     ~DataBaseManager();
@@ -43,14 +50,27 @@ private:
 class DataBaseWorker : public QObject
 {
     Q_OBJECT
+
+Q_SIGNALS:
+    void sig_allConversationInfoAcquired(bool success, QJsonArray jsonArrayConversationInfo);
+
 public Q_SLOTS:
     void slot_initialize();
+    void slot_getAllConversationInfo();
+    void slot_insertNewConversation(const QString &agentUuid,
+                                    const QString &uuid,
+                                    const QString &summary,
+                                    const QString &createdTime,
+                                    const QString &updatedTime);
     void slot_insertNewMessage(const QString &conversationUuid,
                                const QString &uuid,
                                int role,
                                const QString &text,
                                const QString &createdTime,
-                               const QString &avatarFilePath);
+                               const QString &avatarFilePath,
+                               const QString &toolCalls,
+                               const QString &toolCallId);
+    void slot_updateConversationUpdatedTime(const QString &uuid, const QString &newUpdatedTime);
 
 public:
     explicit DataBaseWorker(const QString &dataBaseFile, QObject *parent = nullptr);
@@ -70,4 +90,4 @@ private:
 /**
  * NOTE QSqlDatabase 的局部特性
  * QSqlDatabase具有局部特写，在使用的时候要确保执行query的线程和打开的数据库连接QSqlDatabase处于同一线程中。
- *  */ 
+ *  */

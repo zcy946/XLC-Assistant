@@ -176,7 +176,7 @@ void PageSettingsLLM::initItems()
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
                 EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
             });
 }
 
@@ -436,8 +436,9 @@ PageSettingsAgent::PageSettingsAgent(QWidget *parent)
     : BaseWidget(parent)
 {
     initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersLoaded);
-    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
 }
 
 void PageSettingsAgent::initWidget()
@@ -502,7 +503,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonSave, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
                 DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
                 // 刷新m_listWidgetAgents
                 QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
@@ -555,7 +556,7 @@ void PageSettingsAgent::slot_onListWidgetItemClicked(QListWidgetItem *item)
     showAgentInfo(agentUuid);
 }
 
-void PageSettingsAgent::slot_onAgentsOrMcpServersLoaded(bool success)
+void PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded(bool success)
 {
     if (!success)
         return;
@@ -845,6 +846,8 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     m_doubleSpinBoxTopP->setValue(agent->topP);
     m_spinBoxMaxTokens->setValue(agent->maxTokens);
     m_plainTextEditSystemPrompt->setPlainText(agent->systemPrompt);
+
+    // 更新MCP服务器列表
     m_listWidgetMcpServers->clear();
     for (const QString &uuid : agent->mcpServers)
     {
@@ -859,13 +862,15 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         m_listWidgetMcpServers->addItem(itemMcpServer);
     }
     m_listWidgetMcpServers->sortItems();
+
+    // 更新对话列表
     m_listWidgetConversations->clear();
     for (const QString &uuid : agent->conversations)
     {
         const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
-            XLC_LOG_WARN("Conversation not found (uuid={})", uuid);
+            XLC_LOG_WARN("Conversation is loading or not found (uuid={})", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
             continue;
         }
         QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
@@ -1161,7 +1166,7 @@ void PageSettingsMcp::initItems()
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
                 EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
 }
 

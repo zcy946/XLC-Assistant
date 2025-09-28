@@ -49,7 +49,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"model", llm->modelID.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
-                    {"messages", conversation->getMessages()},
+                    {"messages", conversation->getCachedMessages()},
                     {"tools", tools},
                     {"tool_choice", "auto"}};
             }
@@ -59,7 +59,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"model", llm->modelID.toStdString()},
                     {"max_tokens", agent->maxTokens},
                     {"temperature", agent->temperature},
-                    {"messages", conversation->getMessages()}};
+                    {"messages", conversation->getCachedMessages()}};
             }
             m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
@@ -85,6 +85,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                         QString errorMsg = QString("Process request failed (conversationUuid=%1, errorMsg=%2): failed to parse response")
                                                .arg(conversation->uuid)
                                                .arg(e.what());
+                        XLC_LOG_ERROR("{}", errorMsg);
                         Q_EMIT sig_errorOccurred(conversation->uuid, errorMsg);
                     }
                     return;
@@ -117,20 +118,30 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
 
 void LLMService::processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage)
 {
-    // 记录回答
-    conversation->addMessage(responseMessage);
-
-    // 展示响应消息
-    if (responseMessage.contains("content"))
-        Q_EMIT sig_responseReady(conversation->uuid, QString::fromStdString(responseMessage["content"].get<std::string>()));
-    else
+    QString content;
+    if (!responseMessage.contains("content"))
         XLC_LOG_WARN("process response failed (conversationUuid={}): content not found in response", conversation->uuid);
+    else
+        content = QString::fromStdString(responseMessage.value("content", ""));
 
     // 没有调用工具
     if (!responseMessage.contains("tool_calls"))
+    {
+        // 记录消息
+        conversation->addMessage(Message(content, Message::ASSISTANT, getCurrentDateTime()));
+        // 通知界面展示
+        Q_EMIT sig_responseReady(conversation->uuid, content);
         return;
-
+    }
+    
     // 调用了工具
+    QString toolCalls = QString::fromStdString(responseMessage["tool_calls"].dump());
+    // 记录消息
+    conversation->addMessage(Message(content, Message::ASSISTANT, getCurrentDateTime(), toolCalls));
+    // 通知界面展示
+    Q_EMIT sig_responseReady(conversation->uuid, content + "\ntool_calls:\n" + toolCalls);
+
+    // 开始调用工具
     for (const auto &tool_call : responseMessage["tool_calls"])
     {
         QString callId = QString::fromStdString(tool_call["id"].get<std::string>());
@@ -217,14 +228,15 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     {
         // 更新消息列表
         std::string formattedContent = formatMcpToolResponse(result, callToolArgs.toolName.toStdString(), false);
-        conversation->addMessage({{"role", "tool"},
-                                  {"tool_call_id", callToolArgs.callId.toStdString()},
-                                  {"content", formattedContent}});
+        conversation->addMessage(Message(QString::fromStdString(formattedContent), Message::TOOL, getCurrentDateTime(), QString(), callToolArgs.callId));
+        // conversation->addMessage({{"role", "tool"},
+        //                           {"tool_call_id", callToolArgs.callId.toStdString()},
+        //                           {"content", formattedContent}});
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
-                                                         .arg(success)
-                                                         .arg(callToolArgs.callId)
-                                                         .arg(QString::fromStdString(formattedContent)));
+                                                      .arg(success)
+                                                      .arg(callToolArgs.callId)
+                                                      .arg(QString::fromStdString(formattedContent)));
     }
     else
     {
@@ -233,14 +245,15 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
             XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
             return;
         }
-        conversation->addMessage({{"role", "tool"},
-                                  {"tool_call_id", callToolArgs.callId.toStdString()},
-                                  {"content", errorMessage.toStdString()}});
+        conversation->addMessage(Message(errorMessage, Message::TOOL, getCurrentDateTime(), Q_NULLPTR, callToolArgs.callId));
+        // conversation->addMessage({{"role", "tool"},
+        //                           {"tool_call_id", callToolArgs.callId.toStdString()},
+        //                           {"content", errorMessage.toStdString()}});
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, errorMessage=%3)")
-                                                         .arg(success)
-                                                         .arg(callToolArgs.callId)
-                                                         .arg(errorMessage));
+                                                      .arg(success)
+                                                      .arg(callToolArgs.callId)
+                                                      .arg(errorMessage));
     }
 
     // 回应LLM

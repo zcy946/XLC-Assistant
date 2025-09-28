@@ -34,6 +34,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void slot_onMcpServersLoaded(bool success);
+    void slot_handleAllConversationInfoAcquired(bool success, QJsonArray jsonArrayConversations);
 
 public:
     static DataManager *getInstance();
@@ -46,7 +47,7 @@ public:
     void removeLLM(const QString &uuid);
     void updateLLM(const std::shared_ptr<LLM> &llm);
     void saveLLMs(const QString &filePath) const;
-    void saveLLMsAsync(const QString &filePath) const;
+    void saveLLMsAsync(const QString &filePath = QString()) const;
     std::shared_ptr<LLM> getLLM(const QString &uuid) const;
     QList<std::shared_ptr<LLM>> getLLMs() const;
     void setFilePathLLMs(const QString &filePath);
@@ -57,7 +58,7 @@ public:
     void removeMcpServer(const QString &uuid);
     void updateMcpServer(const std::shared_ptr<McpServer> &mcpServer);
     void saveMcpServers(const QString &filePath) const;
-    void saveMcpServersAsync(const QString &filePath) const;
+    void saveMcpServersAsync(const QString &filePath = QString()) const;
     std::shared_ptr<McpServer> getMcpServer(const QString &uuid) const;
     QList<std::shared_ptr<McpServer>> getMcpServers() const;
     void setFilePathMcpServers(const QString &filePath);
@@ -67,7 +68,7 @@ public:
     void removeAgent(const QString &uuid);
     void updateAgent(const std::shared_ptr<Agent> &newAgent);
     void saveAgents(const QString &filePath) const;
-    void saveAgentsAsync(const QString &filePath) const;
+    void saveAgentsAsync(const QString &filePath = QString()) const;
     void addAgent(const std::shared_ptr<Agent> &agent);
     std::shared_ptr<Agent> getAgent(const QString &uuid) const;
     QList<std::shared_ptr<Agent>> getAgents() const;
@@ -75,11 +76,13 @@ public:
     const QString &getFilePathAgents() const;
 
     bool loadConversations();
+    // 添加对话，并同步到配置文件
     void addConversation(const std::shared_ptr<Conversation> &conversation);
     void removeConversation(const QString &uuid);
     void updateConversation(std::shared_ptr<Conversation> newConversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
+    // 通过`agentUuid`创建新的`conversation`并绑定到该`agent`
     std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
 
 private:
@@ -217,25 +220,30 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString uuid;
     QString agentUuid;
     QString summary;
-    QDateTime createdTime;
-    QDateTime updatedTime;
-    // TODO 加入messageCount字段，记录消息数量
+    QString createdTime;
+    QString updatedTime;
+    int messageCount = -1; // 记录消息数量，初始化为 -1 代表未同步/同步失败数据库
 
 private:
     QMutex mutex;
-    mcp::json messages;
+    mcp::json cachedJsonMessages;
+    QMap<QString, Message> messages;
+
+    // TODO 添加`QMap<QString, Message> messages`，将`mcp::json messages`改为`cachedJsonMessages`。用于解决当前的messages[cachedJsonMessages]无法存储消息时间的问题
 
 public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid);
     static std::shared_ptr<Conversation> create(const QString &uuid,
                                                 const QString &agentUuid,
                                                 const QString &summary,
-                                                const QDateTime &createdTime,
-                                                const QDateTime &updatedTime);
+                                                const QString &createdTime,
+                                                const QString &updatedTime,
+                                                int messageCount);
     bool hasSystemPrompt();
     void resetSystemPrompt();
-    void addMessage(const mcp::json &newMessage);
-    const mcp::json getMessages();
+    void addMessage(const Message &newMessage);
+    QList<Message> getMessages();
+    const mcp::json getCachedMessages();
     // 清除上下文
     void clearContext();
 
@@ -244,8 +252,9 @@ protected:
     Conversation(const QString &uuid,
                  const QString &agentUuid,
                  const QString &summary,
-                 const QDateTime &createdTime,
-                 const QDateTime &updatedTime);
+                 const QString &createdTime,
+                 const QString &updatedTime,
+                 int messageCount);
 };
 
 // Q_DECLARE_METATYPE(Conversation)

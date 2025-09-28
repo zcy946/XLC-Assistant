@@ -36,8 +36,10 @@ DataManager::DataManager(QObject *parent)
     else
         m_filePathAgents = FILE_AGENTS;
 
-    // 处理MCPServers加载完毕信号
+    // 响应MCPServers加载完毕信号
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
+    // 响应从数据库获取所有Conversation数据信号
+    connect(DataBaseManager::getInstance().get(), &DataBaseManager::sig_allConversationInfoAcquired, this, &DataManager::slot_handleAllConversationInfoAcquired);
 }
 
 void DataManager::registerAllMetaType()
@@ -58,25 +60,26 @@ void DataManager::loadDataAsync()
     loadLLMsAsync();
     loadMcpServersAsync();
     loadAgentsAsync();
+    loadConversations(); // 数据库线程获取对话信息
 
-    QFuture<bool> futureConversations = QtConcurrent::run(
-        [this]()
-        {
-            return this->loadConversations();
-        });
-    QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
-    connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
-            [this, futureWatcherConversations]()
-            {
-                bool success = futureWatcherConversations->result();
-                Q_EMIT sig_conversationsLoaded(success);
-                if (success)
-                {
-                    XLC_LOG_INFO("Loaded conversations from database (count={})", m_conversations.count());
-                }
-                futureWatcherConversations->deleteLater();
-            });
-    futureWatcherConversations->setFuture(futureConversations);
+    // QFuture<bool> futureConversations = QtConcurrent::run(
+    //     [this]()
+    //     {
+    //         return this->loadConversations();
+    //     });
+    // QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
+    // connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
+    //         [this, futureWatcherConversations]()
+    //         {
+    //             bool success = futureWatcherConversations->result();
+    //             Q_EMIT sig_conversationsLoaded(success);
+    //             if (success)
+    //             {
+    //                 XLC_LOG_INFO("Loaded conversations from database (count={})", m_conversations.count());
+    //             }
+    //             futureWatcherConversations->deleteLater();
+    //         });
+    // futureWatcherConversations->setFuture(futureConversations);
 }
 
 void DataManager::loadLLMsAsync()
@@ -151,6 +154,27 @@ void DataManager::slot_onMcpServersLoaded(bool success)
         return;
 }
 
+void DataManager::slot_handleAllConversationInfoAcquired(bool success, QJsonArray jsonArrayConversations)
+{
+    if (!success)
+        return;
+    for (const QJsonValue &value : jsonArrayConversations)
+    {
+        if (!value.isObject())
+            continue;
+        QJsonObject obj = value.toObject();
+        QString uuid = obj["uuid"].toString();
+        QString agentUuid = obj["agent_uuid"].toString();
+        QString summary = obj["summary"].toString();
+        QString createdTime = obj["created_time"].toString();
+        QString updatedTime = obj["updated_time"].toString();
+        int messageCount = obj["message_count"].toInt();
+
+        m_conversations.insert(uuid, Conversation::create(uuid, agentUuid, summary, createdTime, updatedTime, messageCount));
+    }
+    Q_EMIT sig_conversationsLoaded(success);
+}
+
 bool DataManager::loadLLMs(const QString &filePath)
 {
     QFile file(filePath);
@@ -216,7 +240,7 @@ void DataManager::addLLM(const std::shared_ptr<LLM> &llm)
     if (llm)
     {
         m_llms.insert(llm->uuid.trimmed(), llm);
-        saveLLMsAsync(m_filePathLLMs);
+        saveLLMsAsync();
     }
     else
     {
@@ -227,7 +251,7 @@ void DataManager::addLLM(const std::shared_ptr<LLM> &llm)
 void DataManager::removeLLM(const QString &uuid)
 {
     m_llms.remove(uuid.trimmed());
-    saveLLMsAsync(m_filePathLLMs);
+    saveLLMsAsync();
 }
 
 void DataManager::updateLLM(const std::shared_ptr<LLM> &llm)
@@ -242,7 +266,7 @@ void DataManager::updateLLM(const std::shared_ptr<LLM> &llm)
     {
         (*it.value()) = *llm;
         XLC_LOG_DEBUG("Successed to update LLM (uuid={})", llm->uuid);
-        saveLLMsAsync(m_filePathLLMs);
+        saveLLMsAsync();
     }
     else
     {
@@ -290,7 +314,10 @@ void DataManager::saveLLMsAsync(const QString &filePath) const
     QFuture<void> futureLLMs = QtConcurrent::run(
         [this, filePath]()
         {
-            this->saveLLMs(filePath);
+            if (filePath.trimmed().isEmpty())
+                this->saveLLMs(m_filePathLLMs);
+            else
+                this->saveLLMs(filePath);
         });
     QFutureWatcher<void> *futureWatcherLLMs = new QFutureWatcher<void>();
     connect(futureWatcherLLMs, &QFutureWatcher<void>::finished, this,
@@ -399,7 +426,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
     if (mcpServer)
     {
         m_mcpServers.insert(mcpServer->uuid.trimmed(), mcpServer);
-        saveMcpServersAsync(m_filePathMcpServers);
+        saveMcpServersAsync();
     }
     else
     {
@@ -410,7 +437,7 @@ void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
 void DataManager::removeMcpServer(const QString &uuid)
 {
     m_mcpServers.remove(uuid.trimmed());
-    saveMcpServersAsync(m_filePathMcpServers);
+    saveMcpServersAsync();
 }
 
 void DataManager::updateMcpServer(const std::shared_ptr<McpServer> &mcpServer)
@@ -425,7 +452,7 @@ void DataManager::updateMcpServer(const std::shared_ptr<McpServer> &mcpServer)
     {
         (*it.value()) = *mcpServer;
         XLC_LOG_DEBUG("Updated McpServer with UUID: {}", mcpServer->uuid);
-        saveMcpServersAsync(m_filePathMcpServers);
+        saveMcpServersAsync();
     }
     else
     {
@@ -478,7 +505,10 @@ void DataManager::saveMcpServersAsync(const QString &filePath) const
     QFuture<void> futureMcpServers = QtConcurrent::run(
         [this, filePath]()
         {
-            this->saveMcpServers(filePath);
+            if (filePath.trimmed().isEmpty())
+                this->saveMcpServers(m_filePathMcpServers);
+            else
+                this->saveMcpServers(filePath);
         });
     QFutureWatcher<void> *futureWatcherMcpServers = new QFutureWatcher<void>();
     connect(futureWatcherMcpServers, &QFutureWatcher<void>::finished, this,
@@ -586,7 +616,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
     if (agent)
     {
         m_agents.insert(agent->uuid.trimmed(), agent);
-        saveAgentsAsync(m_filePathAgents);
+        saveAgentsAsync();
     }
     else
     {
@@ -597,7 +627,7 @@ void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
 void DataManager::removeAgent(const QString &uuid)
 {
     m_agents.remove(uuid.trimmed());
-    saveAgentsAsync(m_filePathAgents);
+    saveAgentsAsync();
 }
 
 void DataManager::updateAgent(const std::shared_ptr<Agent> &newAgent)
@@ -617,7 +647,7 @@ void DataManager::updateAgent(const std::shared_ptr<Agent> &newAgent)
         (*it.value()) = *newAgent;
         Q_EMIT sig_agentUpdate(newAgent->uuid);
         XLC_LOG_DEBUG("Updated Agent successed (uuid={})", newAgent->uuid);
-        saveAgentsAsync(m_filePathAgents);
+        saveAgentsAsync();
 
         // 更新各个conversation的systemprompt
         if (isSystemPromptModified)
@@ -675,7 +705,10 @@ void DataManager::saveAgentsAsync(const QString &filePath) const
     QFuture<void> futureAgents = QtConcurrent::run(
         [this, filePath]()
         {
-            this->saveAgents(filePath);
+            if (filePath.trimmed().isEmpty())
+                this->saveAgents(m_filePathAgents);
+            else
+                this->saveAgents(filePath);
         });
     QFutureWatcher<void> *futureWatcherAgents = new QFutureWatcher<void>();
     connect(futureWatcherAgents, &QFutureWatcher<void>::finished, this,
@@ -720,7 +753,8 @@ const QString &DataManager::getFilePathAgents() const
 
 bool DataManager::loadConversations()
 {
-    // TODO 从数据库加载对话信息
+    // 从数据库加载对话信息，获取数据库conversations表中的各项数据，以及对应的messages的数量，先不获取具体message
+    Q_EMIT DataBaseManager::getInstance()->sig_getAllConversationInfo();
     return true;
 }
 
@@ -729,7 +763,14 @@ void DataManager::addConversation(const std::shared_ptr<Conversation> &conversat
     if (conversation)
     {
         m_conversations.insert(conversation->uuid.trimmed(), conversation);
-        // TODO 将对话添加到数据库
+        // 更新Agent配置文件（主要为了更新对话列表）
+        saveAgentsAsync();
+        // 将对话添加到数据库
+        Q_EMIT DataBaseManager::getInstance()->sig_insertNewConversation(conversation->agentUuid,
+                                                                         conversation->uuid,
+                                                                         conversation->summary,
+                                                                         conversation->createdTime,
+                                                                         conversation->updatedTime);
     }
     else
     {
@@ -1093,45 +1134,47 @@ std::shared_ptr<Conversation> Conversation::create(const QString &agentUuid)
         make_shared_enabler(const QString &uuid,
                             const QString &agentUuid,
                             const QString &summary,
-                            const QDateTime &createdTime,
-                            const QDateTime &updatedTime)
-            : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
+                            const QString &createdTime,
+                            const QString &updatedTime,
+                            int messageCount)
+            : Conversation(uuid, agentUuid, summary, createdTime, updatedTime, messageCount) {}
     };
     return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(agentUuid));
     /**
-     * NOTE
-     * 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
+     * NOTE 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
        解决办法：用 make_shared_enabler（内部派生类）作为“桥”，让它调用 protected 构造函数，然后把结果当成 shared_ptr<Conversation> 返回。
        效果：外部只能通过 Conversation::create(...) 来生成对象，既安全又保持 make_shared 的高效内存分配。 */
 }
 
 std::shared_ptr<Conversation> Conversation::create(const QString &uuid,
-                                            const QString &agentUuid,
-                                            const QString &summary,
-                                            const QDateTime &createdTime,
-                                            const QDateTime &updatedTime)
+                                                   const QString &agentUuid,
+                                                   const QString &summary,
+                                                   const QString &createdTime,
+                                                   const QString &updatedTime,
+                                                   int messageCount)
 {
     struct make_shared_enabler : public Conversation
     {
         make_shared_enabler(const QString &uuid,
                             const QString &agentUuid,
                             const QString &summary,
-                            const QDateTime &createdTime,
-                            const QDateTime &updatedTime)
-            : Conversation(uuid, agentUuid, summary, createdTime, updatedTime) {}
+                            const QString &createdTime,
+                            const QString &updatedTime,
+                            int messageCount)
+            : Conversation(uuid, agentUuid, summary, createdTime, updatedTime, messageCount) {}
     };
 
-    return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(uuid, agentUuid, summary, createdTime, updatedTime));
+    return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(uuid, agentUuid, summary, createdTime, updatedTime, messageCount));
 }
 
 bool Conversation::hasSystemPrompt()
 {
     QMutexLocker locker(&mutex);
-    if (!messages.is_array() || messages.empty())
+    if (!cachedJsonMessages.is_array() || cachedJsonMessages.empty())
     {
         return false;
     }
-    const auto &firstItem = messages.front();
+    const auto &firstItem = cachedJsonMessages.front();
     if (!firstItem.is_object())
     {
         return false;
@@ -1160,89 +1203,131 @@ void Conversation::resetSystemPrompt()
     if (hasSystemPrompt())
     {
         QMutexLocker locker(&mutex);
-        messages.front() = systemPromptItem;
+        cachedJsonMessages.front() = systemPromptItem;
     }
     else
     {
         QMutexLocker locker(&mutex);
-        if (messages.empty())
-            messages.push_back(systemPromptItem);
+        if (cachedJsonMessages.empty())
+            cachedJsonMessages.push_back(systemPromptItem);
         else
-            messages.insert(messages.begin(), systemPromptItem);
+            cachedJsonMessages.insert(cachedJsonMessages.begin(), systemPromptItem);
     }
 }
 
-void Conversation::addMessage(const mcp::json &newMessage)
+void Conversation::addMessage(const Message &newMessage)
 {
-    QMutexLocker locker(&mutex);
-    messages.push_back(newMessage);
-    updatedTime = QDateTime::currentDateTime();
+    mcp::json jsonMessage;
+    std::string roleStr;
+    switch (newMessage.role)
+    {
+    case Message::USER:
+        roleStr = "user";
+        break;
+    case Message::ASSISTANT:
+        roleStr = "assistant";
+        break;
+    case Message::TOOL:
+        roleStr = "tool";
+        break;
+    case Message::SYSTEM:
+        roleStr = "system";
+        break;
+    default:
+        roleStr = "unknown";
+        break;
+    }
+    jsonMessage["role"] = roleStr;
+    jsonMessage["content"] = newMessage.content.toStdString();
+    if (newMessage.role == Message::TOOL)
+        jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
+    if (newMessage.role == Message::ASSISTANT && !newMessage.toolCalls.isEmpty())
+    {
+        try
+        {
+            mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
+            jsonMessage["tool_calls"] = jsonArrayToolCalls;
+        }
+        catch (const mcp::json::parse_error &e)
+        {
+            XLC_LOG_ERROR("JSON Parsing error: {}", e.what());
+        }
+    }
+
+    {
+        QMutexLocker locker(&mutex);
+        cachedJsonMessages.push_back(jsonMessage);
+        messages.insert(newMessage.id, newMessage);
+        // 更新本地对话更新时间
+        updatedTime = newMessage.createdTime;
+        // 更新消息数量
+        messageCount+=1;
+    }
 
     // 插入数据库
-    QString message = QString::fromStdString(newMessage["content"].get<std::string>());
-    Message::Role role;
-    std::string strRole = newMessage["role"].get<std::string>();
-    if (strRole == "user")
-        role = Message::USER;
-    else if (strRole == "assistant")
-        role = Message::ASSISTANT;
-    else if (strRole == "tool")
-        role = Message::SYSTEM;
-    else
-        role = Message::SYSTEM;
-    Message temp_message(message, role);
-    Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid, temp_message.id,
-                                                                static_cast<int>(temp_message.role),
-                                                                temp_message.text,
-                                                                temp_message.createdTime,
-                                                                temp_message.avatarFilePath);
+    Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid,
+                                                                newMessage.id,
+                                                                static_cast<int>(newMessage.role),
+                                                                newMessage.content,
+                                                                newMessage.createdTime,
+                                                                newMessage.avatarFilePath,
+                                                                newMessage.toolCalls,
+                                                                newMessage.toolCallId);
 }
 
-const mcp::json Conversation::getMessages()
+QList<Message> Conversation::getMessages()
 {
-    // TODO 在loadAgents获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
+    return messages.values();
+}
+
+const mcp::json Conversation::getCachedMessages()
+{
+    // TODO 111在loadConversations获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
     /**
-     * TODO 先返回当前messages，
+     * TODO 111先返回当前messages，
      *      ↓
-     *      再将messageCount与当前messages.size()作比较
-     *      if (messages.size() != messageCount) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
+     *      再将messageCount与当前cachedJsonMessages.size()作比较
+     *      if (cachedJsonMessages.size() != messageCount || messageCount = -1) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
      *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
      *      ↓
-     *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QVariant[存储message的json数组])），在此槽函数中先判断pendingConversations中是否存在对应uuid
-     *      如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
+     *      在DataManager响应DataBaseManager中获取Messages的信号（sig_resultGetMessages(uuid, QJsonArray[存储Message的json数组])），
+     *      在此槽函数中先判断pendingConversations中是否存在对应uuid，如果存在 -> 更新对应conversation的messages（updateMessages(QJsonArray jsonArrayMessages)）
      *      ↓
      *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
-     *  */ 
+     *  */
     QMutexLocker locker(&mutex);
-    return messages;
+    return cachedJsonMessages;
 }
 
 // 清除上下文
 void Conversation::clearContext()
 {
     QMutexLocker locker(&mutex);
-    messages.clear();
+    cachedJsonMessages.clear();
 }
 
 Conversation::Conversation(const QString &agentUuid)
     : uuid(generateUuid()),
       agentUuid(agentUuid),
-      createdTime(QDateTime::currentDateTime()),
-      updatedTime(QDateTime::currentDateTime()),
-      messages(mcp::json())
+      createdTime(getCurrentDateTime()),
+      updatedTime(getCurrentDateTime()),
+      cachedJsonMessages(mcp::json()),
+      messageCount(-1)
 {
 }
 
 Conversation::Conversation(const QString &uuid,
-             const QString &agentUuid,
-             const QString &summary,
-             const QDateTime &createdTime,
-             const QDateTime &updatedTime)
+                           const QString &agentUuid,
+                           const QString &summary,
+                           const QString &createdTime,
+                           const QString &updatedTime,
+                           int messageCount)
     : uuid(uuid),
       agentUuid(agentUuid),
       summary(summary),
       createdTime(createdTime),
       updatedTime(updatedTime),
-      messages(mcp::json())
+      cachedJsonMessages(mcp::json()),
+      messageCount(messageCount)
 {
 }

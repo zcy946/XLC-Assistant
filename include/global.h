@@ -20,6 +20,8 @@ constexpr const char *ENDPOINT = "/v1/chat/completions";
 constexpr const char *MODEL = "deepseek-chat";
 constexpr const char *API_KEY = "sk-67827bd147dc43afbb9a982349c4be31";
 
+constexpr const char *AVATAR_UNKNOW = "://image/avatar_unknow.png";
+constexpr const char *AVATAR_TOOL = "://image/avatar_tool.png";
 constexpr const char *AVATAR_SYSTEM = "://image/avatar_system.png";
 constexpr const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
 constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
@@ -29,42 +31,38 @@ QString generateUuid();
 struct Message
 {
     QString id;
-    QString text;
+    QString content;
     enum Role
     {
         USER = 0,
         ASSISTANT = 1,
-        SYSTEM = 2
+        TOOL = 2,
+        SYSTEM = 3,
+        UNKNOWN = 4
     };
     Role role;
     QString createdTime;
+    QString toolCalls;
+    QString toolCallId;
     QString avatarFilePath;
-    // TODO 加入tool_calls[TEXT]和tool_call_id[TEXT]字段
 
-    Message()
-        : id(generateUuid()), createdTime(getCurrentDateTime())
-    {
-        switch (role)
-        {
-        case Role::USER:
-            this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
-            break;
-        case Role::ASSISTANT:
-            this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
-            break;
-        default:
-            this->avatarFilePath = QString(AVATAR_SYSTEM);
-            break;
-        }
-    }
-
-    Message(const QString &id, const QString &text, Role role, const QString &avatarFilePath, const QString &createdTime)
-        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    Message(const QString &id,
+            const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QString &toolCalls,
+            const QString &toolCallId,
+            const QString &avatarFilePath)
+        : id(id), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId), avatarFilePath(avatarFilePath)
     {
     }
 
-    Message(const QString &text, Role role = USER, const QString &avatarFilePath = QString(), const QString &createdTime = getCurrentDateTime())
-        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), createdTime(createdTime)
+    Message(const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QString &toolCalls = QString(),
+            const QString &toolCallId = QString())
+        : id(generateUuid()), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId)
     {
         if (this->avatarFilePath.isEmpty())
         {
@@ -76,8 +74,14 @@ struct Message
             case Role::ASSISTANT:
                 this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
                 break;
-            default:
+            case Role::TOOL:
+                this->avatarFilePath = QString(AVATAR_TOOL);
+                break;
+            case Role::SYSTEM:
                 this->avatarFilePath = QString(AVATAR_SYSTEM);
+                break;
+            default:
+                this->avatarFilePath = QString(AVATAR_UNKNOW);
                 break;
             }
         }
@@ -121,7 +125,7 @@ inline QString generateUuid()
 }
 
 /**
- * 获取当前时间 yyyy-mm-dd hh:mm:ss
+ * 获取当前时间 yyyy-MM-dd HH:mm:ss
  */
 inline QString getCurrentDateTime()
 {

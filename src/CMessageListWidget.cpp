@@ -27,7 +27,7 @@ QVariant CMessageListModel::data(const QModelIndex &index, int role) const
     case MessageRoles::ID:
         return message.id;
     case MessageRoles::Text:
-        return message.text;
+        return message.content;
     case MessageRoles::Role:
         return message.role;
     case MessageRoles::CreatedTime:
@@ -59,6 +59,17 @@ void CMessageListModel::clearCachedSizes()
         message.cachedItemSize = QSize();
 }
 
+void CMessageListModel::clearAllMessage()
+{
+    if (m_messages.isEmpty())
+    {
+        return;
+    }
+    beginInsertRows(QModelIndex(), 0, m_messages.count() - 1);
+    m_messages.clear();
+    endInsertRows();
+}
+
 // CMessageDelegate
 CMessageDelegate::CMessageDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -83,10 +94,12 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         nick = "User";
     else if (role == Message::Role::ASSISTANT)
         nick = "Assistant";
+    else if (role == Message::Role::TOOL)
+        nick = "Tool";
     else if (role == Message::Role::SYSTEM)
         nick = "System";
     else
-        nick = "Unknow";
+        nick = "Unknown";
 
     // 绘制头像
     QRect rectAvatar(option.rect.topLeft() + QPoint(PADDING, PADDING), QSize(AVATAR_SIZE, AVATAR_SIZE));
@@ -146,7 +159,7 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
     int textWidth = viewWidth - PADDING - AVATAR_SIZE - NICK_MARGIN - PADDING; // 左 padding + 头像 + 头像到昵称的距离 + 右 padding
     if (textWidth < 50)                                                        // 宽度太小保护一下
         textWidth = 50;
-    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, message->text);
+    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, message->content);
 
     int avatarHeight = AVATAR_SIZE;
     int textHeight = rectText.height();
@@ -224,11 +237,6 @@ CMessageListWidget::CMessageListWidget(QWidget *parent)
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // Smooth scroll
 }
 
-void CMessageListWidget::addMessage(const CMessage &message)
-{
-    m_model->addMessage(message);
-}
-
 void CMessageListWidget::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
@@ -237,4 +245,14 @@ void CMessageListWidget::resizeEvent(QResizeEvent *event)
     if (model)
         model->clearCachedSizes();
     doItemsLayout();
+}
+
+void CMessageListWidget::addMessage(const CMessage &message)
+{
+    m_model->addMessage(message);
+}
+
+void CMessageListWidget::clearAllMessage()
+{
+    m_model->clearAllMessage();
 }

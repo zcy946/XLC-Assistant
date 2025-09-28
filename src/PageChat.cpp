@@ -15,6 +15,7 @@ PageChat::PageChat(QWidget *parent)
     initUI();
     connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
+    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageChat::slot_onConversationsLoaded);
     connect(EventBus::getInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
     connect(EventBus::getInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
     connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &PageChat::slot_handleResponse);
@@ -48,31 +49,31 @@ void PageChat::initItems()
                 // 刷新WidgetChat
                 m_widgetChat->refreshHistoryMessageList(uuid);
             });
-#ifdef QT_DEBUG
-    for (int i = 0; i < 5; ++i)
-    {
-        // QString nameAgent = "agent实例测试" + QString::number(i + 1);
-        // QListWidgetItem *itemAgent = new QListWidgetItem();
-        // itemAgent->setText(nameAgent);
-        // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
-        // m_listWidgetAgents->addItem(itemAgent);
-        if (!DataManager::getInstance()->getAgents().isEmpty())
-        {
-            std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgents().first();
-            std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agent->uuid);
-            if (newConversation)
-            {
-                newConversation->summary = "对话实例测试" + QString::number(i + 1);
-                QListWidgetItem *itemNewConversation = new QListWidgetItem();
-                itemNewConversation->setText(newConversation->summary);
-                itemNewConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
-                m_listWidgetConversations->addItem(itemNewConversation);
-                DataManager::getInstance()->addConversation(newConversation);
-            }
-        }
-    }
-    m_listWidgetConversations->sortItems();
-#endif
+    // #ifdef QT_DEBUG
+    //     for (int i = 0; i < 5; ++i)
+    //     {
+    //         // QString nameAgent = "agent实例测试" + QString::number(i + 1);
+    //         // QListWidgetItem *itemAgent = new QListWidgetItem();
+    //         // itemAgent->setText(nameAgent);
+    //         // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
+    //         // m_listWidgetAgents->addItem(itemAgent);
+    //         if (!DataManager::getInstance()->getAgents().isEmpty())
+    //         {
+    //             std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgents().first();
+    //             std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agent->uuid);
+    //             if (newConversation)
+    //             {
+    //                 newConversation->summary = "对话实例测试" + QString::number(i + 1);
+    //                 QListWidgetItem *itemNewConversation = new QListWidgetItem();
+    //                 itemNewConversation->setText(newConversation->summary);
+    //                 itemNewConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
+    //                 m_listWidgetConversations->addItem(itemNewConversation);
+    //                 DataManager::getInstance()->addConversation(newConversation);
+    //             }
+    //         }
+    //     }
+    //     m_listWidgetConversations->sortItems();
+    // #endif
     if (m_listWidgetConversations->currentItem() == nullptr)
     {
         m_listWidgetConversations->setCurrentRow(0);
@@ -139,6 +140,19 @@ void PageChat::slot_onAgentUpdated(const QString &agentUuid)
     }
 }
 
+void PageChat::slot_onConversationsLoaded(bool success)
+{
+    if (!success)
+        return;
+    refreshConversationList();
+    m_listWidgetConversations->sortItems();
+    // 默认选中并展示第一项
+    if (m_listWidgetConversations->currentItem() == nullptr)
+    {
+        m_listWidgetConversations->setCurrentRow(0);
+    }
+}
+
 void PageChat::slot_onMessageSent(const QString &message)
 {
     QListWidgetItem *itemSelectedAgent = m_listWidgetAgents->currentItem();
@@ -181,9 +195,11 @@ void PageChat::slot_onMessageSent(const QString &message)
     }
     if (allMcpServersReady)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
+        m_widgetChat->addNewMessage(CMessage(message, Message::USER, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
         // 记录问题
-        conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
+        conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
+        // conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
         LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
     }
     else
@@ -278,7 +294,8 @@ void PageChat::slot_handleResponse(const QString &conversationUuid, const QStrin
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
+        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::ASSISTANT, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
     }
 }
 
@@ -286,7 +303,8 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::SYSTEM));
+        m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL));
     }
 }
 
@@ -299,7 +317,8 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
         return;
     }
     QString agentUuid = currentSelectedAgentItem->data(Qt::UserRole).toString();
-    if (!DataManager::getInstance()->getAgent(agentUuid))
+    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
+    if (!agent)
     {
         XLC_LOG_WARN("Create new conversation failed (agentUuid={}): agent not found", agentUuid);
         return;
@@ -428,9 +447,9 @@ void WidgetChat::initItems()
     for (int i = 0; i < 50; ++i)
     {
         if (i % 2 == 0)
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER, getCurrentDateTime()));
         else
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT, getCurrentDateTime()));
     }
 #endif
     // m_plainTextEdit
@@ -517,23 +536,32 @@ const QString WidgetChat::getConversationUuid()
     return m_conversationUuid;
 }
 
-void WidgetChat::refreshHistoryMessageList(const QString &newConversationUuid)
+void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
 {
-    if (newConversationUuid.trimmed().isEmpty())
+    if (conversationUuid.trimmed().isEmpty())
     {
-        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", newConversationUuid);
+        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", conversationUuid);
         return;
     }
-    std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(newConversationUuid);
+    std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(conversationUuid);
     if (!conversation)
     {
-        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): conversation not found", newConversationUuid);
+        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): conversation not found", conversationUuid);
         return;
     }
 
     // 刷新缓存uuid
-    m_conversationUuid = newConversationUuid;
+    m_conversationUuid = conversationUuid;
 
     // 刷新消息列表
-    mcp::json messages = conversation->getMessages();
+    m_listWidgetMessages->clearAllMessage();
+    QList<Message> messages = conversation->getMessages();
+    // 刷新历史消息列表m_listWidgetMessages
+    // BUG 1. LLM 调用tool的展示有问题 2. 获取的messages中的消息顺序不对
+    for (const Message &message : messages)
+    {
+        m_listWidgetMessages->addMessage(CMessage(message.id, message.content, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+        XLC_LOG_CRITICAL("message: {}", message.content);
+    }
+    XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }
