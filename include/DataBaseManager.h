@@ -60,7 +60,7 @@ public Q_SLOTS:
                                const QString &avatarFilePath,
                                const QString &toolCalls,
                                const QString &toolCallId);
-
+    void slot_updateConversationUpdatedTime(const QString &uuid, const QString &newUpdatedTime);
 public:
     explicit DataBaseWorker(const QString &dataBaseFile, QObject *parent = nullptr);
     ~DataBaseWorker();

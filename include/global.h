@@ -144,7 +144,7 @@ inline QString generateUuid()
 }
 
 /**
- * 获取当前时间 yyyy-mm-dd hh:mm:ss
+ * 获取当前时间 yyyy-MM-dd HH:mm:ss
  */
 inline QString getCurrentDateTime()
 {
