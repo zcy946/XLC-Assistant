@@ -20,6 +20,8 @@ constexpr const char *ENDPOINT = "/v1/chat/completions";
 constexpr const char *MODEL = "deepseek-chat";
 constexpr const char *API_KEY = "sk-67827bd147dc43afbb9a982349c4be31";
 
+constexpr const char *AVATAR_UNKNOW = "://image/avatar_unknow.png";
+constexpr const char *AVATAR_TOOL = "://image/avatar_tool.png";
 constexpr const char *AVATAR_SYSTEM = "://image/avatar_system.png";
 constexpr const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
 constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
@@ -54,8 +56,14 @@ struct Message
         case Role::ASSISTANT:
             this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
             break;
-        default:
+        case Role::TOOL:
+            this->avatarFilePath = QString(AVATAR_TOOL);
+            break;
+        case Role::SYSTEM:
             this->avatarFilePath = QString(AVATAR_SYSTEM);
+            break;
+        default:
+            this->avatarFilePath = QString(AVATAR_UNKNOW);
             break;
         }
     }
@@ -78,8 +86,14 @@ struct Message
             case Role::ASSISTANT:
                 this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
                 break;
-            default:
+            case Role::TOOL:
+                this->avatarFilePath = QString(AVATAR_TOOL);
+                break;
+            case Role::SYSTEM:
                 this->avatarFilePath = QString(AVATAR_SYSTEM);
+                break;
+            default:
+                this->avatarFilePath = QString(AVATAR_UNKNOW);
                 break;
             }
         }

@@ -286,7 +286,7 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::SYSTEM));
+        m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL));
     }
 }
 

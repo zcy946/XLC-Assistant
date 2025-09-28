@@ -6,5 +6,7 @@
         <file>image/avatar_system.png</file>
         <file>image/default_avatar_llm.png</file>
         <file>image/default_avatar_user.png</file>
+        <file>image/avatar_tool.png</file>
+        <file>image/avatar_unknow.png</file>
     </qresource>
 </RCC>

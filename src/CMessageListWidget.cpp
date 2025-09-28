@@ -83,10 +83,12 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         nick = "User";
     else if (role == Message::Role::ASSISTANT)
         nick = "Assistant";
+    else if (role == Message::Role::TOOL)
+        nick = "Tool";
     else if (role == Message::Role::SYSTEM)
         nick = "System";
     else
-        nick = "Unknow";
+        nick = "Unknown";
 
     // 绘制头像
     QRect rectAvatar(option.rect.topLeft() + QPoint(PADDING, PADDING), QSize(AVATAR_SIZE, AVATAR_SIZE));
