@@ -59,6 +59,17 @@ void CMessageListModel::clearCachedSizes()
         message.cachedItemSize = QSize();
 }
 
+void CMessageListModel::clearAllMessage()
+{
+    if (m_messages.isEmpty())
+    {
+        return;
+    }
+    beginInsertRows(QModelIndex(), 0, m_messages.count() - 1);
+    m_messages.clear();
+    endInsertRows();
+}
+
 // CMessageDelegate
 CMessageDelegate::CMessageDelegate(QObject *parent)
     : QStyledItemDelegate(parent)
@@ -226,11 +237,6 @@ CMessageListWidget::CMessageListWidget(QWidget *parent)
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // Smooth scroll
 }
 
-void CMessageListWidget::addMessage(const CMessage &message)
-{
-    m_model->addMessage(message);
-}
-
 void CMessageListWidget::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
@@ -239,4 +245,14 @@ void CMessageListWidget::resizeEvent(QResizeEvent *event)
     if (model)
         model->clearCachedSizes();
     doItemsLayout();
+}
+
+void CMessageListWidget::addMessage(const CMessage &message)
+{
+    m_model->addMessage(message);
+}
+
+void CMessageListWidget::clearAllMessage()
+{
+    m_model->clearAllMessage();
 }

@@ -532,23 +532,67 @@ const QString WidgetChat::getConversationUuid()
     return m_conversationUuid;
 }
 
-void WidgetChat::refreshHistoryMessageList(const QString &newConversationUuid)
+void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
 {
-    if (newConversationUuid.trimmed().isEmpty())
+    if (conversationUuid.trimmed().isEmpty())
     {
-        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", newConversationUuid);
+        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", conversationUuid);
         return;
     }
-    std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(newConversationUuid);
+    std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(conversationUuid);
     if (!conversation)
     {
-        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): conversation not found", newConversationUuid);
+        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): conversation not found", conversationUuid);
         return;
     }
 
     // 刷新缓存uuid
-    m_conversationUuid = newConversationUuid;
+    m_conversationUuid = conversationUuid;
 
     // 刷新消息列表
+    m_listWidgetMessages->clearAllMessage();
     mcp::json messages = conversation->getMessages();
+    // TODO 刷新历史消息列表m_listWidgetMessages
+    for (const auto &message : messages)
+    {
+        QString id;
+        QString text;
+        Message::Role role;
+        QString avatarFilePath;
+        QString toolCalls;
+        QString toolCallId;
+        QString createdTime;
+
+        // 解析id
+        if (message.contains("content"))
+            text = QString::fromStdString(message.value("content", ""));
+        else
+            text = "";
+
+
+        // 解析role
+        if (message.contains("role"))
+        {
+            std::string roleStr = message.value("role", "unknown");
+            if (roleStr == "user")
+                role = Message::USER;
+            if (roleStr == "assistant")
+                role = Message::ASSISTANT;
+            if (roleStr == "tool")
+                role = Message::TOOL;
+            if (roleStr == "system")
+                role = Message::SYSTEM;
+            else
+                role = Message::UNKNOWN;
+        }
+        else
+            role = Message::UNKNOWN;
+
+        // 解析content
+        if (message.contains("content"))
+            text = QString::fromStdString(message.value("content", ""));
+        else
+            text = "";
+        m_listWidgetMessages->addMessage(CMessage(id));
+    }
 }

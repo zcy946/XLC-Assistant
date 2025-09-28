@@ -228,6 +228,8 @@ private:
     QMutex mutex;
     mcp::json messages;
 
+    // TODO 添加`QHash<QString, Message> messages`，将`mcp::json messages`改为`cachedJsonMessages`。用于解决当前的messages[cachedJsonMessages]无法存储消息时间的问题
+
 public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid);
     static std::shared_ptr<Conversation> create(const QString &uuid,
