@@ -223,7 +223,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     query.bindValue(":tool_call_id", toolCallId);
     if (!query.exec())
     {
-        // TODO 错误展示
+        // TODO 处理错误
         XLC_LOG_WARN("Insert message failed (query={}, uuid={}, conversationUuid={}, role={}, text={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={}): {}",
                      query.lastQuery(),
                      query.lastError().text(),

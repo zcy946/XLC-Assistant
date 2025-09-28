@@ -720,7 +720,7 @@ const QString &DataManager::getFilePathAgents() const
 
 bool DataManager::loadConversations()
 {
-    // TODO 从数据库加载对话信息
+    // TODO 111从数据库加载对话信息
     return true;
 }
 
@@ -729,7 +729,7 @@ void DataManager::addConversation(const std::shared_ptr<Conversation> &conversat
     if (conversation)
     {
         m_conversations.insert(conversation->uuid.trimmed(), conversation);
-        // TODO 将对话添加到数据库
+        // 将对话添加到数据库
         Q_EMIT DataBaseManager::getInstance()->sig_insertNewConversation(conversation->agentUuid,
                                                                          conversation->uuid,
                                                                          conversation->summary,
@@ -1104,8 +1104,7 @@ std::shared_ptr<Conversation> Conversation::create(const QString &agentUuid)
     };
     return std::static_pointer_cast<Conversation>(std::make_shared<make_shared_enabler>(agentUuid));
     /**
-     * NOTE
-     * 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
+     * NOTE 问题根源：std::make_shared 是外部函数，不能访问 protected 构造函数。
        解决办法：用 make_shared_enabler（内部派生类）作为“桥”，让它调用 protected 构造函数，然后把结果当成 shared_ptr<Conversation> 返回。
        效果：外部只能通过 Conversation::create(...) 来生成对象，既安全又保持 make_shared 的高效内存分配。 */
 }
@@ -1228,12 +1227,12 @@ void Conversation::addMessage(const mcp::json &newMessage)
 
 const mcp::json Conversation::getMessages()
 {
-    // TODO 在loadAgents获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
+    // TODO 111在loadAgents获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
     /**
-     * TODO 先返回当前messages，
+     * TODO 111先返回当前messages，
      *      ↓
      *      再将messageCount与当前messages.size()作比较
-     *      if (messages.size() != messageCount) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
+     *      if (messages.size() != messageCount || messageCount = -1) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
      *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
      *      ↓
      *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QVariant[存储message的json数组])），

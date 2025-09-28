@@ -219,7 +219,7 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString summary;
     QDateTime createdTime;
     QDateTime updatedTime;
-    int messageCount; // 记录消息数量
+    int messageCount; // 记录消息数量，初始化为 -1 代表未同步/同步失败数据库
 
 private:
     QMutex mutex;
