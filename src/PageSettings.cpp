@@ -176,7 +176,7 @@ void PageSettingsLLM::initItems()
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
                 EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
             });
 }
 
@@ -502,7 +502,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonSave, &QPushButton::clicked, this,
             [this]()
             {
-                XLC_LOG_DEBUG("Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
                 DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
                 // 刷新m_listWidgetAgents
                 QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
@@ -865,7 +865,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
-            XLC_LOG_WARN("Conversation not found (uuid={})", uuid);
+            XLC_LOG_WARN("Conversation is loading or not found (uuid={})", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
             continue;
         }
         QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
@@ -1161,7 +1161,7 @@ void PageSettingsMcp::initItems()
                 QJsonObject jsonObj;
                 jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
                 EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
+                XLC_LOG_DEBUG("Saving/Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
             });
 }
 

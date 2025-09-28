@@ -16,6 +16,7 @@ class PageChat : public BaseWidget
 private Q_SLOTS:
     void slot_onAgentsLoaded(bool success);
     void slot_onAgentUpdated(const QString &agentUuid);
+    void slot_onConversationsLoaded(bool success);
     // 用户点击发送按钮
     void slot_onMessageSent(const QString &message);
     void slot_handlePageSwitched(const QVariant &data);

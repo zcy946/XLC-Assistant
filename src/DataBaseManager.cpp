@@ -16,8 +16,10 @@ DataBaseManager::DataBaseManager(QObject *parent)
 
     // 在线程启动后初始化数据库，确保 QSqlDatabase 和 worker 在同一线程
     connect(&m_thread, &QThread::started, m_worker, &DataBaseWorker::slot_initialize);
+    connect(this, &DataBaseManager::sig_getAllConversationInfo, m_worker, &DataBaseWorker::slot_getAllConversationInfo, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_insertNewConversation, m_worker, &DataBaseWorker::slot_insertNewConversation, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_insertNewMessage, m_worker, &DataBaseWorker::slot_insertNewMessage, Qt::QueuedConnection);
+    connect(m_worker, &DataBaseWorker::sig_allConversationInfoAcquired, this, &DataBaseManager::sig_allConversationInfoAcquired);
 
     m_thread.start();
 }
@@ -108,14 +110,14 @@ void DataBaseWorker::initializeDatabase()
     }
     // 创建 idx_conversations_agent_id 索引
     if (!query.exec(R"(
-            CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
+            CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
         )"))
     {
         XLC_LOG_WARN("Initialize database (query={}): {}", query.lastQuery(), query.lastError().text());
     }
     // 创建 idx_conversations_updated_time 索引
     if (!query.exec(R"(
-            CREATE INDEX idx_messages_created_time ON messages(created_time);
+            CREATE INDEX IF NOT EXISTS idx_messages_created_time ON messages(created_time);
         )"))
     {
         XLC_LOG_WARN("Initialize database (query={}): {}", query.lastQuery(), query.lastError().text());
@@ -137,6 +139,52 @@ void DataBaseWorker::slot_initialize()
         XLC_LOG_INFO("Worker opened database successfully");
 
     initializeDatabase();
+}
+
+void DataBaseWorker::slot_getAllConversationInfo()
+{
+    QSqlQuery query(m_dataBase);
+    query.prepare(R"(
+                SELECT
+                    c.id,
+                    c.agent_id,
+                    c.summary,
+                    c.created_time,
+                    c.updated_time,
+                    COUNT(m.conversation_id) AS message_count
+                FROM
+                    conversations c
+                LEFT JOIN
+                    messages m ON c.id = m.conversation_id
+                GROUP BY
+                    c.id, c.agent_id, c.summary, c.created_time, c.updated_time
+                ORDER BY
+                    c.updated_time DESC,
+                    c.created_time DESC
+            )");
+    if (!query.exec())
+    {
+        XLC_LOG_WARN("Get all conversation information failed (query={}): {}",
+                     query.lastQuery(),
+                     query.lastError().text());
+        Q_EMIT sig_allConversationInfoAcquired(false, QJsonArray());
+        return;
+    }
+    XLC_LOG_TRACE("Get all conversation information successfully (query={})", query.lastQuery());
+    // 解析数据
+    QJsonArray jsonArrayConversationInfo;
+    while (query.next())
+    {
+        QJsonObject jsonObjConversationInfo;
+        jsonObjConversationInfo["uuid"] = query.value(0).toString();
+        jsonObjConversationInfo["agent_uuid"] = query.value(1).toString();
+        jsonObjConversationInfo["summary"] = query.value(2).toString();
+        jsonObjConversationInfo["created_time"] = query.value(3).toString();
+        jsonObjConversationInfo["updated_time"] = query.value(4).toString();
+        jsonObjConversationInfo["message_count"] = query.value(5).toInt();
+        jsonArrayConversationInfo.append(jsonObjConversationInfo);
+    }
+    Q_EMIT sig_allConversationInfoAcquired(true, jsonArrayConversationInfo);
 }
 
 void DataBaseWorker::slot_insertNewConversation(const QString &agentUuid,
@@ -168,7 +216,7 @@ void DataBaseWorker::slot_insertNewConversation(const QString &agentUuid,
     }
     else
     {
-        XLC_LOG_TRACE("Insert conversations successfully (query={}, agentUuid={}, summary={}, createdTime={}, updatedTime={})",
+        XLC_LOG_TRACE("Insert conversations successfully (query={}, uuid={}, agentUuid={}, summary={}, createdTime={}, updatedTime={})",
                       query.lastQuery(),
                       uuid,
                       agentUuid,

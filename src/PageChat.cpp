@@ -15,6 +15,7 @@ PageChat::PageChat(QWidget *parent)
     initUI();
     connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageChat::slot_onAgentsLoaded);
     connect(DataManager::getInstance(), &DataManager::sig_agentUpdate, this, &PageChat::slot_onAgentUpdated);
+    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageChat::slot_onConversationsLoaded);
     connect(EventBus::getInstance().get(), &EventBus::sig_pageSwitched, this, &PageChat::slot_handlePageSwitched);
     connect(EventBus::getInstance().get(), &EventBus::sig_stateChanged, this, &PageChat::slot_handleStateChanged);
     connect(LLMService::getInstance(), &LLMService::sig_responseReady, this, &PageChat::slot_handleResponse);
@@ -48,31 +49,31 @@ void PageChat::initItems()
                 // 刷新WidgetChat
                 m_widgetChat->refreshHistoryMessageList(uuid);
             });
-#ifdef QT_DEBUG
-    for (int i = 0; i < 5; ++i)
-    {
-        // QString nameAgent = "agent实例测试" + QString::number(i + 1);
-        // QListWidgetItem *itemAgent = new QListWidgetItem();
-        // itemAgent->setText(nameAgent);
-        // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
-        // m_listWidgetAgents->addItem(itemAgent);
-        if (!DataManager::getInstance()->getAgents().isEmpty())
-        {
-            std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgents().first();
-            std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agent->uuid);
-            if (newConversation)
-            {
-                newConversation->summary = "对话实例测试" + QString::number(i + 1);
-                QListWidgetItem *itemNewConversation = new QListWidgetItem();
-                itemNewConversation->setText(newConversation->summary);
-                itemNewConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
-                m_listWidgetConversations->addItem(itemNewConversation);
-                DataManager::getInstance()->addConversation(newConversation);
-            }
-        }
-    }
-    m_listWidgetConversations->sortItems();
-#endif
+    // #ifdef QT_DEBUG
+    //     for (int i = 0; i < 5; ++i)
+    //     {
+    //         // QString nameAgent = "agent实例测试" + QString::number(i + 1);
+    //         // QListWidgetItem *itemAgent = new QListWidgetItem();
+    //         // itemAgent->setText(nameAgent);
+    //         // itemAgent->setData(Qt::UserRole, QVariant::fromValue(generateUuid());
+    //         // m_listWidgetAgents->addItem(itemAgent);
+    //         if (!DataManager::getInstance()->getAgents().isEmpty())
+    //         {
+    //             std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgents().first();
+    //             std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agent->uuid);
+    //             if (newConversation)
+    //             {
+    //                 newConversation->summary = "对话实例测试" + QString::number(i + 1);
+    //                 QListWidgetItem *itemNewConversation = new QListWidgetItem();
+    //                 itemNewConversation->setText(newConversation->summary);
+    //                 itemNewConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
+    //                 m_listWidgetConversations->addItem(itemNewConversation);
+    //                 DataManager::getInstance()->addConversation(newConversation);
+    //             }
+    //         }
+    //     }
+    //     m_listWidgetConversations->sortItems();
+    // #endif
     if (m_listWidgetConversations->currentItem() == nullptr)
     {
         m_listWidgetConversations->setCurrentRow(0);
@@ -136,6 +137,19 @@ void PageChat::slot_onAgentUpdated(const QString &agentUuid)
     if (currentItem->data(Qt::UserRole).toString() == agentUuid)
     {
         refreshConversationList();
+    }
+}
+
+void PageChat::slot_onConversationsLoaded(bool success)
+{
+    if (!success)
+        return;
+    refreshConversationList();
+    m_listWidgetConversations->sortItems();
+    // 默认选中并展示第一项
+    if (m_listWidgetConversations->currentItem() == nullptr)
+    {
+        m_listWidgetConversations->setCurrentRow(0);
     }
 }
 
@@ -299,7 +313,8 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
         return;
     }
     QString agentUuid = currentSelectedAgentItem->data(Qt::UserRole).toString();
-    if (!DataManager::getInstance()->getAgent(agentUuid))
+    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
+    if (!agent)
     {
         XLC_LOG_WARN("Create new conversation failed (agentUuid={}): agent not found", agentUuid);
         return;
