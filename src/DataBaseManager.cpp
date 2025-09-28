@@ -17,6 +17,7 @@ DataBaseManager::DataBaseManager(QObject *parent)
     // 在线程启动后初始化数据库，确保 QSqlDatabase 和 worker 在同一线程
     connect(&m_thread, &QThread::started, m_worker, &DataBaseWorker::slot_initialize);
     connect(this, &DataBaseManager::sig_insertNewMessage, m_worker, &DataBaseWorker::slot_insertNewMessage, Qt::QueuedConnection);
+    connect(this, &DataBaseManager::sig_insertNewConversation, m_worker, &DataBaseWorker::slot_insertNewConversation, Qt::QueuedConnection);
 
     m_thread.start();
 }
@@ -138,6 +139,32 @@ void DataBaseWorker::slot_initialize()
     initializeDatabase();
 }
 
+void DataBaseWorker::slot_insertNewConversation(const QString &agentUuid,
+                                                const QString &uuid,
+                                                const QString &summary,
+                                                const QString &createdTime,
+                                                const QString &updatedTime)
+{
+    QSqlQuery query(m_dataBase);
+    query.prepare(R"(
+                INSERT INTO conversations (id, agent_id, summary, created_time, updated_time)
+                VALUES (:id, :agent_id, :summary, :created_time, :updated_time)
+            )");
+    query.bindValue(":id", uuid);
+    query.bindValue(":agent_id", agentUuid);
+    query.bindValue(":summary", summary);
+    query.bindValue(":created_time", createdTime);
+    query.bindValue(":updated_time", updatedTime);
+    if (!query.exec())
+    {
+        XLC_LOG_WARN("Insert conversations failed (query={}): {}", query.lastQuery(), query.lastError().text());
+    }
+    else
+    {
+        XLC_LOG_TRACE("Insert conversations successfully (query={})", query.lastQuery());
+    }
+}
+
 void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                                            const QString &uuid,
                                            int role,
@@ -185,6 +212,6 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     }
     else
     {
-        XLC_LOG_DEBUG("Insert message successfully (query={})", query.lastQuery());
+        XLC_LOG_TRACE("Insert message successfully (query={})", query.lastQuery());
     }
 }

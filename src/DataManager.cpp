@@ -730,6 +730,11 @@ void DataManager::addConversation(const std::shared_ptr<Conversation> &conversat
     {
         m_conversations.insert(conversation->uuid.trimmed(), conversation);
         // TODO 将对话添加到数据库
+        Q_EMIT DataBaseManager::getInstance()->sig_insertNewConversation(conversation->agentUuid,
+                                                                         conversation->uuid,
+                                                                         conversation->summary,
+                                                                         conversation->createdTime.toString("yyyy-mm-dd hh:mm:ss"),
+                                                                         conversation->updatedTime.toString("yyyy-mm-dd hh:mm:ss"));
     }
     else
     {

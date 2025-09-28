@@ -47,6 +47,11 @@ class DataBaseWorker : public QObject
     Q_OBJECT
 public Q_SLOTS:
     void slot_initialize();
+    void slot_insertNewConversation(const QString &agentUuid,
+                                   const QString &uuid,
+                                   const QString &summary,
+                                   const QString &createdTime,
+                                   const QString &updatedTime);
     void slot_insertNewMessage(const QString &conversationUuid,
                                const QString &uuid,
                                int role,
