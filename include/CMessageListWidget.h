@@ -13,10 +13,17 @@
 
 struct CMessage : public Message
 {
-    CMessage(const QString &id, const QString &text, Message::Role role,
-             const QString &createdTime, const QString &avatarFilePath,
-             const QString &toolCalls, const QString &toolCallId)
-        : Message(id, text, role, avatarFilePath, toolCalls, toolCallId, createdTime)
+    CMessage(const QString &content, Message::Role role,
+             const QString &createdTime,
+             const QString &toolCalls = QString(), const QString &toolCallId = QString())
+        : Message(content, role, createdTime, toolCalls, toolCallId)
+    {
+    }
+    CMessage(const QString &id, const QString &content, Message::Role role,
+             const QString &createdTime,
+             const QString &toolCalls, const QString &toolCallId,
+             const QString &avatarFilePath)
+        : Message(id, content, role, createdTime, toolCalls, toolCallId, avatarFilePath)
     {
     }
     // 缓存尺寸信息

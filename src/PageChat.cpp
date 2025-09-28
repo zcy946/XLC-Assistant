@@ -195,9 +195,11 @@ void PageChat::slot_onMessageSent(const QString &message)
     }
     if (allMcpServersReady)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
+        m_widgetChat->addNewMessage(CMessage(message, Message::USER, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
         // 记录问题
-        conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
+        conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
+        // conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
         LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
     }
     else
@@ -292,7 +294,8 @@ void PageChat::slot_handleResponse(const QString &conversationUuid, const QStrin
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
+        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::ASSISTANT, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
     }
 }
 
@@ -300,7 +303,8 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL));
+        m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL, getCurrentDateTime()));
+        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL));
     }
 }
 
@@ -443,9 +447,9 @@ void WidgetChat::initItems()
     for (int i = 0; i < 50; ++i)
     {
         if (i % 2 == 0)
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER, getCurrentDateTime()));
         else
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT));
+            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT, getCurrentDateTime()));
     }
 #endif
     // m_plainTextEdit
@@ -551,48 +555,13 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
 
     // 刷新消息列表
     m_listWidgetMessages->clearAllMessage();
-    mcp::json messages = conversation->getMessages();
-    // TODO 刷新历史消息列表m_listWidgetMessages
-    for (const auto &message : messages)
+    QList<Message> messages = conversation->getMessages();
+    // 刷新历史消息列表m_listWidgetMessages
+    // BUG 1. LLM 调用tool的展示有问题 2. 获取的messages中的消息顺序不对
+    for (const Message &message : messages)
     {
-        QString id;
-        QString text;
-        Message::Role role;
-        QString avatarFilePath;
-        QString toolCalls;
-        QString toolCallId;
-        QString createdTime;
-
-        // 解析id
-        if (message.contains("content"))
-            text = QString::fromStdString(message.value("content", ""));
-        else
-            text = "";
-
-
-        // 解析role
-        if (message.contains("role"))
-        {
-            std::string roleStr = message.value("role", "unknown");
-            if (roleStr == "user")
-                role = Message::USER;
-            if (roleStr == "assistant")
-                role = Message::ASSISTANT;
-            if (roleStr == "tool")
-                role = Message::TOOL;
-            if (roleStr == "system")
-                role = Message::SYSTEM;
-            else
-                role = Message::UNKNOWN;
-        }
-        else
-            role = Message::UNKNOWN;
-
-        // 解析content
-        if (message.contains("content"))
-            text = QString::fromStdString(message.value("content", ""));
-        else
-            text = "";
-        m_listWidgetMessages->addMessage(CMessage(id));
+        m_listWidgetMessages->addMessage(CMessage(message.id, message.content, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+        XLC_LOG_CRITICAL("message: {}", message.content);
     }
+    XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }

@@ -31,7 +31,7 @@ QString generateUuid();
 struct Message
 {
     QString id;
-    QString text;
+    QString content;
     enum Role
     {
         USER = 0,
@@ -42,46 +42,27 @@ struct Message
     };
     Role role;
     QString createdTime;
-    QString avatarFilePath;
     QString toolCalls;
     QString toolCallId;
+    QString avatarFilePath;
 
-    Message()
-        : id(generateUuid()), createdTime(getCurrentDateTime())
-    {
-        switch (role)
-        {
-        case Role::USER:
-            this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
-            break;
-        case Role::ASSISTANT:
-            this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
-            break;
-        case Role::TOOL:
-            this->avatarFilePath = QString(AVATAR_TOOL);
-            break;
-        case Role::SYSTEM:
-            this->avatarFilePath = QString(AVATAR_SYSTEM);
-            break;
-        default:
-            this->avatarFilePath = QString(AVATAR_UNKNOW);
-            break;
-        }
-    }
-
-    Message(const QString &id, const QString &text, Role role,
-            const QString &avatarFilePath,
-            const QString &toolCalls, const QString &toolCallId,
-            const QString &createdTime)
-        : id(id), text(text), role(role), avatarFilePath(avatarFilePath), toolCalls(toolCalls), toolCallId(toolCallId), createdTime(createdTime)
+    Message(const QString &id,
+            const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QString &toolCalls,
+            const QString &toolCallId,
+            const QString &avatarFilePath)
+        : id(id), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId), avatarFilePath(avatarFilePath)
     {
     }
 
-    Message(const QString &text,
-            Role role = USER, const QString &avatarFilePath = QString(),
-            const QString &toolCalls = QString(), const QString &toolCallId = QString(),
-            const QString &createdTime = getCurrentDateTime())
-        : id(generateUuid()), text(text), role(role), avatarFilePath(avatarFilePath), toolCalls(toolCalls), toolCallId(toolCallId), createdTime(createdTime)
+    Message(const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QString &toolCalls = QString(),
+            const QString &toolCallId = QString())
+        : id(generateUuid()), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId)
     {
         if (this->avatarFilePath.isEmpty())
         {

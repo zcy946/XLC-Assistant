@@ -27,7 +27,7 @@ QVariant CMessageListModel::data(const QModelIndex &index, int role) const
     case MessageRoles::ID:
         return message.id;
     case MessageRoles::Text:
-        return message.text;
+        return message.content;
     case MessageRoles::Role:
         return message.role;
     case MessageRoles::CreatedTime:
@@ -159,7 +159,7 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
     int textWidth = viewWidth - PADDING - AVATAR_SIZE - NICK_MARGIN - PADDING; // 左 padding + 头像 + 头像到昵称的距离 + 右 padding
     if (textWidth < 50)                                                        // 宽度太小保护一下
         textWidth = 50;
-    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, message->text);
+    QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, message->content);
 
     int avatarHeight = AVATAR_SIZE;
     int textHeight = rectText.height();

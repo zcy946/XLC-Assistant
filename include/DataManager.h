@@ -226,9 +226,10 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
 
 private:
     QMutex mutex;
-    mcp::json messages;
+    mcp::json cachedJsonMessages;
+    QMap<QString, Message> messages;
 
-    // TODO 添加`QHash<QString, Message> messages`，将`mcp::json messages`改为`cachedJsonMessages`。用于解决当前的messages[cachedJsonMessages]无法存储消息时间的问题
+    // TODO 添加`QMap<QString, Message> messages`，将`mcp::json messages`改为`cachedJsonMessages`。用于解决当前的messages[cachedJsonMessages]无法存储消息时间的问题
 
 public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid);
@@ -240,8 +241,9 @@ public:
                                                 int messageCount);
     bool hasSystemPrompt();
     void resetSystemPrompt();
-    void addMessage(const mcp::json &newMessage);
-    const mcp::json getMessages();
+    void addMessage(const Message &newMessage);
+    QList<Message> getMessages();
+    const mcp::json getCachedMessages();
     // 清除上下文
     void clearContext();
 

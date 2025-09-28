@@ -1170,11 +1170,11 @@ std::shared_ptr<Conversation> Conversation::create(const QString &uuid,
 bool Conversation::hasSystemPrompt()
 {
     QMutexLocker locker(&mutex);
-    if (!messages.is_array() || messages.empty())
+    if (!cachedJsonMessages.is_array() || cachedJsonMessages.empty())
     {
         return false;
     }
-    const auto &firstItem = messages.front();
+    const auto &firstItem = cachedJsonMessages.front();
     if (!firstItem.is_object())
     {
         return false;
@@ -1203,91 +1203,107 @@ void Conversation::resetSystemPrompt()
     if (hasSystemPrompt())
     {
         QMutexLocker locker(&mutex);
-        messages.front() = systemPromptItem;
+        cachedJsonMessages.front() = systemPromptItem;
     }
     else
     {
         QMutexLocker locker(&mutex);
-        if (messages.empty())
-            messages.push_back(systemPromptItem);
+        if (cachedJsonMessages.empty())
+            cachedJsonMessages.push_back(systemPromptItem);
         else
-            messages.insert(messages.begin(), systemPromptItem);
+            cachedJsonMessages.insert(cachedJsonMessages.begin(), systemPromptItem);
     }
 }
 
-void Conversation::addMessage(const mcp::json &newMessage)
+void Conversation::addMessage(const Message &newMessage)
 {
-    QMutexLocker locker(&mutex);
-    messages.push_back(newMessage);
+    mcp::json jsonMessage;
+    std::string roleStr;
+    switch (newMessage.role)
+    {
+    case Message::USER:
+        roleStr = "user";
+        break;
+    case Message::ASSISTANT:
+        roleStr = "assistant";
+        break;
+    case Message::TOOL:
+        roleStr = "tool";
+        break;
+    case Message::SYSTEM:
+        roleStr = "system";
+        break;
+    default:
+        roleStr = "unknown";
+        break;
+    }
+    jsonMessage["role"] = roleStr;
+    jsonMessage["content"] = newMessage.content.toStdString();
+    if (newMessage.role == Message::TOOL)
+        jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
+    if (newMessage.role == Message::ASSISTANT && !newMessage.toolCalls.isEmpty())
+    {
+        try
+        {
+            mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
+            jsonMessage["tool_calls"] = jsonArrayToolCalls;
+        }
+        catch (const mcp::json::parse_error &e)
+        {
+            XLC_LOG_ERROR("JSON Parsing error: {}", e.what());
+        }
+    }
+
+    {
+        QMutexLocker locker(&mutex);
+        cachedJsonMessages.push_back(jsonMessage);
+        messages.insert(newMessage.id, newMessage);
+        // 更新本地对话更新时间
+        updatedTime = newMessage.createdTime;
+        // 更新消息数量
+        messageCount+=1;
+    }
 
     // 插入数据库
-    QString message = QString::fromStdString(newMessage["content"].get<std::string>());
-    QString toolCalls;
-    QString toolCallId;
-    Message::Role role;
-    std::string strRole = newMessage["role"].get<std::string>();
-    if (strRole == "user")
-        role = Message::USER;
-    else if (strRole == "assistant")
-    {
-        role = Message::ASSISTANT;
-        auto it = newMessage.find("tool_calls");
-        if (it != newMessage.end())
-        {
-            toolCalls = QString::fromStdString(it.value().dump());
-        }
-    }
-    else if (strRole == "tool")
-    {
-        role = Message::TOOL;
-        auto it = newMessage.find("tool_call_id");
-        if (it != newMessage.end())
-        {
-            toolCallId = QString::fromStdString(it.value().get<std::string>());
-        }
-    }
-    else if (strRole == "system")
-        role = Message::SYSTEM;
-    else
-        role = Message::UNKNOWN;
-
-    Message temp_message(message, role, Q_NULLPTR, toolCalls, toolCallId);
     Q_EMIT DataBaseManager::getInstance()->sig_insertNewMessage(uuid,
-                                                                temp_message.id,
-                                                                static_cast<int>(temp_message.role),
-                                                                temp_message.text,
-                                                                temp_message.createdTime,
-                                                                temp_message.avatarFilePath,
-                                                                temp_message.toolCalls,
-                                                                temp_message.toolCallId);
-    // 更新对话更新时间
-    updatedTime = temp_message.createdTime;
+                                                                newMessage.id,
+                                                                static_cast<int>(newMessage.role),
+                                                                newMessage.content,
+                                                                newMessage.createdTime,
+                                                                newMessage.avatarFilePath,
+                                                                newMessage.toolCalls,
+                                                                newMessage.toolCallId);
 }
 
-const mcp::json Conversation::getMessages()
+QList<Message> Conversation::getMessages()
+{
+    return messages.values();
+}
+
+const mcp::json Conversation::getCachedMessages()
 {
     // TODO 111在loadConversations获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
     /**
      * TODO 111先返回当前messages，
      *      ↓
-     *      再将messageCount与当前messages.size()作比较
-     *      if (messages.size() != messageCount || messageCount = -1) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
+     *      再将messageCount与当前cachedJsonMessages.size()作比较
+     *      if (cachedJsonMessages.size() != messageCount || messageCount = -1) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
      *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
      *      ↓
-     *      在DataManager响应DataBaseManager中获取messages的信号（sig_resultGetMessages(uuid, QJsonArray[存储message的json数组])），
-     *      在此槽函数中先判断pendingConversations中是否存在对应uuid，如果存在 -> 更新对应conversation的messages（updateMessages(mcp::json messages)）
+     *      在DataManager响应DataBaseManager中获取Messages的信号（sig_resultGetMessages(uuid, QJsonArray[存储Message的json数组])），
+     *      在此槽函数中先判断pendingConversations中是否存在对应uuid，如果存在 -> 更新对应conversation的messages（updateMessages(QJsonArray jsonArrayMessages)）
      *      ↓
      *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
      *  */
     QMutexLocker locker(&mutex);
-    return messages;
+    return cachedJsonMessages;
 }
 
 // 清除上下文
 void Conversation::clearContext()
 {
     QMutexLocker locker(&mutex);
-    messages.clear();
+    cachedJsonMessages.clear();
 }
 
 Conversation::Conversation(const QString &agentUuid)
@@ -1295,7 +1311,7 @@ Conversation::Conversation(const QString &agentUuid)
       agentUuid(agentUuid),
       createdTime(getCurrentDateTime()),
       updatedTime(getCurrentDateTime()),
-      messages(mcp::json()),
+      cachedJsonMessages(mcp::json()),
       messageCount(-1)
 {
 }
@@ -1311,7 +1327,7 @@ Conversation::Conversation(const QString &uuid,
       summary(summary),
       createdTime(createdTime),
       updatedTime(updatedTime),
-      messages(mcp::json()),
+      cachedJsonMessages(mcp::json()),
       messageCount(messageCount)
 {
 }
