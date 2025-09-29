@@ -26,6 +26,8 @@ constexpr const char *AVATAR_SYSTEM = "://image/avatar_system.png";
 constexpr const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
 constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
 
+constexpr const char *DEFAULT_CONTENT_CLEAR_CONTEXT = "XLC_ASSISTANT_CLEAR_CONTEXT"; // 清除上下文的Role为SYSTEM的Message的Content
+
 QString getCurrentDateTime();
 QString generateUuid();
 struct Message
@@ -87,7 +89,6 @@ struct Message
         }
     }
 };
-// Q_DECLARE_METATYPE(Message)
 
 /**
  * 获取默认字体

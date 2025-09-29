@@ -82,6 +82,7 @@ class CMessageListWidget : public QListView
 public:
     explicit CMessageListWidget(QWidget *parent = nullptr);
     void addMessage(const CMessage &message);
+    void clearContext();
     // 清除消息
     void clearAllMessage();
 

@@ -36,10 +36,9 @@ DataManager::DataManager(QObject *parent)
     else
         m_filePathAgents = FILE_AGENTS;
 
-    // 响应MCPServers加载完毕信号
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
-    // 响应从数据库获取所有Conversation数据信号
-    connect(DataBaseManager::getInstance().get(), &DataBaseManager::sig_allConversationInfoAcquired, this, &DataManager::slot_handleAllConversationInfoAcquired);
+    connect(DataBaseManager::getInstance()->getWorkerPtr(), &DataBaseWorker::sig_allConversationInfoAcquired, this, &DataManager::slot_handleAllConversationInfoAcquired, Qt::QueuedConnection);
+    connect(DataBaseManager::getInstance()->getWorkerPtr(), &DataBaseWorker::sig_messagesAcquired, this, &DataManager::slot_handleMessagesAcquired, Qt::QueuedConnection);
 }
 
 void DataManager::registerAllMetaType()
@@ -60,26 +59,7 @@ void DataManager::loadDataAsync()
     loadLLMsAsync();
     loadMcpServersAsync();
     loadAgentsAsync();
-    loadConversations(); // 数据库线程获取对话信息
-
-    // QFuture<bool> futureConversations = QtConcurrent::run(
-    //     [this]()
-    //     {
-    //         return this->loadConversations();
-    //     });
-    // QFutureWatcher<bool> *futureWatcherConversations = new QFutureWatcher<bool>(this);
-    // connect(futureWatcherConversations, &QFutureWatcher<bool>::finished, this,
-    //         [this, futureWatcherConversations]()
-    //         {
-    //             bool success = futureWatcherConversations->result();
-    //             Q_EMIT sig_conversationsLoaded(success);
-    //             if (success)
-    //             {
-    //                 XLC_LOG_INFO("Loaded conversations from database (count={})", m_conversations.count());
-    //             }
-    //             futureWatcherConversations->deleteLater();
-    //         });
-    // futureWatcherConversations->setFuture(futureConversations);
+    loadConversations(); // 数据库获取对话信息
 }
 
 void DataManager::loadLLMsAsync()
@@ -175,6 +155,54 @@ void DataManager::slot_handleAllConversationInfoAcquired(bool success, QJsonArra
     Q_EMIT sig_conversationsLoaded(success);
 }
 
+void DataManager::slot_handleMessagesAcquired(bool success, const QString &conversationUuid, QJsonArray jsonArrayMessages)
+{
+    if (!success)
+        return;
+
+    // 解析消息列表，装载消息
+    QList<Message> messages;
+    for (const QJsonValue &value : jsonArrayMessages)
+    {
+        if (!value.isObject())
+            continue;
+        QJsonObject obj = value.toObject();
+        QString temp_uuid = obj["uuid"].toString();
+        QString temp_conversationUuid = obj["conversation_uuid"].toString();
+        QString temp_roleStr = obj["role"].toString();
+        QString temp_content = obj["content"].toString();
+        QString temp_createdTime = obj["created_time"].toString();
+        QString temp_avatarFilePath = obj["avatar_file_path"].toString();
+        QString temp_toolCalls = obj["tool_calls"].toString();
+        QString temp_toolCallId = obj["tool_call_id"].toString();
+
+        Message::Role role;
+        if (temp_roleStr == "USER")
+            role = Message::USER;
+        else if (temp_roleStr == "ASSISTANT")
+            role = Message::ASSISTANT;
+        else if (temp_roleStr == "TOOL")
+            role = Message::TOOL;
+        else if (temp_roleStr == "SYSTEM")
+            role = Message::SYSTEM;
+        else
+            role = Message::UNKNOWN;
+
+        messages.append(Message(temp_uuid, temp_content, role, temp_createdTime, temp_toolCalls, temp_toolCallId, temp_avatarFilePath));
+    }
+    std::shared_ptr<Conversation> conversation = getConversation(conversationUuid);
+    if (!conversation)
+    {
+        XLC_LOG_WARN("Handle messages acquired failed (conversationUuid={}): conversation not found", conversationUuid);
+        return;
+    }
+    conversation->loadMessages(messages);
+    // 从正在获取消息列表中删除对话
+    removePengingConversation(conversationUuid);
+    // 通知界面更新消息
+    Q_EMIT sig_messagesLoaded(conversationUuid);
+}
+
 bool DataManager::loadLLMs(const QString &filePath)
 {
     QFile file(filePath);
@@ -235,7 +263,7 @@ bool DataManager::loadLLMs(const QString &filePath)
     return true;
 }
 
-void DataManager::addLLM(const std::shared_ptr<LLM> &llm)
+void DataManager::addLLM(std::shared_ptr<LLM> llm)
 {
     if (llm)
     {
@@ -254,7 +282,7 @@ void DataManager::removeLLM(const QString &uuid)
     saveLLMsAsync();
 }
 
-void DataManager::updateLLM(const std::shared_ptr<LLM> &llm)
+void DataManager::updateLLM(std::shared_ptr<LLM> llm)
 {
     if (!llm)
     {
@@ -421,7 +449,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     return true;
 }
 
-void DataManager::addMcpServer(const std::shared_ptr<McpServer> &mcpServer)
+void DataManager::addMcpServer(std::shared_ptr<McpServer> mcpServer)
 {
     if (mcpServer)
     {
@@ -440,7 +468,7 @@ void DataManager::removeMcpServer(const QString &uuid)
     saveMcpServersAsync();
 }
 
-void DataManager::updateMcpServer(const std::shared_ptr<McpServer> &mcpServer)
+void DataManager::updateMcpServer(std::shared_ptr<McpServer> mcpServer)
 {
     if (!mcpServer)
     {
@@ -611,7 +639,7 @@ bool DataManager::loadAgents(const QString &filePath)
     return true;
 }
 
-void DataManager::addAgent(const std::shared_ptr<Agent> &agent)
+void DataManager::addAgent(std::shared_ptr<Agent> agent)
 {
     if (agent)
     {
@@ -630,8 +658,9 @@ void DataManager::removeAgent(const QString &uuid)
     saveAgentsAsync();
 }
 
-void DataManager::updateAgent(const std::shared_ptr<Agent> &newAgent)
+void DataManager::updateAgent(std::shared_ptr<Agent> newAgent)
 {
+    // TODO 从数据库删除已删除的对话
     if (!newAgent)
     {
         XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", newAgent->uuid);
@@ -649,7 +678,7 @@ void DataManager::updateAgent(const std::shared_ptr<Agent> &newAgent)
         XLC_LOG_DEBUG("Updated Agent successed (uuid={})", newAgent->uuid);
         saveAgentsAsync();
 
-        // 更新各个conversation的systemprompt
+        // 如果系统提示词被修改，更新各个conversation的systemprompt
         if (isSystemPromptModified)
         {
             for (const QString &conversationUuid : (*it)->conversations)
@@ -758,7 +787,7 @@ bool DataManager::loadConversations()
     return true;
 }
 
-void DataManager::addConversation(const std::shared_ptr<Conversation> &conversation)
+void DataManager::addConversation(std::shared_ptr<Conversation> conversation)
 {
     if (conversation)
     {
@@ -827,6 +856,21 @@ std::shared_ptr<Conversation> DataManager::createNewConversation(const QString &
     // 更新对应agent的对话列表
     targetAgent->conversations.insert(newConversation->uuid);
     return newConversation;
+}
+
+void DataManager::addPengingConversation(const QString &conversationUuid)
+{
+    m_pendingConversations.insert(conversationUuid);
+}
+
+bool DataManager::isPendingConversations(const QString &conversationUuid)
+{
+    return m_pendingConversations.contains(conversationUuid);
+}
+
+void DataManager::removePengingConversation(const QString &conversationUuid)
+{
+    m_pendingConversations.remove(conversationUuid);
 }
 
 // LLM
@@ -1124,6 +1168,32 @@ QJsonObject Agent::toJsonObject() const
 }
 
 // Conversation
+Conversation::Conversation(const QString &agentUuid)
+    : uuid(generateUuid()),
+      agentUuid(agentUuid),
+      createdTime(getCurrentDateTime()),
+      updatedTime(getCurrentDateTime()),
+      cachedJsonMessages(mcp::json()),
+      messageCount(-1)
+{
+}
+
+Conversation::Conversation(const QString &uuid,
+                           const QString &agentUuid,
+                           const QString &summary,
+                           const QString &createdTime,
+                           const QString &updatedTime,
+                           int messageCount)
+    : uuid(uuid),
+      agentUuid(agentUuid),
+      summary(summary),
+      createdTime(createdTime),
+      updatedTime(updatedTime),
+      cachedJsonMessages(mcp::json()),
+      messageCount(messageCount)
+{
+}
+
 std::shared_ptr<Conversation> Conversation::create(const QString &agentUuid)
 {
     // 通过内部 enabler 来调用 protected ctor
@@ -1169,7 +1239,8 @@ std::shared_ptr<Conversation> Conversation::create(const QString &uuid,
 
 bool Conversation::hasSystemPrompt()
 {
-    QMutexLocker locker(&mutex);
+    // 只需要保证缓存的json messages有提示词即可，数据库不保存系统提示词
+    QMutexLocker locker(&mutex_cachedJsonMessages);
     if (!cachedJsonMessages.is_array() || cachedJsonMessages.empty())
     {
         return false;
@@ -1202,12 +1273,12 @@ void Conversation::resetSystemPrompt()
 
     if (hasSystemPrompt())
     {
-        QMutexLocker locker(&mutex);
+        QMutexLocker locker(&mutex_cachedJsonMessages);
         cachedJsonMessages.front() = systemPromptItem;
     }
     else
     {
-        QMutexLocker locker(&mutex);
+        QMutexLocker locker(&mutex_cachedJsonMessages);
         if (cachedJsonMessages.empty())
             cachedJsonMessages.push_back(systemPromptItem);
         else
@@ -1217,51 +1288,68 @@ void Conversation::resetSystemPrompt()
 
 void Conversation::addMessage(const Message &newMessage)
 {
+    // 更新 messages
+    messages.append(newMessage);
+    // 更新本地对话更新时间
+    updatedTime = newMessage.createdTime;
+    // 更新消息数量
+    messageCount += 1;
+
+    // 更新 json messages 缓存
     mcp::json jsonMessage;
-    std::string roleStr;
+    jsonMessage["content"] = newMessage.content.toStdString();
     switch (newMessage.role)
     {
     case Message::USER:
-        roleStr = "user";
-        break;
-    case Message::ASSISTANT:
-        roleStr = "assistant";
-        break;
-    case Message::TOOL:
-        roleStr = "tool";
-        break;
-    case Message::SYSTEM:
-        roleStr = "system";
-        break;
-    default:
-        roleStr = "unknown";
-        break;
-    }
-    jsonMessage["role"] = roleStr;
-    jsonMessage["content"] = newMessage.content.toStdString();
-    if (newMessage.role == Message::TOOL)
-        jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
-    if (newMessage.role == Message::ASSISTANT && !newMessage.toolCalls.isEmpty())
     {
-        try
-        {
-            mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
-            jsonMessage["tool_calls"] = jsonArrayToolCalls;
-        }
-        catch (const mcp::json::parse_error &e)
-        {
-            XLC_LOG_ERROR("JSON Parsing error: {}", e.what());
-        }
-    }
-
-    {
-        QMutexLocker locker(&mutex);
+        jsonMessage["role"] = "user";
+        QMutexLocker locker(&mutex_cachedJsonMessages);
         cachedJsonMessages.push_back(jsonMessage);
-        messages.insert(newMessage.id, newMessage);
-        // 更新本地对话更新时间
-        updatedTime = newMessage.createdTime;
-        // 更新消息数量
-        messageCount+=1;
+        break;
+    }
+    case Message::ASSISTANT:
+    {
+        jsonMessage["role"] = "assistant";
+        if (!newMessage.toolCalls.isEmpty())
+        {
+            try
+            {
+                mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
+                jsonMessage["tool_calls"] = jsonArrayToolCalls;
+            }
+            catch (const mcp::json::parse_error &e)
+            {
+                XLC_LOG_ERROR("Load messages (error={}): JSON Parsing error", e.what());
+            }
+        }
+        QMutexLocker locker(&mutex_cachedJsonMessages);
+        cachedJsonMessages.push_back(jsonMessage);
+        break;
+    }
+    case Message::TOOL:
+    {
+        jsonMessage["role"] = "tool";
+        jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
+        QMutexLocker locker(&mutex_cachedJsonMessages);
+        cachedJsonMessages.push_back(jsonMessage);
+        break;
+    }
+    case Message::SYSTEM:
+    {
+        jsonMessage["role"] = "system";
+        // 清除上下文
+        if (newMessage.content == DEFAULT_CONTENT_CLEAR_CONTEXT)
+        {
+            QMutexLocker locker(&mutex_cachedJsonMessages);
+            cachedJsonMessages.clear();
+        }
+        break;
+    }
+    default:
+    {
+        // 其他情况不添加
+        break;
+    }
     }
 
     // 插入数据库
@@ -1275,19 +1363,13 @@ void Conversation::addMessage(const Message &newMessage)
                                                                 newMessage.toolCallId);
 }
 
-QList<Message> Conversation::getMessages()
+const QVector<Message> Conversation::getMessages()
 {
-    return messages.values();
-}
-
-const mcp::json Conversation::getCachedMessages()
-{
-    // TODO 111在loadConversations获取conversations表中的各项数据，以及对于的messages的数量，先不获取具体message
     /**
-     * TODO 111先返回当前messages，
+     * NOTE 先返回当前messages，
      *      ↓
-     *      再将messageCount与当前cachedJsonMessages.size()作比较
-     *      if (cachedJsonMessages.size() != messageCount || messageCount = -1) -> 从数据库拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
+     *      再将messageCount与当前messages.size()作比较
+     *      if (messages.size() != messageCount || messageCount = -1) -> 通知DataBaseManager拉取最新的数据（sig_getMessages(const QString &conversationUuid)），
      *      并将当前conversationUuid加入DataManager的pendingConversations中，表示正在拉取数据，然后发送信号通知界面更新状态。
      *      ↓
      *      在DataManager响应DataBaseManager中获取Messages的信号（sig_resultGetMessages(uuid, QJsonArray[存储Message的json数组])），
@@ -1295,39 +1377,94 @@ const mcp::json Conversation::getCachedMessages()
      *      ↓
      *      在updateMessages中，更新messages后触发信号通知页面刷新消息列表
      *  */
-    QMutexLocker locker(&mutex);
+    if (messageCount == -1 || messages.size() != messageCount)
+    {
+        if (!DataManager::getInstance()->isPendingConversations(uuid))
+        {
+            DataManager::getInstance()->addPengingConversation(uuid);
+            Q_EMIT DataBaseManager::getInstance()->sig_getMessageList(uuid);
+        }
+    }
+    return messages;
+}
+
+const mcp::json Conversation::getCachedMessages()
+{
+    QMutexLocker locker(&mutex_cachedJsonMessages);
     return cachedJsonMessages;
 }
 
 // 清除上下文
 void Conversation::clearContext()
 {
-    QMutexLocker locker(&mutex);
+    // 加入Role=System的清除上下文消息
+    addMessage(Message(DEFAULT_CONTENT_CLEAR_CONTEXT, Message::SYSTEM, getCurrentDateTime()));
+}
+
+void Conversation::loadMessages(const QList<Message> &messageList)
+{
+    QMutexLocker locker(&mutex_cachedJsonMessages);
     cachedJsonMessages.clear();
-}
+    messages.clear();
+    // 更新消息数量
+    messageCount = messageList.size();
+    for (const Message &newMessage : messageList)
+    {
+        // 更新 messages
+        messages.append(newMessage);
+        // 更新本地对话更新时间
+        updatedTime = newMessage.createdTime;
 
-Conversation::Conversation(const QString &agentUuid)
-    : uuid(generateUuid()),
-      agentUuid(agentUuid),
-      createdTime(getCurrentDateTime()),
-      updatedTime(getCurrentDateTime()),
-      cachedJsonMessages(mcp::json()),
-      messageCount(-1)
-{
-}
-
-Conversation::Conversation(const QString &uuid,
-                           const QString &agentUuid,
-                           const QString &summary,
-                           const QString &createdTime,
-                           const QString &updatedTime,
-                           int messageCount)
-    : uuid(uuid),
-      agentUuid(agentUuid),
-      summary(summary),
-      createdTime(createdTime),
-      updatedTime(updatedTime),
-      cachedJsonMessages(mcp::json()),
-      messageCount(messageCount)
-{
+        // 更新 json messages 缓存
+        mcp::json jsonMessage;
+        jsonMessage["content"] = newMessage.content.toStdString();
+        switch (newMessage.role)
+        {
+        case Message::USER:
+        {
+            jsonMessage["role"] = "user";
+            cachedJsonMessages.push_back(jsonMessage);
+            break;
+        }
+        case Message::ASSISTANT:
+        {
+            jsonMessage["role"] = "assistant";
+            if (!newMessage.toolCalls.isEmpty())
+            {
+                try
+                {
+                    mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
+                    jsonMessage["tool_calls"] = jsonArrayToolCalls;
+                }
+                catch (const mcp::json::parse_error &e)
+                {
+                    XLC_LOG_ERROR("Load messages (error={}): JSON Parsing error", e.what());
+                }
+            }
+            cachedJsonMessages.push_back(jsonMessage);
+            break;
+        }
+        case Message::TOOL:
+        {
+            jsonMessage["role"] = "tool";
+            jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
+            cachedJsonMessages.push_back(jsonMessage);
+            break;
+        }
+        case Message::SYSTEM:
+        {
+            jsonMessage["role"] = "system";
+            // 清除上下文
+            if (newMessage.content == DEFAULT_CONTENT_CLEAR_CONTEXT)
+                cachedJsonMessages.clear();
+            break;
+        }
+        default:
+        {
+            // 其他情况不添加
+            break;
+        }
+        }
+    }
+    XLC_LOG_DEBUG("Load messages successfully (messageCount={})", messageCount);
 }

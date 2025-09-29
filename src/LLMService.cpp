@@ -21,7 +21,7 @@ LLMService::LLMService(QObject *parent)
     connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &LLMService::slot_onToolCallFinished);
 }
 
-void LLMService::processRequest(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)
+void LLMService::processRequest(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools, int max_retries)
 {
     // 使用QtConcurrent::run来在后台线程执行耗时操作
     QtConcurrent::run(
@@ -32,7 +32,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
             {
                 conversation->resetSystemPrompt();
             }
-            const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
+            std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
             XLC_LOG_DEBUG("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, toolsCount={})",
                           conversation->uuid,
                           conversation->summary,
@@ -61,7 +61,9 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"temperature", agent->temperature},
                     {"messages", conversation->getCachedMessages()}};
             }
-            m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
+            XLC_LOG_INFO("获取到的[{}]json messages: {}", conversation->uuid, conversation->getCachedMessages().dump(4));
+            // TODO 使用Qt的http库重构代码
+            std::unique_ptr<httplib::Client> m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
             m_client->set_connection_timeout(10);
 
@@ -133,7 +135,7 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
         Q_EMIT sig_responseReady(conversation->uuid, content);
         return;
     }
-    
+
     // 调用了工具
     QString toolCalls = QString::fromStdString(responseMessage["tool_calls"].dump());
     // 记录消息
@@ -157,6 +159,8 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
         }
         // 执行工具
         MCPService::getInstance()->callTool(CallToolArgs{conversation->uuid, callId, toolName, args});
+        // 更新待处理工具调用数量
+        conversation->pendingToolCalls += 1;
     }
 }
 
@@ -229,9 +233,7 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
         // 更新消息列表
         std::string formattedContent = formatMcpToolResponse(result, callToolArgs.toolName.toStdString(), false);
         conversation->addMessage(Message(QString::fromStdString(formattedContent), Message::TOOL, getCurrentDateTime(), QString(), callToolArgs.callId));
-        // conversation->addMessage({{"role", "tool"},
-        //                           {"tool_call_id", callToolArgs.callId.toStdString()},
-        //                           {"content", formattedContent}});
+
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
                                                       .arg(success)
@@ -246,17 +248,19 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
             return;
         }
         conversation->addMessage(Message(errorMessage, Message::TOOL, getCurrentDateTime(), Q_NULLPTR, callToolArgs.callId));
-        // conversation->addMessage({{"role", "tool"},
-        //                           {"tool_call_id", callToolArgs.callId.toStdString()},
-        //                           {"content", errorMessage.toStdString()}});
+
         // 展示调用结果
         Q_EMIT sig_toolCalled(conversation->uuid, QString::fromStdString("Result of call tool (success=%1, callId=%2, errorMessage=%3)")
                                                       .arg(success)
                                                       .arg(callToolArgs.callId)
                                                       .arg(errorMessage));
     }
+    // 更新待处理工具调用数量
+    conversation->pendingToolCalls -= 1;
 
-    // 回应LLM
+    // 保证所有toolcall获取到结果后再响应LLM
+    if (conversation->pendingToolCalls > 0)
+        return;
     std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(conversation->agentUuid);
     if (!agent)
     {

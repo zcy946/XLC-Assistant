@@ -14,12 +14,11 @@ DataBaseManager::DataBaseManager(QObject *parent)
 
     connect(qApp, &QCoreApplication::aboutToQuit, &m_thread, &QThread::quit);
 
-    // 在线程启动后初始化数据库，确保 QSqlDatabase 和 worker 在同一线程
-    connect(&m_thread, &QThread::started, m_worker, &DataBaseWorker::slot_initialize);
+    connect(&m_thread, &QThread::started, m_worker, &DataBaseWorker::slot_initialize); // 在线程启动后初始化数据库，确保 QSqlDatabase 和 worker 在同一线程
     connect(this, &DataBaseManager::sig_getAllConversationInfo, m_worker, &DataBaseWorker::slot_getAllConversationInfo, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_insertNewConversation, m_worker, &DataBaseWorker::slot_insertNewConversation, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_insertNewMessage, m_worker, &DataBaseWorker::slot_insertNewMessage, Qt::QueuedConnection);
-    connect(m_worker, &DataBaseWorker::sig_allConversationInfoAcquired, this, &DataBaseManager::sig_allConversationInfoAcquired);
+    connect(this, &DataBaseManager::sig_getMessageList, m_worker, &DataBaseWorker::slot_getMessages, Qt::QueuedConnection);
 
     m_thread.start();
 }
@@ -35,6 +34,11 @@ DataBaseManager::~DataBaseManager()
         m_worker->deleteLater();
         m_worker = nullptr;
     }
+}
+
+const DataBaseWorker *DataBaseManager::getWorkerPtr()
+{
+    return m_worker;
 }
 
 // DataBaseWorker
@@ -93,7 +97,7 @@ void DataBaseWorker::initializeDatabase()
                 id TEXT UNIQUE NOT NULL,
                 conversation_id TEXT NOT NULL,
                 role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'TOOL', 'SYSTEM', 'UNKNOWN')),
-                text TEXT NOT NULL,
+                content TEXT NOT NULL,
                 created_time TEXT NOT NULL,
                 avatar_file_path TEXT,
                 tool_calls TEXT,
@@ -170,7 +174,6 @@ void DataBaseWorker::slot_getAllConversationInfo()
         Q_EMIT sig_allConversationInfoAcquired(false, QJsonArray());
         return;
     }
-    XLC_LOG_TRACE("Get all conversation information successfully (query={})", query.lastQuery());
     // 解析数据
     QJsonArray jsonArrayConversationInfo;
     while (query.next())
@@ -184,6 +187,7 @@ void DataBaseWorker::slot_getAllConversationInfo()
         jsonObjConversationInfo["message_count"] = query.value(5).toInt();
         jsonArrayConversationInfo.append(jsonObjConversationInfo);
     }
+    XLC_LOG_TRACE("Get all conversation information successfully (conversationsCount={}, query={})", jsonArrayConversationInfo.size(), query.lastQuery());
     Q_EMIT sig_allConversationInfoAcquired(true, jsonArrayConversationInfo);
 }
 
@@ -205,31 +209,31 @@ void DataBaseWorker::slot_insertNewConversation(const QString &agentUuid,
     query.bindValue(":updated_time", updatedTime);
     if (!query.exec())
     {
-        XLC_LOG_WARN("Insert conversations failed (query={}, uuid={}, agentUuid={}, summary={}, createdTime={}, updatedTime={}): {}",
-                     query.lastQuery(),
-                     query.lastError().text(),
+        XLC_LOG_WARN("Insert conversations failed (uuid={}, agentUuid={}, summary={}, createdTime={}, updatedTime={}, query={}): {}",
                      uuid,
                      agentUuid,
                      summary,
                      createdTime,
-                     updatedTime);
+                     updatedTime,
+                     query.lastQuery(),
+                     query.lastError().text());
     }
     else
     {
-        XLC_LOG_TRACE("Insert conversations successfully (query={}, uuid={}, agentUuid={}, summary={}, createdTime={}, updatedTime={})",
-                      query.lastQuery(),
+        XLC_LOG_TRACE("Insert conversations successfully (uuid={}, agentUuid={}, summary={}, createdTime={}, updatedTime={}, query={})",
                       uuid,
                       agentUuid,
                       summary,
                       createdTime,
-                      updatedTime);
+                      updatedTime,
+                      query.lastQuery());
     }
 }
 
 void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                                            const QString &uuid,
                                            int role,
-                                           const QString &text,
+                                           const QString &content,
                                            const QString &createdTime,
                                            const QString &avatarFilePath,
                                            const QString &toolCalls,
@@ -258,13 +262,13 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     // 插入新消息
     QSqlQuery query(m_dataBase);
     query.prepare(R"(
-                INSERT INTO messages (id, conversation_id, role, text, created_time, avatar_file_path, tool_calls, tool_call_id)
-                VALUES (:id, :conversation_id, :role, :text, :created_time, :avatar_file_path, :tool_calls, :tool_call_id)
+                INSERT INTO messages (id, conversation_id, role, content, created_time, avatar_file_path, tool_calls, tool_call_id)
+                VALUES (:id, :conversation_id, :role, :content, :created_time, :avatar_file_path, :tool_calls, :tool_call_id)
             )");
     query.bindValue(":id", uuid);
     query.bindValue(":conversation_id", conversationUuid);
     query.bindValue(":role", strRole);
-    query.bindValue(":text", text);
+    query.bindValue(":content", content);
     query.bindValue(":created_time", createdTime);
     query.bindValue(":avatar_file_path", avatarFilePath);
     query.bindValue(":tool_calls", toolCalls);
@@ -272,30 +276,30 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     if (!query.exec())
     {
         // TODO 处理错误
-        XLC_LOG_WARN("Insert message failed (query={}, uuid={}, conversationUuid={}, role={}, text={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={}): {}",
-                     query.lastQuery(),
-                     query.lastError().text(),
+        XLC_LOG_WARN("Insert message failed (uuid={}, conversationUuid={}, role={}, content={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={}, query={}): {}",
                      uuid,
                      conversationUuid,
                      strRole,
-                     text,
+                     content,
                      createdTime,
                      avatarFilePath,
                      toolCalls,
-                     toolCallId);
+                     toolCallId,
+                     query.lastQuery(),
+                     query.lastError().text());
     }
     else
     {
-        XLC_LOG_TRACE("Insert message successfully (query={}, uuid={}, conversationUuid={}, role={}, text={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={})",
-                      query.lastQuery(),
+        XLC_LOG_TRACE("Insert message successfully (uuid={}, conversationUuid={}, role={}, content={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={}, query={})",
                       uuid,
                       conversationUuid,
                       strRole,
-                      text,
+                      content,
                       createdTime,
                       avatarFilePath,
                       toolCalls,
-                      toolCallId);
+                      toolCallId,
+                      query.lastQuery());
     }
 
     // 更新对应 conversation 的更新时间
@@ -317,17 +321,66 @@ void DataBaseWorker::slot_updateConversationUpdatedTime(const QString &uuid, con
     query.bindValue(":id", uuid);
     if (!query.exec())
     {
-        XLC_LOG_WARN("Update conversation updated_time failed (query={}, uuid={}, newUpdatedTime={}): {}",
-                     query.lastQuery(),
-                     query.lastError().text(),
+        XLC_LOG_WARN("Update conversation updated_time failed (uuid={}, newUpdatedTime={}, query={}): {}",
                      uuid,
-                     newUpdatedTime);
+                     newUpdatedTime,
+                     query.lastQuery(),
+                     query.lastError().text());
     }
     else
     {
-        XLC_LOG_TRACE("Update conversation updated_time successfully (query={}, uuid={}, newUpdatedTime={})",
+        XLC_LOG_TRACE("Update conversation updated_time successfully (uuid={}, newUpdatedTime={}, query={})",
+                      newUpdatedTime,
                       query.lastQuery(),
-                      uuid,
-                      newUpdatedTime);
+                      uuid);
     }
+}
+
+void DataBaseWorker::slot_getMessages(const QString &conversationUuid)
+{
+    QSqlQuery query(m_dataBase);
+    query.prepare(R"(
+                SELECT
+                    msg.id,
+                    msg.conversation_id,
+                    msg.role,
+                    msg.content,
+                    msg.created_time,
+                    msg.avatar_file_path,
+                    msg.tool_calls,
+                    msg.tool_call_id
+                FROM
+                    messages msg
+                WHERE
+                    msg.conversation_id = :conversationUuid
+                ORDER BY
+                    msg.seq
+            )");
+    query.bindValue(":conversationUuid", conversationUuid);
+    if (!query.exec())
+    {
+        XLC_LOG_WARN("Get messages failed (conversationUuid={}, query={}): {}",
+                     conversationUuid,
+                     query.lastQuery(),
+                     query.lastError().text());
+        Q_EMIT sig_messagesAcquired(false, conversationUuid, QJsonArray());
+        return;
+    }
+    // 解析数据
+    QJsonArray jsonArrayMessages;
+    while (query.next())
+    {
+        QJsonObject jsonObjMessage;
+        jsonObjMessage["uuid"] = query.value(0).toString();
+        jsonObjMessage["conversation_uuid"] = query.value(1).toString();
+        jsonObjMessage["role"] = query.value(2).toString();
+        jsonObjMessage["content"] = query.value(3).toString();
+        jsonObjMessage["created_time"] = query.value(4).toString();
+        jsonObjMessage["avatar_file_path"] = query.value(5).toString();
+        jsonObjMessage["tool_calls"] = query.value(6).toString();
+        jsonObjMessage["tool_call_id"] = query.value(7).toString();
+        jsonArrayMessages.append(jsonObjMessage);
+    }
+    XLC_LOG_DEBUG("Get messages successfully (conversationUuid={}, messagesCount={}, query={})", conversationUuid, jsonArrayMessages.size(), query.lastQuery());
+    Q_EMIT sig_messagesAcquired(true, conversationUuid, jsonArrayMessages);
 }
