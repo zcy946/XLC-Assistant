@@ -661,6 +661,7 @@ void DataManager::removeAgent(const QString &uuid)
 void DataManager::updateAgent(std::shared_ptr<Agent> newAgent)
 {
     // TODO 从数据库删除已删除的对话
+    
     if (!newAgent)
     {
         XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", newAgent->uuid);
