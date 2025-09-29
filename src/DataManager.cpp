@@ -1257,11 +1257,11 @@ void Conversation::addMessage(const Message &newMessage)
     {
         QMutexLocker locker(&mutex);
         cachedJsonMessages.push_back(jsonMessage);
-        messages.insert(newMessage.id, newMessage);
+        messages.append(newMessage);
         // 更新本地对话更新时间
         updatedTime = newMessage.createdTime;
         // 更新消息数量
-        messageCount+=1;
+        messageCount += 1;
     }
 
     // 插入数据库
@@ -1275,9 +1275,14 @@ void Conversation::addMessage(const Message &newMessage)
                                                                 newMessage.toolCallId);
 }
 
-QList<Message> Conversation::getMessages()
+// QList<Message> Conversation::getMessages()
+// {
+//     return messages.values();
+// }
+
+const QVector<Message> Conversation::getMessages()
 {
-    return messages.values();
+    return messages;
 }
 
 const mcp::json Conversation::getCachedMessages()

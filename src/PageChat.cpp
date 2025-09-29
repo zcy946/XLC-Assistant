@@ -555,13 +555,11 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
 
     // 刷新消息列表
     m_listWidgetMessages->clearAllMessage();
-    QList<Message> messages = conversation->getMessages();
+    QVector<Message> messages = conversation->getMessages();
     // 刷新历史消息列表m_listWidgetMessages
-    // BUG 1. LLM 调用tool的展示有问题 2. 获取的messages中的消息顺序不对
     for (const Message &message : messages)
     {
         m_listWidgetMessages->addMessage(CMessage(message.id, message.content, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
-        XLC_LOG_CRITICAL("message: {}", message.content);
     }
     XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }
