@@ -82,7 +82,7 @@ CREATE TABLE messages (
     id TEXT UNIQUE NOT NULL,                 -- 消息ID (UUID)
     conversation_id TEXT NOT NULL,       -- 关联的会话ID
     role TEXT NOT NULL CHECK(role IN ('USER', 'ASSISTANT', 'TOOL', 'SYSTEM', 'UNKNOWN')), -- 消息角色
-    text TEXT NOT NULL,                  -- 消息内容
+    content TEXT NOT NULL,                  -- 消息内容
     created_time TEXT NOT NULL,          -- 创建时间 (ISO 8601)
     avatar_file_path TEXT,               -- 头像文件路径
     tool_calls TEXT,					 -- 当LLM调用工具时存在的字段

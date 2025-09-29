@@ -24,6 +24,7 @@ Q_SIGNALS:
     void sig_LLMsLoaded(bool success);
     void sig_mcpServersLoaded(bool success);
     void sig_agentsLoaded(bool success);
+    void sig_messagesLoaded(const QString &conversationUuid);
     void sig_conversationsLoaded(bool success);
     void sig_LLMsFilePathChange(const QString &filePath);
     void sig_mcpServersFilePathChange(const QString &filePath);
@@ -33,8 +34,12 @@ Q_SIGNALS:
     void sig_agentUpdate(const QString &uuid);
 
 private Q_SLOTS:
+    // 处理 MCP Servers 加载完毕事件
     void slot_onMcpServersLoaded(bool success);
+    // 处理从数据库获取到所有Conversation数据事件
     void slot_handleAllConversationInfoAcquired(bool success, QJsonArray jsonArrayConversations);
+    // 处理从数据库获取到消息列表事件
+    void slot_handleMessagesAcquired(bool success, const QString &conversationUuid, QJsonArray jsonArrayMessages);
 
 public:
     static DataManager *getInstance();
@@ -42,48 +47,55 @@ public:
     static void registerAllMetaType();
     void init();
 
+    // LLM
     bool loadLLMs(const QString &filePath);
-    void addLLM(const std::shared_ptr<LLM> &llm);
+    void addLLM(std::shared_ptr<LLM> llm);
     void removeLLM(const QString &uuid);
-    void updateLLM(const std::shared_ptr<LLM> &llm);
+    void updateLLM(std::shared_ptr<LLM> llm);
     void saveLLMs(const QString &filePath) const;
     void saveLLMsAsync(const QString &filePath = QString()) const;
     std::shared_ptr<LLM> getLLM(const QString &uuid) const;
     QList<std::shared_ptr<LLM>> getLLMs() const;
     void setFilePathLLMs(const QString &filePath);
     const QString &getFilePathLLMs() const;
-
+    // MCP Server
     bool loadMcpServers(const QString &filePath);
-    void addMcpServer(const std::shared_ptr<McpServer> &mcpServer);
+    void addMcpServer(std::shared_ptr<McpServer> mcpServer);
     void removeMcpServer(const QString &uuid);
-    void updateMcpServer(const std::shared_ptr<McpServer> &mcpServer);
+    void updateMcpServer(std::shared_ptr<McpServer> mcpServer);
     void saveMcpServers(const QString &filePath) const;
     void saveMcpServersAsync(const QString &filePath = QString()) const;
     std::shared_ptr<McpServer> getMcpServer(const QString &uuid) const;
     QList<std::shared_ptr<McpServer>> getMcpServers() const;
     void setFilePathMcpServers(const QString &filePath);
     const QString &getFilePathMcpServers() const;
-
+    // Agent
     bool loadAgents(const QString &filePath);
     void removeAgent(const QString &uuid);
-    void updateAgent(const std::shared_ptr<Agent> &newAgent);
+    void updateAgent(std::shared_ptr<Agent> newAgent);
     void saveAgents(const QString &filePath) const;
     void saveAgentsAsync(const QString &filePath = QString()) const;
-    void addAgent(const std::shared_ptr<Agent> &agent);
+    void addAgent(std::shared_ptr<Agent> agent);
     std::shared_ptr<Agent> getAgent(const QString &uuid) const;
     QList<std::shared_ptr<Agent>> getAgents() const;
     void setFilePathAgents(const QString &filePath);
     const QString &getFilePathAgents() const;
-
+    // conversation
     bool loadConversations();
     // 添加对话，并同步到配置文件
-    void addConversation(const std::shared_ptr<Conversation> &conversation);
+    void addConversation(std::shared_ptr<Conversation> conversation);
     void removeConversation(const QString &uuid);
     void updateConversation(std::shared_ptr<Conversation> newConversation);
     std::shared_ptr<Conversation> getConversation(const QString &uuid) const;
     QList<std::shared_ptr<Conversation>> getConversations() const;
     // 通过`agentUuid`创建新的`conversation`并绑定到该`agent`
     std::shared_ptr<Conversation> createNewConversation(const QString &agentUuid);
+    // 添加对话到正在获取消息列表
+    void addPengingConversation(const QString &conversationUuid);
+    // 查看是否正在获取消息
+    bool isPendingConversations(const QString &conversationUuid);
+    // 从正在获取消息列表中删除对话
+    void removePengingConversation(const QString &conversationUuid);
 
 private:
     explicit DataManager(QObject *parent = nullptr);
@@ -103,6 +115,7 @@ private:
     QHash<QString, std::shared_ptr<McpServer>> m_mcpServers;       // uuid - ptr
     QHash<QString, std::shared_ptr<Agent>> m_agents;               // uuid - ptr
     QHash<QString, std::shared_ptr<Conversation>> m_conversations; // uuid - ptr
+    QSet<QString> m_pendingConversations;                          // conversationUuid - 正在从数据库获取消息的对话
 };
 
 struct LLM
@@ -124,7 +137,6 @@ struct LLM
 
     QJsonObject toJsonObject() const;
 };
-// Q_DECLARE_METATYPE(LLM)
 
 struct McpServer
 {
@@ -180,7 +192,6 @@ struct McpServer
     // 将 McpServer 序列化为 QJsonObject
     QJsonObject toJsonObject() const;
 };
-// Q_DECLARE_METATYPE(McpServer)
 
 struct Agent
 {
@@ -213,22 +224,17 @@ struct Agent
     // 将 Agent 序列化为 QJsonObject
     QJsonObject toJsonObject() const;
 };
-// Q_DECLARE_METATYPE(Agent)
 
 struct Conversation : public std::enable_shared_from_this<Conversation>
 {
-    QString uuid;
-    QString agentUuid;
-    QString summary;
-    QString createdTime;
-    QString updatedTime;
-    int messageCount = -1;    // 记录消息数量，初始化为 -1 代表未同步/同步失败数据库
-    int pendingToolCalls = 0; // 待处理的工具调用数量
-
-private:
-    QMutex mutex;
-    mcp::json cachedJsonMessages;
-    QVector<Message> messages;
+protected:
+    Conversation(const QString &agentUuid);
+    Conversation(const QString &uuid,
+                 const QString &agentUuid,
+                 const QString &summary,
+                 const QString &createdTime,
+                 const QString &updatedTime,
+                 int messageCount);
 
 public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid);
@@ -238,25 +244,35 @@ public:
                                                 const QString &createdTime,
                                                 const QString &updatedTime,
                                                 int messageCount);
+
+    // 是否有系统提示词
     bool hasSystemPrompt();
+    // 重设系统提示词
     void resetSystemPrompt();
+    // 添加消息
     void addMessage(const Message &newMessage);
-    // QList<Message> getMessages();
+    // 获取所有消息
     const QVector<Message> getMessages();
+    // 获取json格式的messages
     const mcp::json getCachedMessages();
     // 清除上下文
     void clearContext();
+    // 从[数据库获取的]消息列表中加载
+    void loadMessages(const QList<Message> &messages);
 
-protected:
-    Conversation(const QString &agentUuid);
-    Conversation(const QString &uuid,
-                 const QString &agentUuid,
-                 const QString &summary,
-                 const QString &createdTime,
-                 const QString &updatedTime,
-                 int messageCount);
+public:
+    QString uuid;             // 对话唯一标识
+    QString agentUuid;        // agent唯一标识
+    QString summary;          // 摘要-对话标题
+    QString createdTime;      // 创建时间
+    QString updatedTime;      // 更新时间
+    int messageCount = -1;    // 记录消息数量(非缓存消息)，初始化为 -1 代表未同步/同步失败数据库
+    int pendingToolCalls = 0; // 待处理的工具调用数量
+
+private:
+    QMutex mutex_cachedJsonMessages;
+    mcp::json cachedJsonMessages;
+    QVector<Message> messages;
 };
-
-// Q_DECLARE_METATYPE(Conversation)
 
 #endif // DATAMANAGER_H

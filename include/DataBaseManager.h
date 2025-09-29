@@ -5,7 +5,6 @@
 #include "Singleton.h"
 #include <QSqlDatabase>
 #include <QThread>
-#include "global.h"
 #include <QJsonArray>
 
 class DataBaseWorker;
@@ -17,9 +16,7 @@ class DataBaseManager : public QObject, public Singleton<DataBaseManager>
 Q_SIGNALS:
     // 获取所有对话信息
     void sig_getAllConversationInfo();
-    // 所有对话信息被获取
-    void sig_allConversationInfoAcquired(bool success, QJsonArray jsonArrayConversations);
-    // 新增conversation
+    // 新增对话
     void sig_insertNewConversation(const QString &agentUuid,
                                    const QString &uuid,
                                    const QString &summary,
@@ -34,9 +31,12 @@ Q_SIGNALS:
                               const QString &avatarFilePath,
                               const QString &toolCalls,
                               const QString &toolCallId);
+    // 获取消息列表
+    void sig_getMessageList(const QString &conversationUuid);
 
 public:
     ~DataBaseManager();
+    const DataBaseWorker *getWorkerPtr();
 
 private:
     explicit DataBaseManager(QObject *parent = nullptr);
@@ -53,6 +53,7 @@ class DataBaseWorker : public QObject
 
 Q_SIGNALS:
     void sig_allConversationInfoAcquired(bool success, QJsonArray jsonArrayConversationInfo);
+    void sig_messagesAcquired(bool success, const QString &conversationUuid, QJsonArray jsonArrayMessages);
 
 public Q_SLOTS:
     void slot_initialize();
@@ -65,12 +66,13 @@ public Q_SLOTS:
     void slot_insertNewMessage(const QString &conversationUuid,
                                const QString &uuid,
                                int role,
-                               const QString &text,
+                               const QString &content,
                                const QString &createdTime,
                                const QString &avatarFilePath,
                                const QString &toolCalls,
                                const QString &toolCallId);
     void slot_updateConversationUpdatedTime(const QString &uuid, const QString &newUpdatedTime);
+    void slot_getMessages(const QString &conversationUuid);
 
 public:
     explicit DataBaseWorker(const QString &dataBaseFile, QObject *parent = nullptr);

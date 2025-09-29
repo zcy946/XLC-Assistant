@@ -87,6 +87,26 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     // 获取数据
     QString text = index.data(CMessageListModel::Text).toString();
     Message::Role role = static_cast<Message::Role>(index.data(CMessageListModel::Role).toInt());
+
+    // 绘制清除上下文分割线
+    if (role == Message::SYSTEM && text == DEFAULT_CONTENT_CLEAR_CONTEXT)
+    {
+        QString text = "清除上下文";
+        QFontMetrics fontMetrics(option.font);
+        int textWidth = fontMetrics.horizontalAdvance(text);
+        int lineLength = (option.rect.width() - textWidth) / 2;
+        QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);
+        QRect rectDrawText = QRect(option.rect.topLeft() + QPoint(lineLength, PADDING), rectText.size());
+        painter->setPen(QColor("#D0D0D0"));
+        painter->drawLine(QPoint(option.rect.left() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(rectDrawText.left() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
+        painter->setPen(QColor("#000000"));
+        painter->drawText(rectDrawText, text);
+        painter->setPen(QColor("#D0D0D0"));
+        painter->drawLine(QPoint(rectDrawText.right() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(option.rect.right() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
+        painter->restore();
+        return;
+    }
+
     QString createDateTime = index.data(CMessageListModel::CreatedTime).toString();
     QString avatarFilePath = index.data(CMessageListModel::AvatarFilePath).toString();
     QString nick;
@@ -156,6 +176,14 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
     // 拿到 listView 的宽度（比 option.rect 更准确）
     int viewWidth = option.widget ? option.widget->width() : option.rect.width();
     QFontMetrics fontMetrics(option.font);
+
+    // 清除上下文分割线
+    if (message->role == Message::SYSTEM && message->content == DEFAULT_CONTENT_CLEAR_CONTEXT)
+    {
+        return QSize(viewWidth, fontMetrics.height() + PADDING * 2);
+    }
+
+    // 正常消息
     int textWidth = viewWidth - PADDING - AVATAR_SIZE - NICK_MARGIN - PADDING; // 左 padding + 头像 + 头像到昵称的距离 + 右 padding
     if (textWidth < 50)                                                        // 宽度太小保护一下
         textWidth = 50;
@@ -250,6 +278,11 @@ void CMessageListWidget::resizeEvent(QResizeEvent *event)
 void CMessageListWidget::addMessage(const CMessage &message)
 {
     m_model->addMessage(message);
+}
+
+void CMessageListWidget::clearContext()
+{
+    m_model->addMessage(CMessage(DEFAULT_CONTENT_CLEAR_CONTEXT, Message::SYSTEM, getCurrentDateTime()));
 }
 
 void CMessageListWidget::clearAllMessage()

@@ -145,7 +145,7 @@ void PageSettingsLLM::initItems()
     connect(m_pushButtonReset, &QPushButton::clicked, this,
             [this]()
             {
-                const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
+                std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
                 if (!llm)
                     return;
                 m_widgetLLMInfo->updateFormData(llm);
@@ -240,7 +240,7 @@ void PageSettingsLLM::slot_onLLMsLoaded(bool success)
         QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
         if (!selectedItem)
             return;
-        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
+        std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
         m_widgetLLMInfo->updateFormData(llm);
@@ -268,7 +268,7 @@ void PageSettingsLLM::slot_onPushButtonClickedRemove()
         QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
         if (!selectedItem)
             return;
-        const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
+        std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
         if (!llm)
             return;
         m_widgetLLMInfo->updateFormData(llm);
@@ -281,7 +281,7 @@ void PageSettingsLLM::slot_onPushButtonClickedRemove()
 
 void PageSettingsLLM::showLLMInfo(const QString &uuid)
 {
-    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(uuid);
+    std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(uuid);
     if (!llm)
     {
         XLC_LOG_WARN("LLM not found (uuid={})", uuid);
@@ -489,7 +489,7 @@ void PageSettingsAgent::initItems()
     connect(m_pushButtonReset, &QPushButton::clicked, this,
             [this]()
             {
-                const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
+                std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
                 if (!agent)
                     return;
                 m_widgetAgentInfo->updateFormData(agent);
@@ -579,7 +579,7 @@ void PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded(bool succ
         QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
         if (!selectedItem)
             return;
-        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
+        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
         m_widgetAgentInfo->updateFormData(agent);
@@ -607,7 +607,7 @@ void PageSettingsAgent::slot_onPushButtonClickedRemove()
         QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
         if (!selectedItem)
             return;
-        const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
+        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
         if (!agent)
             return;
         m_widgetAgentInfo->updateFormData(agent);
@@ -620,7 +620,7 @@ void PageSettingsAgent::slot_onPushButtonClickedRemove()
 
 void PageSettingsAgent::showAgentInfo(const QString &uuid)
 {
-    const std::shared_ptr<Agent> &agent = DataManager::getInstance()->getAgent(uuid);
+    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(uuid);
     if (!agent)
     {
         XLC_LOG_WARN("Agent not found (uuid={})", uuid);
@@ -832,7 +832,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     m_lineEditName->setText(agent->name);
     m_plainTextEditDescription->setPlainText(agent->description);
     updateLLMList();
-    const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
+    std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
     {
         XLC_LOG_WARN("LLM not found ({})", agent->llmUUid);
@@ -851,7 +851,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     m_listWidgetMcpServers->clear();
     for (const QString &uuid : agent->mcpServers)
     {
-        const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
+        std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
         {
             XLC_LOG_WARN("MCP server not found ({})", uuid);
@@ -867,7 +867,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     m_listWidgetConversations->clear();
     for (const QString &uuid : agent->conversations)
     {
-        const std::shared_ptr<Conversation> &conversation = DataManager::getInstance()->getConversation(uuid);
+        std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
             XLC_LOG_WARN("Conversation is loading or not found (uuid={})", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
@@ -990,7 +990,7 @@ void WidgetAgentInfo::updateMCPServerList(const std::shared_ptr<Agent> &agent)
 
     for (const QString &uuid : currentAgent->mcpServers)
     {
-        const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
+        std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
         {
             XLC_LOG_WARN("Update MCP server list (serverUuid={}): MCP server not found", uuid);
@@ -1256,7 +1256,7 @@ void PageSettingsMcp::slot_onPushButtonClickedRemove()
             QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
             if (!selectedItem)
                 return;
-            const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>());
+            std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>());
             if (!mcpServer)
                 return;
             m_widgetMcpServerInfo->updateFormData(mcpServer);
@@ -1270,7 +1270,7 @@ void PageSettingsMcp::slot_onPushButtonClickedRemove()
 
 void PageSettingsMcp::showMcpServerInfo(const QString &uuid)
 {
-    const std::shared_ptr<McpServer> &mcpServer = DataManager::getInstance()->getMcpServer(uuid);
+    std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
     if (!mcpServer)
     {
         XLC_LOG_WARN("MCP server not found (serverUuid={})", uuid);

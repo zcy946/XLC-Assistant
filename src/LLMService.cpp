@@ -21,7 +21,7 @@ LLMService::LLMService(QObject *parent)
     connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &LLMService::slot_onToolCallFinished);
 }
 
-void LLMService::processRequest(const std::shared_ptr<Conversation> &conversation, const std::shared_ptr<Agent> &agent, const mcp::json &tools, int max_retries)
+void LLMService::processRequest(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools, int max_retries)
 {
     // 使用QtConcurrent::run来在后台线程执行耗时操作
     QtConcurrent::run(
@@ -32,7 +32,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
             {
                 conversation->resetSystemPrompt();
             }
-            const std::shared_ptr<LLM> &llm = DataManager::getInstance()->getLLM(agent->llmUUid);
+            std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
             XLC_LOG_DEBUG("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, toolsCount={})",
                           conversation->uuid,
                           conversation->summary,
@@ -61,6 +61,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"temperature", agent->temperature},
                     {"messages", conversation->getCachedMessages()}};
             }
+            XLC_LOG_INFO("获取到的[{}]json messages: {}", conversation->uuid, conversation->getCachedMessages().dump(4));
             // TODO 使用Qt的http库重构代码
             std::unique_ptr<httplib::Client> m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
