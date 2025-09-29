@@ -43,7 +43,6 @@ private:
 
 private:
     static LLMService *s_instance;
-    std::unique_ptr<httplib::Client> m_client;
 };
 
 #endif // LLMSERVICE_H

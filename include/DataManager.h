@@ -222,14 +222,13 @@ struct Conversation : public std::enable_shared_from_this<Conversation>
     QString summary;
     QString createdTime;
     QString updatedTime;
-    int messageCount = -1; // 记录消息数量，初始化为 -1 代表未同步/同步失败数据库
+    int messageCount = -1;    // 记录消息数量，初始化为 -1 代表未同步/同步失败数据库
+    int pendingToolCalls = 0; // 待处理的工具调用数量
 
 private:
     QMutex mutex;
     mcp::json cachedJsonMessages;
     QVector<Message> messages;
-
-    // TODO 添加`QMap<QString, Message> messages`，将`mcp::json messages`改为`cachedJsonMessages`。用于解决当前的messages[cachedJsonMessages]无法存储消息时间的问题
 
 public:
     static std::shared_ptr<Conversation> create(const QString &agentUuid);

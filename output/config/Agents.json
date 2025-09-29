@@ -3,12 +3,12 @@
         "context": 2048,
         "conversations": [
             "bfd93fff-6473-4874-8a0e-f9863d1229c8",
-            "a48bc6e8-e302-4467-af32-4b4586ec5edd",
+            "5ff7bf62-0fd4-4e04-8654-480ddb96d36c",
             "5fd35b50-795b-47b1-bbd6-034a882cfc12",
             "4bc95b82-b0f9-4a4a-b854-e20532f46b2f",
-            "03014acd-9912-4f13-a3f1-6fe4b7a91b7a",
-            "5ff7bf62-0fd4-4e04-8654-480ddb96d36c",
-            "aef2346e-cbe8-4bc4-af2b-ab18969b6f51"
+            "a48bc6e8-e302-4467-af32-4b4586ec5edd",
+            "aef2346e-cbe8-4bc4-af2b-ab18969b6f51",
+            "03014acd-9912-4f13-a3f1-6fe4b7a91b7a"
         ],
         "description": "开发测试使用Agent[无mcp服务器挂载]",
         "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
@@ -17,7 +17,7 @@
             "d0e1f2a3-b4c5-6789-0123-def057887878"
         ],
         "name": "开发测试Agent[无mcp服务器挂载]",
-        "systemPrompt": "你是一个擅长调用工具解决问题的小助手，在回答问题之前你应该看看有没有可以使用的工具。",
+        "systemPrompt": "你是一个擅长调用工具解决问题的小助手，在回答问题之前你应该看看有没有可以使用的工具。如果条件允许的话，请在一次请求中调用多个工具",
         "temperature": 0.7,
         "topP": 0.9,
         "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef123456"

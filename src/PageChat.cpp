@@ -196,10 +196,8 @@ void PageChat::slot_onMessageSent(const QString &message)
     if (allMcpServersReady)
     {
         m_widgetChat->addNewMessage(CMessage(message, Message::USER, getCurrentDateTime()));
-        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::USER));
         // 记录问题
         conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
-        // conversation->addMessage({{"role", "user"}, {"content", message.toStdString()}});
         LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
     }
     else
@@ -295,7 +293,6 @@ void PageChat::slot_handleResponse(const QString &conversationUuid, const QStrin
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
         m_widgetChat->addNewMessage(CMessage(responseMessage, Message::ASSISTANT, getCurrentDateTime()));
-        // m_widgetChat->addNewMessage(CMessage(responseMessage, Message::Role::ASSISTANT));
     }
 }
 
@@ -304,7 +301,6 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
         m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL, getCurrentDateTime()));
-        // m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL));
     }
 }
 
