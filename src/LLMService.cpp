@@ -61,10 +61,7 @@ void LLMService::processRequest(const std::shared_ptr<Conversation> &conversatio
                     {"temperature", agent->temperature},
                     {"messages", conversation->getCachedMessages()}};
             }
-            /**
-             * BUG 一次LLM响应调用两个工具，会连续触发两次`processRequest`。造成前一次socket上的 HTTP 请求还未完成(正在使用)，
-             * 后一次请求就用再次初始化导致上一个m_client所指向的socket被析构触发断言
-             * 重构代码： 使用Qt的http库 */
+            // TODO 使用Qt的http库重构代码
             std::unique_ptr<httplib::Client> m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
             m_client->set_connection_timeout(10);
