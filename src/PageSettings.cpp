@@ -835,7 +835,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
     if (!llm)
     {
-        XLC_LOG_WARN("LLM not found ({})", agent->llmUUid);
+        XLC_LOG_WARN("Update form data failed (agentUuid={}, LLMUuid={}): LLM not found", agent->uuid, agent->llmUUid);
     }
     else
     {
@@ -854,7 +854,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
         {
-            XLC_LOG_WARN("MCP server not found ({})", uuid);
+            XLC_LOG_WARN("Update form data failed (agentUuid={}): MCP server not found", uuid);
             continue;
         }
         QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->isActive ? mcpServer->name : mcpServer->name + " [未启用]", m_listWidgetMcpServers);
@@ -870,7 +870,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
-            XLC_LOG_WARN("Conversation is loading or not found (uuid={})", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
+            XLC_LOG_WARN("Update form data (agentUuid={}): Conversation is loading or not found", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
             continue;
         }
         QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
@@ -993,7 +993,7 @@ void WidgetAgentInfo::updateMCPServerList(const std::shared_ptr<Agent> &agent)
         std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
         if (!mcpServer)
         {
-            XLC_LOG_WARN("Update MCP server list (serverUuid={}): MCP server not found", uuid);
+            XLC_LOG_WARN("Update MCP server list failed (serverUuid={}): MCP server not found", uuid);
             continue;
         }
         QListWidgetItem *itemMcpServer = new QListWidgetItem(mcpServer->isActive ? mcpServer->name : mcpServer->name + " [未启用]", m_listWidgetMcpServers);
@@ -1016,6 +1016,7 @@ void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
     {
         QJsonObject jsonObj = data.value<QJsonObject>();
         int id = jsonObj["id"].toInt();
+        QString agentUuid = jsonObj["agentUuid"].toString();
 
         switch (static_cast<EventBus::States>(id))
         {
@@ -1027,6 +1028,13 @@ void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
         case EventBus::States::MCP_SERVERS_UPDATED:
         {
             updateMCPServerList();
+            break;
+        }
+        case EventBus::States::AGENT_UPDATED:
+        {
+            if (agentUuid != m_lineEditUuid->text())
+                break;
+            updateFormData(DataManager::getInstance()->getAgent(agentUuid));
             break;
         }
         default:

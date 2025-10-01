@@ -322,7 +322,11 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
         // 刷新WidgetChat
         m_widgetChat->refreshHistoryMessageList(newConversation->uuid);
         XLC_LOG_INFO("Create new conversation successfully");
-        // TODO 通知更新设置界面-agent-对话列表
+        // 通知更新设置界面-agent-对话列表
+        QJsonObject jsonObj;
+        jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
+        jsonObj["agentUuid"] = agentUuid;
+        EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
     }
 }
 
