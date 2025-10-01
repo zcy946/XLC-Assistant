@@ -61,7 +61,6 @@ void LLMService::processRequest(std::shared_ptr<Conversation> conversation, std:
                     {"temperature", agent->temperature},
                     {"messages", conversation->getCachedMessages()}};
             }
-            XLC_LOG_INFO("获取到的[{}]json messages: {}", conversation->uuid, conversation->getCachedMessages().dump(4));
             // TODO 使用Qt的http库重构代码
             std::unique_ptr<httplib::Client> m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
             m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});

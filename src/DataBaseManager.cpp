@@ -19,6 +19,7 @@ DataBaseManager::DataBaseManager(QObject *parent)
     connect(this, &DataBaseManager::sig_insertNewConversation, m_worker, &DataBaseWorker::slot_insertNewConversation, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_insertNewMessage, m_worker, &DataBaseWorker::slot_insertNewMessage, Qt::QueuedConnection);
     connect(this, &DataBaseManager::sig_getMessageList, m_worker, &DataBaseWorker::slot_getMessages, Qt::QueuedConnection);
+    connect(this, &DataBaseManager::sig_deleteConversation, m_worker, &DataBaseWorker::slot_deleteConversation, Qt::QueuedConnection);
 
     m_thread.start();
 }
@@ -330,9 +331,9 @@ void DataBaseWorker::slot_updateConversationUpdatedTime(const QString &uuid, con
     else
     {
         XLC_LOG_TRACE("Update conversation updated_time successfully (uuid={}, newUpdatedTime={}, query={})",
+                      uuid,
                       newUpdatedTime,
-                      query.lastQuery(),
-                      uuid);
+                      query.lastQuery());
     }
 }
 
@@ -383,4 +384,30 @@ void DataBaseWorker::slot_getMessages(const QString &conversationUuid)
     }
     XLC_LOG_DEBUG("Get messages successfully (conversationUuid={}, messagesCount={}, query={})", conversationUuid, jsonArrayMessages.size(), query.lastQuery());
     Q_EMIT sig_messagesAcquired(true, conversationUuid, jsonArrayMessages);
+}
+
+void DataBaseWorker::slot_deleteConversation(const QString &conversationUuid)
+{
+    QSqlQuery query(m_dataBase);
+    query.prepare(R"(
+                DELETE
+                FROM
+                    conversations
+                WHERE
+                    id = :conversationUuid
+            )");
+    query.bindValue(":conversationUuid", conversationUuid);
+    if (!query.exec())
+    {
+        XLC_LOG_WARN("Delete conversation failed (uuid={}, query={}): {}",
+                     conversationUuid,
+                     query.lastQuery(),
+                     query.lastError().text());
+    }
+    else
+    {
+        XLC_LOG_TRACE("Delete conversation successfully (uuid={}, query={})",
+                      conversationUuid,
+                      query.lastQuery());
+    }
 }

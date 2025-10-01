@@ -1,0 +1,58 @@
+[2025-10-01 13:18:49.241] [warning] [DataManager.cpp:27] LLMs file does not exist (file=./config/LLMs.json)
+[2025-10-01 13:18:49.243] [warning] [DataManager.cpp:31] McpServers file does not exist (file=./config/MCPServers.json)
+[2025-10-01 13:18:49.243] [warning] [DataManager.cpp:35] Agents file does not exist (file=./config/Agents.json)
+[2025-10-01 13:18:49.244] [error] [DataManager.cpp:212] Could not open LLMs file:  - No file name specified
+[2025-10-01 13:18:49.244] [error] [DataManager.cpp:588] Could not open Agents file:  - No file name specified
+[2025-10-01 13:18:49.244] [error] [DataManager.cpp:398] Load MCP Servers failed(filepath=, errormessage=No file name specified): Could not open McpServers file
+[2025-10-01 13:18:49.248] [info] [DataBaseManager.cpp:143] Worker opened database successfully
+[2025-10-01 13:18:49.266] [trace] [DataBaseManager.cpp:190] Get all conversation information successfully (conversationsCount=0, query=
+                SELECT
+                    c.id,
+                    c.agent_id,
+                    c.summary,
+                    c.created_time,
+                    c.updated_time,
+                    COUNT(m.conversation_id) AS message_count
+                FROM
+                    conversations c
+                LEFT JOIN
+                    messages m ON c.id = m.conversation_id
+                GROUP BY
+                    c.id, c.agent_id, c.summary, c.created_time, c.updated_time
+                ORDER BY
+                    c.updated_time DESC,
+                    c.created_time DESC
+            )
+[2025-10-01 13:18:49.575] [trace] [PageSettings.cpp:63] Setting item selected (item=智能体)
+[2025-10-01 13:18:49.674] [debug] [PageChat.cpp:377] No agent selected, no need to update conversations list.
+[2025-10-01 13:18:53.843] [trace] [MainWindow.cpp:67] Navigating to index (index=1, text=设置)
+[2025-10-01 13:18:55.680] [trace] [PageSettings.cpp:63] Setting item selected (item=模型服务)
+[2025-10-01 13:18:56.882] [trace] [PageSettings.cpp:63] Setting item selected (item=智能体)
+[2025-10-01 13:19:05.175] [warning] [DataManager.cpp:27] LLMs file does not exist (file=./config/LLMs.json)
+[2025-10-01 13:19:05.176] [warning] [DataManager.cpp:31] McpServers file does not exist (file=./config/MCPServers.json)
+[2025-10-01 13:19:05.176] [warning] [DataManager.cpp:35] Agents file does not exist (file=./config/Agents.json)
+[2025-10-01 13:19:05.177] [error] [DataManager.cpp:398] Load MCP Servers failed(filepath=, errormessage=No file name specified): Could not open McpServers file
+[2025-10-01 13:19:05.177] [error] [DataManager.cpp:212] Could not open LLMs file:  - No file name specified
+[2025-10-01 13:19:05.177] [error] [DataManager.cpp:588] Could not open Agents file:  - No file name specified
+[2025-10-01 13:19:05.181] [info] [DataBaseManager.cpp:143] Worker opened database successfully
+[2025-10-01 13:19:05.182] [trace] [DataBaseManager.cpp:190] Get all conversation information successfully (conversationsCount=0, query=
+                SELECT
+                    c.id,
+                    c.agent_id,
+                    c.summary,
+                    c.created_time,
+                    c.updated_time,
+                    COUNT(m.conversation_id) AS message_count
+                FROM
+                    conversations c
+                LEFT JOIN
+                    messages m ON c.id = m.conversation_id
+                GROUP BY
+                    c.id, c.agent_id, c.summary, c.created_time, c.updated_time
+                ORDER BY
+                    c.updated_time DESC,
+                    c.created_time DESC
+            )
+[2025-10-01 13:19:05.465] [trace] [PageSettings.cpp:63] Setting item selected (item=智能体)
+[2025-10-01 13:19:05.562] [debug] [PageChat.cpp:377] No agent selected, no need to update conversations list.
+[2025-10-01 13:19:07.508] [trace] [MainWindow.cpp:67] Navigating to index (index=1, text=设置)

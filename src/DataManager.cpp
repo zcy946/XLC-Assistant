@@ -660,8 +660,6 @@ void DataManager::removeAgent(const QString &uuid)
 
 void DataManager::updateAgent(std::shared_ptr<Agent> newAgent)
 {
-    // TODO 从数据库删除已删除的对话
-    
     if (!newAgent)
     {
         XLC_LOG_WARN("Update agent failed (uuid={}): attempted to update a null Agent shared_ptr", newAgent->uuid);
@@ -670,13 +668,25 @@ void DataManager::updateAgent(std::shared_ptr<Agent> newAgent)
     auto it = m_agents.find(newAgent->uuid.trimmed());
     if (it != m_agents.end())
     {
+        // 检查系统提示词是否被修改
         bool isSystemPromptModified = false;
         if (newAgent->systemPrompt != (*it)->systemPrompt)
             isSystemPromptModified = true;
+        // 从数据库删除已删除的对话
+        if (newAgent->conversations.size() != (*it)->conversations.size())
+        {
+            for (const QString &conversationUuid : (*it)->conversations)
+            {
+                if (newAgent->conversations.contains(conversationUuid))
+                    continue;
+                Q_EMIT DataBaseManager::getInstance()->sig_deleteConversation(conversationUuid);
+                XLC_LOG_TRACE("Updated agent (conversationUuid={}): delete conversation", conversationUuid);
+            }
+        }
 
         (*it.value()) = *newAgent;
         Q_EMIT sig_agentUpdate(newAgent->uuid);
-        XLC_LOG_DEBUG("Updated Agent successed (uuid={})", newAgent->uuid);
+        XLC_LOG_DEBUG("Updated agent successed (uuid={})", newAgent->uuid);
         saveAgentsAsync();
 
         // 如果系统提示词被修改，更新各个conversation的systemprompt

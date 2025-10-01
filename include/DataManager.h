@@ -195,16 +195,16 @@ struct McpServer
 
 struct Agent
 {
-    QString uuid;
-    QString name;
-    QString description;
+    QString uuid;        // 唯一标识符
+    QString name;        // 名字
+    QString description; // 描述
     // llm参数
-    int context;
-    QString systemPrompt;
-    QString llmUUid;
-    double temperature;
-    double topP;
-    int maxTokens;
+    int context;                 // 上下文数量
+    QString systemPrompt;        // 系统提示词
+    QString llmUUid;             // LLM ID
+    double temperature;          // 文档
+    double topP;                 // top-P
+    int maxTokens;               // 最大tokens
     QSet<QString> mcpServers;    // 挂载的mcp服务器的uuid
     QSet<QString> conversations; // 使用该agent的对话的uuid
 

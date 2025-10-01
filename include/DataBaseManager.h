@@ -33,6 +33,8 @@ Q_SIGNALS:
                               const QString &toolCallId);
     // 获取消息列表
     void sig_getMessageList(const QString &conversationUuid);
+    // 删除对话
+    void sig_deleteConversation(const QString &conversationUuid);
 
 public:
     ~DataBaseManager();
@@ -73,6 +75,7 @@ public Q_SLOTS:
                                const QString &toolCallId);
     void slot_updateConversationUpdatedTime(const QString &uuid, const QString &newUpdatedTime);
     void slot_getMessages(const QString &conversationUuid);
+    void slot_deleteConversation(const QString &conversationUuid);
 
 public:
     explicit DataBaseWorker(const QString &dataBaseFile, QObject *parent = nullptr);

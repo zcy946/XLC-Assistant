@@ -25,25 +25,26 @@
 - [x] 修复添加新LLM|更新LLM信息时，点击设置-助手设置-模型的combobox列表没有更新的bug
 - [x] 为mcpserver结构体添加`isActive`代表是否启用
 - [x] 实现清除上下文
-- [ ] 使用`QListView`重构简单的消息列表
-- [ ] 实现新建对话
+- [x] 使用`QListView`重构简单的消息列表
+- [x] 实现新建对话
 - [ ] 实现右键助手列表弹出菜单（编辑）
-- [ ] 实现调用结果的展示
+- [x] 实现调用结果的展示
 - [x] 加载json配置文件时，如果为空会导致触发assert
 
 ### 优化
 
 - [ ] 将存储设置改为常规设置，创建`config.json`管理`LLMs.json`、`Agents.json`、`McpServers.json`的存储位置以及是否使用mcp服务器等参数
-- [ ] 修改mcp服务器设置页，实现自定义启停mcp服务器，从而降低客户端初始化的压力
-- [ ] 优化异常展示
+- [x] 修改mcp服务器设置页，实现自定义启停mcp服务器，从而降低客户端初始化的压力
+- [ ] 优化异常展示(创建消息弹窗控件)
 - [ ] 在各个`getCurrentData`函数内部判空
 - [x] 将`LLMService`和`McpGateway`作为单例实现
-- [ ] 为`Conversation`结构体的`messages`相关操作加锁
+- [x] 为`Conversation`结构体的`messages`相关操作加锁
 
 ### **进阶**
 
-- [ ] 从数据库加载对话数据
-- [ ] 使用QListView制作消息列表控件
+- [x] 从数据库加载对话数据
+- [x] 使用QListView制作消息列表控件
+- [ ] 使用虚拟化列表优化历史消息控件性能
 
 
 
