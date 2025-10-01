@@ -1,6 +1,7 @@
 #include "LLMService.h"
-#include <QtConcurrent>
+#include <QJsonObject>
 #include "global.h"
+#include <QNetworkReply>
 
 LLMService *LLMService::s_instance = nullptr;
 
@@ -18,111 +19,162 @@ LLMService *LLMService::getInstance()
 LLMService::LLMService(QObject *parent)
     : QObject(parent)
 {
+    m_networkManager = new QNetworkAccessManager(this);
     connect(MCPService::getInstance(), &MCPService::sig_toolCallFinished, this, &LLMService::slot_onToolCallFinished);
 }
 
-void LLMService::processRequest(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools, int max_retries)
+void LLMService::postMessage(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools, int max_retries)
 {
-    // 使用QtConcurrent::run来在后台线程执行耗时操作
-    QtConcurrent::run(
-        [this, conversation, agent, tools, max_retries]()
-        {
-            // 检查系统提示词
-            if (!conversation->hasSystemPrompt())
-            {
-                conversation->resetSystemPrompt();
-            }
-            std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
-            XLC_LOG_DEBUG("Processing request (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, toolsCount={})",
-                          conversation->uuid,
-                          conversation->summary,
-                          agent->uuid,
-                          agent->name,
-                          llm->uuid,
-                          llm->modelID,
-                          llm->modelName,
-                          tools.size());
-            nlohmann::json body;
-            if (tools.is_array() && !tools.empty())
-            {
-                body = {
-                    {"model", llm->modelID.toStdString()},
-                    {"max_tokens", agent->maxTokens},
-                    {"temperature", agent->temperature},
-                    {"messages", conversation->getCachedMessages()},
-                    {"tools", tools},
-                    {"tool_choice", "auto"}};
-            }
-            else
-            {
-                body = {
-                    {"model", llm->modelID.toStdString()},
-                    {"max_tokens", agent->maxTokens},
-                    {"temperature", agent->temperature},
-                    {"messages", conversation->getCachedMessages()}};
-            }
-            // TODO 使用Qt的http库重构代码
-            std::unique_ptr<httplib::Client> m_client = std::make_unique<httplib::Client>(llm->baseUrl.toStdString());
-            m_client->set_default_headers({{"Authorization", "Bearer " + std::string(llm->apiKey.toStdString())}});
-            m_client->set_connection_timeout(10);
+    // 补全系统提示词
+    if (!conversation->hasSystemPrompt())
+    {
+        conversation->resetSystemPrompt();
+    }
+    // 检查LLM是否存在
+    std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(agent->llmUUid);
+    if (!llm)
+    {
+        XLC_LOG_DEBUG("Post message failed (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, toolsCount={}): LLM not found",
+                      conversation->uuid,
+                      conversation->summary,
+                      agent->uuid,
+                      agent->name,
+                      llm->uuid,
+                      tools.size());
+        return;
+    }
 
-            for (int retry = 0; retry <= max_retries; ++retry)
-            {
-                XLC_LOG_TRACE("Posting to LLM (baseURL={}, endpoint={}, body={})", llm->baseUrl, llm->endpoint, body.dump(4));
-                httplib::Result result = m_client->Post(llm->endpoint.toStdString(), body.dump(), "application/json");
-                if (result && result->status == 200)
-                {
-                    try
-                    {
-                        nlohmann::json json_data = nlohmann::json::parse(result->body);
-                        nlohmann::json responseMessage = json_data["choices"][0]["message"];
+    // 构建请求体
+    nlohmann::json body;
+    if (tools.is_array() && !tools.empty())
+    {
+        body = {
+            {"model", llm->modelID.toStdString()},
+            {"max_tokens", agent->maxTokens},
+            {"temperature", agent->temperature},
+            {"messages", conversation->getCachedMessages()},
+            {"tools", tools},
+            {"tool_choice", "auto"}};
+    }
+    else
+    {
+        body = {
+            {"model", llm->modelID.toStdString()},
+            {"max_tokens", agent->maxTokens},
+            {"temperature", agent->temperature},
+            {"messages", conversation->getCachedMessages()}};
+    }
 
-                        XLC_LOG_TRACE("Request response (conversationUuid={}, response={})", conversation->uuid, responseMessage.dump(4));
-                        // 处理LLM响应
-                        processResponse(conversation, responseMessage);
-                    }
-                    catch (const std::exception &e)
-                    {
-                        QString errorMsg = QString("Process request failed (conversationUuid=%1, errorMsg=%2): failed to parse response")
-                                               .arg(conversation->uuid)
-                                               .arg(e.what());
-                        XLC_LOG_ERROR("{}", errorMsg);
-                        Q_EMIT sig_errorOccurred(conversation->uuid, errorMsg);
-                    }
-                    return;
-                }
-                else
-                {
-                    QString errorMsg = QString("Post LLM failed (conversationUuid=%1, retries=%2)")
-                                           .arg(conversation->uuid)
-                                           .arg(retry + 1);
-                    if (result)
-                    {
-                        errorMsg += QString(" Status: %1, Body: %2").arg(result->status).arg(QString::fromStdString(result->body));
-                    }
-                    else
-                    {
-                        errorMsg += QString(" Error: %1").arg(httplib::to_string(result.error()).c_str());
-                    }
-                    XLC_LOG_WARN("{}", errorMsg);
-                }
-            }
-            QString errorMsg = QString("Process request failed (conversationUuid=%1, retries=%2, baseURL=%3, endpoint=%4): failed to post to LLM after multiple retries")
-                                   .arg(conversation->uuid)
-                                   .arg(max_retries)
-                                   .arg(llm->baseUrl)
-                                   .arg(llm->endpoint);
-            XLC_LOG_ERROR("{}", errorMsg);
-            Q_EMIT sig_errorOccurred(conversation->uuid, errorMsg);
-        });
+    QNetworkRequest request(llm->baseUrl + llm->endpoint);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    request.setRawHeader("Authorization", ("Bearer " + llm->apiKey).toUtf8());
+    // request.setTransferTimeout(120 * 1000); // 超时时间 120s
+
+    QNetworkReply *reply = m_networkManager->post(request, QByteArray::fromStdString(body.dump()));
+    connect(reply, &QNetworkReply::finished, this,
+            [this, reply, conversation, agent, llm, tools, max_retries]()
+            {
+                handleResponse(reply, conversation, agent, llm, tools, max_retries - 1);
+            });
+    XLC_LOG_DEBUG("Posting message (conversationUuid={}, summary={}, agentUuid={}, agentName={}, llmUuid={}, modelID={}, modelName={}, toolsCount={}): \n{}",
+                  conversation->uuid,
+                  conversation->summary,
+                  agent->uuid,
+                  agent->name,
+                  llm->uuid,
+                  llm->modelID,
+                  llm->modelName,
+                  tools.size(),
+                  body.dump(4));
 }
 
-void LLMService::processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage)
+void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, std::shared_ptr<LLM> llm, const mcp::json &tools, int retries_left)
+{
+    // 确保 reply 在处理完毕后被销毁
+    reply->deleteLater();
+
+    // 检查网络错误
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        QString errorMsg = QString("Post message failed (conversationUuid=%1, retries_left=%2), Network Error: %3")
+                               .arg(conversation->uuid)
+                               .arg(retries_left)
+                               .arg(reply->errorString());
+        XLC_LOG_WARN("{}", errorMsg);
+
+        // 如果还有重试次数，则重试
+        if (retries_left > 0)
+        {
+            postMessage(conversation, agent, tools, retries_left - 1);
+        }
+        else
+        {
+            QString finalErrorMsg = QString("Post message failed (conversationUuid=%1, baseURL=%2, endpoint=%3): failed to post to LLM after multiple retries")
+                                        .arg(conversation->uuid)
+                                        .arg(llm->baseUrl)
+                                        .arg(llm->endpoint);
+            XLC_LOG_ERROR("{}", finalErrorMsg);
+            Q_EMIT sig_errorOccurred(conversation->uuid, finalErrorMsg);
+        }
+        return;
+    }
+
+    // 检查HTTP状态码
+    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (statusCode == 200)
+    {
+        try
+        {
+            QByteArray responseBody = reply->readAll();
+            nlohmann::json json_data = nlohmann::json::parse(responseBody.toStdString());
+            nlohmann::json responseMessage = json_data["choices"][0]["message"];
+
+            XLC_LOG_DEBUG("Get response (conversationUuid={}): \n{}", conversation->uuid, responseMessage.dump(4));
+            // 处理LLM响应
+            handleSuccessfulResponse(conversation, responseMessage);
+        }
+        catch (const std::exception &e)
+        {
+            QString errorMsg = QString("Handle response failed (conversationUuid=%1, errorMsg=%2): failed to parse response")
+                                   .arg(conversation->uuid)
+                                   .arg(e.what());
+            XLC_LOG_ERROR("{}", errorMsg);
+            Q_EMIT sig_errorOccurred(conversation->uuid, errorMsg);
+        }
+    }
+    else
+    {
+        // 处理非200的HTTP状态码
+        QByteArray responseBody = reply->readAll();
+        QString errorMsg = QString("Post message failed (conversationUuid=%1, retries_left=%2, statusCode=%3, body=%4)")
+                               .arg(conversation->uuid)
+                               .arg(retries_left)
+                               .arg(statusCode)
+                               .arg(QString::fromUtf8(responseBody));
+        XLC_LOG_WARN("{}", errorMsg);
+        // 如果还有重试次数，则重试
+        if (retries_left > 0)
+        {
+            postMessage(conversation, agent, tools, retries_left - 1);
+        }
+        else
+        {
+            QString finalErrorMsg = QString("Post message failed (conversationUuid=%1, baseURL=%2, endpoint=%3): failed to post to LLM after multiple retries")
+                                        .arg(conversation->uuid)
+                                        .arg(llm->baseUrl)
+                                        .arg(llm->endpoint);
+            XLC_LOG_ERROR("{}", finalErrorMsg);
+            Q_EMIT sig_errorOccurred(conversation->uuid, finalErrorMsg);
+        }
+    }
+}
+
+void LLMService::handleSuccessfulResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage)
 {
     QString content;
     if (!responseMessage.contains("content"))
-        XLC_LOG_WARN("process response failed (conversationUuid={}): content not found in response", conversation->uuid);
-    else
+        XLC_LOG_WARN("Handle response failed (conversationUuid={}): content not found in response", conversation->uuid);
+    else if (!responseMessage["content"].is_null())
         content = QString::fromStdString(responseMessage.value("content", ""));
 
     // 没有调用工具
@@ -140,7 +192,7 @@ void LLMService::processResponse(const std::shared_ptr<Conversation> &conversati
     // 记录消息
     conversation->addMessage(Message(content, Message::ASSISTANT, getCurrentDateTime(), toolCalls));
     // 通知界面展示
-    Q_EMIT sig_responseReady(conversation->uuid, content + "\ntool_calls:\n" + toolCalls);
+    Q_EMIT sig_responseReady(conversation->uuid, content.isEmpty() ? "tool_calls:\n" + toolCalls : content + "\ntool_calls:\n" + toolCalls);
 
     // 开始调用工具
     for (const auto &tool_call : responseMessage["tool_calls"])
@@ -267,5 +319,5 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
         XLC_LOG_WARN("Agent not found (conversationUuid={}, agentUuid={})", conversation->uuid, conversation->agentUuid);
         return;
     }
-    processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
+    postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
 }

@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <mcp_message.h>
-#include <httplib.h>
+#include <QNetworkAccessManager>
 #include "MCPService.h"
 
 struct Agent;
@@ -32,17 +32,19 @@ public:
      * @param tools 可使用的工具列表（默认为空）.
      * @param max_retries 失败时最大重试次数（默认为3）.
      */
-    void processRequest(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools = mcp::json(), int max_retries = 3);
+    void postMessage(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools = mcp::json(), int max_retries = 3);
 
 private:
     explicit LLMService(QObject *parent = nullptr);
     LLMService(const LLMService &) = delete;
     LLMService &operator=(const LLMService &) = delete;
-    void processResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage);
+    void handleResponse(QNetworkReply *reply, std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, std::shared_ptr<LLM> llm, const mcp::json &tools, int retries_left);
+    void handleSuccessfulResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage);
     std::string formatMcpToolResponse(const mcp::json &result, const std::string &toolName, bool isVisionModel = false);
 
 private:
     static LLMService *s_instance;
+    QNetworkAccessManager *m_networkManager;
 };
 
 #endif // LLMSERVICE_H

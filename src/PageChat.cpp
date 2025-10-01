@@ -186,7 +186,7 @@ void PageChat::slot_onMessageSent(const QString &message)
         m_widgetChat->addNewMessage(CMessage(message, Message::USER, getCurrentDateTime()));
         // 记录问题
         conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
-        LLMService::getInstance()->processRequest(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
+        LLMService::getInstance()->postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
     }
     else
     {
