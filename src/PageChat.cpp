@@ -227,6 +227,7 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
                         if (m_listWidgetConversations->item(j)->data(Qt::UserRole).toString() == conversationUuid)
                         {
                             m_listWidgetConversations->setCurrentRow(j);
+                            m_widgetChat->refreshHistoryMessageList(conversationUuid);
                             return;
                         }
                     }
@@ -321,6 +322,7 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
         // 刷新WidgetChat
         m_widgetChat->refreshHistoryMessageList(newConversation->uuid);
         XLC_LOG_INFO("Create new conversation successfully");
+        // TODO 通知更新设置界面-agent-对话列表
     }
 }
 
