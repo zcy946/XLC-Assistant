@@ -173,8 +173,8 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
         return message->cachedItemSize;
     }
 
-    // 拿到 listView 的宽度（比 option.rect 更准确）
-    int viewWidth = option.widget ? option.widget->width() : option.rect.width();
+    // 拿到 listView 的宽度
+    int viewWidth = option.rect.width();
     QFontMetrics fontMetrics(option.font);
 
     // 清除上下文分割线
