@@ -88,6 +88,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    void paintEvent(QPaintEvent *e) override;
 
 private:
     CMessageListModel *m_model;

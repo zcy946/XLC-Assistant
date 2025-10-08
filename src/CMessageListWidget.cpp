@@ -275,6 +275,24 @@ void CMessageListWidget::resizeEvent(QResizeEvent *event)
     doItemsLayout();
 }
 
+void CMessageListWidget::paintEvent(QPaintEvent *event)
+{
+    // 绘制列表
+    QListView::paintEvent(event);
+
+    // 2. 检查模型和数据行数
+    QAbstractItemModel *mdl = model();
+    if (mdl && mdl->rowCount(rootIndex()) == 0)
+    {
+        QPainter painter(viewport());
+        painter.save();
+        painter.setPen(palette().color(QPalette::Disabled, QPalette::Text));
+        QString message = tr("(´-﹏-`；) 空空如也呢～ 输入内容点击发送开始对话吧 (。・∀・)ノ゛");
+        painter.drawText(viewport()->rect(), Qt::AlignCenter, message);
+        painter.restore();
+    }
+}
+
 void CMessageListWidget::addMessage(const CMessage &message)
 {
     m_model->addMessage(message);

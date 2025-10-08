@@ -39,12 +39,14 @@
 - [ ] 在各个`getCurrentData`函数内部判空
 - [x] 将`LLMService`和`McpGateway`作为单例实现
 - [x] 为`Conversation`结构体的`messages`相关操作加锁
+- [ ] 将所有`mcp::json`类型改为`QJson`
 
 ### **进阶**
 
 - [x] 从数据库加载对话数据
 - [x] 使用QListView制作消息列表控件
 - [ ] 使用虚拟化列表优化历史消息控件性能
+- [ ] 实现流式输出
 
 
 

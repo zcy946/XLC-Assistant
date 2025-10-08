@@ -13,7 +13,7 @@ DataManager *DataManager::getInstance()
     {
         s_instance = new DataManager();
         // 在应用程序退出时自动清理单例实例
-        // TODO 应用关闭时检查是否在保存
+        // FIXME 应用关闭时检查是否在保存
         connect(qApp, &QCoreApplication::aboutToQuit, s_instance, &QObject::deleteLater);
     }
     return s_instance;
