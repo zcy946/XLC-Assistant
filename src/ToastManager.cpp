@@ -310,5 +310,6 @@ void ToastManager::showMessage(Toast::Type type, const QString &message, int dur
     pAnimationOpacity->start(QAbstractAnimation::DeleteWhenStopped);
 
     newToast->startTimer();
+    raise();
     update();
 }
