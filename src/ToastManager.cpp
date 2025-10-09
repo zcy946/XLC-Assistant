@@ -99,7 +99,7 @@ ToastManager::ToastManager(QWidget *parent)
     // 开启透明背景与鼠标穿透
     setAttribute(Qt::WA_TranslucentBackground);
     setAttribute(Qt::WA_TransparentForMouseEvents);
-    show();
+    hide();
 }
 
 ToastManager *ToastManager::getInstance()
