@@ -5,6 +5,7 @@
 #include "Logger.hpp"
 #include <QSvgRenderer>
 #include <QPainterPath>
+#include <QPropertyAnimation>
 
 // Toast
 Toast::Toast(Toast::Type type, const QString &message, int duration, QWidget *parent)
@@ -44,6 +45,17 @@ Toast::Toast(Toast::Type type, const QString &message, int duration, QWidget *pa
 void Toast::startTimer()
 {
     m_timer->start();
+}
+
+qreal Toast::getOpacity()
+{
+    return m_opacity;
+}
+
+void Toast::setOpacity(qreal opacity)
+{
+    m_opacity = opacity;
+    Q_EMIT sig_requestUpdate();
 }
 
 // ToastManager
@@ -91,13 +103,13 @@ void ToastManager::paintEvent(QPaintEvent *event)
     {
         Toast *toast = m_toasts.at(i);
         // 计算文本最大可占用宽度
-        int maxTextWidth = width() - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread;
+        int maxTextWidth = m_width - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread * 2;
         // 计算绘制文本所需最小区域
         QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWordWrap, toast->m_message);
         // 计算背景区域
         int w = m_paddingH + m_widthIcon + m_spacingIconToText + rectText.width() + m_paddingH;
         int h = m_paddingV + rectText.height() + m_paddingV;
-        int x = (width() - w) / 2;
+        int x = (m_width - w) / 2;
         QRect rectBackground(x, y, w, h);
         // 计算文本绘制区域
         QRect rectDrawText = rectText.adjusted(x + m_paddingH + m_widthIcon + m_spacingIconToText,
@@ -106,7 +118,9 @@ void ToastManager::paintEvent(QPaintEvent *event)
                                                y + m_paddingV);
         // 计算图标区域
         QRect rectIcon = QRect(rectBackground.topLeft() + QPoint(m_paddingH, m_paddingV), QSize(m_widthIcon, m_heightIcon));
-
+        
+        // 设置画笔透明度
+        painter.setOpacity(toast->m_opacity);
         // 绘制阴影
         for (int j = 0; j < m_spread; ++j)
         {
@@ -182,6 +196,11 @@ void ToastManager::slot_onRequestExist(Toast *message)
     }
 }
 
+void ToastManager::slot_onRequestUpdate()
+{
+    update();
+}
+
 void ToastManager::init(QWidget *parent)
 {
     if (!parent)
@@ -202,6 +221,15 @@ void ToastManager::showMessage(Toast::Type type, const QString &message, int dur
     Toast *newMessage = new Toast(type, message, duration, parentWidget());
     m_toasts.append(newMessage);
     connect(newMessage, &Toast::sig_requestExit, this, &ToastManager::slot_onRequestExist);
+    connect(newMessage, &Toast::sig_requestUpdate, this, &ToastManager::slot_onRequestUpdate);
+
+    QPropertyAnimation *pAnimationOpacity = new QPropertyAnimation(newMessage, "opacity");
+    pAnimationOpacity->setDuration(m_animationDuration);
+    pAnimationOpacity->setEasingCurve(QEasingCurve::OutSine);
+    pAnimationOpacity->setStartValue(0.0);
+    pAnimationOpacity->setEndValue(1.0);
+    pAnimationOpacity->start(QAbstractAnimation::DeleteWhenStopped);
+
     newMessage->startTimer();
     update();
 }

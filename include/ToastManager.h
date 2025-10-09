@@ -9,9 +9,11 @@
 class Toast : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(qreal opacity READ getOpacity WRITE setOpacity)
 
 Q_SIGNALS:
     void sig_requestExit(Toast *message);
+    void sig_requestUpdate();
 
 public:
     enum Type
@@ -27,6 +29,8 @@ public:
     ~Toast() = default;
     // 开始倒计时
     void startTimer();
+    qreal getOpacity();
+    void setOpacity(qreal opacity);
 
 public:
     Type m_type;            // 消息类型
@@ -34,6 +38,7 @@ public:
     QString m_svgFilePath;  // 图标文件路径
     int m_duration;         // 显示时间
     bool m_timeoutOccurred; // 是否已经超时
+    qreal m_opacity;        // 透明度
     QTimer *m_timer;
 };
 
@@ -43,6 +48,7 @@ class ToastManager : public QWidget
 
 private Q_SLOTS:
     void slot_onRequestExist(Toast *message);
+    void slot_onRequestUpdate();
 
 public:
     static ToastManager *getInstance();
@@ -62,21 +68,22 @@ protected:
 private:
     static ToastManager *s_instance;
     QList<Toast *> m_toasts;
-    int m_width;
-    int m_height;
-    int m_margin = 10;                   // 外边距
-    int m_spacing = 10;                  // 消息间距
-    int m_paddingH = 18;                 // 内水平边距
-    int m_paddingV = 10;                 // 内垂直边距
-    int m_radius = 5;                    // 圆角半径
-    int m_widthIcon = 20;                // 图标宽度
-    int m_heightIcon = 20;               // 图标高度
-    int m_spacingIconToText = 10;        // 图标到文本的间距
-    int m_spread = 4;                    // 阴影扩散层数
-    int m_baseAlpha = 50;                // 阴影起始透明度
+    int m_width;                       // 宽度
+    int m_height;                      // 高度
+    int m_margin = 10;                 // 外边距
+    int m_spacing = 10;                // 消息间距
+    int m_paddingH = 18;               // 内水平边距
+    int m_paddingV = 10;               // 内垂直边距
+    int m_radius = 5;                  // 圆角半径
+    int m_widthIcon = 20;              // 图标宽度
+    int m_heightIcon = 20;             // 图标高度
+    int m_spacingIconToText = 10;      // 图标到文本的间距
+    int m_spread = 4;                  // 阴影扩散层数
+    int m_baseAlpha = 50;              // 阴影起始透明度
     QString m_colorShadow = "#000000"; // 阴影颜色
-    int m_offSetX = 0;                   // 阴影水平偏移
-    int m_offSetY = 2;                   // 阴影垂直偏移
+    int m_offSetX = 0;                 // 阴影水平偏移
+    int m_offSetY = 2;                 // 阴影垂直偏移
+    int m_animationDuration = 350;     // 动画持续时间
 };
 
 #endif // TOASTMANAGER_H

@@ -18,7 +18,6 @@ signals:
 private slots:
 	void onMessageRequestExit(AntMessage* msg);
 	void startExitAnimation();
-	void onMessageExitFinished(AntMessage* msg);
 private:
 	explicit AntMessageManager(QWidget* parent = nullptr);
 	~AntMessageManager();

@@ -26,7 +26,6 @@ void AntMessageManager::showMessage(AntMessage::Type type, const QString &messag
 	AntMessage *msg = new AntMessage(mainWindow, type, message);
 	msgHeight = msg->height();
 	connect(msg, &AntMessage::requestExit, this, &AntMessageManager::onMessageRequestExit);
-	connect(msg, &AntMessage::exitAnimationFinished, this, &AntMessageManager::onMessageExitFinished);
 
 	// 稳妥地计算 Y：累加所有当前消息的高度 + 间距
 	int y = spacingY;
@@ -150,9 +149,4 @@ void AntMessageManager::startExitAnimation()
 
 	m_isBatchAnimating = true;
 	slideOutGroup->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void AntMessageManager::onMessageExitFinished(AntMessage *msg)
-{
-	// 这里可以做额外清理或通知
 }

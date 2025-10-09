@@ -9,11 +9,17 @@
 class AntMessage : public QWidget
 {
 	Q_OBJECT
-		Q_PROPERTY(qreal customOpacity READ getCustomOpacity WRITE setCustomOpacity)
+	Q_PROPERTY(qreal customOpacity READ getCustomOpacity WRITE setCustomOpacity)
 public:
-	enum Type { Info, Success, Error, Warning };
+	enum Type
+	{
+		Info,
+		Success,
+		Error,
+		Warning
+	};
 
-	explicit AntMessage(QWidget* parent, Type type, const QString& message);
+	explicit AntMessage(QWidget *parent, Type type, const QString &message);
 	~AntMessage();
 
 	// 启动显示持续时间计时器
@@ -26,26 +32,15 @@ public:
 	bool isExit();
 	// 是否已经出现超时
 	bool hasTimeoutOccurred();
-
-	// 设置进入动画开始结束位置
-	void setStartEndPos(QPoint startPos, QPoint endPos)
-	{
-		m_startPos = startPos;
-		m_endPos = endPos;
-	}
-	// 进入动画开始位置
-	QPoint getStartPos() const { return m_startPos; }
-	// 进入结束开始位置
-	QPoint getEndPos() const { return m_endPos; }
 signals:
 	// 请求退出
-	void requestExit(AntMessage* msg);
-	// 退出动画结束信号
-	void exitAnimationFinished(AntMessage* msg);
+	void requestExit(AntMessage *msg);
+
 protected:
-	void paintEvent(QPaintEvent* event) override;
+	void paintEvent(QPaintEvent *event) override;
 private slots:
 	void onTimeout();
+
 private:
 	void initResources();
 	void setupTimer();
@@ -59,8 +54,8 @@ private:
 	QString m_svgPath;
 	qreal m_customOpacity;
 
-	QTimer* timer;
-	QPropertyAnimation* m_posAnim;
-	QPropertyAnimation* m_opacityAnim;
-	QParallelAnimationGroup* m_animGroup;
+	QTimer *timer;
+	QPropertyAnimation *m_posAnim;
+	QPropertyAnimation *m_opacityAnim;
+	QParallelAnimationGroup *m_animGroup;
 };
