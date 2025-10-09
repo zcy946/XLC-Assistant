@@ -6,6 +6,7 @@
 #include <QSvgRenderer>
 #include <QPainterPath>
 #include <QPropertyAnimation>
+#include <QParallelAnimationGroup>
 
 // Toast
 Toast::Toast(Toast::Type type, const QString &message, int duration, QWidget *parent)
@@ -118,7 +119,7 @@ void ToastManager::paintEvent(QPaintEvent *event)
                                                y + m_paddingV);
         // 计算图标区域
         QRect rectIcon = QRect(rectBackground.topLeft() + QPoint(m_paddingH, m_paddingV), QSize(m_widthIcon, m_heightIcon));
-        
+
         // 设置画笔透明度
         painter.setOpacity(toast->m_opacity);
         // 绘制阴影
@@ -176,10 +177,13 @@ void ToastManager::slot_onRequestExist(Toast *message)
     if (m_toasts.isEmpty() || m_toasts.first() != message)
         return;
     Toast *exitMessage = m_toasts.first();
+
+    QParallelAnimationGroup *pAnimationGroupFadeOut = new QParallelAnimationGroup(this);
+    QPropertyAnimation *pAnimationSlideOut = new QPropertyAnimation();
+
     m_toasts.removeFirst();
     exitMessage->deleteLater();
     update();
-    XLC_LOG_DEBUG("Remove toast success");
 
     // 检查下一条消息是否需要被移除
     while (true)
@@ -223,7 +227,7 @@ void ToastManager::showMessage(Toast::Type type, const QString &message, int dur
     connect(newMessage, &Toast::sig_requestExit, this, &ToastManager::slot_onRequestExist);
     connect(newMessage, &Toast::sig_requestUpdate, this, &ToastManager::slot_onRequestUpdate);
 
-    QPropertyAnimation *pAnimationOpacity = new QPropertyAnimation(newMessage, "opacity");
+    QPropertyAnimation *pAnimationOpacity = new QPropertyAnimation(newMessage, "m_opacity");
     pAnimationOpacity->setDuration(m_animationDuration);
     pAnimationOpacity->setEasingCurve(QEasingCurve::OutSine);
     pAnimationOpacity->setStartValue(0.0);

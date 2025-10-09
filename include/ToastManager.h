@@ -84,6 +84,7 @@ private:
     int m_offSetX = 0;                 // 阴影水平偏移
     int m_offSetY = 2;                 // 阴影垂直偏移
     int m_animationDuration = 350;     // 动画持续时间
+    bool m_isAnimating = false;        // 是否正在进行退出动画
 };
 
 #endif // TOASTMANAGER_H
