@@ -132,4 +132,5 @@ inline QString getCurrentDateTime()
 {
     return QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
 }
+
 #endif // GLOBAL_H

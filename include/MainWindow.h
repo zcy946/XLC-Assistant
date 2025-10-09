@@ -6,6 +6,7 @@
 #include <QStackedLayout>
 #include "PageChat.h"
 #include "PageSettings.h"
+#include <QResizeEvent>
 
 class MainWindow : public BaseWidget
 {

@@ -8,5 +8,9 @@
         <file>image/default_avatar_user.png</file>
         <file>image/avatar_tool.png</file>
         <file>image/avatar_unknow.png</file>
+        <file>image/error.svg</file>
+        <file>image/info.svg</file>
+        <file>image/success.svg</file>
+        <file>image/warning.svg</file>
     </qresource>
 </RCC>
