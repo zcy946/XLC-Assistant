@@ -8,6 +8,7 @@
 #include "EventBus.h"
 #include "MCPService.h"
 #include "LLMService.h"
+#include "ToastManager.h"
 
 PageChat::PageChat(QWidget *parent)
     : BaseWidget(parent)
@@ -175,7 +176,7 @@ void PageChat::slot_onMessageSent(const QString &message)
         if (!MCPService::getInstance()->isInitialized(mcpServerUuid))
         {
             allMcpServersReady = false;
-
+            ToastManager::getInstance()->showMessage(Toast::Type::Warning, "正在连接到MCP服务器，请稍后...");
             // 初始化未初始化的MCP服务器
             MCPService::getInstance()->initClient(mcpServerUuid);
         }

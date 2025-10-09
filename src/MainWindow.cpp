@@ -4,7 +4,6 @@
 #include "DataManager.h"
 #include "EventBus.h"
 #include "ToastManager.h"
-#include "AntMessageManager.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : BaseWidget(parent)
@@ -69,8 +68,8 @@ void MainWindow::handleNavigationBarIndexChanged(int index, const QString &text)
         return;
     XLC_LOG_TRACE("Navigating to index (index={}, text={})", index, text);
     m_stackedLayout->setCurrentIndex(index);
-    
-    // 重新置顶，否则会被遮盖
+
+    // WARNING：必须重新置顶ToastManager，否则切换stackedLayout会被遮盖
     ToastManager::getInstance()->raise();
 }
 

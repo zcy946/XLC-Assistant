@@ -2,6 +2,7 @@
 #include <QJsonObject>
 #include "global.h"
 #include <QNetworkReply>
+#include "ToastManager.h"
 
 LLMService *LLMService::s_instance = nullptr;
 
@@ -276,6 +277,7 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     {
         // TODO 处理异常错误
         XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, "Failed to handle ToolCallFinished event: Conversation not found");
         return;
     }
 
@@ -317,6 +319,7 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     {
         // TODO 处理异常错误
         XLC_LOG_WARN("Agent not found (conversationUuid={}, agentUuid={})", conversation->uuid, conversation->agentUuid);
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, "Failed to handle ToolCallFinished event: Agent not found");
         return;
     }
     postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));

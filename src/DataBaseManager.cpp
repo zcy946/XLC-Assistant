@@ -4,6 +4,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtConcurrent>
+#include "ToastManager.h"
 
 DataBaseManager::DataBaseManager(QObject *parent)
     : QObject(parent)
@@ -172,6 +173,7 @@ void DataBaseWorker::slot_getAllConversationInfo()
         XLC_LOG_WARN("Get all conversation information failed (query={}): {}",
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能获取全部对话信息: %1").arg(query.lastError().text()));
         Q_EMIT sig_allConversationInfoAcquired(false, QJsonArray());
         return;
     }
@@ -218,6 +220,7 @@ void DataBaseWorker::slot_insertNewConversation(const QString &agentUuid,
                      updatedTime,
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能插入对话 (conversationUuid=%1): %2").arg(uuid).arg(query.lastError().text()));
     }
     else
     {
@@ -276,7 +279,6 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     query.bindValue(":tool_call_id", toolCallId);
     if (!query.exec())
     {
-        // TODO 处理错误
         XLC_LOG_WARN("Insert message failed (uuid={}, conversationUuid={}, role={}, content={}, createdTime={}, avatarFilePath={}, toolCalls={}, toolCallId={}, query={}): {}",
                      uuid,
                      conversationUuid,
@@ -288,6 +290,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                      toolCallId,
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能插入消息 (uuid=%1): %2").arg(uuid).arg(query.lastError().text()));
     }
     else
     {
@@ -327,6 +330,7 @@ void DataBaseWorker::slot_updateConversationUpdatedTime(const QString &uuid, con
                      newUpdatedTime,
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能更新对话最后更新时间 (conversationUuid=%1): %2").arg(uuid).arg(query.lastError().text()));
     }
     else
     {
@@ -364,6 +368,7 @@ void DataBaseWorker::slot_getMessages(const QString &conversationUuid)
                      conversationUuid,
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能获取到历史消息 (conversationUuid=%1): %2").arg(conversationUuid).arg(query.lastError().text()));
         Q_EMIT sig_messagesAcquired(false, conversationUuid, QJsonArray());
         return;
     }
@@ -403,6 +408,7 @@ void DataBaseWorker::slot_deleteConversation(const QString &conversationUuid)
                      conversationUuid,
                      query.lastQuery(),
                      query.lastError().text());
+        ToastManager::getInstance()->showMessage(Toast::Type::Warning, QString("未能删除对话 (conversationUuid=%1): %2").arg(conversationUuid).arg(query.lastError().text()));
     }
     else
     {

@@ -3,6 +3,7 @@
 #include "Logger.hpp"
 #include <QtConcurrent>
 #include <QFutureWatcher>
+#include <ToastManager.h>
 
 MCPTool::MCPTool(const QString &name, const QString &serverUuid, const mcp::json &convertedTool)
     : name(name), serverUuid(serverUuid), convertedTool(convertedTool)
@@ -177,7 +178,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
         XLC_LOG_DEBUG("Initializing connection to MCP server (MCPServer={})", server->uuid);
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
         {
-            XLC_LOG_ERROR("Failed initialize connection to MCP server (MCPServer={}", server->uuid);
+            XLC_LOG_ERROR("Failed initialize connection to MCP server (MCPServer={})", server->uuid);
             return nullptr;
         }
         // Ping 服务器
@@ -340,6 +341,7 @@ void MCPService::initClient(const QString &serverUuid)
                     if (client)
                     {
                         XLC_LOG_INFO("Client initialization succeeded (serverUuid={})", serverUuid);
+                        ToastManager::getInstance()->showMessage(Toast::Type::Success, QString("初始化MCP客户端成功 (serverUuid=%1)").arg(serverUuid));
                         {
                             QMutexLocker locker(&m_mutexClients);
                             m_clients.insert(serverUuid, client); // 存储已就绪的客户端
@@ -349,6 +351,7 @@ void MCPService::initClient(const QString &serverUuid)
                     else
                     {
                         XLC_LOG_WARN("Client initialization failed (serverUuid={})", serverUuid);
+                        ToastManager::getInstance()->showMessage(Toast::Type::Error, QString("初始化MCP客户端失败 (serverUuid=%1): 客户端对象为空或创建失败").arg(serverUuid));
                         Q_EMIT sig_clientError(serverUuid, "初始化失败：客户端对象为空或创建失败。");
                     }
                 }
