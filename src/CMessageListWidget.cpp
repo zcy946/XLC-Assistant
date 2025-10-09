@@ -280,7 +280,7 @@ void CMessageListWidget::paintEvent(QPaintEvent *event)
     // 绘制列表
     QListView::paintEvent(event);
 
-    // 2. 检查模型和数据行数
+    // 列表为空时绘制提示
     QAbstractItemModel *mdl = model();
     if (mdl && mdl->rowCount(rootIndex()) == 0)
     {

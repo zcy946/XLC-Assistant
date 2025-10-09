@@ -2,17 +2,16 @@
     {
         "context": 2048,
         "conversations": [
-            "afe92471-0f73-44bf-84b8-681b2b809380",
-            "c00a61da-0db9-4fd3-a3ec-58ca0bb708d6",
             "984302d1-7f24-4a52-9216-0c59740d8642",
+            "915cd8ad-443f-4d94-a086-c11bce0e5fb5",
+            "c00a61da-0db9-4fd3-a3ec-58ca0bb708d6",
             "4ba9058a-3038-4da8-b159-1aa8a1eefb33",
-            "915cd8ad-443f-4d94-a086-c11bce0e5fb5"
+            "afe92471-0f73-44bf-84b8-681b2b809380"
         ],
         "description": "开发测试使用Agent[无mcp服务器挂载]",
         "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "maxTokens": 1024,
         "mcpServers": [
-            "d0e1f2a3-b4c5-6789-0123-def057887878"
         ],
         "name": "开发测试Agent[无mcp服务器挂载]",
         "systemPrompt": "你是一个擅长调用工具解决问题的小助手，在回答问题之前你应该看看有没有可以使用的工具。如果条件允许的话，请在一次请求中调用多个工具",
