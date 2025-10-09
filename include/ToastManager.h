@@ -9,7 +9,8 @@
 class Toast : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(qreal opacity READ getOpacity WRITE setOpacity)
+    Q_PROPERTY(qreal m_opacity READ getOpacity WRITE setOpacity)
+    Q_PROPERTY(qreal m_renderY READ getRenderY WRITE setRenderY)
 
 Q_SIGNALS:
     void sig_requestExit(Toast *message);
@@ -31,14 +32,20 @@ public:
     void startTimer();
     qreal getOpacity();
     void setOpacity(qreal opacity);
+    qreal getRenderY();
+    void setRenderY(qreal renderY);
+    bool isAnimatingExit();
+    void setAnimatingExit(bool state);
 
 public:
-    Type m_type;            // 消息类型
-    QString m_message;      // 消息体
-    QString m_svgFilePath;  // 图标文件路径
-    int m_duration;         // 显示时间
-    bool m_timeoutOccurred; // 是否已经超时
-    qreal m_opacity;        // 透明度
+    Type m_type;                    // 消息类型
+    QString m_message;              // 消息体
+    QString m_svgFilePath;          // 图标文件路径
+    int m_duration;                 // 显示时间
+    bool m_timeoutOccurred;         // 是否已经超时
+    qreal m_opacity = 1.0;          // 透明度
+    qreal m_renderY = 0.0;          // Y轴绘制偏移量
+    bool m_isAnimatingExit = false; // 退出动画状态
     QTimer *m_timer;
 };
 
@@ -60,6 +67,7 @@ public:
 
 private:
     explicit ToastManager(QWidget *parent = nullptr);
+    void removeToastAfterAnimation(Toast *toastToRemove);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

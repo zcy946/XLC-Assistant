@@ -59,6 +59,27 @@ void Toast::setOpacity(qreal opacity)
     Q_EMIT sig_requestUpdate();
 }
 
+qreal Toast::getRenderY()
+{
+    return m_renderY;
+}
+
+void Toast::setRenderY(qreal renderY)
+{
+    m_renderY = renderY;
+    Q_EMIT sig_requestUpdate();
+}
+
+bool Toast::isAnimatingExit()
+{
+    return m_isAnimatingExit;
+}
+
+void Toast::setAnimatingExit(bool state)
+{
+    m_isAnimatingExit = state;
+}
+
 // ToastManager
 ToastManager *ToastManager::s_instance = nullptr;
 ToastManager::ToastManager(QWidget *parent)
@@ -75,9 +96,9 @@ ToastManager::ToastManager(QWidget *parent)
             [this]()
             {
                 showMessage(Toast::Info, "测试消息测试消息测试消息测试消息测试消息测试消息");
-                showMessage(Toast::Type::Success, "测试消息");
-                showMessage(Toast::Type::Warning, "测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息");
-                showMessage(Toast::Type::Error, "测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息");
+                // showMessage(Toast::Type::Success, "测试消息");
+                // showMessage(Toast::Type::Warning, "测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息");
+                // showMessage(Toast::Type::Error, "测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息测试消息");
             });
     show();
 }
@@ -103,6 +124,11 @@ void ToastManager::paintEvent(QPaintEvent *event)
     for (int i = 0; i < m_toasts.size(); ++i)
     {
         Toast *toast = m_toasts.at(i);
+
+        // 计算当前 Toast 的实际绘制 Y 坐标
+        // y 是堆叠位置，m_renderY 是动画带来的偏移量
+        qreal currentDrawY = y + toast->m_renderY;
+
         // 计算文本最大可占用宽度
         int maxTextWidth = m_width - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread * 2;
         // 计算绘制文本所需最小区域
@@ -111,25 +137,32 @@ void ToastManager::paintEvent(QPaintEvent *event)
         int w = m_paddingH + m_widthIcon + m_spacingIconToText + rectText.width() + m_paddingH;
         int h = m_paddingV + rectText.height() + m_paddingV;
         int x = (m_width - w) / 2;
-        QRect rectBackground(x, y, w, h);
-        // 计算文本绘制区域
+
+        // 用 currentDrawY 定义背景区域
+        QRect rectBackground(x, currentDrawY, w, h);
+
+        // 使用 currentDrawY 定义文本绘制区域的 Y 坐标
         QRect rectDrawText = rectText.adjusted(x + m_paddingH + m_widthIcon + m_spacingIconToText,
-                                               y + m_paddingV,
+                                               currentDrawY + m_paddingV,
                                                x + m_paddingH + m_widthIcon + m_spacingIconToText,
-                                               y + m_paddingV);
-        // 计算图标区域
+                                               currentDrawY + m_paddingV);
+
+        // rectIcon 由于使用了 rectBackground.topLeft()，会自动应用 currentDrawY
         QRect rectIcon = QRect(rectBackground.topLeft() + QPoint(m_paddingH, m_paddingV), QSize(m_widthIcon, m_heightIcon));
 
         // 设置画笔透明度
         painter.setOpacity(toast->m_opacity);
-        // 绘制阴影
+
+        // 绘制阴影 (rectBackground 已使用 currentDrawY)
         for (int j = 0; j < m_spread; ++j)
         {
             float ratio = 1.0f - float(j) / m_spread;
             int alpha = m_baseAlpha * ratio;
             QColor shadow = QColor(m_colorShadow);
             shadow.setAlpha(alpha);
+
             // 阴影矩形向外扩展 j 像素
+            // 注意：rectBackground 已经是 QRect，需要转换为 QRectF 进行 adjusted 操作，但 Qt 会自动转换
             QRectF shadowRect = rectBackground.adjusted(-j + m_offSetX, -j + m_offSetY, j + m_offSetY, j + m_offSetY);
             QPainterPath path;
             // 阴影圆角半径随 j 增加
@@ -139,18 +172,21 @@ void ToastManager::paintEvent(QPaintEvent *event)
             painter.setBrush(Qt::NoBrush);
             painter.drawPath(path);
         }
-        // 绘制背景
+
+        // 绘制背景 (rectBackground 已使用 currentDrawY)
         painter.setBrush(QColor("#FFFFFF"));
         painter.setPen(Qt::NoPen);
         painter.drawRoundedRect(rectBackground, m_radius, m_radius);
-        // 绘制图标
+
+        // 绘制图标 (rectIcon 已使用 currentDrawY)
         QSvgRenderer svgRenderer(toast->m_svgFilePath);
         svgRenderer.render(&painter, rectIcon);
-        // 绘制文本
-        painter.setPen(Qt::black);
-        painter.drawText(rectDrawText, toast->m_message);
 
-        // 更新y坐标
+        // 绘制文本 (rectDrawText 已使用 currentDrawY)
+        painter.setPen(Qt::black);
+        painter.drawText(rectDrawText, Qt::AlignLeft | Qt::AlignVCenter, toast->m_message);
+
+        // 核心：更新下一条消息的堆叠基准 Y 坐标（不受当前动画偏移影响）
         y += h + m_spacing;
     }
 }
@@ -171,21 +207,84 @@ bool ToastManager::eventFilter(QObject *watched, QEvent *event)
     return QWidget::eventFilter(watched, event);
 }
 
-void ToastManager::slot_onRequestExist(Toast *message)
+void ToastManager::slot_onRequestExist(Toast *toastToExit)
 {
-    // 移除第一条消息
-    if (m_toasts.isEmpty() || m_toasts.first() != message)
+    // 1. 检查是否正在动画中或队列中第一个不是它
+    if (toastToExit->isAnimatingExit() || m_toasts.isEmpty() || m_toasts.first() != toastToExit)
         return;
-    Toast *exitMessage = m_toasts.first();
 
-    QParallelAnimationGroup *pAnimationGroupFadeOut = new QParallelAnimationGroup(this);
-    QPropertyAnimation *pAnimationSlideOut = new QPropertyAnimation();
+    // 标记为正在动画，防止重复触发
+    toastToExit->setAnimatingExit(true);
 
-    m_toasts.removeFirst();
-    exitMessage->deleteLater();
-    update();
+    QFont font(getGlobalFont());
+    QFontMetrics fontMetrics(font);
+    int maxTextWidth = m_width - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread * 2;
+    // 计算绘制文本所需最小区域
+    QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWordWrap, toastToExit->m_message);
+    const qreal SLIDE_DISTANCE = -(m_paddingV + rectText.height() + m_paddingV + m_spacing); // 上移像素
 
-    // 检查下一条消息是否需要被移除
+    // 2. 创建并行动画组
+    QParallelAnimationGroup *group = new QParallelAnimationGroup(toastToExit);
+
+    // a) Y 轴滑动动画 ("renderY")
+    QPropertyAnimation *slideAnim = new QPropertyAnimation(toastToExit, "m_renderY");
+    slideAnim->setDuration(m_animationDuration);
+    slideAnim->setStartValue(0.0);          // 从无偏移开始
+    slideAnim->setEndValue(SLIDE_DISTANCE); // 向上移动
+    slideAnim->setEasingCurve(QEasingCurve::OutSine);
+    group->addAnimation(slideAnim);
+
+    // b) 透明度淡出动画 ("opacity")
+    QPropertyAnimation *opacityAnim = new QPropertyAnimation(toastToExit, "m_opacity");
+    opacityAnim->setDuration(m_animationDuration);
+    opacityAnim->setStartValue(toastToExit->getOpacity()); // 从当前不透明度开始 (1.0)
+    opacityAnim->setEndValue(0.0);                         // 淡出至 0.0
+    opacityAnim->setEasingCurve(QEasingCurve::OutSine);
+    group->addAnimation(opacityAnim);
+
+    // c) 整体上移
+    for (int i = 1; i < m_toasts.count(); ++i)
+    {
+        Toast *toast = m_toasts[i];
+        // 计算绘制文本所需最小区域
+        rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWordWrap, toast->m_message);
+        int slideDistance = -(m_paddingV + rectText.height() + m_paddingV + m_spacing);
+        QPropertyAnimation *anim = new QPropertyAnimation(toast, "m_renderY");
+        anim->setDuration(m_animationDuration - 100);
+        anim->setEasingCurve(QEasingCurve::InOutSine);
+        anim->setStartValue(0.0);
+        anim->setEndValue(slideDistance);
+        group->addAnimation(anim);
+    }
+
+    // 3. 连接动画完成信号到清理槽
+    connect(group, &QAbstractAnimation::finished, this,
+            [this, toastToExit, group]()
+            {
+                // 动画完成后，执行清理工作
+                removeToastAfterAnimation(toastToExit);
+                group->deleteLater(); // 清理动画组
+            });
+
+    // 4. 启动动画
+    group->start();
+}
+
+void ToastManager::removeToastAfterAnimation(Toast *toastToRemove)
+{
+    // 查找并移除 Toast (使用 removeOne 更安全)
+    if (m_toasts.contains(toastToRemove))
+    {
+        m_toasts.removeOne(toastToRemove);
+        toastToRemove->deleteLater();
+        XLC_LOG_DEBUG("Remove toast after animation success");
+    }
+
+    // 动画完成后，需要重新绘制，让所有剩余的 Toast 向上移动
+    this->update();
+
+    // **核心：处理队列中已超时的下一条消息的级联移除**
+    // 恢复原来的 while 循环逻辑
     while (true)
     {
         if (m_toasts.isEmpty())
@@ -193,10 +292,12 @@ void ToastManager::slot_onRequestExist(Toast *message)
         Toast *nextMessage = m_toasts.first();
         if (!nextMessage->m_timeoutOccurred)
             break;
+
+        // 如果下一条消息已经超时，立即移除（这里可以考虑也给它一个快速动画，但现在按照原逻辑直接移除）
         m_toasts.removeFirst();
         nextMessage->deleteLater();
-        update();
-        XLC_LOG_DEBUG("Remove toast success");
+        this->update();
+        XLC_LOG_DEBUG("Remove cascaded toast success");
     }
 }
 
