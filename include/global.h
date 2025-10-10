@@ -28,67 +28,6 @@ constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
 
 constexpr const char *DEFAULT_CONTENT_CLEAR_CONTEXT = "XLC_ASSISTANT_CLEAR_CONTEXT"; // 清除上下文的Role为SYSTEM的Message的Content
 
-QString getCurrentDateTime();
-QString generateUuid();
-struct Message
-{
-    QString id;
-    QString content;
-    enum Role
-    {
-        USER = 0,
-        ASSISTANT = 1,
-        TOOL = 2,
-        SYSTEM = 3,
-        UNKNOWN = 4
-    };
-    Role role;
-    QString createdTime;
-    QString toolCalls;
-    QString toolCallId;
-    QString avatarFilePath;
-
-    Message(const QString &id,
-            const QString &content,
-            Role role,
-            const QString &createdTime,
-            const QString &toolCalls,
-            const QString &toolCallId,
-            const QString &avatarFilePath)
-        : id(id), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId), avatarFilePath(avatarFilePath)
-    {
-    }
-
-    Message(const QString &content,
-            Role role,
-            const QString &createdTime,
-            const QString &toolCalls = QString(),
-            const QString &toolCallId = QString())
-        : id(generateUuid()), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId)
-    {
-        if (this->avatarFilePath.isEmpty())
-        {
-            switch (role)
-            {
-            case Role::USER:
-                this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
-                break;
-            case Role::ASSISTANT:
-                this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
-                break;
-            case Role::TOOL:
-                this->avatarFilePath = QString(AVATAR_TOOL);
-                break;
-            case Role::SYSTEM:
-                this->avatarFilePath = QString(AVATAR_SYSTEM);
-                break;
-            default:
-                this->avatarFilePath = QString(AVATAR_UNKNOW);
-                break;
-            }
-        }
-    }
-};
 
 /**
  * 获取默认字体

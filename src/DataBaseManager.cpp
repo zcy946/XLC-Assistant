@@ -240,7 +240,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                                            const QString &content,
                                            const QString &createdTime,
                                            const QString &avatarFilePath,
-                                           const QString &toolCalls,
+                                           const QJsonArray &toolCalls,
                                            const QString &toolCallId)
 {
     QString strRole;
@@ -262,7 +262,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
         strRole = "UNKNOWN";
         break;
     }
-
+    QString strToolCalls = QString::fromUtf8(QJsonDocument(toolCalls).toJson(QJsonDocument::Indented));
     // 插入新消息
     QSqlQuery query(m_dataBase);
     query.prepare(R"(
@@ -275,7 +275,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
     query.bindValue(":content", content);
     query.bindValue(":created_time", createdTime);
     query.bindValue(":avatar_file_path", avatarFilePath);
-    query.bindValue(":tool_calls", toolCalls);
+    query.bindValue(":tool_calls", strToolCalls);
     query.bindValue(":tool_call_id", toolCallId);
     if (!query.exec())
     {
@@ -286,7 +286,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                      content,
                      createdTime,
                      avatarFilePath,
-                     toolCalls,
+                     strToolCalls,
                      toolCallId,
                      query.lastQuery(),
                      query.lastError().text());
@@ -301,7 +301,7 @@ void DataBaseWorker::slot_insertNewMessage(const QString &conversationUuid,
                       content,
                       createdTime,
                       avatarFilePath,
-                      toolCalls,
+                      strToolCalls,
                       toolCallId,
                       query.lastQuery());
     }

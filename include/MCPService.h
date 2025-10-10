@@ -15,8 +15,8 @@ struct MCPTool
     QString id;              // 新生成的唯一id(将此id作为function name传给llm)
     QString name;            // 工具原有的名字
     QString serverUuid;      // 所在mcp服务器uuid
-    mcp::json convertedTool; // 转换为json的工具
-    MCPTool(const QString &name, const QString &serverUuid, const mcp::json &convertedTool = mcp::json());
+    QJsonObject jsonObjTool; // 转换为json的工具
+    MCPTool(const QString &name, const QString &serverUuid, const QJsonObject &jsonObjTool = QJsonObject());
 
 private:
     // 通过serverUuid和toolName构建新的用于LLM调用的toolName
@@ -34,7 +34,7 @@ struct CallToolArgs
     QString conversationUuid; // 对话uuid
     QString callId;           // 本次本次调用的id
     QString toolName;         // 调用的函数名称（MCPTool中的id）
-    mcp::json parameters;     // 参数
+    QJsonObject parameters;   // 参数
 };
 Q_DECLARE_METATYPE(CallToolArgs)
 
@@ -45,7 +45,7 @@ class MCPService : public QObject
 Q_SIGNALS:
     void sig_clientReady(const QString &serverUuid, std::shared_ptr<MCPClient> client);
     void sig_clientError(const QString &serverUuid, const QString &errorMessage);
-    void sig_toolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
+    void sig_toolCallFinished(const CallToolArgs &callToolArgs, bool success, const QJsonObject &jsonObjectToolCallResult, const QString &errorMessage);
     // void sig_checkMcpConnectivityFinished(const QString &serverUuid, bool success);
 
 public:
@@ -61,8 +61,8 @@ public:
     void initClient(const QString &serverUuid);
     void closeClient(const QString &serverUuid);
     void callTool(const CallToolArgs &callToolArgs);
-    mcp::json getToolsFromServer(const QString &serverUuid);
-    mcp::json getToolsFromServers(const QSet<QString> mcpServers);
+    QJsonArray getToolsFromServer(const QString &serverUuid);
+    QJsonArray getToolsFromServers(const QSet<QString> mcpServers);
     // void checkMcpConnectivity(const QString &serverUuid);
     bool isInitialized(const QString &serverUuid);
 

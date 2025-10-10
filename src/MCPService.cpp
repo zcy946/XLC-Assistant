@@ -5,8 +5,8 @@
 #include <QFutureWatcher>
 #include <ToastManager.h>
 
-MCPTool::MCPTool(const QString &name, const QString &serverUuid, const mcp::json &convertedTool)
-    : name(name), serverUuid(serverUuid), convertedTool(convertedTool)
+MCPTool::MCPTool(const QString &name, const QString &serverUuid, const QJsonObject &jsonObjTool)
+    : name(name), serverUuid(serverUuid), jsonObjTool(jsonObjTool)
 {
     id = buildFunctionCallToolName(serverUuid, name);
 }
@@ -252,16 +252,18 @@ QVector<QString> MCPService::registerTools(const QString &serverUuid, mcp::clien
         for (const auto &tool : client->get_tools())
         {
             std::shared_ptr<MCPTool> mcpTool = std::make_shared<MCPTool>(QString::fromStdString(tool.name), serverUuid);
-            mcp::json convertedTool = {
+            // 解析 properties 对象
+            QJsonObject jsonObjProperties = QJsonDocument::fromJson(QByteArray::fromStdString(tool.parameters_schema.value("properties", mcp::json::object()).dump())).object();
+            // 解析 required 数组
+            QJsonArray jsonArrayRequired = QJsonDocument::fromJson(QByteArray::fromStdString(tool.parameters_schema.value("required", mcp::json::array()).dump())).array();
+            QJsonObject newJsonObjTool = {
                 {"type", "function"},
-                {"function",
-                 {{"name", mcpTool->id.toStdString()},
-                  {"description", tool.description},
-                  {"parameters",
-                   {{"type", "object"},
-                    {"properties", tool.parameters_schema.value("properties", mcp::json::object())},
-                    {"required", tool.parameters_schema.value("required", mcp::json::array())}}}}}};
-            mcpTool->convertedTool = convertedTool;
+                {"function", QJsonObject({{"name", mcpTool->id},
+                                          {"description", QString::fromStdString(tool.description)},
+                                          {"parameters", QJsonObject({{"type", "object"},
+                                                                      {"properties", jsonObjProperties},
+                                                                      {"required", jsonArrayRequired}})}})}};
+            mcpTool->jsonObjTool = newJsonObjTool;
             tools.push_back(mcpTool->id);
             // 更新工具列表
             m_tools.insert(mcpTool->id, mcpTool);
@@ -405,7 +407,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         {
             QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): tool not found").arg(callToolArgs.callId).arg(callToolArgs.toolName);
             XLC_LOG_WARN("{}", errorMessage);
-            Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+            Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             return;
         }
         mcpTool = it_McpTool.value();
@@ -420,7 +422,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         {
             QString errorMessage = QString("Call tool failed (callId=%1, server=%2): mcp client not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid);
             XLC_LOG_WARN("{}", errorMessage);
-            Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+            Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             return;
         }
         mcpClient = it_McpClient.value();
@@ -430,7 +432,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
     {
         QString errorMessage = QString("Call tool failed (callId=%1, server=%2, tool=%3): original tool not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid).arg(callToolArgs.toolName);
         XLC_LOG_WARN("{}", errorMessage);
-        Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+        Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
         return;
     }
 
@@ -440,14 +442,17 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         {
             try
             {
-                mcp::json result = mcpClient->client->call_tool(mcpTool->name.toStdString(), callToolArgs.parameters);
+                // 使用std::string作为中间件转换QJsonObject到mcp::json
+                mcp::json arguments = mcp::json::parse(QString::fromUtf8(QJsonDocument(callToolArgs.parameters).toJson(QJsonDocument::Compact)).toStdString());
+                mcp::json result = mcpClient->client->call_tool(mcpTool->name.toStdString(), arguments);
                 // 根据 isError 字段判断是否调用成功
                 if (result.contains("isError") && result["isError"].is_boolean() && !result["isError"])
                 {
                     // 调用成功
                     XLC_LOG_TRACE("Call tool succeeded (callId={}, tool={}): {}", callToolArgs.callId, mcpTool->name, result.dump(4));
                     // 处理调用结果
-                    Q_EMIT sig_toolCallFinished(callToolArgs, true, result, Q_NULLPTR);
+                    QJsonObject jsonObjToolCallResult = QJsonDocument::fromJson(QString::fromStdString(result.dump()).toUtf8()).object();
+                    Q_EMIT sig_toolCallFinished(callToolArgs, true, jsonObjToolCallResult, QString());
                 }
                 else
                 {
@@ -466,7 +471,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(QString::fromStdString(result["content"][0]["text"].get<std::string>()));
                     }
                     XLC_LOG_ERROR("{}", errorMessage);
-                    Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+                    Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
                 }
             }
             // 调用失败
@@ -477,7 +482,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(mcpTool->name)
                                            .arg(e.what());
                 XLC_LOG_WARN("{}", errorMessage);
-                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
             catch (const std::exception &e)
             {
@@ -487,7 +492,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(e.what());
 
                 XLC_LOG_WARN("{}", errorMessage);
-                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
             catch (...)
             {
@@ -496,14 +501,15 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(mcpTool->name);
 
                 XLC_LOG_WARN("{}", errorMessage);
-                Q_EMIT sig_toolCallFinished(callToolArgs, false, mcp::json(), errorMessage);
+                Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
         });
 }
 
-mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
+QJsonArray MCPService::getToolsFromServer(const QString &serverUuid)
 {
     std::shared_ptr<MCPClient> client;
+    // 查找客户端连接
     {
         QMutexLocker locker(&m_mutexClients);
         auto it_McpClient = m_clients.find(serverUuid);
@@ -511,6 +517,7 @@ mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
         {
             QString errorMsg;
             {
+                // 未初始化，也没有正在初始化则尝试初始化客户端连接
                 QMutexLocker lockerPendingClients(&m_mutexPendingClients);
                 if (!m_pendingClients.contains(serverUuid))
                 {
@@ -520,34 +527,38 @@ mcp::json MCPService::getToolsFromServer(const QString &serverUuid)
             }
             errorMsg = QString("Get tools failed (serverUuid={}): client is initializing");
             XLC_LOG_WARN("errorMsg", serverUuid);
-            return mcp::json::array();
+            return QJsonArray();
         }
         client = it_McpClient.value();
     }
 
     QMutexLocker locker(&m_mutexTools);
-    mcp::json toolsJson = mcp::json::array();
+    QJsonArray jsonArrayTools;
     for (const QString &toolId : client->tools)
     {
         auto it_McpTool = m_tools.find(toolId);
         if (it_McpTool != m_tools.end())
         {
-            toolsJson.push_back((*it_McpTool)->convertedTool);
+            jsonArrayTools.push_back((*it_McpTool)->jsonObjTool);
         }
     }
-    return toolsJson;
+    return jsonArrayTools;
 }
 
-mcp::json MCPService::getToolsFromServers(const QSet<QString> mcpServers)
+QJsonArray MCPService::getToolsFromServers(const QSet<QString> mcpServers)
 {
-    mcp::json toolsJson = mcp::json::array();
+    QJsonArray jsonArrayTools = QJsonArray();
     for (const QString mcpServerUuid : mcpServers)
     {
-        mcp::json serverTools = getToolsFromServer(mcpServerUuid);
-        toolsJson.insert(toolsJson.end(), serverTools.begin(), serverTools.end());
+        QJsonArray jsonArrayToolsFromSingleServer = getToolsFromServer(mcpServerUuid);
+        for (const QJsonValue &tool : jsonArrayToolsFromSingleServer)
+        {
+            jsonArrayTools.append(tool);
+        }
     }
-    XLC_LOG_TRACE("Get tools succeeded (toolJsonStr={})", toolsJson.dump(4));
-    return toolsJson;
+
+    XLC_LOG_TRACE("Get tools succeeded (jsonArrayTools={})", QString::fromUtf8(QJsonDocument(jsonArrayTools).toJson(QJsonDocument::Indented)));
+    return jsonArrayTools;
 }
 
 // void MCPService::checkMcpConnectivity(const QString &serverUuid)

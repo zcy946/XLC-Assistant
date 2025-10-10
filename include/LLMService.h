@@ -17,7 +17,7 @@ Q_SIGNALS:
     void sig_toolCalled(const QString &conversationUuid, const QString &message);
 
 private Q_SLOTS:
-    void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const mcp::json &result, const QString &errorMessage);
+    void slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool success, const QJsonObject &jsonObjectToolCallResult, const QString &errorMessage);
 
 public:
     static LLMService *getInstance();
@@ -32,15 +32,15 @@ public:
      * @param tools 可使用的工具列表（默认为空）.
      * @param max_retries 失败时最大重试次数（默认为3）.
      */
-    void postMessage(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const mcp::json &tools = mcp::json(), int max_retries = 3);
+    void postMessage(std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, const QJsonArray &tools = QJsonArray(), int max_retries = 3);
 
 private:
     explicit LLMService(QObject *parent = nullptr);
     LLMService(const LLMService &) = delete;
     LLMService &operator=(const LLMService &) = delete;
-    void handleResponse(QNetworkReply *reply, std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, std::shared_ptr<LLM> llm, const mcp::json &tools, int retries_left);
-    void handleSuccessfulResponse(const std::shared_ptr<Conversation> &conversation, const nlohmann::json &responseMessage);
-    std::string formatMcpToolResponse(const mcp::json &result, const std::string &toolName, bool isVisionModel = false);
+    void handleResponse(QNetworkReply *reply, std::shared_ptr<Conversation> conversation, std::shared_ptr<Agent> agent, std::shared_ptr<LLM> llm, const QJsonArray &tools, int retries_left);
+    void handleSuccessfulResponse(const std::shared_ptr<Conversation> &conversation, const QJsonObject &jsonObjMessage);
+    QString formatMcpToolResponse(const QJsonObject &jsonObjToolCallResult, const QString &toolName, bool isVisionModel = false);
 
 private:
     static LLMService *s_instance;

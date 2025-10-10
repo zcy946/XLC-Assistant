@@ -29,7 +29,7 @@ Q_SIGNALS:
                               const QString &text,
                               const QString &createdTime,
                               const QString &avatarFilePath,
-                              const QString &toolCalls,
+                              const QJsonArray &toolCalls,
                               const QString &toolCallId);
     // 获取消息列表
     void sig_getMessageList(const QString &conversationUuid);
@@ -71,7 +71,7 @@ public Q_SLOTS:
                                const QString &content,
                                const QString &createdTime,
                                const QString &avatarFilePath,
-                               const QString &toolCalls,
+                               const QJsonArray &toolCalls,
                                const QString &toolCallId);
     void slot_updateConversationUpdatedTime(const QString &uuid, const QString &newUpdatedTime);
     void slot_getMessages(const QString &conversationUuid);

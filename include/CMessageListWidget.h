@@ -9,19 +9,19 @@
 #include <QPainter>
 #include <QTextDocument>
 #include <QListView>
-#include "global.h"
+#include "DataManager.h"
 
 struct CMessage : public Message
 {
     CMessage(const QString &content, Message::Role role,
              const QString &createdTime,
-             const QString &toolCalls = QString(), const QString &toolCallId = QString())
+             const QJsonArray &toolCalls = QJsonArray(), const QString &toolCallId = QString())
         : Message(content, role, createdTime, toolCalls, toolCallId)
     {
     }
     CMessage(const QString &id, const QString &content, Message::Role role,
              const QString &createdTime,
-             const QString &toolCalls, const QString &toolCallId,
+             const QJsonArray &toolCalls, const QString &toolCallId,
              const QString &avatarFilePath)
         : Message(id, content, role, createdTime, toolCalls, toolCallId, avatarFilePath)
     {

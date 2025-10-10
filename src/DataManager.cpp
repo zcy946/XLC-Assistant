@@ -162,33 +162,47 @@ void DataManager::slot_handleMessagesAcquired(bool success, const QString &conve
 
     // 解析消息列表，装载消息
     QList<Message> messages;
-    for (const QJsonValue &value : jsonArrayMessages)
+    for (int i = 0; i < jsonArrayMessages.size(); ++i)
     {
-        if (!value.isObject())
+        if (!jsonArrayMessages.at(i).isObject())
             continue;
-        QJsonObject obj = value.toObject();
-        QString temp_uuid = obj["uuid"].toString();
-        QString temp_conversationUuid = obj["conversation_uuid"].toString();
-        QString temp_roleStr = obj["role"].toString();
-        QString temp_content = obj["content"].toString();
-        QString temp_createdTime = obj["created_time"].toString();
-        QString temp_avatarFilePath = obj["avatar_file_path"].toString();
-        QString temp_toolCalls = obj["tool_calls"].toString();
-        QString temp_toolCallId = obj["tool_call_id"].toString();
+        QJsonObject jsonObjMessage = jsonArrayMessages.at(i).toObject();
+        QString uuid = jsonObjMessage["uuid"].toString();
+        QString conversationUuid = jsonObjMessage["conversation_uuid"].toString();
+        QString roleStr = jsonObjMessage["role"].toString();
+        QString content = jsonObjMessage["content"].toString();
+        QString createdTime = jsonObjMessage["created_time"].toString();
+        QString avatarFilePath = jsonObjMessage["avatar_file_path"].toString();
+        QString strToolCalls = jsonObjMessage["tool_calls"].toString();
+        QString toolCallId = jsonObjMessage["tool_call_id"].toString();
 
+        QJsonParseError parseError;
+        QJsonDocument jsonDocToolCalls = QJsonDocument::fromJson(strToolCalls.toUtf8(), &parseError);
+        QJsonArray jsonArrayToolCalls = QJsonArray();
+        if (!jsonDocToolCalls.isNull())
+        {
+            if (!jsonDocToolCalls.isArray())
+            {
+                XLC_LOG_ERROR("Parse toolcalls failed (conversationUuid={}, strToolCalls={}): strToolCalls is not an array", conversationUuid, strToolCalls);
+            }
+            else
+            {
+                jsonArrayToolCalls = jsonDocToolCalls.array();
+            }
+        }
         Message::Role role;
-        if (temp_roleStr == "USER")
+        if (roleStr == "USER")
             role = Message::USER;
-        else if (temp_roleStr == "ASSISTANT")
+        else if (roleStr == "ASSISTANT")
             role = Message::ASSISTANT;
-        else if (temp_roleStr == "TOOL")
+        else if (roleStr == "TOOL")
             role = Message::TOOL;
-        else if (temp_roleStr == "SYSTEM")
+        else if (roleStr == "SYSTEM")
             role = Message::SYSTEM;
         else
             role = Message::UNKNOWN;
 
-        messages.append(Message(temp_uuid, temp_content, role, temp_createdTime, temp_toolCalls, temp_toolCallId, temp_avatarFilePath));
+        messages.append(Message(uuid, content, role, createdTime, jsonArrayToolCalls, toolCallId, avatarFilePath));
     }
     std::shared_ptr<Conversation> conversation = getConversation(conversationUuid);
     if (!conversation)
@@ -1184,7 +1198,7 @@ Conversation::Conversation(const QString &agentUuid)
       agentUuid(agentUuid),
       createdTime(getCurrentDateTime()),
       updatedTime(getCurrentDateTime()),
-      cachedJsonMessages(mcp::json()),
+      jsonArrayCachedMessages(QJsonArray()),
       messageCount(-1)
 {
 }
@@ -1200,7 +1214,7 @@ Conversation::Conversation(const QString &uuid,
       summary(summary),
       createdTime(createdTime),
       updatedTime(updatedTime),
-      cachedJsonMessages(mcp::json()),
+      jsonArrayCachedMessages(QJsonArray()),
       messageCount(messageCount)
 {
 }
@@ -1251,19 +1265,16 @@ std::shared_ptr<Conversation> Conversation::create(const QString &uuid,
 bool Conversation::hasSystemPrompt()
 {
     // 只需要保证缓存的json messages有提示词即可，数据库不保存系统提示词
-    QMutexLocker locker(&mutex_cachedJsonMessages);
-    if (!cachedJsonMessages.is_array() || cachedJsonMessages.empty())
-    {
+    QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+    if (jsonArrayCachedMessages.isEmpty())
         return false;
-    }
-    const auto &firstItem = cachedJsonMessages.front();
-    if (!firstItem.is_object())
+    // 查找第一条message
+    if (jsonArrayCachedMessages.first().isObject())
     {
-        return false;
-    }
-    if (firstItem.contains("role") && firstItem["role"].is_string() && firstItem["role"] == "system")
-    {
-        return true;
+        // 判断第一条消息是否存在为role的key、role是否字符串、value是否为system
+        QJsonObject firstMessage = jsonArrayCachedMessages.first().toObject();
+        if (firstMessage.contains("role") && firstMessage.value("role").isString() && firstMessage.value("role").toString() == "system")
+            return true;
     }
     return false;
 }
@@ -1278,22 +1289,25 @@ void Conversation::resetSystemPrompt()
     if (agent->systemPrompt.isEmpty())
         return;
 
-    mcp::json systemPromptItem = mcp::json();
-    systemPromptItem["content"] = agent->systemPrompt.toStdString();
-    systemPromptItem["role"] = "system";
+    // 创建提示词message
+    QJsonObject jsonObjPrompt;
+    jsonObjPrompt["content"] = agent->systemPrompt;
+    jsonObjPrompt["role"] = "system";
 
     if (hasSystemPrompt())
     {
-        QMutexLocker locker(&mutex_cachedJsonMessages);
-        cachedJsonMessages.front() = systemPromptItem;
+        // 已存在提示词 -> 更新
+        QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+        jsonArrayCachedMessages.replace(0, jsonObjPrompt);
     }
     else
     {
-        QMutexLocker locker(&mutex_cachedJsonMessages);
-        if (cachedJsonMessages.empty())
-            cachedJsonMessages.push_back(systemPromptItem);
+        // 不存在提示词 -> 插入
+        QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+        if (jsonArrayCachedMessages.empty())
+            jsonArrayCachedMessages.push_back(jsonObjPrompt);
         else
-            cachedJsonMessages.insert(cachedJsonMessages.begin(), systemPromptItem);
+            jsonArrayCachedMessages.insert(jsonArrayCachedMessages.begin(), jsonObjPrompt);
     }
 }
 
@@ -1306,53 +1320,45 @@ void Conversation::addMessage(const Message &newMessage)
     // 更新消息数量
     messageCount += 1;
 
-    // 更新 json messages 缓存
-    mcp::json jsonMessage;
-    jsonMessage["content"] = newMessage.content.toStdString();
+    // 更新 messages 缓存
+    QJsonObject jsonObjNewMessage;
+    jsonObjNewMessage["content"] = newMessage.content;
     switch (newMessage.role)
     {
     case Message::USER:
     {
-        jsonMessage["role"] = "user";
-        QMutexLocker locker(&mutex_cachedJsonMessages);
-        cachedJsonMessages.push_back(jsonMessage);
+        jsonObjNewMessage["role"] = "user";
+        QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+        jsonArrayCachedMessages.push_back(jsonObjNewMessage);
         break;
     }
     case Message::ASSISTANT:
     {
-        jsonMessage["role"] = "assistant";
+        jsonObjNewMessage["role"] = "assistant";
         if (!newMessage.toolCalls.isEmpty())
         {
-            try
-            {
-                mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
-                jsonMessage["tool_calls"] = jsonArrayToolCalls;
-            }
-            catch (const mcp::json::parse_error &e)
-            {
-                XLC_LOG_ERROR("Load messages (error={}): JSON Parsing error", e.what());
-            }
+            jsonObjNewMessage["tool_calls"] = newMessage.toolCalls;
         }
-        QMutexLocker locker(&mutex_cachedJsonMessages);
-        cachedJsonMessages.push_back(jsonMessage);
+        QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+        jsonArrayCachedMessages.push_back(jsonObjNewMessage);
         break;
     }
     case Message::TOOL:
     {
-        jsonMessage["role"] = "tool";
-        jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
-        QMutexLocker locker(&mutex_cachedJsonMessages);
-        cachedJsonMessages.push_back(jsonMessage);
+        jsonObjNewMessage["role"] = "tool";
+        jsonObjNewMessage["tool_call_id"] = newMessage.toolCallId;
+        QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+        jsonArrayCachedMessages.push_back(jsonObjNewMessage);
         break;
     }
     case Message::SYSTEM:
     {
-        jsonMessage["role"] = "system";
+        jsonObjNewMessage["role"] = "system";
         // 清除上下文
         if (newMessage.content == DEFAULT_CONTENT_CLEAR_CONTEXT)
         {
-            QMutexLocker locker(&mutex_cachedJsonMessages);
-            cachedJsonMessages.clear();
+            QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+            jsonArrayCachedMessages = QJsonArray();
         }
         break;
     }
@@ -1399,10 +1405,10 @@ const QVector<Message> Conversation::getMessages()
     return messages;
 }
 
-const mcp::json Conversation::getCachedMessages()
+const QJsonArray Conversation::getCachedMessages()
 {
-    QMutexLocker locker(&mutex_cachedJsonMessages);
-    return cachedJsonMessages;
+    QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+    return jsonArrayCachedMessages;
 }
 
 // 清除上下文
@@ -1414,60 +1420,52 @@ void Conversation::clearContext()
 
 void Conversation::loadMessages(const QList<Message> &messageList)
 {
-    QMutexLocker locker(&mutex_cachedJsonMessages);
-    cachedJsonMessages.clear();
+    QMutexLocker locker(&mutex_jsonArrayCachedMessages);
+    jsonArrayCachedMessages = QJsonArray();
     messages.clear();
     // 更新消息数量
     messageCount = messageList.size();
-    for (const Message &newMessage : messageList)
+    for (const Message &message : messageList)
     {
         // 更新 messages
-        messages.append(newMessage);
+        messages.append(message);
         // 更新本地对话更新时间
-        updatedTime = newMessage.createdTime;
+        updatedTime = message.createdTime;
 
         // 更新 json messages 缓存
-        mcp::json jsonMessage;
-        jsonMessage["content"] = newMessage.content.toStdString();
-        switch (newMessage.role)
+        QJsonObject jsonObjMessage;
+        jsonObjMessage["content"] = message.content;
+        switch (message.role)
         {
         case Message::USER:
         {
-            jsonMessage["role"] = "user";
-            cachedJsonMessages.push_back(jsonMessage);
+            jsonObjMessage["role"] = "user";
+            jsonArrayCachedMessages.push_back(jsonObjMessage);
             break;
         }
         case Message::ASSISTANT:
         {
-            jsonMessage["role"] = "assistant";
-            if (!newMessage.toolCalls.isEmpty())
+            jsonObjMessage["role"] = "assistant";
+            if (!message.toolCalls.isEmpty())
             {
-                try
-                {
-                    mcp::json jsonArrayToolCalls = mcp::json::parse(newMessage.toolCalls.toStdString());
-                    jsonMessage["tool_calls"] = jsonArrayToolCalls;
-                }
-                catch (const mcp::json::parse_error &e)
-                {
-                    XLC_LOG_ERROR("Load messages (error={}): JSON Parsing error", e.what());
-                }
+                jsonObjMessage["tool_calls"] = message.toolCalls;
             }
-            cachedJsonMessages.push_back(jsonMessage);
+            jsonArrayCachedMessages.push_back(jsonObjMessage);
             break;
         }
         case Message::TOOL:
         {
-            jsonMessage["role"] = "tool";
-            jsonMessage["tool_call_id"] = newMessage.toolCallId.toStdString();
-            cachedJsonMessages.push_back(jsonMessage);
+            jsonObjMessage["role"] = "tool";
+            jsonObjMessage["tool_call_id"] = message.toolCallId;
+            jsonArrayCachedMessages.push_back(jsonObjMessage);
             break;
         }
         case Message::SYSTEM:
         {
-            jsonMessage["role"] = "system";
+            jsonObjMessage["role"] = "system";
             // 清除上下文
-            if (newMessage.content == DEFAULT_CONTENT_CLEAR_CONTEXT)
-                cachedJsonMessages.clear();
+            if (message.content == DEFAULT_CONTENT_CLEAR_CONTEXT)
+                jsonArrayCachedMessages = QJsonArray();
             break;
         }
         default:

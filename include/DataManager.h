@@ -6,7 +6,8 @@
 #include <global.h>
 #include <QObject>
 #include "Logger.hpp"
-#include <mcp_message.h>
+// #include <mcp_message.h>
+#include <QJsonArray>
 #include <QSet>
 #include <QMutex>
 #include "DataBaseManager.h"
@@ -15,6 +16,7 @@ struct CallToolArgs;
 struct LLM;
 struct McpServer;
 struct Agent;
+struct Message;
 struct Conversation;
 class DataManager : public QObject
 {
@@ -254,7 +256,7 @@ public:
     // 获取所有消息
     const QVector<Message> getMessages();
     // 获取json格式的messages
-    const mcp::json getCachedMessages();
+    const QJsonArray getCachedMessages();
     // 清除上下文
     void clearContext();
     // 从[数据库获取的]消息列表中加载
@@ -270,9 +272,69 @@ public:
     int pendingToolCalls = 0; // 待处理的工具调用数量
 
 private:
-    QMutex mutex_cachedJsonMessages;
-    mcp::json cachedJsonMessages;
+    QMutex mutex_jsonArrayCachedMessages;
+    QJsonArray jsonArrayCachedMessages;
     QVector<Message> messages;
+};
+
+struct Message
+{
+    QString id;
+    QString content;
+    enum Role
+    {
+        USER = 0,
+        ASSISTANT = 1,
+        TOOL = 2,
+        SYSTEM = 3,
+        UNKNOWN = 4
+    };
+    Role role;
+    QString createdTime;
+    QJsonArray toolCalls;
+    QString toolCallId;
+    QString avatarFilePath;
+
+    Message(const QString &id,
+            const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QJsonArray &toolCalls,
+            const QString &toolCallId,
+            const QString &avatarFilePath)
+        : id(id), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId), avatarFilePath(avatarFilePath)
+    {
+    }
+
+    Message(const QString &content,
+            Role role,
+            const QString &createdTime,
+            const QJsonArray &toolCalls = QJsonArray(),
+            const QString &toolCallId = QString())
+        : id(generateUuid()), content(content), role(role), createdTime(createdTime), toolCalls(toolCalls), toolCallId(toolCallId)
+    {
+        if (this->avatarFilePath.isEmpty())
+        {
+            switch (role)
+            {
+            case Role::USER:
+                this->avatarFilePath = QString(DEFAULT_AVATAR_USER);
+                break;
+            case Role::ASSISTANT:
+                this->avatarFilePath = QString(DEFAULT_AVATAR_LLM);
+                break;
+            case Role::TOOL:
+                this->avatarFilePath = QString(AVATAR_TOOL);
+                break;
+            case Role::SYSTEM:
+                this->avatarFilePath = QString(AVATAR_SYSTEM);
+                break;
+            default:
+                this->avatarFilePath = QString(AVATAR_UNKNOW);
+                break;
+            }
+        }
+    }
 };
 
 #endif // DATAMANAGER_H
