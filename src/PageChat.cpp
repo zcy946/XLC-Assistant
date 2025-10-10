@@ -9,6 +9,7 @@
 #include "MCPService.h"
 #include "LLMService.h"
 #include "ToastManager.h"
+#include "QJsonDocument"
 
 PageChat::PageChat(QWidget *parent)
     : BaseWidget(parent)
@@ -434,15 +435,6 @@ void WidgetChat::initItems()
 {
     // m_listWidgetMessages
     m_listWidgetMessages = new CMessageListWidget(this);
-#ifdef QT_DEBUG
-    for (int i = 0; i < 50; ++i)
-    {
-        if (i % 2 == 0)
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::USER, getCurrentDateTime()));
-        else
-            m_listWidgetMessages->addMessage(CMessage("测试消息" + QString::number(i + 1), Message::Role::ASSISTANT, getCurrentDateTime()));
-    }
-#endif
     // m_plainTextEdit
     m_plainTextEdit = new QPlainTextEdit(this);
     // m_pushButtonSend
@@ -554,7 +546,22 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
     // 刷新历史消息列表m_listWidgetMessages
     for (const Message &message : messages)
     {
-        m_listWidgetMessages->addMessage(CMessage(message.id, message.content, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+        QString displayContent = message.content;
+        if (message.role == Message::ASSISTANT && !message.toolCalls.isEmpty())
+        {
+            QString strToolCalls = QString::fromUtf8(QJsonDocument(message.toolCalls).toJson(QJsonDocument::Indented));
+            displayContent = QString(message.content.isEmpty() ? "tool_calls:\n" + strToolCalls : message.content + "\ntool_calls:\n" + strToolCalls);
+        }
+        else if (message.role == Message::TOOL)
+        {
+            // 插入一条拼凑的系统调用工具的消息，保持一致性（数据库没有存储）
+            m_listWidgetMessages->addMessage(CMessage(message.id, QString("Calling tool (callId=%1)").arg(message.toolCallId), Message::TOOL, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+            displayContent = QString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
+                                 .arg(1)
+                                 .arg(message.toolCallId)
+                                 .arg(message.content);
+        }
+        m_listWidgetMessages->addMessage(CMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
     }
     XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }
