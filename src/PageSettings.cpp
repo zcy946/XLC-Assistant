@@ -677,9 +677,9 @@ void WidgetAgentInfo::initItems()
     m_listWidgetMcpServers->setContextMenuPolicy(Qt::CustomContextMenu);
     // m_contextMenuMcpServers
     m_contextMenuMcpServers = new QMenu(m_listWidgetMcpServers);
-    QAction *actionAddMcpServer = new QAction("添加", m_listWidgetMcpServers);
+    QAction *actionEditMcpServer = new QAction("编辑", m_listWidgetMcpServers);
     QAction *actionDeleteMcpServer = new QAction("删除", m_listWidgetMcpServers);
-    m_contextMenuMcpServers->addAction(actionAddMcpServer);
+    m_contextMenuMcpServers->addAction(actionEditMcpServer);
     m_contextMenuMcpServers->addAction(actionDeleteMcpServer);
     connect(m_listWidgetMcpServers, &QListWidget::customContextMenuRequested, this,
             [this, actionDeleteMcpServer](const QPoint &pos)
@@ -695,7 +695,7 @@ void WidgetAgentInfo::initItems()
                 }
                 m_contextMenuMcpServers->exec(m_listWidgetMcpServers->mapToGlobal(pos));
             });
-    connect(actionAddMcpServer, &QAction::triggered, this,
+    connect(actionEditMcpServer, &QAction::triggered, this,
             [this]()
             {
                 XLC_LOG_DEBUG("Attempting to add (mount) mcp server (agentUuid={})", m_lineEditUuid->text());
