@@ -92,19 +92,19 @@ void MainWindow::handlePageSwitched(const QVariant &data)
             }
             else
             {
-                XLC_LOG_ERROR("Failed to switch, agent or conversation UUID is empty.");
+                XLC_LOG_WARN("Failed to switch, agent or conversation UUID is empty.");
             }
             break;
         }
         default:
         {
-            XLC_LOG_ERROR("Page not found (id={})", id);
+            XLC_LOG_WARN("Page not found (id={})", id);
             break;
         }
         }
     }
     else
     {
-        XLC_LOG_ERROR("Failed to process page switch event (typename={}): unexpected data type", data.typeName());
+        XLC_LOG_WARN("Failed to process page switch event (typename={}): unexpected data type", data.typeName());
     }
 }

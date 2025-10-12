@@ -103,6 +103,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
                                .arg(retries_left)
                                .arg(reply->errorString());
         XLC_LOG_WARN("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Warning, errorMsg);
 
         // 如果还有重试次数，则重试
         if (retries_left > 0)
@@ -116,6 +117,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
                                         .arg(llm->baseUrl)
                                         .arg(llm->endpoint);
             XLC_LOG_ERROR("{}", finalErrorMsg);
+            ToastManager::showMessage(Toast::Type::Error, finalErrorMsg);
             Q_EMIT sig_errorOccurred(conversation->uuid, finalErrorMsg);
         }
         return;
@@ -133,6 +135,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
         {
             QString errorMsg = QString("Handle response failed, failed to parse response data to QJsonDocument (conversationUuid=%1): %2").arg(conversation->uuid).arg(parseError.errorString());
             XLC_LOG_ERROR("{}", errorMsg);
+            ToastManager::showMessage(Toast::Type::Error, errorMsg);
             Q_EMIT sig_errorOccurred(conversation->uuid, errorMsg);
             return;
         }
@@ -158,6 +161,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
                                .arg(conversation->uuid)
                                .arg(QString::fromUtf8(jsonDocResponse.toJson(QJsonDocument::Indented)));
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
     }
     else
     {
@@ -169,6 +173,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
                                .arg(statusCode)
                                .arg(QString::fromUtf8(responseBody));
         XLC_LOG_WARN("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Warning, errorMsg);
         // 如果还有重试次数，则重试
         if (retries_left > 0)
         {
@@ -181,6 +186,7 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
                                         .arg(llm->baseUrl)
                                         .arg(llm->endpoint);
             XLC_LOG_ERROR("{}", finalErrorMsg);
+            ToastManager::showMessage(Toast::Type::Error, finalErrorMsg);
             Q_EMIT sig_errorOccurred(conversation->uuid, finalErrorMsg);
         }
     }
@@ -197,6 +203,7 @@ void LLMService::handleSuccessfulResponse(const std::shared_ptr<Conversation> &c
     else
     {
         XLC_LOG_WARN("Handle successful response warning (conversationUuid={}): content not found in response", conversation->uuid);
+        ToastManager::showMessage(Toast::Type::Warning, QString("处理响应失败 (conversationUuid=%1): content not found in response").arg(conversation->uuid));
     }
 
     if (jsonObjMessage.contains("tool_calls") && jsonObjMessage.value("tool_calls").isArray())
@@ -243,6 +250,7 @@ void LLMService::handleSuccessfulResponse(const std::shared_ptr<Conversation> &c
                 }
             }
             XLC_LOG_WARN("Failed to call tool (conversationUuid={}): invalid tool call structure", conversation->uuid);
+            ToastManager::showMessage(Toast::Type::Warning, QString("调用工具失败 (conversationUuid=%1): invalid tool call structure").arg(conversation->uuid));
         }
     }
     else
@@ -339,7 +347,8 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     {
         // TODO 处理异常错误
         XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
-        ToastManager::getInstance()->showMessage(Toast::Type::Warning, "Failed to handle ToolCallFinished event: Conversation not found");
+        ToastManager::showMessage(Toast::Type::Warning,
+                                  QString("Failed to handle ToolCallFinished event (conversationUuid=%1): Conversation not found").arg(callToolArgs.conversationUuid));
         return;
     }
 
@@ -359,7 +368,8 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     {
         if (!conversation)
         {
-            XLC_LOG_WARN("Conversation not found (conversationUuid={})", callToolArgs.conversationUuid);
+            XLC_LOG_WARN("Handle tool call finished event failed (conversationUuid={}): Conversation not found", callToolArgs.conversationUuid);
+            ToastManager::showMessage(Toast::Type::Warning, QString("Handle tool call finished event failed (conversationUuid=%1: Conversation not found").arg(callToolArgs.conversationUuid));
             return;
         }
         conversation->addMessage(Message(errorMessage, Message::TOOL, getCurrentDateTime(), QJsonArray(), callToolArgs.callId));
@@ -380,8 +390,11 @@ void LLMService::slot_onToolCallFinished(const CallToolArgs &callToolArgs, bool 
     if (!agent)
     {
         // TODO 处理异常错误
-        XLC_LOG_WARN("Agent not found (conversationUuid={}, agentUuid={})", conversation->uuid, conversation->agentUuid);
-        ToastManager::getInstance()->showMessage(Toast::Type::Warning, "Failed to handle ToolCallFinished event: Agent not found");
+        XLC_LOG_WARN("Handle tool call finished event failed (conversationUuid={}, agentUuid={}): Agent not found", conversation->uuid, conversation->agentUuid);
+        ToastManager::showMessage(Toast::Type::Warning,
+                                  QString("Handle tool call finished event failed (conversationUuid=%1, agentUuid=%2): Agent not found")
+                                      .arg(conversation->uuid)
+                                      .arg(conversation->agentUuid));
         return;
     }
     postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));

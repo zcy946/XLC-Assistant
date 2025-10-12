@@ -148,6 +148,7 @@ void PageChat::slot_onMessageSent(const QString &message)
     if (!itemSelectedAgent)
     {
         XLC_LOG_WARN("Send message failed : select or create a agent");
+        ToastManager::showMessage(Toast::Type::Error, "发送失败，请先选中一个agent");
         return;
     }
     QString agentUuid = itemSelectedAgent->data(Qt::UserRole).toString();
@@ -155,12 +156,14 @@ void PageChat::slot_onMessageSent(const QString &message)
     if (!agent)
     {
         XLC_LOG_WARN("Send message failed (agentUuid={}): agent not found", agentUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("发送失败 (agentUuid=%1): agent not found").arg(agentUuid));
         return;
     }
     QListWidgetItem *itemSelectedConversation = m_listWidgetConversations->currentItem();
     if (!itemSelectedConversation)
     {
         XLC_LOG_WARN("Send message failed (agentUuid={}): select or create a conversation", agentUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("发送失败 (agentUuid=%1): 请先选中一个对话").arg(agentUuid));
         return;
     }
     QString conversationUuid = itemSelectedConversation->data(Qt::UserRole).toString();
@@ -168,6 +171,9 @@ void PageChat::slot_onMessageSent(const QString &message)
     if (!conversation)
     {
         XLC_LOG_WARN("Send message failed (agentUuid={}, conversationUuid={}): conversation not found", agentUuid, conversationUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("发送失败 (agentUuid=%1, conversationUuid=%2): conversation not found")
+                                                          .arg(agentUuid)
+                                                          .arg(conversationUuid));
         return;
     }
     // 检查 MCP 服务器是否初始化
@@ -177,7 +183,6 @@ void PageChat::slot_onMessageSent(const QString &message)
         if (!MCPService::getInstance()->isInitialized(mcpServerUuid))
         {
             allMcpServersReady = false;
-            ToastManager::getInstance()->showMessage(Toast::Type::Warning, "正在连接到MCP服务器，请稍后...");
             // 初始化未初始化的MCP服务器
             MCPService::getInstance()->initClient(mcpServerUuid);
         }
@@ -193,6 +198,7 @@ void PageChat::slot_onMessageSent(const QString &message)
     else
     {
         XLC_LOG_WARN("Send message failed (agentUuid={}, conversationUuid={}): MCP servers not yet all initialized ", agentUuid, conversationUuid);
+        ToastManager::showMessage(Toast::Type::Warning, "正在连接到MCP服务器，请稍后...");
     }
 }
 
@@ -234,10 +240,12 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
                         }
                     }
                     XLC_LOG_WARN("Switch failed (conversationUuid={}): agent found but conversation not found", conversationUuid);
+                    ToastManager::showMessage(Toast::Type::Error, QString("跳转失败 (conversationUuid=%1): agent found but conversation not found").arg(conversationUuid));
                     break;
                 }
             }
             XLC_LOG_WARN("Switch failed (agentUuid={}): agent not found", agentUuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("跳转失败 (agentUuid=%1): agent not found").arg(agentUuid));
             break;
         }
         default:
@@ -301,6 +309,7 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
     if (!currentSelectedAgentItem)
     {
         XLC_LOG_WARN("Create new conversation failed: no selected agent item");
+        ToastManager::showMessage(Toast::Type::Error, QString("新建对话失败，请先选中一个对话"));
         return;
     }
     QString agentUuid = currentSelectedAgentItem->data(Qt::UserRole).toString();
@@ -308,6 +317,7 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
     if (!agent)
     {
         XLC_LOG_WARN("Create new conversation failed (agentUuid={}): agent not found", agentUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("新建对话失败 (agentUuid=%1): agent not found").arg(agentUuid));
         return;
     }
     std::shared_ptr<Conversation> newConversation = DataManager::getInstance()->createNewConversation(agentUuid);
@@ -459,6 +469,7 @@ void WidgetChat::initItems()
                 if (!conversation)
                 {
                     XLC_LOG_WARN("Clear context failed (conversationUuid={}): conversation not found", m_conversationUuid);
+                    ToastManager::showMessage(Toast::Type::Error, QString("清除上下文失败 (conversationUuid=%1): conversation not found").arg(m_conversationUuid));
                     return;
                 }
                 // 清除messages
@@ -467,6 +478,7 @@ void WidgetChat::initItems()
                 m_listWidgetMessages->clearContext();
                 m_listWidgetMessages->scrollToBottom();
                 XLC_LOG_INFO("Clear context successed");
+                ToastManager::showMessage(Toast::Type::Success, "已清空上下文");
             });
     // m_pushButtonCreateNewConversation
     m_pushButtonCreateNewConversation = new QPushButton(this);
@@ -528,12 +540,14 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
     if (conversationUuid.trimmed().isEmpty())
     {
         XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", conversationUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("刷新历史消息列表失败 (conversationUuid=%1): empty uuid").arg(conversationUuid));
         return;
     }
     std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(conversationUuid);
     if (!conversation)
     {
         XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): conversation not found", conversationUuid);
+        ToastManager::showMessage(Toast::Type::Error, QString("刷新历史消息列表失败 (conversationUuid=%1): conversation not found").arg(conversationUuid));
         return;
     }
 

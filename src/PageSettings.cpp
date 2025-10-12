@@ -193,6 +193,7 @@ void WidgetAgentInfo::initItems()
                 if (!agent)
                 {
                     XLC_LOG_WARN("Failed to display the list of available MCP servers (agentUuid={}): agent not found", m_lineEditUuid->text());
+                    ToastManager::showMessage(Toast::Type::Error, QString("获取可用MCP服务器列表失败 (agentUuid=%1): agent not found").arg(m_lineEditUuid->text()));
                     return;
                 }
                 std::shared_ptr<QSet<QString>> mountedMCPServerUuidsPtr = std::make_shared<QSet<QString>>(agent->mcpServers);
@@ -325,6 +326,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
     if (!llm)
     {
         XLC_LOG_WARN("Update form data failed (agentUuid={}, LLMUuid={}): LLM not found", agent->uuid, agent->llmUUid);
+        ToastManager::showMessage(Toast::Type::Error, QString("更新Agent失败 (agentUuid=%1, LLMUuid=%2): agent not found").arg(agent->uuid).arg(agent->llmUUid));
     }
     else
     {
@@ -473,6 +475,7 @@ void WidgetAgentInfo::updateMCPServerList(const std::shared_ptr<Agent> &agent)
         if (!currentAgent)
         {
             XLC_LOG_WARN("Update MCP server list failed (agentUuid={}): agent not found", m_lineEditUuid->text());
+            ToastManager::showMessage(Toast::Type::Error, QString("更新MCP服务器列表失败 (agentUuid=%1): agent not found").arg(m_lineEditUuid->text()));
             return;
         }
     }
@@ -1039,6 +1042,7 @@ void WidgetMcpServerInfo::slot_onComboBoxCurrentIndexChanged(int index)
         return;
     }
     XLC_LOG_WARN("Non-existent MCP server type (type={})", m_comboBoxType->currentText());
+    ToastManager::showMessage(Toast::Type::Error, QString("不存在的MCP服务器类型 (type=%1)").arg(m_comboBoxType->currentText()));
 }
 
 // DialogMountMcpServer

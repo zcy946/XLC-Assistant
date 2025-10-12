@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #endif
 #include "DataManager.h"
+#include "ToastManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,9 @@ int main(int argc, char *argv[])
 #endif
 
     QApplication app(argc, argv);
+
+    // 注册自定义类型
+    qRegisterMetaType<Toast::Type>("Toast::Type");
 
     // 设置全局字体
     app.setFont(getGlobalFont());

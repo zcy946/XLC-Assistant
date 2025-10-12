@@ -113,6 +113,7 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
         {
             XLC_LOG_ERROR("Failed to initialize connection to MCP server (MCPServer={})", server->uuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("Failed to initialize connection to MCP server (MCPServer=%1)").arg(server->uuid));
             return nullptr;
         }
         // Ping 服务器
@@ -120,6 +121,7 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
         if (!client->ping())
         {
             XLC_LOG_ERROR("Failed ping to MCP server (MCPServer={})", server->uuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("Failed ping to MCP server (MCPServer=%1)").arg(server->uuid));
             return nullptr;
         }
         // 获取capabilities
@@ -137,12 +139,16 @@ std::shared_ptr<MCPClient> MCPService::createStdioClient(std::shared_ptr<McpServ
     }
     catch (const mcp::mcp_exception &e)
     {
-        XLC_LOG_ERROR("Create stdio client failed (code={}, message={}): mcp error", static_cast<int>(e.code()), e.what());
+        XLC_LOG_ERROR("Create stdio client failed (code={}): {}", static_cast<int>(e.code()), e.what());
+        ToastManager::showMessage(Toast::Type::Error, QString("Create stdio client failed (code=%1): %2")
+                                                          .arg(static_cast<int>(e.code()))
+                                                          .arg(e.what()));
         return nullptr;
     }
     catch (const std::exception &e)
     {
-        XLC_LOG_ERROR("Create stdio client failed (message={})", e.what());
+        XLC_LOG_ERROR("Create stdio client failed: {}", e.what());
+        ToastManager::showMessage(Toast::Type::Error, QString("Create stdio client failed: %1").arg(e.what()));
         return nullptr;
     }
 }
@@ -179,6 +185,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
         if (!client->initialize("XLCClient", mcp::MCP_VERSION))
         {
             XLC_LOG_ERROR("Failed initialize connection to MCP server (MCPServer={})", server->uuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("Failed initialize connection to MCP server (MCPServer=%1)").arg(server->uuid));
             return nullptr;
         }
         // Ping 服务器
@@ -186,6 +193,7 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
         if (!client->ping())
         {
             XLC_LOG_ERROR("Failed ping to MCP server (MCPServer={})", server->uuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("Failed ping to MCP server (MCPServer={}) (MCPServer=%1)").arg(server->uuid));
             return nullptr;
         }
         // 获取capabilities
@@ -203,12 +211,16 @@ std::shared_ptr<MCPClient> MCPService::createSSEClient(std::shared_ptr<McpServer
     }
     catch (const mcp::mcp_exception &e)
     {
-        XLC_LOG_ERROR("Create sse client failed (code={}, message={}): mcp error", static_cast<int>(e.code()), e.what());
+        XLC_LOG_ERROR("Create sse client failed (code={}): {}", static_cast<int>(e.code()), e.what());
+        ToastManager::showMessage(Toast::Type::Error, QString("Create sse client failed (code=%1): %2")
+                                                          .arg(static_cast<int>(e.code()))
+                                                          .arg(e.what()));
         return nullptr;
     }
     catch (const std::exception &e)
     {
-        XLC_LOG_ERROR("Create sse client failed (message={})", e.what());
+        XLC_LOG_ERROR("Create sse client failed: {}", e.what());
+        ToastManager::showMessage(Toast::Type::Error, QString("Create sse client failed: %1").arg(e.what()));
         return nullptr;
     }
 }
@@ -231,12 +243,15 @@ std::shared_ptr<MCPClient> MCPService::createMCPClient(const QString &serverUuid
     case McpServer::Type::streambleHttp:
     {
         // 暂不支持的服务器类型
-        XLC_LOG_WARN("Unsupported MCPServer type: {} - streambleHttp", static_cast<int>(mcpServer->type));
+        XLC_LOG_WARN("Create MCP client failed ({} - streambleHttp): Unsupported MCPServer type", static_cast<int>(mcpServer->type));
+        ToastManager::showMessage(Toast::Type::Warning, QString("Create MCP client failed (type=%1 - streambleHttp): Unsupported MCPServer type").arg(static_cast<int>(mcpServer->type)));
+
         break;
     }
     default:
     {
-        XLC_LOG_WARN("Unknown MCPServer type: {}", static_cast<int>(mcpServer->type));
+        XLC_LOG_WARN("Create MCP client failed (type={}): Unknown MCPServer type", static_cast<int>(mcpServer->type));
+        ToastManager::showMessage(Toast::Type::Warning, QString("Create MCP client failed (type=%1): Unknown MCPServer type").arg(static_cast<int>(mcpServer->type)));
         break;
     }
     }
@@ -343,7 +358,7 @@ void MCPService::initClient(const QString &serverUuid)
                     if (client)
                     {
                         XLC_LOG_INFO("Client initialization succeeded (serverUuid={})", serverUuid);
-                        ToastManager::getInstance()->showMessage(Toast::Type::Success, QString("初始化MCP客户端成功 (serverUuid=%1)").arg(serverUuid));
+                        ToastManager::showMessage(Toast::Type::Success, QString("初始化MCP客户端成功 (serverUuid=%1)").arg(serverUuid));
                         {
                             QMutexLocker locker(&m_mutexClients);
                             m_clients.insert(serverUuid, client); // 存储已就绪的客户端
@@ -353,19 +368,23 @@ void MCPService::initClient(const QString &serverUuid)
                     else
                     {
                         XLC_LOG_WARN("Client initialization failed (serverUuid={})", serverUuid);
-                        ToastManager::getInstance()->showMessage(Toast::Type::Error, QString("初始化MCP客户端失败 (serverUuid=%1): 客户端对象为空或创建失败").arg(serverUuid));
+                        ToastManager::showMessage(Toast::Type::Error, QString("初始化MCP客户端失败 (serverUuid=%1): 客户端对象为空或创建失败").arg(serverUuid));
                         Q_EMIT sig_clientError(serverUuid, "初始化失败：客户端对象为空或创建失败。");
                     }
                 }
                 else if (finishedFuture.isCanceled())
                 {
                     XLC_LOG_WARN("Client initialization cancelled (serverUuid={})", serverUuid);
+                    ToastManager::showMessage(Toast::Type::Error, QString("初始化MCP客户端失败 (serverUuid=%1): 初始化被取消").arg(serverUuid));
                     Q_EMIT sig_clientError(serverUuid, "初始化被取消。");
                 }
                 else
                 {
                     // 对于 QtConcurrent::run 来说，通常不会出现这种情况，但为了健壮性考虑
                     XLC_LOG_WARN("Server future completed but result unavailable or cancelled (exception state) (serverUuid={})", serverUuid);
+                    ToastManager::showMessage(Toast::Type::Error,
+                                              QString("初始化MCP客户端失败 (serverUuid=%1): Server future completed but result unavailable or cancelled (exception state)")
+                                                  .arg(serverUuid));
                     Q_EMIT sig_clientError(serverUuid, "Future 状态异常。");
                 }
                 watcher->deleteLater(); // 销毁 watcher
@@ -407,6 +426,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         {
             QString errorMessage = QString("Call tool failed (callId=%1, tool=%2): tool not found").arg(callToolArgs.callId).arg(callToolArgs.toolName);
             XLC_LOG_WARN("{}", errorMessage);
+            ToastManager::showMessage(Toast::Type::Error, errorMessage);
             Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             return;
         }
@@ -422,6 +442,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
         {
             QString errorMessage = QString("Call tool failed (callId=%1, server=%2): mcp client not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid);
             XLC_LOG_WARN("{}", errorMessage);
+            ToastManager::showMessage(Toast::Type::Error, errorMessage);
             Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             return;
         }
@@ -432,6 +453,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
     {
         QString errorMessage = QString("Call tool failed (callId=%1, server=%2, tool=%3): original tool not found").arg(callToolArgs.callId).arg(mcpTool->serverUuid).arg(callToolArgs.toolName);
         XLC_LOG_WARN("{}", errorMessage);
+        ToastManager::showMessage(Toast::Type::Error, errorMessage);
         Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
         return;
     }
@@ -471,6 +493,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(QString::fromStdString(result["content"][0]["text"].get<std::string>()));
                     }
                     XLC_LOG_ERROR("{}", errorMessage);
+                    ToastManager::showMessage(Toast::Type::Error, errorMessage);
                     Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
                 }
             }
@@ -482,6 +505,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(mcpTool->name)
                                            .arg(e.what());
                 XLC_LOG_WARN("{}", errorMessage);
+                ToastManager::showMessage(Toast::Type::Error, errorMessage);
                 Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
             catch (const std::exception &e)
@@ -492,6 +516,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(e.what());
 
                 XLC_LOG_WARN("{}", errorMessage);
+                ToastManager::showMessage(Toast::Type::Error, errorMessage);
                 Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
             catch (...)
@@ -501,6 +526,7 @@ void MCPService::callTool(const CallToolArgs &callToolArgs)
                                            .arg(mcpTool->name);
 
                 XLC_LOG_WARN("{}", errorMessage);
+                ToastManager::showMessage(Toast::Type::Error, errorMessage);
                 Q_EMIT sig_toolCallFinished(callToolArgs, false, QJsonObject(), errorMessage);
             }
         });
@@ -522,11 +548,12 @@ QJsonArray MCPService::getToolsFromServer(const QString &serverUuid)
                 if (!m_pendingClients.contains(serverUuid))
                 {
                     initClient(serverUuid);
-                    errorMsg = QString("Get tools failed (serverUuid={}): client not initialized, calling initClient()");
+                    errorMsg = QString("Get tools failed (serverUuid=%1): client not initialized, calling initClient()").arg(serverUuid);
                 }
             }
-            errorMsg = QString("Get tools failed (serverUuid={}): client is initializing");
-            XLC_LOG_WARN("errorMsg", serverUuid);
+            errorMsg = QString("Get tools failed (serverUuid=%1): client is initializing").arg(serverUuid);
+            XLC_LOG_WARN("{}", errorMsg);
+            ToastManager::showMessage(Toast::Type::Error, errorMsg);
             return QJsonArray();
         }
         client = it_McpClient.value();

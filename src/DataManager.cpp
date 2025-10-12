@@ -5,6 +5,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QSettings>
+#include "ToastManager.h"
 
 DataManager *DataManager::s_instance = nullptr;
 
@@ -63,6 +64,9 @@ void DataManager::loadLLMsAsync()
                 if (success)
                 {
                     XLC_LOG_INFO("Successfully loaded LLMs (count={}, path={})", m_llms.count(), QFileInfo(m_filePathLLMs).absoluteFilePath());
+                    ToastManager::showMessage(Toast::Success, QString("Successfully loaded LLMs (count=%1, path=%2)")
+                                                                  .arg(m_llms.count())
+                                                                  .arg(QFileInfo(m_filePathLLMs).absoluteFilePath()));
                 }
                 futureWatcherLLMs->deleteLater();
             });
@@ -85,6 +89,9 @@ void DataManager::loadMcpServersAsync()
                 if (success)
                 {
                     XLC_LOG_INFO("Successfully loaded MCPServers (count={}, filePath={})", m_mcpServers.count(), QFileInfo(m_filePathMcpServers).absoluteFilePath());
+                    ToastManager::showMessage(Toast::Success, QString("Successfully loaded MCPServers (count=%1, path=%2)")
+                                                                  .arg(m_mcpServers.count())
+                                                                  .arg(QFileInfo(m_filePathMcpServers).absoluteFilePath()));
                 }
                 futureWatcherMcpServers->deleteLater();
             });
@@ -107,6 +114,9 @@ void DataManager::loadAgentsAsync()
                 if (success)
                 {
                     XLC_LOG_INFO("Successfully loaded agents (count={}, filePath={})", m_agents.count(), QFileInfo(m_filePathAgents).absoluteFilePath());
+                    ToastManager::showMessage(Toast::Success, QString("Successfully loaded agents (count=%1, path=%2)")
+                                                                  .arg(m_agents.count())
+                                                                  .arg(QFileInfo(m_filePathAgents).absoluteFilePath()));
                 }
                 futureWatcherAgents->deleteLater();
             });
@@ -193,6 +203,7 @@ void DataManager::slot_handleMessagesAcquired(bool success, const QString &conve
     if (!conversation)
     {
         XLC_LOG_WARN("Handle messages acquired failed (conversationUuid={}): conversation not found", conversationUuid);
+        ToastManager::showMessage(Toast::Type::Warning, QString("历史消息获取失败，不存在的对话: %1").arg(conversationUuid));
         return;
     }
     conversation->loadMessages(messages);
@@ -209,6 +220,7 @@ bool DataManager::loadLLMs(const QString &filePath)
     {
         QString errorMsg = QString("Load LLMs failed(filepath=%1, errormessage=%2): Could not open LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -220,6 +232,7 @@ bool DataManager::loadLLMs(const QString &filePath)
     {
         QString errorMsg = QString("Load LLMs failed(filepath=%1): Failed to create JSON document").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -227,6 +240,7 @@ bool DataManager::loadLLMs(const QString &filePath)
     {
         QString errorMsg = QString("Load LLMs failed(filepath=%1): LLMs JSON root is not an array").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -298,6 +312,7 @@ void DataManager::updateLLM(std::shared_ptr<LLM> llm)
     else
     {
         XLC_LOG_WARN("Failed to update LLM (LLMUuid={}): LLM not found", llm->uuid);
+        ToastManager::showMessage(Toast::Type::Warning, QString("更新模型失败，不存在的模型: %1").arg(llm->uuid));
     }
 }
 
@@ -319,6 +334,7 @@ void DataManager::saveLLMs(const QString &filePath) const
     {
         QString errorMsg = QString("Failed to save LLMs (filepath=%1, error=%2): Could not open LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
 
@@ -330,10 +346,12 @@ void DataManager::saveLLMs(const QString &filePath) const
     {
         QString errorMsg = QString("Failed to save LLMs (filepath=%1, error=%2): Failed to write to LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
 
     XLC_LOG_INFO("Save LLMS successed (count={}, filepath={})", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
+    ToastManager::showMessage(Toast::Success, QString("保存成功"));
 }
 
 void DataManager::saveLLMsAsync(const QString &filePath) const
@@ -397,6 +415,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     {
         QString errorMsg = QString("Load MCP Servers failed(filepath=%1, errormessage=%2): Could not open MCPServers file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -408,6 +427,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     {
         QString errorMsg = QString("Load MCP Servers failed (filepath=%1): Failed to create JSONDocument from file").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -415,6 +435,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     {
         QString errorMsg = QString("Load MCP Servers failed (filepath=%1): McpServers JSON root is not an array in file").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -434,7 +455,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
             // 检查 UUID 是否有效
             if (newServer.uuid.isEmpty())
             {
-                XLC_LOG_WARN("McpServer entry missing UUID. Skipping entry.");
+                XLC_LOG_WARN("Failed to load MCP Servers: McpServer entry missing UUID. Skipping entry.");
                 continue;
             }
 
@@ -444,7 +465,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
         }
         else
         {
-            XLC_LOG_WARN("McpServers array contains non-object element. Skipping.");
+            XLC_LOG_WARN("Failed to load MCP Servers: McpServers array contains non-object element. Skipping.");
         }
     }
     return true;
@@ -459,7 +480,7 @@ void DataManager::addMcpServer(std::shared_ptr<McpServer> mcpServer)
     }
     else
     {
-        XLC_LOG_WARN("Attempted to add a null McpServer shared_ptr.");
+        XLC_LOG_WARN("Failed to add MCP Servers: Attempted to add a null McpServer shared_ptr.");
     }
 }
 
@@ -473,7 +494,7 @@ void DataManager::updateMcpServer(std::shared_ptr<McpServer> mcpServer)
 {
     if (!mcpServer)
     {
-        XLC_LOG_WARN("Attempted to update a null McpServer shared_ptr.");
+        XLC_LOG_WARN("Failed to update MCP Servers: Attempted to update a null McpServer shared_ptr.");
         return;
     }
     auto it = m_mcpServers.find(mcpServer->uuid.trimmed());
@@ -485,7 +506,8 @@ void DataManager::updateMcpServer(std::shared_ptr<McpServer> mcpServer)
     }
     else
     {
-        XLC_LOG_WARN("McpServer with UUID {} not found for update. No action taken.", mcpServer->uuid);
+        XLC_LOG_WARN("Failed to update MCP Servers: McpServer with UUID {} not found.", mcpServer->uuid);
+        ToastManager::showMessage(Toast::Type::Warning, QString("更新MCP服务器失败，不存在的MCP服务器: %1").arg(mcpServer->uuid));
     }
 }
 
@@ -509,8 +531,9 @@ void DataManager::saveMcpServers(const QString &filePath) const
     // Truncate: 如果文件存在，先清空其内容
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        QString errorMsg = QString("Could not open McpServers file for writing: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Save MCP servers failed, could not open McpServers file (filepath=%1): %2").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
 
@@ -521,12 +544,14 @@ void DataManager::saveMcpServers(const QString &filePath) const
 
     if (bytesWritten == -1)
     {
-        QString errorMsg = QString("Failed to write to McpServers file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Save MCP servers failed, failed to write to McpServers file (filepath=%1): %2").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
 
-    XLC_LOG_INFO("Successfully saved [{}] McpServers to: [{}]", m_mcpServers.count(), QFileInfo(filePath).absoluteFilePath());
+    XLC_LOG_INFO("Save MCP Servers successed (count={}, filepath={})", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
+    ToastManager::showMessage(Toast::Success, QString("保存成功"));
 }
 
 void DataManager::saveMcpServersAsync(const QString &filePath) const
@@ -590,6 +615,7 @@ bool DataManager::loadAgents(const QString &filePath)
     {
         QString errorMsg = QString("Load Agents failed(filepath=%1, errormessage=%2): Could not open Agents file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -601,6 +627,7 @@ bool DataManager::loadAgents(const QString &filePath)
     {
         QString errorMsg = QString("Load Agents failed(filepath=%1): Failed to create JSON document").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -608,6 +635,7 @@ bool DataManager::loadAgents(const QString &filePath)
     {
         QString errorMsg = QString("Load Agents failed(filepath=%1): Agents JSON root is not an array").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return false;
     }
 
@@ -627,7 +655,7 @@ bool DataManager::loadAgents(const QString &filePath)
             // 检查 UUID 是否有效
             if (newAgent.uuid.isEmpty())
             {
-                XLC_LOG_WARN("Agent entry missing UUID. Skipping entry.");
+                XLC_LOG_WARN("Failed to load agents: Agent entry missing UUID. Skipping entry.");
                 continue;
             }
 
@@ -637,7 +665,7 @@ bool DataManager::loadAgents(const QString &filePath)
         }
         else
         {
-            XLC_LOG_WARN("Agents array contains non-object element. Skipping.");
+            XLC_LOG_WARN("Failed to load agents: Agents array contains non-object element. Skipping.");
         }
     }
     return true;
@@ -652,7 +680,7 @@ void DataManager::addAgent(std::shared_ptr<Agent> agent)
     }
     else
     {
-        XLC_LOG_WARN("Attempted to add a null Agent shared_ptr.");
+        XLC_LOG_WARN("Failed to add agent: Attempted to add a null Agent shared_ptr.");
     }
 }
 
@@ -706,7 +734,8 @@ void DataManager::updateAgent(std::shared_ptr<Agent> newAgent)
     }
     else
     {
-        XLC_LOG_WARN("Agent with UUID {} not found for update. No action taken.", newAgent->uuid);
+        XLC_LOG_WARN("Update agent failed (agentUuid={}): agent not found", newAgent->uuid);
+        ToastManager::showMessage(Toast::Type::Warning, QString("更新agent失败，不存在的agent: %1").arg(newAgent->uuid));
     }
 }
 
@@ -726,8 +755,9 @@ void DataManager::DataManager::saveAgents(const QString &filePath) const
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
-        QString errorMsg = QString("Could not open Agents file for writing: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Save agents failed, could not open Agents file for writing (filePath=%1): %2").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
 
@@ -737,11 +767,13 @@ void DataManager::DataManager::saveAgents(const QString &filePath) const
 
     if (bytesWritten == -1)
     {
-        QString errorMsg = QString("Failed to write to Agents file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Save agents failed, failed to write to Agents file (filePath=%1): %2").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
+        ToastManager::showMessage(Toast::Type::Error, errorMsg);
         return;
     }
-    XLC_LOG_INFO("Successfully saved [{}] Agents to: [{}]", m_agents.count(), QFileInfo(filePath).absoluteFilePath());
+    XLC_LOG_INFO("Save Agents successed (count={}, filepath={})", m_llms.count(), QFileInfo(filePath).absoluteFilePath());
+    ToastManager::showMessage(Toast::Success, QString("保存成功"));
 }
 
 void DataManager::saveAgentsAsync(const QString &filePath) const
@@ -821,7 +853,7 @@ void DataManager::addConversation(std::shared_ptr<Conversation> conversation)
     }
     else
     {
-        XLC_LOG_WARN("Attempted to add a null Conversation shared_ptr.");
+        XLC_LOG_WARN("Add conversation failed: Attempted to add a null Conversation shared_ptr.");
     }
 }
 
@@ -841,7 +873,7 @@ void DataManager::updateConversation(std::shared_ptr<Conversation> newConversati
     }
     else
     {
-        XLC_LOG_WARN("Conversation with UUID {} not found for update. No action taken.", uuid);
+        XLC_LOG_WARN("Update conversation failed(conversationUuid={}): conversation not found", uuid);
     }
 }
 

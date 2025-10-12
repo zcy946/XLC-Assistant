@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QJsonObject>
 #include <functional>
+#include "ToastManager.h"
 
 template <typename T, typename TWidget, typename TDialog>
 class BaseSettingsPage : public BaseWidget
@@ -245,6 +246,7 @@ private:
         if (!item)
         {
             XLC_LOG_WARN("{} not found (uuid={})", m_entityName, uuid);
+            ToastManager::showMessage(Toast::Type::Warning, QString("%1 not found (uuid=%2)").arg(m_entityName).arg(uuid));
             return;
         }
         m_detailWidget->updateFormData(item);

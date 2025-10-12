@@ -45,10 +45,15 @@ public:
     qreal m_renderY = 0.0;  // Y轴绘制偏移量
     QTimer *m_timer;
 };
+Q_DECLARE_METATYPE(Toast::Type)
 
 class ToastManager : public QWidget
 {
     Q_OBJECT
+
+public Q_SLOTS:
+    // 显示消息
+    void slot_showMessage(Toast::Type type, const QString &message, int duration);
 
 private Q_SLOTS:
     void slot_onRequestExist(Toast *message);
@@ -59,8 +64,7 @@ public:
     ~ToastManager() = default;
     // 初始化
     void init(QWidget *parent);
-    // 显示消息
-    void showMessage(Toast::Type type, const QString &message, int duration = 3000);
+    static void showMessage(Toast::Type type, const QString &message, int duration = 3000);
 
 private:
     explicit ToastManager(QWidget *parent = nullptr);
