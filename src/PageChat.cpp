@@ -44,10 +44,12 @@ void PageChat::initItems()
             });
     // m_listWidgetConversations
     m_listWidgetConversations = new QListWidget(this);
-    connect(m_listWidgetConversations, &QListWidget::itemClicked, this,
-            [this](QListWidgetItem *item)
+    connect(m_listWidgetConversations, &QListWidget::currentItemChanged, this,
+            [this](QListWidgetItem *current, QListWidgetItem *previous)
             {
-                const QString &uuid = item->data(Qt::UserRole).toString();
+                if (!current)
+                    return;
+                const QString &uuid = current->data(Qt::UserRole).toString();
                 XLC_LOG_TRACE("Conversation selected (uuid={})", uuid);
                 // 刷新WidgetChat
                 m_widgetChat->refreshHistoryMessageList(uuid);
@@ -95,7 +97,6 @@ void PageChat::slot_onAgentsLoaded(bool success)
     if (!success)
         return;
     refreshAgentList();
-    m_listWidgetAgents->sortItems();
     // 默认选中并展示第一项
     if (m_listWidgetAgents->currentItem() == nullptr)
     {
@@ -107,7 +108,6 @@ void PageChat::slot_onAgentUpdated(const QString &agentUuid)
 {
     // 更新agents列表
     refreshAgentList();
-    m_listWidgetAgents->sortItems();
     // 更新conversations列表
     QListWidgetItem *currentItem = m_listWidgetAgents->currentItem();
     if (!currentItem)
@@ -123,7 +123,6 @@ void PageChat::slot_onConversationsLoaded(bool success)
     if (!success)
         return;
     refreshConversationList();
-    m_listWidgetConversations->sortItems();
     // 默认选中并展示第一项
     if (m_listWidgetConversations->currentItem() == nullptr)
     {
@@ -360,6 +359,7 @@ void PageChat::refreshAgentList()
         itemAgent->setData(Qt::UserRole, QVariant::fromValue(agent->uuid));
         m_listWidgetAgents->addItem(itemAgent);
     }
+    m_listWidgetAgents->sortItems();
     // 重新选中之前的item
     if (selectedAgentUuid == -1)
         return;
@@ -409,6 +409,7 @@ void PageChat::refreshConversationList()
         itemConversation->setData(Qt::UserRole, QVariant::fromValue(uuid));
         m_listWidgetConversations->addItem(itemConversation);
     }
+    m_listWidgetConversations->sortItems();
     // 重新选中之前的item
     if (selectedConversationUuid == -1)
         return;

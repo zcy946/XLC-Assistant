@@ -98,10 +98,11 @@ void LLMService::handleResponse(QNetworkReply *reply, std::shared_ptr<Conversati
     // 检查网络错误
     if (reply->error() != QNetworkReply::NoError)
     {
-        QString errorMsg = QString("Post message failed (conversationUuid=%1, retries_left=%2), Network Error: %3")
+        QString errorMsg = QString("Post message failed (conversationUuid=%1, retries_left=%2, Network Error=%3): %4")
                                .arg(conversation->uuid)
                                .arg(retries_left)
-                               .arg(reply->errorString());
+                               .arg(reply->errorString())
+                               .arg(QString::fromUtf8(reply->readAll()));
         XLC_LOG_WARN("{}", errorMsg);
         ToastManager::showMessage(Toast::Type::Warning, errorMsg);
 
