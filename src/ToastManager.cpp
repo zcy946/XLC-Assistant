@@ -128,12 +128,12 @@ void ToastManager::paintEvent(QPaintEvent *event)
         // y 是堆叠位置，m_renderY 是动画带来的偏移量
         qreal currentDrawY = y + toast->getRenderY();
         // 计算文本最大可占用宽度
-        int maxTextWidth = m_width - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread * 2;
+        int maxTextWidth = qMax(50, m_width - 2 * (m_margin + m_paddingH + m_spread + qAbs(m_offSetX)) - (m_widthIcon + m_spacingIconToText));
         // 计算绘制文本所需最小区域
-        QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWordWrap, toast->m_message);
+        QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWrapAnywhere, toast->m_message);
         // 计算背景区域
         int w = m_paddingH + m_widthIcon + m_spacingIconToText + rectText.width() + m_paddingH;
-        int h = m_paddingV + rectText.height() + m_paddingV;
+        int h = m_paddingV + qMax(m_heightIcon, rectText.height()) + m_paddingV;
         int x = (m_width - w) / 2;
         // 背景绘制区
         QRect rectBackground(x, currentDrawY, w, h);
@@ -171,7 +171,7 @@ void ToastManager::paintEvent(QPaintEvent *event)
         svgRenderer.render(&painter, rectIcon);
         // 绘制文本
         painter.setPen(Qt::black);
-        painter.drawText(rectDrawText, Qt::TextWordWrap, toast->m_message);
+        painter.drawText(rectDrawText, Qt::TextWrapAnywhere, toast->m_message);
 
         // 更新下一条消息的堆叠基准 Y 坐标
         y += h + m_spacing;
@@ -206,8 +206,8 @@ void ToastManager::slot_onRequestExist(Toast *toastToExit)
     // 计算第一条消息的高度
     QFont font(getGlobalFont());
     QFontMetrics fontMetrics(font);
-    int maxTextWidth = m_width - m_margin * 2 - m_paddingH * 2 - m_spacingIconToText - m_offSetX - m_spread * 2;
-    QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWordWrap, toastToExit->m_message);
+    int maxTextWidth = qMax(50, m_width - 2 * (m_margin + m_paddingH + m_spread + qAbs(m_offSetX)) - (m_widthIcon + m_spacingIconToText));
+    QRect rectText = fontMetrics.boundingRect(0, 0, maxTextWidth, 0, Qt::TextWrapAnywhere, toastToExit->m_message);
     int firstSlideDistance = m_paddingV + rectText.height() + m_paddingV;
 
     // 创建并行动画组（首条淡出并上移，剩余消息整体上移）
@@ -294,7 +294,7 @@ void ToastManager::init(QWidget *parent)
     show();
 }
 
-void ToastManager::showMessage(Toast::Type type, const QString &message, int duration)
+void ToastManager::slot_showMessage(Toast::Type type, const QString &message, int duration)
 {
     Toast *newToast = new Toast(type, message, duration, parentWidget());
     m_toasts.append(newToast);
@@ -312,4 +312,15 @@ void ToastManager::showMessage(Toast::Type type, const QString &message, int dur
     newToast->startTimer();
     raise();
     update();
+}
+
+void ToastManager::showMessage(Toast::Type type, const QString &message, int duration)
+{
+    QMetaObject::invokeMethod(
+        ToastManager::getInstance(),
+        "slot_showMessage",
+        Qt::QueuedConnection,
+        Q_ARG(Toast::Type, type),
+        Q_ARG(QString, message),
+        Q_ARG(int, duration));
 }
