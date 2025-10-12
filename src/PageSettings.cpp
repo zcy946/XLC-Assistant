@@ -89,544 +89,33 @@ void PageSettings::addPage(const QString &name, QWidget *page)
     m_pages.insert(name, page);
 }
 
-// PageSettingsLLM
-PageSettingsLLM::PageSettingsLLM(QWidget *parent)
-    : BaseWidget(parent)
-{
-    initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &PageSettingsLLM::slot_onLLMsLoaded);
-}
-
-void PageSettingsLLM::initWidget()
-{
-}
-
-void PageSettingsLLM::initItems()
-{
-    // m_listWidgetLLMs
-    m_listWidgetLLMs = new QListWidget(this);
-    connect(m_listWidgetLLMs, &QListWidget::itemClicked, this, &PageSettingsLLM::slot_onListWidgetItemClicked);
-    // m_widgetLLMInfo
-    m_widgetLLMInfo = new WidgetLLMInfo(this);
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            [this]()
-            {
-                XLC_LOG_TRACE("Attempting to add LLM");
-                DialogAddNewLLM *dialog = new DialogAddNewLLM(this);
-                connect(dialog, &DialogAddNewLLM::finished, this,
-                        [this, dialog](int result)
-                        {
-                            if (result == QDialog::Accepted)
-                            {
-                                // 新增LLM
-                                std::shared_ptr<LLM> newLLM = dialog->getFormData();
-                                XLC_LOG_TRACE("Adding new LLM (uuid={}, modelName={})", newLLM->uuid, newLLM->modelName);
-                                DataManager::getInstance()->addLLM(newLLM);
-                                // 更新LLM列表
-                                QListWidgetItem *newItem = new QListWidgetItem();
-                                newItem->setText(newLLM->modelName);
-                                newItem->setData(Qt::UserRole, QVariant::fromValue(newLLM->uuid));
-                                m_listWidgetLLMs->addItem(newItem);
-                                // 选中并展示新增LLM
-                                m_listWidgetLLMs->setCurrentItem(newItem);
-                                m_widgetLLMInfo->updateFormData(newLLM);
-                                // 通知其它页面更新(通知WidgetAgentInfo更新LLM列表)
-                                QJsonObject jsonObj;
-                                jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                            }
-                        });
-                dialog->exec();
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
-                if (!llm)
-                    return;
-                m_widgetLLMInfo->updateFormData(llm);
-                XLC_LOG_DEBUG("Reloading LLM widget (UUID={})", m_widgetLLMInfo->getUuid());
-            });
-    // m_pushButtonRemove
-    m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsLLM::slot_onPushButtonClickedRemove);
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                DataManager::getInstance()->updateLLM(m_widgetLLMInfo->getCurrentData());
-                // 刷新m_listWidgetLLMs
-                /**
-                 * 正常情况下，被更新的llm就是当前选中的llm
-                 */
-                QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
-                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetLLMInfo->getUuid())
-                {
-                    std::shared_ptr<LLM> currentLLM = DataManager::getInstance()->getLLM(m_widgetLLMInfo->getUuid());
-                    if (currentLLM)
-                    {
-                        selectedItem->setText(currentLLM->modelName);
-                    }
-                }
-                QJsonObject jsonObj;
-                jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Saving/Updating LLM widget (uuid={})", m_widgetLLMInfo->getUuid());
-            });
-}
-
-void PageSettingsLLM::initLayout()
-{
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonRemove);
-    hLayoutButtons->addWidget(m_pushButtonSave);
-    // widgetOption
-    QWidget *widgetOption = new QWidget(this);
-    // vLayoutOption
-    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
-    vLayoutOption->addWidget(m_widgetLLMInfo);
-    vLayoutOption->addStretch();
-    vLayoutOption->addLayout(hLayoutButtons);
-    // splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setChildrenCollapsible(false);
-    splitter->addWidget(m_listWidgetLLMs);
-    splitter->addWidget(widgetOption);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 8);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(splitter);
-}
-
-void PageSettingsLLM::slot_onListWidgetItemClicked(QListWidgetItem *item)
-{
-    const QString &llmName = item->data(Qt::DisplayRole).value<QString>();
-    const QString &llmUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("LLM selected (name={}, uuid={})", llmName, llmUuid);
-    showLLMInfo(llmUuid);
-}
-
-void PageSettingsLLM::slot_onLLMsLoaded(bool success)
-{
-    if (!success)
-        return;
-    QList<std::shared_ptr<LLM>> llms = DataManager::getInstance()->getLLMs();
-    if (llms.isEmpty())
-        return;
-    m_listWidgetLLMs->clear();
-    for (const std::shared_ptr<LLM> &llm : llms)
-    {
-        QListWidgetItem *itemLLM = new QListWidgetItem(llm->modelName, m_listWidgetLLMs);
-        itemLLM->setData(Qt::UserRole, QVariant::fromValue<QString>(llm->uuid));
-        m_listWidgetLLMs->addItem(itemLLM);
-    }
-    m_listWidgetLLMs->sortItems();
-    // 默认选中并展示第一项
-    if (m_listWidgetLLMs->currentItem() == nullptr)
-    {
-        m_listWidgetLLMs->setCurrentRow(0);
-        QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
-        if (!selectedItem)
-            return;
-        std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
-        if (!llm)
-            return;
-        m_widgetLLMInfo->updateFormData(llm);
-    }
-}
-
-void PageSettingsLLM::slot_onPushButtonClickedRemove()
-{
-    if (m_widgetLLMInfo->getUuid().isEmpty())
-        return;
-    if (QMessageBox::Yes == QMessageBox::question(this,
-                                                  "确认删除", QString("是否确认删除LLM: %1？").arg(m_widgetLLMInfo->getUuid()),
-                                                  QMessageBox::Yes | QMessageBox::No,
-                                                  QMessageBox::Yes))
-    {
-        DataManager::getInstance()->removeLLM(m_widgetLLMInfo->getUuid());
-        // 在llm列表中删除
-        QListWidgetItem *currentItem = m_listWidgetLLMs->currentItem();
-        if (currentItem)
-        {
-            delete m_listWidgetLLMs->takeItem(m_listWidgetLLMs->row(currentItem));
-        }
-        // 选中列表中的第一项并展示
-        m_listWidgetLLMs->setCurrentRow(0);
-        QListWidgetItem *selectedItem = m_listWidgetLLMs->currentItem();
-        if (!selectedItem)
-            return;
-        std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(selectedItem->data(Qt::UserRole).value<QString>());
-        if (!llm)
-            return;
-        m_widgetLLMInfo->updateFormData(llm);
-        // 通知其它页面更新
-        QJsonObject jsonObj;
-        jsonObj["id"] = static_cast<int>(EventBus::States::LLM_UPDATED);
-        EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-    }
-}
-
-void PageSettingsLLM::showLLMInfo(const QString &uuid)
-{
-    std::shared_ptr<LLM> llm = DataManager::getInstance()->getLLM(uuid);
-    if (!llm)
-    {
-        XLC_LOG_WARN("LLM not found (uuid={})", uuid);
-        return;
-    }
-    m_widgetLLMInfo->updateFormData(llm);
-}
-
-// WidgetLLMInfo
-WidgetLLMInfo::WidgetLLMInfo(QWidget *parent)
-{
-    initUI();
-}
-
-void WidgetLLMInfo::initWidget()
-{
-}
-
-void WidgetLLMInfo::initItems()
-{
-    // m_lineEditUuid
-    m_lineEditUuid = new QLineEdit(this);
-    m_lineEditUuid->setReadOnly(true);
-    m_lineEditUuid->setPlaceholderText("UUID");
-    // m_lineEditModelID
-    m_lineEditModelID = new QLineEdit(this);
-    m_lineEditModelID->setPlaceholderText("deepseek-chat");
-    // m_lineEditModelName
-    m_lineEditModelName = new QLineEdit(this);
-    m_lineEditModelName->setPlaceholderText("DeepSeek-V3-0324");
-    // m_lineEditApiKey
-    m_lineEditApiKey = new QLineEdit(this);
-    m_lineEditApiKey->setEchoMode(QLineEdit::PasswordEchoOnEdit);
-    m_lineEditApiKey->setPlaceholderText("sk-12345ab123ab12abcd1a123456a1ab12");
-    // m_lineEditBaseUrl
-    m_lineEditBaseUrl = new QLineEdit(this);
-    m_lineEditBaseUrl->setPlaceholderText("https://api.deepseek.com");
-    // m_lineEditEndPoint
-    m_lineEditEndPoint = new QLineEdit(this);
-    m_lineEditEndPoint->setPlaceholderText("/v1/chat/completions");
-}
-
-void WidgetLLMInfo::initLayout()
-{
-    // gLayout
-    QGridLayout *gLayout = new QGridLayout(this);
-    gLayout->setContentsMargins(0, 0, 0, 0);
-    gLayout->addWidget(new QLabel("UUID", this), 0, 0);
-    gLayout->addWidget(m_lineEditUuid, 0, 1);
-    gLayout->addWidget(new QLabel("模型ID", this), 1, 0);
-    gLayout->addWidget(m_lineEditModelID, 1, 1);
-    gLayout->addWidget(new QLabel("模型名称", this), 2, 0);
-    gLayout->addWidget(m_lineEditModelName, 2, 1);
-    gLayout->addWidget(new QLabel("API密钥", this), 3, 0);
-    gLayout->addWidget(m_lineEditApiKey, 3, 1);
-    gLayout->addWidget(new QLabel("API地址", this), 4, 0);
-    gLayout->addWidget(m_lineEditBaseUrl, 4, 1);
-    gLayout->addWidget(new QLabel("接口", this), 5, 0);
-    gLayout->addWidget(m_lineEditEndPoint, 5, 1);
-}
-
-void WidgetLLMInfo::updateFormData(std::shared_ptr<LLM> llm)
-{
-    if (!llm)
-        return;
-    m_lineEditUuid->setText(llm->uuid);
-    m_lineEditModelID->setText(llm->modelID);
-    m_lineEditModelName->setText(llm->modelName);
-    m_lineEditApiKey->setText(llm->apiKey);
-    m_lineEditBaseUrl->setText(llm->baseUrl);
-    m_lineEditEndPoint->setText(llm->endpoint);
-}
-
-void WidgetLLMInfo::clearFormData()
-{
-    m_lineEditUuid->setText("");
-    m_lineEditModelID->setText("");
-    m_lineEditModelName->setText("");
-    m_lineEditApiKey->setText("");
-    m_lineEditBaseUrl->setText("");
-    m_lineEditEndPoint->setText("");
-}
-
-std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
-{
-    std::shared_ptr<LLM> llm = std::make_shared<LLM>();
-    llm->uuid = m_lineEditUuid->text();
-    llm->modelID = m_lineEditModelID->text();
-    llm->modelName = m_lineEditModelName->text();
-    llm->apiKey = m_lineEditApiKey->text();
-    llm->baseUrl = m_lineEditBaseUrl->text();
-    llm->endpoint = m_lineEditEndPoint->text();
-    return llm;
-}
-
-const QString WidgetLLMInfo::getUuid()
-{
-    return m_lineEditUuid->text();
-}
-
-void WidgetLLMInfo::populateBasicInfo()
-{
-    m_lineEditUuid->setText(generateUuid());
-}
-
-// DialogAddNewLLM
-DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
-    : BaseDialog(parent, f)
-{
-    initUI();
-    m_widgetLLMInfo->populateBasicInfo();
-}
-
-void DialogAddNewLLM::initWidget()
-{
-    setWindowTitle("新增LLM");
-    resize(500, 250);
-}
-
-void DialogAddNewLLM::initItems()
-{
-    m_widgetLLMInfo = new WidgetLLMInfo(this);
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogAddNewLLM::accept);
-    // m_pushButtonCancel
-    m_pushButtonCancel = new QPushButton("取消", this);
-    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddNewLLM::reject);
-}
-
-void DialogAddNewLLM::initLayout()
-{
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonSave);
-    hLayoutButtons->addWidget(m_pushButtonCancel);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->addWidget(m_widgetLLMInfo);
-    vLayout->addStretch();
-    vLayout->addLayout(hLayoutButtons);
-}
-
-std::shared_ptr<LLM> DialogAddNewLLM::getFormData()
-{
-    return m_widgetLLMInfo->getCurrentData();
-}
-
 // PageSettingsAgent
 PageSettingsAgent::PageSettingsAgent(QWidget *parent)
-    : BaseWidget(parent)
+    : BaseSettingsPage(
+          "Agent",
+          []()
+          { return DataManager::getInstance()->getAgents(); },
+          [](const QString &uuid)
+          { return DataManager::getInstance()->getAgent(uuid); },
+          [](std::shared_ptr<Agent> agent)
+          { DataManager::getInstance()->addAgent(agent); },
+          [](std::shared_ptr<Agent> agent)
+          { DataManager::getInstance()->updateAgent(agent); },
+          [](const QString &uuid)
+          { DataManager::getInstance()->removeAgent(uuid); },
+          [](const std::shared_ptr<Agent> &agent)
+          { return agent->name; },
+          EventBus::States::AGENT_UPDATED,
+          parent)
 {
-    initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
-    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
-    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded);
+    connectDataManagerDataLoadedSignals();
 }
 
-void PageSettingsAgent::initWidget()
+void PageSettingsAgent::connectDataManagerDataLoadedSignals()
 {
-}
-
-void PageSettingsAgent::initItems()
-{
-    // m_listWidgetAgents
-    m_listWidgetAgents = new QListWidget(this);
-    connect(m_listWidgetAgents, &QListWidget::itemClicked, this, &PageSettingsAgent::slot_onListWidgetItemClicked);
-    // m_widgetAgentInfo
-    m_widgetAgentInfo = new WidgetAgentInfo(this);
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            [this]()
-            {
-                XLC_LOG_TRACE("Attempting to add agent");
-                DialogAddNewAgent *dialog = new DialogAddNewAgent(this);
-                connect(dialog, &DialogAddNewAgent::finished, this,
-                        [this, dialog](int result)
-                        {
-                            if (result == QDialog::Accepted)
-                            {
-                                // 新增agent
-                                std::shared_ptr<Agent> newAgent = dialog->getFormData();
-                                XLC_LOG_TRACE("Adding new agent (uuid={}, name={})", newAgent->uuid, newAgent->name);
-                                DataManager::getInstance()->addAgent(newAgent);
-                                // 更新agent列表
-                                QListWidgetItem *newItem = new QListWidgetItem();
-                                newItem->setText(newAgent->name);
-                                newItem->setData(Qt::UserRole, QVariant::fromValue(newAgent->uuid));
-                                m_listWidgetAgents->addItem(newItem);
-                                // 选中并展示新增LLM
-                                m_listWidgetAgents->setCurrentItem(newItem);
-                                m_widgetAgentInfo->updateFormData(newAgent);
-                                // 通知其它页面更新
-                                QJsonObject jsonObj;
-                                jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
-                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                            }
-                        });
-                dialog->exec();
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
-                if (!agent)
-                    return;
-                m_widgetAgentInfo->updateFormData(agent);
-                XLC_LOG_DEBUG("Reloading agent widget (uuid={})", m_widgetAgentInfo->getUuid());
-            });
-    // m_pushButtonRemove
-    m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsAgent::slot_onPushButtonClickedRemove);
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                XLC_LOG_DEBUG("Saving/Updating agent (uuid={})", m_widgetAgentInfo->getUuid());
-                DataManager::getInstance()->updateAgent(m_widgetAgentInfo->getCurrentData());
-                // 刷新m_listWidgetAgents
-                QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
-                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetAgentInfo->getUuid())
-                {
-                    std::shared_ptr<Agent> currentAgent = DataManager::getInstance()->getAgent(m_widgetAgentInfo->getUuid());
-                    if (currentAgent)
-                    {
-                        selectedItem->setText(currentAgent->name);
-                    }
-                }
-            });
-}
-
-void PageSettingsAgent::initLayout()
-{
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonRemove);
-    hLayoutButtons->addWidget(m_pushButtonSave);
-    // widgetOption
-    QWidget *widgetOption = new QWidget(this);
-    // vLayoutOption
-    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
-    vLayoutOption->addWidget(m_widgetAgentInfo);
-    vLayoutOption->addStretch();
-    vLayoutOption->addLayout(hLayoutButtons);
-    // splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setChildrenCollapsible(false);
-    splitter->addWidget(m_listWidgetAgents);
-    splitter->addWidget(widgetOption);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 8);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(splitter);
-}
-
-void PageSettingsAgent::slot_onListWidgetItemClicked(QListWidgetItem *item)
-{
-    const QString &agentName = item->data(Qt::DisplayRole).value<QString>();
-    const QString &agentUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("Agent selected (name={}, uuid={})", agentName, agentUuid);
-    showAgentInfo(agentUuid);
-}
-
-void PageSettingsAgent::slot_onAgentsOrMcpServersOrConversationsLoaded(bool success)
-{
-    if (!success)
-        return;
-    QList<std::shared_ptr<Agent>> agents = DataManager::getInstance()->getAgents();
-    QList<std::shared_ptr<McpServer>> mcpServers = DataManager::getInstance()->getMcpServers();
-    if (agents.isEmpty() || mcpServers.isEmpty())
-        return;
-    m_listWidgetAgents->clear();
-    for (const std::shared_ptr<Agent> &agent : agents)
-    {
-        QListWidgetItem *itemAgent = new QListWidgetItem(agent->name, m_listWidgetAgents);
-        itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(agent->uuid));
-        m_listWidgetAgents->addItem(itemAgent);
-    }
-    m_listWidgetAgents->sortItems();
-    // 默认选中并展示第一项
-    if (m_listWidgetAgents->currentItem() == nullptr)
-    {
-        m_listWidgetAgents->setCurrentRow(0);
-        QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
-        if (!selectedItem)
-            return;
-        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
-        if (!agent)
-            return;
-        m_widgetAgentInfo->updateFormData(agent);
-    }
-}
-
-void PageSettingsAgent::slot_onPushButtonClickedRemove()
-{
-    if (m_widgetAgentInfo->getUuid().isEmpty())
-        return;
-    if (QMessageBox::Yes == QMessageBox::question(this,
-                                                  "确认删除", QString("是否确认删除Agent: %1？").arg(m_widgetAgentInfo->getUuid()),
-                                                  QMessageBox::Yes | QMessageBox::No,
-                                                  QMessageBox::Yes))
-    {
-        DataManager::getInstance()->removeAgent(m_widgetAgentInfo->getUuid());
-        // 在agent列表中删除
-        QListWidgetItem *currentItem = m_listWidgetAgents->currentItem();
-        if (currentItem)
-        {
-            delete m_listWidgetAgents->takeItem(m_listWidgetAgents->row(currentItem));
-        }
-        // 选中列表中的第一项并展示
-        m_listWidgetAgents->setCurrentRow(0);
-        QListWidgetItem *selectedItem = m_listWidgetAgents->currentItem();
-        if (!selectedItem)
-            return;
-        std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(selectedItem->data(Qt::UserRole).value<QString>());
-        if (!agent)
-            return;
-        m_widgetAgentInfo->updateFormData(agent);
-        // 通知其它页面更新
-        QJsonObject jsonObj;
-        jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
-        EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-    }
-}
-
-void PageSettingsAgent::showAgentInfo(const QString &uuid)
-{
-    std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(uuid);
-    if (!agent)
-    {
-        XLC_LOG_WARN("Agent not found (uuid={})", uuid);
-        return;
-    }
-    m_widgetAgentInfo->updateFormData(agent);
+    connect(DataManager::getInstance(), &DataManager::sig_agentsLoaded, this, &PageSettingsAgent::slot_onDataLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsAgent::slot_onDataLoaded);
+    connect(DataManager::getInstance(), &DataManager::sig_conversationsLoaded, this, &PageSettingsAgent::slot_onDataLoaded);
 }
 
 // WidgetAgentInfo
@@ -1049,6 +538,174 @@ void WidgetAgentInfo::slot_handleStateChanged(const QVariant &data)
     }
 }
 
+// PageSettingsLLM
+PageSettingsLLM::PageSettingsLLM(QWidget *parent)
+    : BaseSettingsPage<LLM, WidgetLLMInfo, DialogAddNewLLM>(
+          "LLM", // 实体名称，用于日志
+          []()
+          { return DataManager::getInstance()->getLLMs(); },
+          [](const QString &uuid)
+          { return DataManager::getInstance()->getLLM(uuid); },
+          [](std::shared_ptr<LLM> llm)
+          { DataManager::getInstance()->addLLM(llm); },
+          [](std::shared_ptr<LLM> llm)
+          { DataManager::getInstance()->updateLLM(llm); },
+          [](const QString &uuid)
+          { DataManager::getInstance()->removeLLM(uuid); },
+          [](const std::shared_ptr<LLM> &llm)
+          { return llm->modelName; },
+          EventBus::States::LLM_UPDATED,
+          parent)
+{
+    connectDataManagerDataLoadedSignals();
+}
+
+void PageSettingsLLM::connectDataManagerDataLoadedSignals()
+{
+    connect(DataManager::getInstance(), &DataManager::sig_LLMsLoaded, this, &PageSettingsLLM::slot_onDataLoaded);
+}
+
+// WidgetLLMInfo
+WidgetLLMInfo::WidgetLLMInfo(QWidget *parent)
+{
+    initUI();
+}
+
+void WidgetLLMInfo::initWidget()
+{
+}
+
+void WidgetLLMInfo::initItems()
+{
+    // m_lineEditUuid
+    m_lineEditUuid = new QLineEdit(this);
+    m_lineEditUuid->setReadOnly(true);
+    m_lineEditUuid->setPlaceholderText("UUID");
+    // m_lineEditModelID
+    m_lineEditModelID = new QLineEdit(this);
+    m_lineEditModelID->setPlaceholderText("deepseek-chat");
+    // m_lineEditModelName
+    m_lineEditModelName = new QLineEdit(this);
+    m_lineEditModelName->setPlaceholderText("DeepSeek-V3-0324");
+    // m_lineEditApiKey
+    m_lineEditApiKey = new QLineEdit(this);
+    m_lineEditApiKey->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+    m_lineEditApiKey->setPlaceholderText("sk-12345ab123ab12abcd1a123456a1ab12");
+    // m_lineEditBaseUrl
+    m_lineEditBaseUrl = new QLineEdit(this);
+    m_lineEditBaseUrl->setPlaceholderText("https://api.deepseek.com");
+    // m_lineEditEndPoint
+    m_lineEditEndPoint = new QLineEdit(this);
+    m_lineEditEndPoint->setPlaceholderText("/v1/chat/completions");
+}
+
+void WidgetLLMInfo::initLayout()
+{
+    // gLayout
+    QGridLayout *gLayout = new QGridLayout(this);
+    gLayout->setContentsMargins(0, 0, 0, 0);
+    gLayout->addWidget(new QLabel("UUID", this), 0, 0);
+    gLayout->addWidget(m_lineEditUuid, 0, 1);
+    gLayout->addWidget(new QLabel("模型ID", this), 1, 0);
+    gLayout->addWidget(m_lineEditModelID, 1, 1);
+    gLayout->addWidget(new QLabel("模型名称", this), 2, 0);
+    gLayout->addWidget(m_lineEditModelName, 2, 1);
+    gLayout->addWidget(new QLabel("API密钥", this), 3, 0);
+    gLayout->addWidget(m_lineEditApiKey, 3, 1);
+    gLayout->addWidget(new QLabel("API地址", this), 4, 0);
+    gLayout->addWidget(m_lineEditBaseUrl, 4, 1);
+    gLayout->addWidget(new QLabel("接口", this), 5, 0);
+    gLayout->addWidget(m_lineEditEndPoint, 5, 1);
+}
+
+void WidgetLLMInfo::updateFormData(std::shared_ptr<LLM> llm)
+{
+    if (!llm)
+        return;
+    m_lineEditUuid->setText(llm->uuid);
+    m_lineEditModelID->setText(llm->modelID);
+    m_lineEditModelName->setText(llm->modelName);
+    m_lineEditApiKey->setText(llm->apiKey);
+    m_lineEditBaseUrl->setText(llm->baseUrl);
+    m_lineEditEndPoint->setText(llm->endpoint);
+}
+
+void WidgetLLMInfo::clearFormData()
+{
+    m_lineEditUuid->setText("");
+    m_lineEditModelID->setText("");
+    m_lineEditModelName->setText("");
+    m_lineEditApiKey->setText("");
+    m_lineEditBaseUrl->setText("");
+    m_lineEditEndPoint->setText("");
+}
+
+std::shared_ptr<LLM> WidgetLLMInfo::getCurrentData()
+{
+    std::shared_ptr<LLM> llm = std::make_shared<LLM>();
+    llm->uuid = m_lineEditUuid->text();
+    llm->modelID = m_lineEditModelID->text();
+    llm->modelName = m_lineEditModelName->text();
+    llm->apiKey = m_lineEditApiKey->text();
+    llm->baseUrl = m_lineEditBaseUrl->text();
+    llm->endpoint = m_lineEditEndPoint->text();
+    return llm;
+}
+
+const QString WidgetLLMInfo::getUuid()
+{
+    return m_lineEditUuid->text();
+}
+
+void WidgetLLMInfo::populateBasicInfo()
+{
+    m_lineEditUuid->setText(generateUuid());
+}
+
+// DialogAddNewLLM
+DialogAddNewLLM::DialogAddNewLLM(QWidget *parent, Qt::WindowFlags f)
+    : BaseDialog(parent, f)
+{
+    initUI();
+    m_widgetLLMInfo->populateBasicInfo();
+}
+
+void DialogAddNewLLM::initWidget()
+{
+    setWindowTitle("新增LLM");
+    resize(500, 250);
+}
+
+void DialogAddNewLLM::initItems()
+{
+    m_widgetLLMInfo = new WidgetLLMInfo(this);
+    // m_pushButtonSave
+    m_pushButtonSave = new QPushButton("保存", this);
+    connect(m_pushButtonSave, &QPushButton::clicked, this, &DialogAddNewLLM::accept);
+    // m_pushButtonCancel
+    m_pushButtonCancel = new QPushButton("取消", this);
+    connect(m_pushButtonCancel, &QPushButton::clicked, this, &DialogAddNewLLM::reject);
+}
+
+void DialogAddNewLLM::initLayout()
+{
+    // hLayoutButtons
+    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
+    hLayoutButtons->addStretch();
+    hLayoutButtons->addWidget(m_pushButtonSave);
+    hLayoutButtons->addWidget(m_pushButtonCancel);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(m_widgetLLMInfo);
+    vLayout->addStretch();
+    vLayout->addLayout(hLayoutButtons);
+}
+
+std::shared_ptr<LLM> DialogAddNewLLM::getFormData()
+{
+    return m_widgetLLMInfo->getCurrentData();
+}
+
 // DialogAddNewAgent
 DialogAddNewAgent::DialogAddNewAgent(QWidget *parent, Qt::WindowFlags f)
     : BaseDialog(parent, f)
@@ -1095,197 +752,29 @@ std::shared_ptr<Agent> DialogAddNewAgent::getFormData()
 
 // PageSettingsMcp
 PageSettingsMcp::PageSettingsMcp(QWidget *parent)
-    : BaseWidget(parent)
+    : BaseSettingsPage<McpServer, WidgetMcpServerInfo, DialogAddNewMcpServer>(
+          "MCP Server",
+          []()
+          { return DataManager::getInstance()->getMcpServers(); },
+          [](const QString &uuid)
+          { return DataManager::getInstance()->getMcpServer(uuid); },
+          [](std::shared_ptr<McpServer> srv)
+          { DataManager::getInstance()->addMcpServer(srv); },
+          [](std::shared_ptr<McpServer> srv)
+          { DataManager::getInstance()->updateMcpServer(srv); },
+          [](const QString &uuid)
+          { DataManager::getInstance()->removeMcpServer(uuid); },
+          [](const std::shared_ptr<McpServer> &srv)
+          { return srv->name; },
+          EventBus::States::MCP_SERVERS_UPDATED,
+          parent)
 {
-    initUI();
-    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsMcp::slot_onMcpServersLoaded);
+    connectDataManagerDataLoadedSignals();
 }
 
-void PageSettingsMcp::initWidget()
+void PageSettingsMcp::connectDataManagerDataLoadedSignals()
 {
-}
-
-void PageSettingsMcp::initItems()
-{
-    // m_listWidgetMcpServers
-    m_listWidgetMcpServers = new QListWidget(this);
-    connect(m_listWidgetMcpServers, &QListWidget::itemClicked, this, &PageSettingsMcp::slot_onListWidgetItemClicked);
-    // m_widgetMcpServerInfo
-    m_widgetMcpServerInfo = new WidgetMcpServerInfo(this);
-    // m_pushButtonAdd
-    m_pushButtonAdd = new QPushButton("添加", this);
-    connect(m_pushButtonAdd, &QPushButton::clicked, this,
-            [this]()
-            {
-                XLC_LOG_TRACE("Attempting to add MCP server");
-                DialogAddNewMcpServer *dialog = new DialogAddNewMcpServer(this);
-                connect(dialog, &DialogAddNewMcpServer::finished, this,
-                        [this, dialog](int result)
-                        {
-                            if (result == QDialog::Accepted)
-                            {
-                                // 新增MCPServer
-                                std::shared_ptr<McpServer> newMcpServer = dialog->getFormData();
-                                XLC_LOG_TRACE("Added new MCP server (uuid={}, name={})", newMcpServer->uuid, newMcpServer->name);
-                                DataManager::getInstance()->addMcpServer(newMcpServer);
-                                // 更新mcpServer列表
-                                QListWidgetItem *newItem = new QListWidgetItem();
-                                newItem->setText(newMcpServer->name);
-                                newItem->setData(Qt::UserRole, QVariant::fromValue(newMcpServer->uuid));
-                                m_listWidgetMcpServers->addItem(newItem);
-                                // 选中并展示新增MCPServer
-                                m_listWidgetMcpServers->setCurrentItem(newItem);
-                                m_widgetMcpServerInfo->updateFormData(newMcpServer);
-                                // 通知其它页面更新
-                                QJsonObject jsonObj;
-                                jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-                                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                            }
-                        });
-                dialog->exec();
-            });
-    // m_pushButtonReset
-    m_pushButtonReset = new QPushButton("重置", this);
-    connect(m_pushButtonReset, &QPushButton::clicked, this,
-            [this]()
-            {
-                m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid()));
-                XLC_LOG_DEBUG("Reloading MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
-            });
-    // m_pushButtonRemove
-    m_pushButtonRemove = new QPushButton("删除", this);
-    connect(m_pushButtonRemove, &QPushButton::clicked, this, &PageSettingsMcp::slot_onPushButtonClickedRemove);
-    // m_pushButtonSave
-    m_pushButtonSave = new QPushButton("保存", this);
-    connect(m_pushButtonSave, &QPushButton::clicked, this,
-            [this]()
-            {
-                DataManager::getInstance()->updateMcpServer(m_widgetMcpServerInfo->getCurrentData());
-                // 刷新m_listWidgetMcpServers
-                QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
-                if (selectedItem && selectedItem->data(Qt::UserRole).toString() == m_widgetMcpServerInfo->getUuid())
-                {
-                    std::shared_ptr<McpServer> currentMcpServer = DataManager::getInstance()->getMcpServer(m_widgetMcpServerInfo->getUuid());
-                    if (currentMcpServer)
-                    {
-                        selectedItem->setText(currentMcpServer->name);
-                    }
-                }
-                QJsonObject jsonObj;
-                jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-                EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-                XLC_LOG_DEBUG("Saving/Updating MCP server (uuid={})", m_widgetMcpServerInfo->getUuid());
-            });
-}
-
-void PageSettingsMcp::initLayout()
-{
-    // hLayoutButtons
-    QHBoxLayout *hLayoutButtons = new QHBoxLayout();
-    hLayoutButtons->setContentsMargins(0, 0, 0, 0);
-    hLayoutButtons->addWidget(m_pushButtonAdd);
-    hLayoutButtons->addStretch();
-    hLayoutButtons->addWidget(m_pushButtonReset);
-    hLayoutButtons->addWidget(m_pushButtonRemove);
-    hLayoutButtons->addWidget(m_pushButtonSave);
-    // widgetOption
-    QWidget *widgetOption = new QWidget(this);
-    // vLayoutOption
-    QVBoxLayout *vLayoutOption = new QVBoxLayout(widgetOption);
-    vLayoutOption->addWidget(m_widgetMcpServerInfo);
-    vLayoutOption->addStretch();
-    vLayoutOption->addLayout(hLayoutButtons);
-    // splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setChildrenCollapsible(false);
-    splitter->addWidget(m_listWidgetMcpServers);
-    splitter->addWidget(widgetOption);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 8);
-    // vLayout
-    QVBoxLayout *vLayout = new QVBoxLayout(this);
-    vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(splitter);
-}
-
-void PageSettingsMcp::slot_onListWidgetItemClicked(QListWidgetItem *item)
-{
-    const QString &mcpServerName = item->data(Qt::DisplayRole).value<QString>();
-    const QString &mcpServerUuid = item->data(Qt::UserRole).value<QString>();
-    XLC_LOG_TRACE("MCP server selected (name={}, uuid={})", mcpServerName, mcpServerUuid);
-    showMcpServerInfo(mcpServerUuid);
-}
-
-void PageSettingsMcp::slot_onMcpServersLoaded(bool success)
-{
-    if (!success)
-        return;
-    QList<std::shared_ptr<McpServer>> mcpServers = DataManager::getInstance()->getMcpServers();
-    if (mcpServers.isEmpty())
-        return;
-    m_listWidgetMcpServers->clear();
-    for (const std::shared_ptr<McpServer> &mcpServer : mcpServers)
-    {
-        QListWidgetItem *itemAgent = new QListWidgetItem(mcpServer->name, m_listWidgetMcpServers);
-        itemAgent->setData(Qt::UserRole, QVariant::fromValue<QString>(mcpServer->uuid));
-        m_listWidgetMcpServers->addItem(itemAgent);
-    }
-    m_listWidgetMcpServers->sortItems();
-    // 默认选中并展示第一项
-    if (m_listWidgetMcpServers->currentItem() == nullptr)
-    {
-        m_listWidgetMcpServers->setCurrentRow(0);
-        QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
-        if (!selectedItem)
-            return;
-        m_widgetMcpServerInfo->updateFormData(DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>()));
-    }
-}
-
-void PageSettingsMcp::slot_onPushButtonClickedRemove()
-{
-    {
-        if (m_widgetMcpServerInfo->getUuid().isEmpty())
-            return;
-        if (QMessageBox::Yes == QMessageBox::question(this,
-                                                      "确认删除", QString("是否确认删除McpServer: %1？").arg(m_widgetMcpServerInfo->getUuid()),
-                                                      QMessageBox::Yes | QMessageBox::No,
-                                                      QMessageBox::Yes))
-        {
-            DataManager::getInstance()->removeMcpServer(m_widgetMcpServerInfo->getUuid());
-            // 在MCPServer列表中删除
-            QListWidgetItem *currentItem = m_listWidgetMcpServers->currentItem();
-            if (currentItem)
-            {
-                delete m_listWidgetMcpServers->takeItem(m_listWidgetMcpServers->row(currentItem));
-            }
-            // 选中列表中的第一项并展示
-            m_listWidgetMcpServers->setCurrentRow(0);
-            QListWidgetItem *selectedItem = m_listWidgetMcpServers->currentItem();
-            if (!selectedItem)
-                return;
-            std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(selectedItem->data(Qt::UserRole).value<QString>());
-            if (!mcpServer)
-                return;
-            m_widgetMcpServerInfo->updateFormData(mcpServer);
-            // 通知其它页面更新
-            QJsonObject jsonObj;
-            jsonObj["id"] = static_cast<int>(EventBus::States::MCP_SERVERS_UPDATED);
-            EventBus::getInstance()->publish(EventBus::EventType::StateChanged, QVariant(jsonObj));
-        }
-    }
-}
-
-void PageSettingsMcp::showMcpServerInfo(const QString &uuid)
-{
-    std::shared_ptr<McpServer> mcpServer = DataManager::getInstance()->getMcpServer(uuid);
-    if (!mcpServer)
-    {
-        XLC_LOG_WARN("MCP server not found (serverUuid={})", uuid);
-        return;
-    }
-    // 展示mcp服务器信息
-    m_widgetMcpServerInfo->updateFormData(mcpServer);
+    connect(DataManager::getInstance(), &DataManager::sig_mcpServersLoaded, this, &PageSettingsMcp::slot_onDataLoaded);
 }
 
 // WidgetMcpServerInfo

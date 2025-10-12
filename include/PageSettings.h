@@ -16,9 +16,10 @@
 #include <QLabel>
 #include <QMenu>
 #include "BaseDialog.hpp"
+#include "BaseSettingsPage.hpp"
 
-class PageSettingsLLM;
 class PageSettingsAgent;
+class PageSettingsLLM;
 class PageSettingsMcp;
 class PageSettingsStorage;
 class PageAbout;
@@ -43,117 +44,17 @@ private:
     QMap<QString, QWidget *> m_pages;
 };
 
-class WidgetLLMInfo;
-class PageSettingsLLM : public BaseWidget
-{
-    Q_OBJECT
-private Q_SLOTS:
-    void slot_onListWidgetItemClicked(QListWidgetItem *item);
-    void slot_onLLMsLoaded(bool success);
-    void slot_onPushButtonClickedRemove();
-
-public:
-    explicit PageSettingsLLM(QWidget *parent = nullptr);
-    ~PageSettingsLLM() = default;
-
-protected:
-    void initWidget() override;
-    void initItems() override;
-    void initLayout() override;
-
-private:
-    QListWidget *m_listWidgetLLMs;
-    WidgetLLMInfo *m_widgetLLMInfo;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonRemove;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
-
-private:
-    void showLLMInfo(const QString &uuid);
-};
-
-class WidgetLLMInfo : public BaseWidget
-{
-    Q_OBJECT
-public:
-    explicit WidgetLLMInfo(QWidget *parent = nullptr);
-    ~WidgetLLMInfo() = default;
-    /**
-     * 更新表单数据
-     */
-    void updateFormData(std::shared_ptr<LLM> llm);
-    /**
-     * 清除表单数据
-     */
-    void clearFormData();
-    /**
-     * 获取当前表单数据
-     */
-    std::shared_ptr<LLM> getCurrentData();
-    const QString getUuid();
-    void populateBasicInfo();
-
-protected:
-    void initWidget() override;
-    void initItems() override;
-    void initLayout() override;
-
-private:
-    QLineEdit *m_lineEditUuid;
-    QLineEdit *m_lineEditModelID;
-    QLineEdit *m_lineEditModelName;
-    QLineEdit *m_lineEditApiKey;
-    QLineEdit *m_lineEditBaseUrl;
-    QLineEdit *m_lineEditEndPoint;
-};
-
-class DialogAddNewLLM : public BaseDialog
-{
-    Q_OBJECT
-public:
-    DialogAddNewLLM(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ~DialogAddNewLLM() = default;
-    std::shared_ptr<LLM> getFormData();
-
-protected:
-    void initWidget() override;
-    void initItems() override;
-    void initLayout() override;
-
-private:
-    WidgetLLMInfo *m_widgetLLMInfo;
-    QPushButton *m_pushButtonSave;
-    QPushButton *m_pushButtonCancel;
-};
-
 class WidgetAgentInfo;
-class PageSettingsAgent : public BaseWidget
+class DialogAddNewAgent;
+class PageSettingsAgent : public BaseSettingsPage<Agent, WidgetAgentInfo, DialogAddNewAgent>
 {
     Q_OBJECT
-private Q_SLOTS:
-    void slot_onListWidgetItemClicked(QListWidgetItem *item);
-    void slot_onAgentsOrMcpServersOrConversationsLoaded(bool success);
-    void slot_onPushButtonClickedRemove();
 
 public:
     explicit PageSettingsAgent(QWidget *parent = nullptr);
 
 protected:
-    void initWidget() override;
-    void initItems() override;
-    void initLayout() override;
-
-private:
-    QListWidget *m_listWidgetAgents;
-    WidgetAgentInfo *m_widgetAgentInfo;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonRemove;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
-
-private:
-    void showAgentInfo(const QString &uuid);
+    void connectDataManagerDataLoadedSignals() override;
 };
 
 class WidgetAgentInfo : public BaseWidget
@@ -225,17 +126,38 @@ private:
     QPushButton *m_pushButtonCancel;
 };
 
-class WidgetMcpServerInfo;
-class PageSettingsMcp : public BaseWidget
+class WidgetLLMInfo;
+class DialogAddNewLLM;
+class PageSettingsLLM : public BaseSettingsPage<LLM, WidgetLLMInfo, DialogAddNewLLM>
 {
     Q_OBJECT
-private Q_SLOTS:
-    void slot_onListWidgetItemClicked(QListWidgetItem *item);
-    void slot_onMcpServersLoaded(bool success);
-    void slot_onPushButtonClickedRemove();
-
 public:
-    explicit PageSettingsMcp(QWidget *parent = nullptr);
+    explicit PageSettingsLLM(QWidget *parent = nullptr);
+
+protected:
+    void connectDataManagerDataLoadedSignals() override;
+};
+
+class WidgetLLMInfo : public BaseWidget
+{
+    Q_OBJECT
+public:
+    explicit WidgetLLMInfo(QWidget *parent = nullptr);
+    ~WidgetLLMInfo() = default;
+    /**
+     * 更新表单数据
+     */
+    void updateFormData(std::shared_ptr<LLM> llm);
+    /**
+     * 清除表单数据
+     */
+    void clearFormData();
+    /**
+     * 获取当前表单数据
+     */
+    std::shared_ptr<LLM> getCurrentData();
+    const QString getUuid();
+    void populateBasicInfo();
 
 protected:
     void initWidget() override;
@@ -243,15 +165,43 @@ protected:
     void initLayout() override;
 
 private:
-    QListWidget *m_listWidgetMcpServers;
-    WidgetMcpServerInfo *m_widgetMcpServerInfo;
-    QPushButton *m_pushButtonAdd;
-    QPushButton *m_pushButtonRemove;
-    QPushButton *m_pushButtonReset;
-    QPushButton *m_pushButtonSave;
+    QLineEdit *m_lineEditUuid;
+    QLineEdit *m_lineEditModelID;
+    QLineEdit *m_lineEditModelName;
+    QLineEdit *m_lineEditApiKey;
+    QLineEdit *m_lineEditBaseUrl;
+    QLineEdit *m_lineEditEndPoint;
+};
+
+class DialogAddNewLLM : public BaseDialog
+{
+    Q_OBJECT
+public:
+    DialogAddNewLLM(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    ~DialogAddNewLLM() = default;
+    std::shared_ptr<LLM> getFormData();
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
 
 private:
-    void showMcpServerInfo(const QString &uuid);
+    WidgetLLMInfo *m_widgetLLMInfo;
+    QPushButton *m_pushButtonSave;
+    QPushButton *m_pushButtonCancel;
+};
+
+class WidgetMcpServerInfo;
+class DialogAddNewMcpServer;
+class PageSettingsMcp : public BaseSettingsPage<McpServer, WidgetMcpServerInfo, DialogAddNewMcpServer>
+{
+    Q_OBJECT
+public:
+    explicit PageSettingsMcp(QWidget *parent = nullptr);
+
+protected:
+    void connectDataManagerDataLoadedSignals() override;
 };
 
 class WidgetMcpServerInfo : public BaseWidget
