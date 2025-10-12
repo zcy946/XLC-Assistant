@@ -25,9 +25,9 @@ DataManager::DataManager(QObject *parent)
 {
     // 读取配置文件
     QSettings settings(FILE_CONFIG, QSettings::IniFormat);
-    m_filePathAgents = settings.value("Agents/FilePath", FILE_DEFAULT_LLMS).toString();
-    m_filePathLLMs = settings.value("LLMs/FilePath", FILE_DEFAULT_LLMS).toString();
-    m_filePathMcpServers = settings.value("MCPServers/FilePath", FILE_DEFAULT_LLMS).toString();
+    m_filePathAgents = settings.value("Agents/FilePath").toString();
+    m_filePathLLMs = settings.value("LLMs/FilePath").toString();
+    m_filePathMcpServers = settings.value("MCPServers/FilePath").toString();
 
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
     connect(DataBaseManager::getInstance()->getWorkerPtr(), &DataBaseWorker::sig_allConversationInfoAcquired, this, &DataManager::slot_handleAllConversationInfoAcquired, Qt::QueuedConnection);

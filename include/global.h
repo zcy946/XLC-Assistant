@@ -14,10 +14,6 @@
 
 static const char *FILE_CONFIG = "./config.ini";
 
-static const char *FILE_DEFAULT_AGENTS = "./config/Agents.json";
-static const char *FILE_DEFAULT_LLMS = "./config/LLMs.json";
-static const char *FILE_DEFAULT_MCPSERVERS = "./config/MCPServers.json";
-
 static const char *AVATAR_UNKNOW = "://image/avatar_unknow.png";
 static const char *AVATAR_TOOL = "://image/avatar_tool.png";
 static const char *AVATAR_SYSTEM = "://image/avatar_system.png";
