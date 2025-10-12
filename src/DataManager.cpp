@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
+#include <QSettings>
 
 DataManager *DataManager::s_instance = nullptr;
 
@@ -22,31 +23,15 @@ DataManager *DataManager::getInstance()
 DataManager::DataManager(QObject *parent)
     : QObject(parent)
 {
-    // 检测配置文件
-    if (!QFile(FILE_LLMS).exists())
-        XLC_LOG_WARN("LLMs file does not exist (file={})", FILE_LLMS);
-    else
-        m_filePathLLMs = FILE_LLMS;
-    if (!QFile(FILE_MCPSERVERS).exists())
-        XLC_LOG_WARN("McpServers file does not exist (file={})", FILE_MCPSERVERS);
-    else
-        m_filePathMcpServers = FILE_MCPSERVERS;
-    if (!QFile(FILE_AGENTS).exists())
-        XLC_LOG_WARN("Agents file does not exist (file={})", FILE_AGENTS);
-    else
-        m_filePathAgents = FILE_AGENTS;
+    // 读取配置文件
+    QSettings settings(FILE_CONFIG, QSettings::IniFormat);
+    m_filePathAgents = settings.value("Agents/FilePath", FILE_DEFAULT_LLMS).toString();
+    m_filePathLLMs = settings.value("LLMs/FilePath", FILE_DEFAULT_LLMS).toString();
+    m_filePathMcpServers = settings.value("MCPServers/FilePath", FILE_DEFAULT_LLMS).toString();
 
     connect(this, &DataManager::sig_mcpServersLoaded, this, &DataManager::slot_onMcpServersLoaded);
     connect(DataBaseManager::getInstance()->getWorkerPtr(), &DataBaseWorker::sig_allConversationInfoAcquired, this, &DataManager::slot_handleAllConversationInfoAcquired, Qt::QueuedConnection);
     connect(DataBaseManager::getInstance()->getWorkerPtr(), &DataBaseWorker::sig_messagesAcquired, this, &DataManager::slot_handleMessagesAcquired, Qt::QueuedConnection);
-}
-
-void DataManager::registerAllMetaType()
-{
-    // qRegisterMetaType<McpServer>("McpServer");
-    // qRegisterMetaType<Agent>("Agent");
-    // qRegisterMetaType<Conversation>("Conversation");
-    // qRegisterMetaType<Message>("Message");
 }
 
 void DataManager::init()
@@ -222,7 +207,7 @@ bool DataManager::loadLLMs(const QString &filePath)
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QString errorMsg = QString("Could not open LLMs file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Load LLMs failed(filepath=%1, errormessage=%2): Could not open LLMs file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -233,14 +218,14 @@ bool DataManager::loadLLMs(const QString &filePath)
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull())
     {
-        QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
+        QString errorMsg = QString("Load LLMs failed(filepath=%1): Failed to create JSON document").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
 
     if (!doc.isArray())
     {
-        QString errorMsg = QString("LLMs JSON root is not an array in file: %1").arg(filePath);
+        QString errorMsg = QString("Load LLMs failed(filepath=%1): LLMs JSON root is not an array").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -390,11 +375,13 @@ QList<std::shared_ptr<LLM>> DataManager::getLLMs() const
 
 void DataManager::setFilePathLLMs(const QString &filePath)
 {
-
     if (filePath.isEmpty())
         return;
     m_filePathLLMs = filePath;
     loadLLMsAsync();
+    QSettings writeSettings(FILE_CONFIG, QSettings::IniFormat);
+    writeSettings.setValue("LLMs/FilePath", filePath);
+    writeSettings.sync();
     Q_EMIT sig_LLMsFilePathChange(filePath);
 }
 
@@ -408,7 +395,7 @@ bool DataManager::loadMcpServers(const QString &filePath)
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QString errorMsg = QString("Load MCP Servers failed(filepath=%1, errormessage=%2): Could not open McpServers file").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Load MCP Servers failed(filepath=%1, errormessage=%2): Could not open MCPServers file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -585,6 +572,9 @@ void DataManager::setFilePathMcpServers(const QString &filePath)
         return;
     m_filePathMcpServers = filePath;
     loadMcpServersAsync();
+    QSettings writeSettings(FILE_CONFIG, QSettings::IniFormat);
+    writeSettings.setValue("MCPServers/FilePath", filePath);
+    writeSettings.sync();
     Q_EMIT sig_mcpServersFilePathChange(filePath);
 }
 
@@ -598,7 +588,7 @@ bool DataManager::loadAgents(const QString &filePath)
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QString errorMsg = QString("Could not open Agents file: %1 - %2").arg(filePath).arg(file.errorString());
+        QString errorMsg = QString("Load Agents failed(filepath=%1, errormessage=%2): Could not open Agents file").arg(filePath).arg(file.errorString());
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -609,14 +599,14 @@ bool DataManager::loadAgents(const QString &filePath)
     QJsonDocument doc = QJsonDocument::fromJson(jsonData);
     if (doc.isNull())
     {
-        QString errorMsg = QString("Failed to create JSON document from file: %1").arg(filePath);
+        QString errorMsg = QString("Load Agents failed(filepath=%1): Failed to create JSON document").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
 
     if (!doc.isArray())
     {
-        QString errorMsg = QString("Agents JSON root is not an array in file: %1").arg(filePath);
+        QString errorMsg = QString("Load Agents failed(filepath=%1): Agents JSON root is not an array").arg(filePath);
         XLC_LOG_ERROR("{}", errorMsg);
         return false;
     }
@@ -797,6 +787,9 @@ void DataManager::setFilePathAgents(const QString &filePath)
         return;
     m_filePathAgents = filePath;
     loadAgentsAsync();
+    QSettings writeSettings(FILE_CONFIG, QSettings::IniFormat);
+    writeSettings.setValue("Agents/FilePath", filePath);
+    writeSettings.sync();
     Q_EMIT sig_agentsFilePathChange(filePath);
 }
 

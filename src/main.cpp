@@ -30,9 +30,6 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
-    // 注册元对象
-    DataManager::registerAllMetaType();
-
     // 设置全局字体
     app.setFont(getGlobalFont());
 

@@ -12,22 +12,19 @@
 #include <QJsonValue>
 #include <QJsonObject>
 
-constexpr const char *FILE_LLMS = "./config/LLMs.json";
-constexpr const char *FILE_MCPSERVERS = "./config/MCPServers.json";
-constexpr const char *FILE_AGENTS = "./config/Agents.json";
-constexpr const char *BASE_URL = "https://api.deepseek.com";
-constexpr const char *ENDPOINT = "/v1/chat/completions";
-constexpr const char *MODEL = "deepseek-chat";
-constexpr const char *API_KEY = "sk-67827bd147dc43afbb9a982349c4be31";
+static const char *FILE_CONFIG = "./config.ini";
 
-constexpr const char *AVATAR_UNKNOW = "://image/avatar_unknow.png";
-constexpr const char *AVATAR_TOOL = "://image/avatar_tool.png";
-constexpr const char *AVATAR_SYSTEM = "://image/avatar_system.png";
-constexpr const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
-constexpr const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
+static const char *FILE_DEFAULT_AGENTS = "./config/Agents.json";
+static const char *FILE_DEFAULT_LLMS = "./config/LLMs.json";
+static const char *FILE_DEFAULT_MCPSERVERS = "./config/MCPServers.json";
 
-constexpr const char *DEFAULT_CONTENT_CLEAR_CONTEXT = "XLC_ASSISTANT_CLEAR_CONTEXT"; // 清除上下文的Role为SYSTEM的Message的Content
+static const char *AVATAR_UNKNOW = "://image/avatar_unknow.png";
+static const char *AVATAR_TOOL = "://image/avatar_tool.png";
+static const char *AVATAR_SYSTEM = "://image/avatar_system.png";
+static const char *DEFAULT_AVATAR_USER = "://image/default_avatar_user.png";
+static const char *DEFAULT_AVATAR_LLM = "://image/default_avatar_llm.png";
 
+static const char *DEFAULT_CONTENT_CLEAR_CONTEXT = "XLC_ASSISTANT_CLEAR_CONTEXT"; // 清除上下文的Role为SYSTEM的Message的Content
 
 /**
  * 获取默认字体

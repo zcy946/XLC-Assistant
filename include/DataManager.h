@@ -46,7 +46,6 @@ private Q_SLOTS:
 public:
     static DataManager *getInstance();
     ~DataManager() = default;
-    static void registerAllMetaType();
     void init();
 
     // LLM
