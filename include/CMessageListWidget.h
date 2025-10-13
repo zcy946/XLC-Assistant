@@ -69,7 +69,6 @@ private:
     QPixmap getRoundedAvatar(const QString &avatarFilePath, int size) const;
 
 private:
-    const char *COLOR_FONT_DATETIME = "#9E9E9E"; // 时间戳的字体颜色
     const int AVATAR_SIZE = 40;                  // 头像大小
     const int PADDING = 10;                      // 整体边距
     const int NICK_MARGIN = 10;                  // 头像到昵称的距离

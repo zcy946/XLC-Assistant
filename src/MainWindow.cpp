@@ -26,17 +26,17 @@ void MainWindow::initWidget()
 void MainWindow::initItems()
 {
     // m_navigationBar
-    m_navigationBar = new CNavigationBar(this);
+    m_navigationBar = new NavigationBar(this);
     m_navigationBar->setFixedWidth(60);
-    m_navigationBar->addItemSvg("聊天", "://image/message-3-line.svg");
-    m_navigationBar->addItemSvg("设置", "://image/settings-3-line.svg");
-    connect(m_navigationBar, &CNavigationBar::indexChanged, this, &MainWindow::handleNavigationBarIndexChanged);
+    m_navigationBar->addItem("聊天", "://image/message-3-line.svg");
+    m_navigationBar->addItem("设置", "://image/settings-3-line.svg");
+    m_navigationBar->setCurrentText("聊天");
+    connect(m_navigationBar, &NavigationBar::indexChanged, this, &MainWindow::handleNavigationBarIndexChanged);
 #ifdef QT_DEBUG
     // 添加测试项目
     for (int i = 0; i < 20; i += 2)
     {
-        m_navigationBar->addItemSvg("Item" + QString::number(i + 1), "://image/fire-line.svg");
-        m_navigationBar->addNonSelectableItemSvg("NonSelectableItem" + QString::number(i + 2), "://image/fire-line.svg");
+        m_navigationBar->addItem("Item" + QString::number(i + 1), "://image/fire-line.svg");
     }
 #endif
 
@@ -62,11 +62,11 @@ void MainWindow::initLayout()
     h_layout->addLayout(m_stackedLayout);
 }
 
-void MainWindow::handleNavigationBarIndexChanged(int index, const QString &text)
+void MainWindow::handleNavigationBarIndexChanged(int index)
 {
     if (index < 0 || index > m_stackedLayout->count() - 1)
         return;
-    XLC_LOG_TRACE("Navigating to index (index={}, text={})", index, text);
+    XLC_LOG_TRACE("Navigating to index (index={})", index);
     m_stackedLayout->setCurrentIndex(index);
 
     // WARNING：必须重新置顶ToastManager，否则切换stackedLayout会被遮盖

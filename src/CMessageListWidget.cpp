@@ -2,6 +2,7 @@
 #include <QPainterPath>
 #include <QPixmapCache>
 #include "Logger.hpp"
+#include "ColorRepository.h"
 
 // CMessageListModel
 CMessageListModel::CMessageListModel(QObject *parent)
@@ -97,11 +98,11 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         int lineLength = (option.rect.width() - textWidth) / 2;
         QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);
         QRect rectDrawText = QRect(option.rect.topLeft() + QPoint(lineLength, PADDING), rectText.size());
-        painter->setPen(QColor("#D0D0D0"));
+        painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(option.rect.left() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(rectDrawText.left() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
-        painter->setPen(QColor("#000000"));
+        painter->setPen(ColorRepository::text());
         painter->drawText(rectDrawText, text);
-        painter->setPen(QColor("#D0D0D0"));
+        painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(rectDrawText.right() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(option.rect.right() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
         painter->restore();
         return;
@@ -141,7 +142,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
                        rectAvatar.bottom() - QFontMetrics(fontDateTime).height(),
                        rectNick.width(),
                        QFontMetrics(fontDateTime).height());
-    painter->setPen(QColor(COLOR_FONT_DATETIME));
+    painter->setPen(ColorRepository::historyMessageListTimestamp());
     painter->setFont(fontDateTime);
     painter->drawText(rectDateTime, createDateTime);
 
