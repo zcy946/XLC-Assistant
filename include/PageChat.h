@@ -68,7 +68,7 @@ private:
     QString m_conversationUuid;
 
 private:
-    HistoryMessageListWidget *m_listWidgetMessages;
+    HistoryMessageListWidget *m_historyMessageList;
     QPlainTextEdit *m_plainTextEdit;
     QPushButton *m_pushButtonSend;
     QPushButton *m_pushButtonClearContext;

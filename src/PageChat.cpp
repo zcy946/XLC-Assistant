@@ -444,8 +444,8 @@ void WidgetChat::initWidget()
 
 void WidgetChat::initItems()
 {
-    // m_listWidgetMessages
-    m_listWidgetMessages = new HistoryMessageListWidget(this);
+    // m_historyMessageList
+    m_historyMessageList = new HistoryMessageListWidget(this);
     // m_plainTextEdit
     m_plainTextEdit = new QPlainTextEdit(this);
     // m_pushButtonSend
@@ -476,8 +476,8 @@ void WidgetChat::initItems()
                 // 清除messages
                 conversation->clearContext();
                 // 更新历史消息列表
-                m_listWidgetMessages->clearContext();
-                m_listWidgetMessages->scrollToBottom();
+                m_historyMessageList->clearContext();
+                m_historyMessageList->scrollToBottom();
                 XLC_LOG_INFO("Clear context successed");
                 ToastManager::showMessage(Toast::Type::Success, "已清空上下文");
             });
@@ -492,7 +492,7 @@ void WidgetChat::initLayout()
     // m_splitter
     QSplitter *m_splitter = new QSplitter(Qt::Orientation::Vertical, this);
     m_splitter->setChildrenCollapsible(false);
-    m_splitter->addWidget(m_listWidgetMessages);
+    m_splitter->addWidget(m_historyMessageList);
     m_splitter->addWidget(m_plainTextEdit);
     m_splitter->setStretchFactor(0, 8);
     m_splitter->setStretchFactor(1, 2);
@@ -527,8 +527,8 @@ void WidgetChat::initLayout()
 
 void WidgetChat::addNewMessage(HistoryMessage message)
 {
-    m_listWidgetMessages->addMessage(message);
-    m_listWidgetMessages->scrollToBottom();
+    m_historyMessageList->addMessage(message);
+    m_historyMessageList->scrollToBottom();
 }
 
 const QString WidgetChat::getConversationUuid()
@@ -556,7 +556,7 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
     m_conversationUuid = conversationUuid;
 
     // 刷新消息列表
-    m_listWidgetMessages->clearAllMessage();
+    m_historyMessageList->clearAllMessage();
     QVector<Message> messages = conversation->getMessages();
     // 刷新历史消息列表m_listWidgetMessages
     for (const Message &message : messages)
@@ -570,13 +570,13 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
         else if (message.role == Message::TOOL)
         {
             // 插入一条拼凑的系统调用工具的消息，保持一致性（数据库没有存储）
-            m_listWidgetMessages->addMessage(HistoryMessage(message.id, QString("Calling tool (callId=%1)").arg(message.toolCallId), Message::TOOL, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+            m_historyMessageList->addMessage(HistoryMessage(message.id, QString("Calling tool (callId=%1)").arg(message.toolCallId), Message::TOOL, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
             displayContent = QString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
                                  .arg(1)
                                  .arg(message.toolCallId)
                                  .arg(message.content);
         }
-        m_listWidgetMessages->addMessage(HistoryMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+        m_historyMessageList->addMessage(HistoryMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
     }
     XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }
