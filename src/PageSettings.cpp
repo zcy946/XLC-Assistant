@@ -361,7 +361,7 @@ void WidgetAgentInfo::updateFormData(std::shared_ptr<Agent> agent)
         std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(uuid);
         if (!conversation)
         {
-            XLC_LOG_WARN("Update form data (agentUuid={}): Conversation is loading or not found", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
+            // XLC_LOG_WARN("Update form data (agentUuid={}): Conversation is loading or not found", uuid); // 当MCPServer和Agent loaded的时候会分别触发一次，无需在意
             continue;
         }
         QListWidgetItem *itemConversation = new QListWidgetItem(conversation->summary, m_listWidgetConversations);
