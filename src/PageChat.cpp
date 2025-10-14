@@ -189,7 +189,7 @@ void PageChat::slot_onMessageSent(const QString &message)
     if (allMcpServersReady)
     {
         // 添加消息到界面
-        m_widgetChat->addNewMessage(CMessage(message, Message::USER, getCurrentDateTime()));
+        m_widgetChat->addNewMessage(HistoryMessage(message, Message::USER, getCurrentDateTime()));
         // 记录问题
         conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
         LLMService::getInstance()->postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
@@ -290,7 +290,7 @@ void PageChat::slot_handleResponse(const QString &conversationUuid, const QStrin
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(responseMessage, Message::ASSISTANT, getCurrentDateTime()));
+        m_widgetChat->addNewMessage(HistoryMessage(responseMessage, Message::ASSISTANT, getCurrentDateTime()));
     }
 }
 
@@ -298,7 +298,7 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
 {
     if (m_widgetChat->getConversationUuid() == conversationUuid)
     {
-        m_widgetChat->addNewMessage(CMessage(message, Message::Role::TOOL, getCurrentDateTime()));
+        m_widgetChat->addNewMessage(HistoryMessage(message, Message::Role::TOOL, getCurrentDateTime()));
     }
 }
 
@@ -445,7 +445,7 @@ void WidgetChat::initWidget()
 void WidgetChat::initItems()
 {
     // m_listWidgetMessages
-    m_listWidgetMessages = new CMessageListWidget(this);
+    m_listWidgetMessages = new HistoryMessageListWidget(this);
     // m_plainTextEdit
     m_plainTextEdit = new QPlainTextEdit(this);
     // m_pushButtonSend
@@ -525,7 +525,7 @@ void WidgetChat::initLayout()
     vLayout->addLayout(hLayoutTools);
 }
 
-void WidgetChat::addNewMessage(CMessage message)
+void WidgetChat::addNewMessage(HistoryMessage message)
 {
     m_listWidgetMessages->addMessage(message);
     m_listWidgetMessages->scrollToBottom();
@@ -570,13 +570,13 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
         else if (message.role == Message::TOOL)
         {
             // 插入一条拼凑的系统调用工具的消息，保持一致性（数据库没有存储）
-            m_listWidgetMessages->addMessage(CMessage(message.id, QString("Calling tool (callId=%1)").arg(message.toolCallId), Message::TOOL, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+            m_listWidgetMessages->addMessage(HistoryMessage(message.id, QString("Calling tool (callId=%1)").arg(message.toolCallId), Message::TOOL, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
             displayContent = QString("Result of call tool (success=%1, callId=%2, formattedContent=%3)")
                                  .arg(1)
                                  .arg(message.toolCallId)
                                  .arg(message.content);
         }
-        m_listWidgetMessages->addMessage(CMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
+        m_listWidgetMessages->addMessage(HistoryMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
     }
     XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
 }

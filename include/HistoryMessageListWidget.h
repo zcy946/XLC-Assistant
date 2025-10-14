@@ -1,5 +1,5 @@
-#ifndef CMESSAGELISTWIDGET_H
-#define CMESSAGELISTWIDGET_H
+#ifndef HISTORYMESSAGELISTWIDGET_H
+#define HISTORYMESSAGELISTWIDGET_H
 
 #include <QString>
 #include <QSize>
@@ -11,15 +11,15 @@
 #include <QListView>
 #include "DataManager.h"
 
-struct CMessage : public Message
+struct HistoryMessage : public Message
 {
-    CMessage(const QString &content, Message::Role role,
+    HistoryMessage(const QString &content, Message::Role role,
              const QString &createdTime,
              const QJsonArray &toolCalls = QJsonArray(), const QString &toolCallId = QString())
         : Message(content, role, createdTime, toolCalls, toolCallId)
     {
     }
-    CMessage(const QString &id, const QString &content, Message::Role role,
+    HistoryMessage(const QString &id, const QString &content, Message::Role role,
              const QString &createdTime,
              const QJsonArray &toolCalls, const QString &toolCallId,
              const QString &avatarFilePath)
@@ -31,11 +31,11 @@ struct CMessage : public Message
     mutable QSize cachedItemSize;
 };
 
-class CMessageListModel : public QAbstractListModel
+class HistoryMessageListModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit CMessageListModel(QObject *parent = nullptr);
+    explicit HistoryMessageListModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -47,13 +47,13 @@ public:
         CreatedTime = Qt::UserRole + 4,
         AvatarFilePath = Qt::UserRole + 5
     };
-    void addMessage(const CMessage &message);
-    const CMessage *messageAt(int row) const;
+    void addMessage(const HistoryMessage &message);
+    const HistoryMessage *messageAt(int row) const;
     void clearCachedSizes();
     void clearAllMessage();
 
 private:
-    QVector<CMessage> m_messages;
+    QVector<HistoryMessage> m_messages;
 };
 
 class CMessageDelegate : public QStyledItemDelegate
@@ -75,12 +75,12 @@ private:
     const int TEXT_MARGIN = 15;                  // 文本的上下外边距
 };
 
-class CMessageListWidget : public QListView
+class HistoryMessageListWidget : public QListView
 {
     Q_OBJECT
 public:
-    explicit CMessageListWidget(QWidget *parent = nullptr);
-    void addMessage(const CMessage &message);
+    explicit HistoryMessageListWidget(QWidget *parent = nullptr);
+    void addMessage(const HistoryMessage &message);
     void clearContext();
     // 清除消息
     void clearAllMessage();
@@ -90,8 +90,8 @@ protected:
     void paintEvent(QPaintEvent *e) override;
 
 private:
-    CMessageListModel *m_model;
+    HistoryMessageListModel *m_model;
     CMessageDelegate *m_delegate;
 };
 
-#endif // CMESSAGELISTWIDGET_H
+#endif // HISTORYMESSAGELISTWIDGET_H

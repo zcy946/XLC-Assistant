@@ -1,28 +1,28 @@
-#include "CMessageListWidget.h"
+#include "HistoryMessageListWidget.h"
 #include <QPainterPath>
 #include <QPixmapCache>
 #include "Logger.hpp"
 #include "ColorRepository.h"
 
-// CMessageListModel
-CMessageListModel::CMessageListModel(QObject *parent)
+// HistoryMessageListModel
+HistoryMessageListModel::HistoryMessageListModel(QObject *parent)
     : QAbstractListModel(parent)
 {
 }
 
-int CMessageListModel::rowCount(const QModelIndex &parent) const
+int HistoryMessageListModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
     return m_messages.count();
 }
 
-QVariant CMessageListModel::data(const QModelIndex &index, int role) const
+QVariant HistoryMessageListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() >= m_messages.size())
         return QVariant();
 
-    const CMessage &message = m_messages.at(index.row());
+    const HistoryMessage &message = m_messages.at(index.row());
     switch (role)
     {
     case MessageRoles::ID:
@@ -40,27 +40,27 @@ QVariant CMessageListModel::data(const QModelIndex &index, int role) const
     }
 }
 
-void CMessageListModel::addMessage(const CMessage &message)
+void HistoryMessageListModel::addMessage(const HistoryMessage &message)
 {
     beginInsertRows(QModelIndex(), m_messages.count(), m_messages.count());
     m_messages.append(message);
     endInsertRows();
 }
 
-const CMessage *CMessageListModel::messageAt(int row) const
+const HistoryMessage *HistoryMessageListModel::messageAt(int row) const
 {
     if (row >= m_messages.size())
         return nullptr;
     return &m_messages.at(row);
 }
 
-void CMessageListModel::clearCachedSizes()
+void HistoryMessageListModel::clearCachedSizes()
 {
-    for (CMessage &message : m_messages)
+    for (HistoryMessage &message : m_messages)
         message.cachedItemSize = QSize();
 }
 
-void CMessageListModel::clearAllMessage()
+void HistoryMessageListModel::clearAllMessage()
 {
     if (m_messages.isEmpty())
     {
@@ -86,8 +86,8 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->setRenderHint(QPainter::Antialiasing);
 
     // 获取数据
-    QString text = index.data(CMessageListModel::Text).toString();
-    Message::Role role = static_cast<Message::Role>(index.data(CMessageListModel::Role).toInt());
+    QString text = index.data(HistoryMessageListModel::Text).toString();
+    Message::Role role = static_cast<Message::Role>(index.data(HistoryMessageListModel::Role).toInt());
 
     // 绘制清除上下文分割线
     if (role == Message::SYSTEM && text == DEFAULT_CONTENT_CLEAR_CONTEXT)
@@ -108,8 +108,8 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         return;
     }
 
-    QString createDateTime = index.data(CMessageListModel::CreatedTime).toString();
-    QString avatarFilePath = index.data(CMessageListModel::AvatarFilePath).toString();
+    QString createDateTime = index.data(HistoryMessageListModel::CreatedTime).toString();
+    QString avatarFilePath = index.data(HistoryMessageListModel::AvatarFilePath).toString();
     QString nick;
     if (role == Message::Role::USER)
         nick = "User";
@@ -166,8 +166,8 @@ QSize CMessageDelegate::sizeHint(const QStyleOptionViewItem &option,
         return QSize();
 
     // 获取message
-    CMessage *message = const_cast<CMessage *>(
-        static_cast<const CMessageListModel *>(index.model())->messageAt(index.row()));
+    HistoryMessage *message = const_cast<HistoryMessage *>(
+        static_cast<const HistoryMessageListModel *>(index.model())->messageAt(index.row()));
 
     if (!message->cachedItemSize.isEmpty())
     {
@@ -249,11 +249,11 @@ QPixmap CMessageDelegate::getRoundedAvatar(const QString &avatarFilePath, int si
     return rounded;
 }
 
-// CMessageListWidget
-CMessageListWidget::CMessageListWidget(QWidget *parent)
+// HistoryMessageListWidget
+HistoryMessageListWidget::HistoryMessageListWidget(QWidget *parent)
     : QListView(parent)
 {
-    m_model = new CMessageListModel(this);
+    m_model = new HistoryMessageListModel(this);
     m_delegate = new CMessageDelegate(this);
 
     setModel(m_model);
@@ -266,17 +266,17 @@ CMessageListWidget::CMessageListWidget(QWidget *parent)
     setVerticalScrollMode(QAbstractItemView::ScrollPerPixel); // Smooth scroll
 }
 
-void CMessageListWidget::resizeEvent(QResizeEvent *event)
+void HistoryMessageListWidget::resizeEvent(QResizeEvent *event)
 {
     QListView::resizeEvent(event);
     // 清空缓存
-    auto model = qobject_cast<CMessageListModel *>(this->model());
+    auto model = qobject_cast<HistoryMessageListModel *>(this->model());
     if (model)
         model->clearCachedSizes();
     doItemsLayout();
 }
 
-void CMessageListWidget::paintEvent(QPaintEvent *event)
+void HistoryMessageListWidget::paintEvent(QPaintEvent *event)
 {
     // 绘制列表
     QListView::paintEvent(event);
@@ -294,17 +294,17 @@ void CMessageListWidget::paintEvent(QPaintEvent *event)
     }
 }
 
-void CMessageListWidget::addMessage(const CMessage &message)
+void HistoryMessageListWidget::addMessage(const HistoryMessage &message)
 {
     m_model->addMessage(message);
 }
 
-void CMessageListWidget::clearContext()
+void HistoryMessageListWidget::clearContext()
 {
-    m_model->addMessage(CMessage(DEFAULT_CONTENT_CLEAR_CONTEXT, Message::SYSTEM, getCurrentDateTime()));
+    m_model->addMessage(HistoryMessage(DEFAULT_CONTENT_CLEAR_CONTEXT, Message::SYSTEM, getCurrentDateTime()));
 }
 
-void CMessageListWidget::clearAllMessage()
+void HistoryMessageListWidget::clearAllMessage()
 {
     m_model->clearAllMessage();
 }

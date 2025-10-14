@@ -7,7 +7,7 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTabWidget>
-#include "CMessageListWidget.h"
+#include "HistoryMessageListWidget.h"
 
 class WidgetChat;
 class PageChat : public BaseWidget
@@ -54,7 +54,7 @@ Q_SIGNALS:
 
 public:
     explicit WidgetChat(const QString &conversationUuid, QWidget *parent = nullptr);
-    void addNewMessage(CMessage message);
+    void addNewMessage(HistoryMessage message);
     const QString getConversationUuid();
     // 刷新历史消息列表展示 conversationUuid 的消息
     void refreshHistoryMessageList(const QString &conversationUuid);
@@ -68,7 +68,7 @@ private:
     QString m_conversationUuid;
 
 private:
-    CMessageListWidget *m_listWidgetMessages;
+    HistoryMessageListWidget *m_listWidgetMessages;
     QPlainTextEdit *m_plainTextEdit;
     QPushButton *m_pushButtonSend;
     QPushButton *m_pushButtonClearContext;
