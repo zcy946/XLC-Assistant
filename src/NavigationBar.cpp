@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "global.h"
 #include "ColorRepository.h"
+#include "PainterHelper.h"
 
 /**
  * NavigationItemListModel
@@ -31,45 +32,15 @@ QVariant NavigationItemListModel::data(const QModelIndex &index, int role) const
         return item.text;
     if (role == IconFilePath)
         return item.iconFilePath;
-    // if (role == Selectable)
-    //     return item.selectable;
 
     return QVariant();
 }
 
-// Qt::ItemFlags NavigationItemListModel::flags(const QModelIndex &index) const
-// {
-//     if (!index.isValid())
-//         return QAbstractListModel::flags(index);
-
-//     const NavigationItem &item = m_items.at(index.row());
-
-//     // 获取基类提供的默认标志 (通常包括 Qt::ItemIsEnabled)
-//     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-
-//     // 检查自定义的 selectable 属性
-//     if (item.selectable)
-//     {
-//         return defaultFlags | Qt::ItemIsSelectable;
-//     }
-//     else
-//     {
-//         // 移除 Qt::ItemIsSelectable 标志，同时保留 Qt::ItemIsEnabled
-//         // 这样项目虽然不可选中，但仍然是可用的（可以接收点击事件用于其他操作）
-//         return defaultFlags & ~Qt::ItemIsSelectable;
-
-//         // 完全不可交互(灰色显示，不响应点击)*/
-//         // return Qt::NoItemFlags;
-//     }
-// }
-
-// void NavigationItemListModel::addItem(const QString &text, const QString &iconFilePath, bool selectable)
 void NavigationItemListModel::addItem(const QString &text, const QString &iconFilePath)
 {
     // 插入数据前通知 View
     beginInsertRows(QModelIndex(), m_items.count(), m_items.count());
 
-    // NavigationItem item = {text, iconFilePath, selectable};
     NavigationItem item = {text, iconFilePath};
     m_items.append(item);
 
@@ -103,36 +74,12 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     /**
      * 绘制背景
      */
-    painter->setRenderHint(QPainter::Antialiasing);
     painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
     int backgroundWidth = rect.width() - MARGIN * 2;
     QRect rectBackground = QRect(rect.x() + (rect.width() - backgroundWidth) / 2, rect.y() + MARGIN, backgroundWidth, backgroundWidth);
-    painter->setPen(Qt::NoPen);
-    // 选中状态
-    if (option.state & QStyle::State_Selected)
-    {
-        // 选中且悬停
-        if (option.state & QStyle::State_MouseOver)
-        {
-            QPen pen(ColorRepository::navigationBarSelectedAndHoveredOutlineColor());
-            pen.setWidth(OUTLINE_WIDTH);
-            painter->setPen(pen);
-        }
-        painter->setBrush(QBrush(ColorRepository::navigationBarSelectedBackground()));
-        painter->drawRoundedRect(rectBackground, REAIUS, REAIUS);
-    }
-    // 悬停状态
-    else if (option.state & QStyle::State_MouseOver)
-    {
-        painter->setBrush(QBrush(ColorRepository::navigationBarHoveredBackground()));
-        painter->drawRoundedRect(rectBackground, REAIUS, REAIUS);
-    }
-    // 普通状态
-    else
-    {
-        painter->setBrush(QBrush(ColorRepository::baseBackground()));
-        painter->drawRoundedRect(rectBackground, REAIUS, REAIUS);
-    }
+
+    PainterHelper::drawBackground(painter, option, rectBackground, RADIUS, ColorRepository::windowBackground());
 
     /**
      * 获取数据
@@ -216,7 +163,7 @@ NavigationBar::NavigationBar(QWidget *parent)
 void NavigationBar::paintEvent(QPaintEvent *e)
 {
     QPainter painter(viewport());
-    painter.fillRect(rect(), ColorRepository::baseBackground());
+    painter.fillRect(rect(), ColorRepository::windowBackground());
     QListView::paintEvent(e);
 }
 

@@ -34,9 +34,9 @@ namespace ColorRepository
     QBrush progressBarContentsBrush(const QRect &rect);
     QColor progressBarTextColor(bool enabled);
 
-    QColor navigationBarHoveredBackground();
-    QColor navigationBarSelectedBackground();
-    QColor navigationBarSelectedAndHoveredOutlineColor();
+    QColor listHoveredBackground();
+    QColor listSelectedBackground();
+    QColor listSelectedAndHoveredOutlineColor();
 
     QColor historyMessageListSeparator(); // 清除上下文分割线颜色
     QColor historyMessageListTimestamp(); // 时间戳的字体颜色

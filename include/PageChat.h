@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include "HistoryMessageListWidget.h"
+#include "AgentListWidget.h"
 
 class WidgetChat;
 class PageChat : public BaseWidget
@@ -35,7 +36,7 @@ protected:
     void initLayout() override;
 
 private:
-    QListWidget *m_listWidgetAgents;
+    AgentListWidget *m_agentListWidget;
     QListWidget *m_listWidgetConversations;
     QTabWidget *m_tabWidgetSiderBar;
     WidgetChat *m_widgetChat;

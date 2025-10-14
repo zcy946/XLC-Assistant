@@ -33,12 +33,11 @@ void PageChat::initWidget()
 
 void PageChat::initItems()
 {
-    // m_listWidgetAgents
-    m_listWidgetAgents = new QListWidget(this);
-    connect(m_listWidgetAgents, &QListWidget::itemClicked, this,
-            [this](QListWidgetItem *item)
+    // m_agentListWidget
+    m_agentListWidget = new AgentListWidget(this);
+    connect(m_agentListWidget, &AgentListWidget::itemChanged,
+            [this](const QString &uuid)
             {
-                const QString &uuid = item->data(Qt::UserRole).toString();
                 XLC_LOG_TRACE("Agent selected (uuid={})", uuid);
                 refreshConversationList();
             });
@@ -61,7 +60,7 @@ void PageChat::initItems()
 
     // m_tabWidgetSiderBar
     m_tabWidgetSiderBar = new QTabWidget(this);
-    m_tabWidgetSiderBar->addTab(m_listWidgetAgents, "智能体");
+    m_tabWidgetSiderBar->addTab(m_agentListWidget, "智能体");
     m_tabWidgetSiderBar->addTab(m_listWidgetConversations, "话题");
     // 默认选中 话题
     m_tabWidgetSiderBar->setCurrentWidget(m_listWidgetConversations);
@@ -98,9 +97,9 @@ void PageChat::slot_onAgentsLoaded(bool success)
         return;
     refreshAgentList();
     // 默认选中并展示第一项
-    if (m_listWidgetAgents->currentItem() == nullptr)
+    if (!m_agentListWidget->hasAgentSelected())
     {
-        m_listWidgetAgents->setCurrentRow(0);
+        m_agentListWidget->selectFirstAgent();
     }
 }
 
@@ -109,10 +108,7 @@ void PageChat::slot_onAgentUpdated(const QString &agentUuid)
     // 更新agents列表
     refreshAgentList();
     // 更新conversations列表
-    QListWidgetItem *currentItem = m_listWidgetAgents->currentItem();
-    if (!currentItem)
-        return;
-    if (currentItem->data(Qt::UserRole).toString() == agentUuid)
+    if (m_agentListWidget->currentAgentUuid() == agentUuid)
     {
         refreshConversationList();
     }
@@ -143,14 +139,13 @@ void PageChat::slot_onMessagesLoaded(const QString &conversationUuid)
 
 void PageChat::slot_onMessageSent(const QString &message)
 {
-    QListWidgetItem *itemSelectedAgent = m_listWidgetAgents->currentItem();
-    if (!itemSelectedAgent)
+    if (!m_agentListWidget->hasAgentSelected())
     {
         XLC_LOG_WARN("Send message failed : select or create a agent");
         ToastManager::showMessage(Toast::Type::Error, "发送失败，请先选中一个agent");
         return;
     }
-    QString agentUuid = itemSelectedAgent->data(Qt::UserRole).toString();
+    QString agentUuid = m_agentListWidget->currentAgentUuid();
     std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
     if (!agent)
     {
@@ -222,29 +217,20 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
             // 选中对话列表
             m_tabWidgetSiderBar->setCurrentWidget(m_listWidgetConversations);
 
-            for (int i = 0; i < m_listWidgetAgents->count(); ++i)
+            // 选中agent
+            m_agentListWidget->setCurrentAgent(agentUuid);
+            // 查找应当选中的conversation
+            for (int j = 0; j < m_listWidgetConversations->count(); ++j)
             {
-                // 查找应当选中的agent
-                if (m_listWidgetAgents->item(i)->data(Qt::UserRole).toString() == agentUuid)
+                if (m_listWidgetConversations->item(j)->data(Qt::UserRole).toString() == conversationUuid)
                 {
-                    m_listWidgetAgents->setCurrentRow(i);
-                    // 查找应当选中的conversation
-                    for (int j = 0; i < m_listWidgetConversations->count(); ++j)
-                    {
-                        if (m_listWidgetConversations->item(j)->data(Qt::UserRole).toString() == conversationUuid)
-                        {
-                            m_listWidgetConversations->setCurrentRow(j);
-                            m_widgetChat->refreshHistoryMessageList(conversationUuid);
-                            return;
-                        }
-                    }
-                    XLC_LOG_WARN("Switch failed (conversationUuid={}): agent found but conversation not found", conversationUuid);
-                    ToastManager::showMessage(Toast::Type::Error, QString("跳转失败 (conversationUuid=%1): agent found but conversation not found").arg(conversationUuid));
-                    break;
+                    m_listWidgetConversations->setCurrentRow(j);
+                    m_widgetChat->refreshHistoryMessageList(conversationUuid);
+                    return;
                 }
             }
-            XLC_LOG_WARN("Switch failed (agentUuid={}): agent not found", agentUuid);
-            ToastManager::showMessage(Toast::Type::Error, QString("跳转失败 (agentUuid=%1): agent not found").arg(agentUuid));
+            XLC_LOG_WARN("Switch failed (conversationUuid={}): agent found but conversation not found", conversationUuid);
+            ToastManager::showMessage(Toast::Type::Error, QString("跳转失败 (conversationUuid=%1): agent found but conversation not found").arg(conversationUuid));
             break;
         }
         default:
@@ -304,14 +290,13 @@ void PageChat::slot_handleToolCalled(const QString &conversationUuid, const QStr
 
 void PageChat::slot_onBtnClickedCreateNewConversation()
 {
-    QListWidgetItem *currentSelectedAgentItem = m_listWidgetAgents->currentItem();
-    if (!currentSelectedAgentItem)
+    if (!m_agentListWidget->hasAgentSelected())
     {
         XLC_LOG_WARN("Create new conversation failed: no selected agent item");
         ToastManager::showMessage(Toast::Type::Error, QString("新建对话失败，请先选中一个对话"));
         return;
     }
-    QString agentUuid = currentSelectedAgentItem->data(Qt::UserRole).toString();
+    QString agentUuid = m_agentListWidget->currentAgentUuid();
     std::shared_ptr<Agent> agent = DataManager::getInstance()->getAgent(agentUuid);
     if (!agent)
     {
@@ -345,38 +330,22 @@ void PageChat::refreshAgentList()
 {
     // 保留当前选中agent的uuid，用于再次选中
     QString selectedAgentUuid = -1;
-    QListWidgetItem *selectedAgentItem = m_listWidgetAgents->currentItem();
-    if (selectedAgentItem && DataManager::getInstance()->getAgent(selectedAgentItem->data(Qt::UserRole).toString()))
+    if (DataManager::getInstance()->getAgent(m_agentListWidget->currentAgentUuid()))
     {
-        selectedAgentUuid = selectedAgentItem->data(Qt::UserRole).toString();
+        selectedAgentUuid = m_agentListWidget->currentAgentUuid();
     }
     // 更新listwidget
-    m_listWidgetAgents->clear();
+    m_agentListWidget->clear();
     for (auto &agent : DataManager::getInstance()->getAgents())
     {
-        QListWidgetItem *itemAgent = new QListWidgetItem();
-        itemAgent->setText(agent->name);
-        itemAgent->setData(Qt::UserRole, QVariant::fromValue(agent->uuid));
-        m_listWidgetAgents->addItem(itemAgent);
+        m_agentListWidget->addItem(agent->uuid, agent->name, agent->conversations.size());
     }
-    m_listWidgetAgents->sortItems();
+    // m_agentListWidget->sortItems();
     // 重新选中之前的item
     if (selectedAgentUuid == -1)
         return;
-    for (int i = 0; i < m_listWidgetAgents->count(); ++i)
-    {
-        QListWidgetItem *item = m_listWidgetAgents->item(i);
-        if (item)
-        {
-            if (item->data(Qt::UserRole).toString() == selectedAgentUuid)
-            {
-                m_listWidgetAgents->setCurrentItem(item);
-                return;
-            }
-        }
-    }
-    m_listWidgetAgents->setCurrentRow(0);
-    XLC_LOG_DEBUG("Agent already deleted, cannot be selected (selectedAgentUuid={})", selectedAgentUuid);
+    m_agentListWidget->selectFirstAgent();
+    m_agentListWidget->setCurrentAgent(selectedAgentUuid);
 }
 
 void PageChat::refreshConversationList()
@@ -389,13 +358,13 @@ void PageChat::refreshConversationList()
         selectedConversationUuid = selectedConversationItem->data(Qt::UserRole).toString();
     }
     // 更新对话列表
-    QListWidgetItem *selectedAgentItem = m_listWidgetAgents->currentItem();
-    if (!selectedAgentItem)
+    QString selectedAgentUuid = m_agentListWidget->currentAgentUuid();
+    if (selectedAgentUuid.isEmpty())
     {
         XLC_LOG_DEBUG("No agent selected, no need to update conversations list.");
         return;
     }
-    std::shared_ptr<Agent> currentAgent = DataManager::getInstance()->getAgent(selectedAgentItem->data(Qt::UserRole).toString());
+    std::shared_ptr<Agent> currentAgent = DataManager::getInstance()->getAgent(selectedAgentUuid);
     if (!currentAgent)
         return;
     m_listWidgetConversations->clear();
@@ -426,7 +395,6 @@ void PageChat::refreshConversationList()
         }
     }
     m_listWidgetConversations->setCurrentRow(0);
-    XLC_LOG_DEBUG("Conversation has been deleted and cannot be selected; first item selected by default (selectedConversationUuid={})", selectedConversationUuid);
 }
 
 /**

@@ -147,17 +147,17 @@ QColor ColorRepository::progressBarTextColor(bool enabled)
     return textColor;
 }
 
-QColor ColorRepository::navigationBarHoveredBackground()
+QColor ColorRepository::listHoveredBackground()
 {
     return QColor("#E5F3FF");
 }
 
-QColor ColorRepository::navigationBarSelectedBackground()
+QColor ColorRepository::listSelectedBackground()
 {
     return QColor("#CCE8FF");
 }
 
-QColor ColorRepository::navigationBarSelectedAndHoveredOutlineColor()
+QColor ColorRepository::listSelectedAndHoveredOutlineColor()
 {
     return QColor("#99D1FF");
 }

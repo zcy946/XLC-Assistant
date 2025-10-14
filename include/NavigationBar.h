@@ -10,7 +10,6 @@ struct NavigationItem
 {
     QString text;
     QString iconFilePath;
-    // bool selectable;
 };
 
 class NavigationItemListModel : public QAbstractListModel
@@ -44,9 +43,8 @@ public:
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private:
-    const int REAIUS = 5;                                  // item 圆角边框半径
+    const int RADIUS = 5;                                  // item 圆角边框半径
     const int MARGIN = 5;                                  // item 外边距
-    const int OUTLINE_WIDTH = 2;                           // item 轮廓宽度
     const int PADDING = 5;                                 // item 内边距
     const int SPACING_ICON_TO_TEXT = 2;                    // item 图标(包含背景)到文本之间的距离
     const QString DEFAULT_ICON = "://image/fire-line.svg"; // 图标加载失败时的默认图标
