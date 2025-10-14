@@ -46,10 +46,12 @@ void PageChat::initItems()
     connect(m_listWidgetConversations, &QListWidget::currentItemChanged, this,
             [this](QListWidgetItem *current, QListWidgetItem *previous)
             {
-                if (!current)
-                    return;
-                const QString &uuid = current->data(Qt::UserRole).toString();
-                XLC_LOG_TRACE("Conversation selected (uuid={})", uuid);
+                QString uuid;
+                if (current)
+                {
+                    uuid = current->data(Qt::UserRole).toString();
+                    XLC_LOG_TRACE("Conversation selected (uuid={})", uuid);
+                }
                 // 刷新WidgetChat
                 m_widgetChat->refreshHistoryMessageList(uuid);
             });
@@ -380,17 +382,18 @@ void PageChat::refreshConversationList()
     }
     m_listWidgetConversations->sortItems();
     // 重新选中之前的item
-    if (selectedConversationUuid == -1)
-        return;
-    for (int i = 0; i < m_listWidgetConversations->count(); ++i)
+    if (selectedConversationUuid != -1)
     {
-        QListWidgetItem *item = m_listWidgetConversations->item(i);
-        if (item)
+        for (int i = 0; i < m_listWidgetConversations->count(); ++i)
         {
-            if (item->data(Qt::UserRole).toString() == selectedConversationUuid)
+            QListWidgetItem *item = m_listWidgetConversations->item(i);
+            if (item)
             {
-                m_listWidgetConversations->setCurrentItem(item);
-                return;
+                if (item->data(Qt::UserRole).toString() == selectedConversationUuid)
+                {
+                    m_listWidgetConversations->setCurrentItem(item);
+                    return;
+                }
             }
         }
     }
@@ -506,10 +509,11 @@ const QString WidgetChat::getConversationUuid()
 
 void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
 {
+    m_historyMessageList->clearAllMessage();
     if (conversationUuid.trimmed().isEmpty())
     {
-        XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", conversationUuid);
-        ToastManager::showMessage(Toast::Type::Error, QString("刷新历史消息列表失败 (conversationUuid=%1): empty uuid").arg(conversationUuid));
+        // XLC_LOG_WARN("Refresh history message list failed (conversationUuid={}): empty uuid", conversationUuid);
+        // ToastManager::showMessage(Toast::Type::Error, QString("刷新历史消息列表失败 (conversationUuid=%1): empty uuid").arg(conversationUuid));
         return;
     }
     std::shared_ptr<Conversation> conversation = DataManager::getInstance()->getConversation(conversationUuid);
