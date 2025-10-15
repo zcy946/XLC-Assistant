@@ -48,68 +48,68 @@ QColor ColorRepository::baseBackground()
 QColor ColorRepository::text()
 {
     // gray / dark gray
-    return s_darkMode ? QColor("#A5A5A5") : QColor("#252525");
+    return s_darkMode ? QColor("#A5A5A5") : QColor("#000000");
+}
+
+QColor ColorRepository::shadowColor()
+{
+    QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#D1D1D1");
+    colorShadow.setAlpha(255 - 2);
+    return colorShadow;
+}
+
+QColor ColorRepository::disabledTextColor()
+{
+    QColor colorDisabledText = text();
+    colorDisabledText.setAlphaF(0.3);
+    return colorDisabledText;
 }
 
 QColor ColorRepository::pressedTextColor()
 {
-    // medium gray
-    return QColor("#656565");
+    QColor colorPressedText = text();
+    colorPressedText.setAlphaF(0.6);
+    return colorPressedText;
 }
 
 QColor ColorRepository::hoverTextColor()
 {
-    // light gray
-    return QColor("#DDDDDD");
-}
-
-QColor ColorRepository::pressedOutlineColor()
-{
-    return QColor("#322D35");
+    return text();
 }
 
 QColor ColorRepository::buttonOutlineColor()
 {
-    return s_darkMode ? QColor("#59515F") : QColor("#9F95A3");
+    return s_darkMode ? QColor("#59515F") : QColor("#D1D1D1");
 }
 
-QBrush ColorRepository::hoverOutlineBrush(const QRect &rect)
+QColor ColorRepository::buttonPressedOutlineColor()
 {
-    // Instructions from the designer:
-    // "Draw line passing by center of rectangle (+4% to the right)
-    // and that is perpendicular to the topleft-bottomright diagonal.
-    // This line intersects the top and bottom in two points, which are the gradient stops"
+    return QColor("#B3B3B3");
+}
+QColor ColorRepository::buttonHoverOutlineColor()
+{
+    return QColor("#C7C7C7");
+}
 
-    const qreal w = rect.width();
-    const qreal h = rect.height();
-    const qreal xmid = w * 0.54;
-    const qreal xoffset = (h * h) / (2 * w); // Proportionality: xoffset / (h/2) = h / w
-    const qreal x0 = xmid - xoffset;
-    const qreal x1 = xmid + xoffset;
-
-    QLinearGradient gradient(x0, h, x1, 0);
-    gradient.setColorAt(0.0, QColor("#53949F"));
-    gradient.setColorAt(1.0, QColor("#755579"));
-    return QBrush(gradient);
+QColor ColorRepository::buttonBackground()
+{
+    return s_darkMode ? QColor("#A7211F22") : QColor("#FDFDFD");
 }
 
 QColor ColorRepository::buttonPressedBackground()
 {
-    return s_darkMode ? QColor("#171717") : QColor("#F8F7F8");
+    return s_darkMode ? QColor("#171717") : QColor("#F3F3F3");
 }
 
 QColor ColorRepository::buttonHoveredBackground()
 {
     QColor color = buttonPressedBackground();
-    // Keep setAlphaF, as the base color is opaque
-    color.setAlphaF(0.2);
     return color;
 }
 
-QColor ColorRepository::buttonBackground()
+QColor ColorRepository::buttonDisableBackground()
 {
-    // QColor(R, G, B, A) -> QColor("#AARRGGBB"). 0xa7 is the alpha component.
-    return s_darkMode ? QColor("#A7211F22") : QColor("#F5F4F5") /* TODO with opacity = ? */;
+    return s_darkMode ? QColor("#A7211F22") : QColor("#F5F5F5");
 }
 
 QBrush ColorRepository::progressBarOutlineBrush(const QRect &rect)

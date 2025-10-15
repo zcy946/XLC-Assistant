@@ -8,6 +8,7 @@
 #endif
 #include "DataManager.h"
 #include "ToastManager.h"
+#include "XlcStyle.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +34,9 @@ int main(int argc, char *argv[])
 
     // 注册自定义类型
     qRegisterMetaType<Toast::Type>("Toast::Type");
+
+    // 设置自定义样式
+    app.setStyle(new XlcStyle());
 
     // 设置全局字体
     app.setFont(getGlobalFont());

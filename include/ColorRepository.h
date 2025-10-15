@@ -18,16 +18,20 @@ namespace ColorRepository
     QColor baseBackground();
     QColor text();
 
+    QColor shadowColor();
+
+    QColor disabledTextColor();
     QColor pressedTextColor();
     QColor hoverTextColor();
 
-    QColor pressedOutlineColor();
-    QBrush hoverOutlineBrush(const QRect &rect);
+    QColor buttonPressedOutlineColor();
+    QColor buttonHoverOutlineColor();
     QColor buttonOutlineColor();
 
+    QColor buttonBackground();
     QColor buttonPressedBackground();
     QColor buttonHoveredBackground();
-    QColor buttonBackground();
+    QColor buttonDisableBackground();
 
     QBrush progressBarOutlineBrush(const QRect &rect);
     QBrush progressBarOutlineFadingBrush(const QRect &rect);
