@@ -10,6 +10,7 @@
 #include "ToastManager.h"
 #include "XlcStyle.h"
 #include "ColorRepository.h"
+#include <QScreen>
 
 int main(int argc, char *argv[])
 {
@@ -31,6 +32,8 @@ int main(int argc, char *argv[])
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 #endif
 
+    qputenv("QT_LOGGING_RULES", "qt.qpa.backingstore.debug=true");
+
     QApplication app(argc, argv);
 
     // 注册自定义类型
@@ -44,7 +47,18 @@ int main(int argc, char *argv[])
     app.setFont(getGlobalFont());
 
     MainWindow w;
-    w.resize(1200, 700);
+    // w.resize(1200, 700);
+    // 获取屏幕可用区域
+    QRect screenGeometry = QGuiApplication::primaryScreen()->availableGeometry();
+
+    // 设置合理的窗口尺寸约束
+    w.setMinimumSize(400, 300);
+    w.setMaximumSize(screenGeometry.width(), screenGeometry.height());
+
+    // 确保初始尺寸合理
+    int initWidth = qMin(1200, screenGeometry.width() - 100);
+    int initHeight = qMin(700, screenGeometry.height() - 100);
+    w.resize(initWidth, initHeight);
     w.show();
 
     app.exec();

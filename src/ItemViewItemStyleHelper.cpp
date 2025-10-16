@@ -1,8 +1,28 @@
 #include "ItemViewItemStyleHelper.h"
 #include "ColorRepository.h"
+#include <QDebug>
 
 void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
+    // 添加有效性检查
+    if (!option || !painter || !option->rect.isValid())
+    {
+        qCritical() << "Null pointer in drawItemViewItemShape!";
+        return;
+    }
+    qDebug() << "Drawing item view item:"
+             << "rect=" << option->rect
+             << "valid=" << option->rect.isValid()
+             << "widget=" << (widget ? widget->objectName() : "null");
+
+    // 检查尺寸是否合理（防止溢出）
+    if (option->rect.width() > 10000 || option->rect.height() > 10000 ||
+        option->rect.width() <= 0 || option->rect.height() <= 0)
+    {
+        qWarning() << "Invalid rect in drawItemViewItemShape:" << option->rect;
+        return;
+    }
+
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
@@ -12,6 +32,11 @@ void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *
 
 void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
+    if (!option || !painter || !option->rect.isValid())
+    {
+        return;
+    }
+
     painter->save();
     QColor textColor;
     if (option->state & QStyle::State_Sunken)
@@ -38,6 +63,11 @@ void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPain
 
 void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
+    if (!option || !painter || !option->rect.isValid())
+    {
+        return;
+    }
+
     if (option->state & QStyle::State_Selected)
     {
         painter->save();
@@ -57,7 +87,22 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
 QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *option, QSize contentsSize, const QWidget *widget) const
 {
     Q_UNUSED(widget)
-    QFontMetrics fm(option->font);
+
+    if (!option)
+    {
+        qWarning() << "ItemViewItemStyleHelper::sizeFromContents: null option";
+        return QSize(100, 30); // 返回合理的默认值
+    }
+
+    // 验证字体有效性
+    QFont font = option->font;
+    if (font.pixelSize() <= 0 && font.pointSize() <= 0)
+    {
+        qWarning() << "ItemViewItemStyleHelper::sizeFromContents: invalid font";
+        font = QFont(); // 使用默认字体
+    }
+
+    QFontMetrics fm(font);
     int textWidth = fm.horizontalAdvance(option->text);
     int widthTotal = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT +
                      textWidth + PADDING_HORIZONTAL;
