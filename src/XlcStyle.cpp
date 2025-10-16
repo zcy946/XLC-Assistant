@@ -5,7 +5,6 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QPointer>
-#include <QDebug>
 
 XlcStyle::XlcStyle()
     : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
@@ -48,34 +47,16 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
             m_pushButtonStyleHelper->drawText(optionButton, painter, widget);
         }
         return;
-
-    case CE_RadioButton: // 仅调用 PE_IndicatorRadioButton、CE_RadioButtonLabel（及焦点框）
-    case CE_RadioButtonLabel:
-    case CE_CheckBox: // 仅调用 PE_IndicatorCheckBox、CE_CheckBoxLabel（及焦点框）
-    case CE_CheckBoxLabel:
-        QProxyStyle::drawControl(element, option, painter, widget);
-        return;
-
-    case CE_ProgressBar: // 主入口点
-        // 调用 CE_ProgressBarGroove、CE_ProgressBarContents 和 CE_ProgressBarLabel
-        QProxyStyle::drawControl(element, option, painter, widget);
-        return;
-    case CE_ProgressBarGroove:
-        break;
-    case CE_ProgressBarContents:
-        break;
-    case CE_ProgressBarLabel:
-        break;
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
             m_itemViewItemStyleHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
-            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, widget);
+            QRect rectTextOriginal = QProxyStyle::subElementRect(QStyle::SE_ItemViewItemText, option, widget);
+            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, rectTextOriginal);
             // 绘制(选中)标记
             m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
         }
         break;
-
     default:
         QProxyStyle::drawControl(element, option, painter, widget);
     }
@@ -99,64 +80,23 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
 
 int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
 {
-    // switch (metric)
-    // {
-    // case PM_ButtonMargin:
-    //     if (qstyleoption_cast<const QStyleOptionButton *>(option))
-    //     {
-    //         return m_pushButtonStyleHelper->padding();
-    //     }
-    //     return QProxyStyle::pixelMetric(metric, option, widget);
-    // case PM_ScrollBarExtent:
-    //     return m_scrollBarStyleHelper->scrollBarExtent();
-    // case PM_IndicatorHeight: // checkboxes
-    // case PM_IndicatorWidth:  // checkboxes
-    //     break;
-    // case PM_ButtonShiftHorizontal:
-    // case PM_ButtonShiftVertical:
-    //     // 按钮按下时的水平和垂直内容偏移
-    //     return 0; // 不偏移
-    // default:
-    //     return QProxyStyle::pixelMetric(metric, option, widget);
-    // }
-    int result;
-
     switch (metric)
     {
     case PM_ButtonMargin:
         if (qstyleoption_cast<const QStyleOptionButton *>(option))
         {
-            result = m_pushButtonStyleHelper->padding();
+            return m_pushButtonStyleHelper->padding();
         }
-        else
-        {
-            result = QProxyStyle::pixelMetric(metric, option, widget);
-        }
-        break;
-
+        return QProxyStyle::pixelMetric(metric, option, widget);
     case PM_ScrollBarExtent:
-        result = m_scrollBarStyleHelper->scrollBarExtent();
-        break;
-
+        return m_scrollBarStyleHelper->scrollBarExtent();
     case PM_ButtonShiftHorizontal:
     case PM_ButtonShiftVertical:
-        return 0;
-
+        // 按钮按下时的水平和垂直内容偏移
+        return 0; // 不偏移
     default:
-        result = QProxyStyle::pixelMetric(metric, option, widget);
-        break;
+        return QProxyStyle::pixelMetric(metric, option, widget);
     }
-
-    // 验证返回值合理性
-    if (result < 0 || result > 1000)
-    {
-        qWarning() << "XlcStyle::pixelMetric: unreasonable value"
-                   << "metric=" << metric
-                   << "result=" << result;
-        return qBound(0, result, 1000);
-    }
-
-    return result;
 }
 
 int XlcStyle::styleHint(StyleHint stylehint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
@@ -174,102 +114,35 @@ int XlcStyle::styleHint(StyleHint stylehint, const QStyleOption *option, const Q
 
 QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &contentsSize, const QWidget *widget) const
 {
-    // switch (type)
-    // {
-    // case CT_PushButton:
-    //     if (const auto *buttonOption = qstyleoption_cast<const QStyleOptionButton *>(option))
-    //     {
-    //         return m_pushButtonStyleHelper->sizeFromContents(buttonOption, contentsSize, widget);
-    //     }
-    //     break;
-    // case CT_RadioButton:
-    // case CT_CheckBox:
-    //     return QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-    // case CT_ItemViewItem:
-    //     if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
-    //     {
-    //         return m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, contentsSize, widget);
-    //     }
-    //     break;
-    // default:
-    //     break;
-    // }
-    // return QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-
-    QSize result;
-
     switch (type)
     {
     case CT_PushButton:
         if (const auto *buttonOption = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
-            result = m_pushButtonStyleHelper->sizeFromContents(buttonOption, contentsSize, widget);
-        }
-        else
-        {
-            result = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
+            return m_pushButtonStyleHelper->sizeFromContents(buttonOption, contentsSize, widget);
         }
         break;
-
-    case CT_RadioButton:
-    case CT_CheckBox:
-        result = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-        break;
-
     case CT_ItemViewItem:
-        if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
-        {
-            result = m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, contentsSize, widget);
+        { 
+            QSize itemSize = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
+            if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+            {
+                // 让 helper 在父类尺寸基础上调整
+                QSize sizeOriginal = QProxyStyle::sizeFromContents(type, optionItemViewItem, contentsSize, widget);
+                itemSize = m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, sizeOriginal, widget);
+            }
+            return itemSize;
         }
-        else
-        {
-            result = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-        }
-        break;
-
     default:
-        result = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
-
-    // 最终防护：确保返回的尺寸始终合理
-    if (!result.isValid() ||
-        result.width() < 0 || result.width() > 10000 ||
-        result.height() < 0 || result.height() > 10000)
-    {
-        qCritical() << "XlcStyle::sizeFromContents: Invalid size returned!"
-                    << "type=" << type
-                    << "result=" << result
-                    << "contentsSize=" << contentsSize
-                    << "widget=" << (widget ? widget->objectName() : "null");
-
-        // 根据类型返回合理的默认值
-        switch (type)
-        {
-        case CT_PushButton:
-            return QSize(96, 32);
-        case CT_ItemViewItem:
-            return QSize(100, 30);
-        default:
-            return contentsSize.isValid() ? contentsSize : QSize(50, 20);
-        }
-    }
-
-    return result;
+    return QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
 }
 
 QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option, const QWidget *widget) const
 {
     switch (subElement)
     {
-    case SE_ProgressBarGroove:
-    case SE_ProgressBarContents:
-    case SE_ProgressBarLabel:
-        // if (const auto *progressBarOption = qstyleoption_cast<const QStyleOptionProgressBar *>(option))
-        // {
-        //     return mProgressBarStyleHelper->subElementRect(subElement, progressBarOption, widget);
-        // }
-        break;
     default:
         break;
     }
@@ -287,19 +160,6 @@ void XlcStyle::polish(QWidget *w)
     {
         w->setAttribute(Qt::WA_Hover);
     }
-    // // 为QPushButton绘制阴影
-    // if (QPushButton *button = qobject_cast<QPushButton *>(w))
-    // {
-    //     if (!button->isVisible())
-    //     {
-    //         QTimer::singleShot(0, button, [this, button]()
-    //                            { m_pushButtonStyleHelper->drawShadow(button); });
-    //     }
-    //     else
-    //     {
-    //         m_pushButtonStyleHelper->drawShadow(button);
-    //     }
-    // }
     // 修复阴影绘制的时序问题
     if (QPushButton *button = qobject_cast<QPushButton *>(w))
     {

@@ -3,26 +3,9 @@
 #include <QPainterPath>
 #include "ColorRepository.h"
 #include <QtMath>
-#include <QDebug>
 
 void ScrollBarStyleHelper::drawScrollBarShapes(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QStyle *style)
 {
-    if (!option || !painter || !option->rect.isValid())
-    {
-        qCritical() << "Null pointer in drawScrollBarShapes!";
-        return;
-    }
-    qDebug() << "Drawing item view item:"
-             << "rect=" << option->rect
-             << "valid=" << option->rect.isValid()
-             << "widget=" << (widget ? widget->objectName() : "null");
-
-    if (option->rect.width() > 10000 || option->rect.height() > 10000)
-    {
-        qWarning() << "Invalid rect in drawScrollBarShapes:" << option->rect;
-        return;
-    }
-
     // 绘制背景
     drawBackground(option, painter, widget);
     // 绘制滑槽

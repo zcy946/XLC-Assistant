@@ -1,42 +1,19 @@
 #include "ItemViewItemStyleHelper.h"
 #include "ColorRepository.h"
-#include <QDebug>
 
 void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
-    // 添加有效性检查
-    if (!option || !painter || !option->rect.isValid())
-    {
-        qCritical() << "Null pointer in drawItemViewItemShape!";
-        return;
-    }
-    qDebug() << "Drawing item view item:"
-             << "rect=" << option->rect
-             << "valid=" << option->rect.isValid()
-             << "widget=" << (widget ? widget->objectName() : "null");
-
-    // 检查尺寸是否合理（防止溢出）
-    if (option->rect.width() > 10000 || option->rect.height() > 10000 ||
-        option->rect.width() <= 0 || option->rect.height() <= 0)
-    {
-        qWarning() << "Invalid rect in drawItemViewItemShape:" << option->rect;
-        return;
-    }
-
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
-    painter->drawRoundedRect(option->rect.adjusted(0, SPACING_TOP, 0, 0), RADIUS, RADIUS);
+    painter->drawRoundedRect(option->rect.adjusted(0, SPACING_TOP, 0, -SPACING_TOP), RADIUS, RADIUS);
     painter->restore();
 }
 
-void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
+void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPainter *painter, QRect rectTextOriginal)
 {
-    if (!option || !painter || !option->rect.isValid())
-    {
+    if (option->text.isEmpty())
         return;
-    }
-
     painter->save();
     QColor textColor;
     if (option->state & QStyle::State_Sunken)
@@ -53,10 +30,7 @@ void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPain
     }
     painter->setPen(QColor(textColor));
     QFontMetrics fm(option->font);
-    QRectF rectText = option->rect.adjusted(MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT,
-                                            PADDING_VERTICAL + SPACING_TOP,
-                                            -PADDING_HORIZONTAL,
-                                            -PADDING_VERTICAL);
+    QRectF rectText = rectTextOriginal.adjusted(MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT, SPACING_TOP + PADDING_VERTICAL, 0, -SPACING_TOP - PADDING_VERTICAL);
     painter->drawText(rectText, option->text);
     painter->restore();
 }
@@ -84,33 +58,12 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
     }
 }
 
-QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *option, QSize contentsSize, const QWidget *widget) const
+QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *option, QSize sizeOriginal, const QWidget *widget) const
 {
     Q_UNUSED(widget)
-
-    if (!option)
-    {
-        qWarning() << "ItemViewItemStyleHelper::sizeFromContents: null option";
-        return QSize(100, 30); // 返回合理的默认值
-    }
-
-    // 验证字体有效性
-    QFont font = option->font;
-    if (font.pixelSize() <= 0 && font.pointSize() <= 0)
-    {
-        qWarning() << "ItemViewItemStyleHelper::sizeFromContents: invalid font";
-        font = QFont(); // 使用默认字体
-    }
-
-    QFontMetrics fm(font);
-    int textWidth = fm.horizontalAdvance(option->text);
-    int widthTotal = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT +
-                     textWidth + PADDING_HORIZONTAL;
-    int finalWidth = qMax(widthTotal, contentsSize.width());
-    int heightText = fm.height();
-    int heightTotal = PADDING_VERTICAL + heightText + PADDING_VERTICAL;
-    int finalHeight = qMax(SPACING_TOP + heightTotal, contentsSize.height());
-    return QSize(finalWidth, finalHeight);
+    int width = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT + sizeOriginal.width();
+    int height = SPACING_TOP + + PADDING_VERTICAL + sizeOriginal.height() + PADDING_VERTICAL;
+    return QSize(width, height);
 }
 
 void ItemViewItemStyleHelper::setupPainterForShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)

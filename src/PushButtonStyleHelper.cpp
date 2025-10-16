@@ -1,27 +1,9 @@
 #include "PushButtonStyleHelper.h"
 #include "ColorRepository.h"
 #include <QGraphicsDropShadowEffect>
-#include <QDebug>
 
 void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
-    if (!option || !painter || !option->rect.isValid())
-    {
-        qCritical() << "Null pointer in drawButtonShape!";
-        return;
-    }
-    qDebug() << "Drawing item view item:"
-             << "rect=" << option->rect
-             << "valid=" << option->rect.isValid()
-             << "widget=" << (widget ? widget->objectName() : "null");
-
-    if (option->rect.width() > 10000 || option->rect.height() > 10000 ||
-        option->rect.width() <= 0 || option->rect.height() <= 0)
-    {
-        qWarning() << "Invalid rect in drawButtonShape:" << option->rect;
-        return;
-    }
-
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
@@ -86,24 +68,8 @@ QSize PushButtonStyleHelper::sizeFromContents(const QStyleOptionButton *option, 
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)
-    // return QSize(qMax(MIN_WIDTH, contentsSize.width() + PADDING_HORIZONTAL * 2 + FRAME_WIDTH * 2), contentsSize.height() + PADDING_VERTICAL * 2 + FRAME_WIDTH * 2);
-    // 验证输入尺寸
-    if (!contentsSize.isValid() ||
-        contentsSize.width() < 0 || contentsSize.width() > 10000 ||
-        contentsSize.height() < 0 || contentsSize.height() > 10000)
-    {
-        qWarning() << "PushButtonStyleHelper::sizeFromContents: invalid contentsSize:" << contentsSize;
-        contentsSize = QSize(80, 24); // 使用合理默认值
-    }
-
-    int width = qMax(MIN_WIDTH, contentsSize.width() + PADDING_HORIZONTAL * 2 + FRAME_WIDTH * 2);
-    int height = contentsSize.height() + PADDING_VERTICAL * 2 + FRAME_WIDTH * 2;
-
-    // 限制最终尺寸
-    width = qBound(MIN_WIDTH, width, 10000);
-    height = qBound(20, height, 10000);
-
-    return QSize(width, height);
+    return QSize(qMax(MIN_WIDTH, contentsSize.width() + PADDING_HORIZONTAL * 2 + FRAME_WIDTH * 2),
+                 contentsSize.height() + PADDING_VERTICAL * 2 + FRAME_WIDTH * 2);
 }
 
 int PushButtonStyleHelper::padding()

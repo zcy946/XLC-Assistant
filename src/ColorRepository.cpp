@@ -122,7 +122,7 @@ QColor ColorRepository::itemViewItemMarkColor()
 
 QColor ColorRepository::itemViewItemBackgroundColor()
 {
-    return s_darkMode ? QColor("#292929") : QColor("#FFFFFF");
+    return baseBackground();
 }
 
 QColor ColorRepository::itemViewItemSelectedBackgroundColor()
