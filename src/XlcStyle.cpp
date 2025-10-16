@@ -4,6 +4,7 @@
 #include <QAbstractItemView>
 #include <QScrollBar>
 #include <QTimer>
+#include <QPointer>
 
 XlcStyle::XlcStyle()
     : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
@@ -186,13 +187,35 @@ void XlcStyle::polish(QWidget *w)
     {
         w->setAttribute(Qt::WA_Hover);
     }
-    // 为QPushButton绘制阴影
+    // // 为QPushButton绘制阴影
+    // if (QPushButton *button = qobject_cast<QPushButton *>(w))
+    // {
+    //     if (!button->isVisible())
+    //     {
+    //         QTimer::singleShot(0, button, [this, button]()
+    //                            { m_pushButtonStyleHelper->drawShadow(button); });
+    //     }
+    //     else
+    //     {
+    //         m_pushButtonStyleHelper->drawShadow(button);
+    //     }
+    // }
+    // 修复阴影绘制的时序问题
     if (QPushButton *button = qobject_cast<QPushButton *>(w))
     {
         if (!button->isVisible())
         {
-            QTimer::singleShot(0, button, [this, button]()
-                               { m_pushButtonStyleHelper->drawShadow(button); });
+            // 使用 QPointer 防止悬空指针
+            QPointer<QPushButton> safeButton(button);
+            QTimer::singleShot(0, this,
+                               [this, safeButton]()
+                               {
+                                   if (safeButton)
+                                   { 
+                                    // 检查指针是否仍然有效
+                                       m_pushButtonStyleHelper->drawShadow(safeButton);
+                                   }
+                               });
         }
         else
         {

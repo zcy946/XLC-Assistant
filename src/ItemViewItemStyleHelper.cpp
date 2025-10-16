@@ -1,6 +1,5 @@
 #include "ItemViewItemStyleHelper.h"
 #include "ColorRepository.h"
-#include <QDebug>
 
 void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
@@ -33,8 +32,7 @@ void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPain
                                             PADDING_VERTICAL + SPACING_TOP,
                                             -PADDING_HORIZONTAL,
                                             -PADDING_VERTICAL);
-    QString elidedText = fm.elidedText(option->text, Qt::ElideRight, rectText.width());
-    painter->drawText(rectText, elidedText);
+    painter->drawText(rectText, option->text);
     painter->restore();
 }
 
@@ -58,17 +56,16 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
 
 QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *option, QSize contentsSize, const QWidget *widget) const
 {
-    Q_UNUSED(option)
     Q_UNUSED(widget)
     QFontMetrics fm(option->font);
-    // NOTE 这种方法返回的宽度会使 `ScrollBarAsNeeded` 永久失效
-    QString ellipsis = QChar(0x2026); // ( Unicode 省略号)qt用于表示省略字符的代码
-    int minContentTextWidth = fm.horizontalAdvance(ellipsis);
-    int widthTotal = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT + minContentTextWidth + PADDING_HORIZONTAL;
-    // int widthTotal = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT + fm.horizontalAdvance(option->text) + PADDING_HORIZONTAL; // 这种方法没问题
+    int textWidth = fm.horizontalAdvance(option->text);
+    int widthTotal = MARK_OFFSET_X + MARK_WIDTH + SPACING_MARK_TO_TEXT +
+                     textWidth + PADDING_HORIZONTAL;
+    int finalWidth = qMax(widthTotal, contentsSize.width());
     int heightText = fm.height();
     int heightTotal = PADDING_VERTICAL + heightText + PADDING_VERTICAL;
-    return QSize(widthTotal, SPACING_TOP + heightTotal);
+    int finalHeight = qMax(SPACING_TOP + heightTotal, contentsSize.height());
+    return QSize(finalWidth, finalHeight);
 }
 
 void ItemViewItemStyleHelper::setupPainterForShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)

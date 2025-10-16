@@ -18,6 +18,7 @@ void ScrollBarStyleHelper::drawScrollBarShapes(const QStyleOptionSlider *option,
 
 void ScrollBarStyleHelper::drawBackground(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget)
 {
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);

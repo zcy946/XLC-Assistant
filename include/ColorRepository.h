@@ -18,7 +18,7 @@ namespace ColorRepository
 
     // 窗口背景颜色(例如: QWidget)
     QColor windowBackground();
-    // 控件内背景颜色(例如: QListView)
+    // 通用控件背景颜色(例如: QListView)
     QColor baseBackground();
     QColor text();
 
