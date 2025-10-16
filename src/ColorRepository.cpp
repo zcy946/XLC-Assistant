@@ -5,6 +5,7 @@
 #include <QToolTip>
 
 static bool s_darkMode = false;
+static QColor s_colorPrimaryNormal = "#0067C0";
 
 QPalette ColorRepository::standardPalette()
 {
@@ -32,17 +33,21 @@ void ColorRepository::setDarkMode(bool dark)
     qApp->setPalette(standardPalette());
 }
 
+QColor ColorRepository::primaryNormal()
+{
+    return s_colorPrimaryNormal;
+}
+
 QColor ColorRepository::windowBackground()
 {
-    // dark blue / light gray
-    return s_darkMode ? QColor("#182129") : QColor("#EFF0F1");
-    // return s_darkMode ? QColor("#000000ff") : QColor("#EFF0F1");
+    // 窗口背景颜色(例如: QWidget)
+    return s_darkMode ? QColor("#202020") : QColor("#F3F3F3");
 }
 
 QColor ColorRepository::baseBackground()
 {
-    // almost black / almost white
-    return s_darkMode ? QColor("#0F0F0F") : QColor("#FBFBFB");
+    // 空间内背景颜色(例如: QListView)
+    return s_darkMode ? QColor("#292929") : QColor("#FDFDFD");
 }
 
 QColor ColorRepository::text()
@@ -110,6 +115,31 @@ QColor ColorRepository::buttonHoveredBackground()
 QColor ColorRepository::buttonDisableBackground()
 {
     return s_darkMode ? QColor("#A7211F22") : QColor("#F5F5F5");
+}
+
+QColor ColorRepository::itemViewItemMarkColor()
+{
+    return primaryNormal();
+}
+
+QColor ColorRepository::itemViewItemBackgroundColor()
+{
+    return s_darkMode ? QColor("#292929") : QColor("#FFFFFF");
+}
+
+QColor ColorRepository::itemViewItemSelectedBackgroundColor()
+{
+    return s_darkMode ? QColor("#3B3B3B") : QColor("#F1F1F1");
+}
+
+QColor ColorRepository::itemViewItemHoveredBackgroundColor()
+{
+    return itemViewItemSelectedBackgroundColor();
+}
+
+QColor ColorRepository::itemViewItemSelectedAndHoveredBackgroundColor()
+{
+    return s_darkMode ? QColor("#393939") : QColor("#F5F5F5");
 }
 
 QBrush ColorRepository::progressBarOutlineBrush(const QRect &rect)

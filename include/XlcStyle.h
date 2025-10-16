@@ -2,10 +2,11 @@
 #define XLCSTYLE_H
 
 #include <QProxyStyle>
-#include "PushButtonStyleHelper.h"
 #include <memory>
+#include "PushButtonStyleHelper.h"
+#include "ItemViewItemStyleHelper.h"
 
-class XlcStyle : public QCommonStyle
+class XlcStyle : public QProxyStyle
 {
 public:
     XlcStyle();
@@ -21,6 +22,7 @@ public:
 
 private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;
+    std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemHelper;
 };
 
 #endif // XLCSTYLE_H

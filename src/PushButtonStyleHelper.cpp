@@ -2,35 +2,6 @@
 #include "ColorRepository.h"
 #include <QGraphicsDropShadowEffect>
 
-void PushButtonStyleHelper::setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
-{
-    Q_UNUSED(widget)
-    // 禁用
-    if (!(option->state & QStyle::State_Enabled))
-    {
-        painter->setPen(ColorRepository::buttonOutlineColor());
-        painter->setBrush(ColorRepository::buttonBackground());
-    }
-    // 按下
-    else if (option->state & QStyle::State_Sunken)
-    {
-        painter->setPen(ColorRepository::buttonPressedOutlineColor());
-        painter->setBrush(ColorRepository::buttonPressedBackground());
-    }
-    // 悬停
-    else if (option->state & QStyle::State_MouseOver)
-    {
-        painter->setPen(QPen(ColorRepository::buttonHoverOutlineColor(), FRAME_WIDTH));
-        painter->setBrush(ColorRepository::buttonHoveredBackground());
-    }
-    // 默认
-    else
-    {
-        painter->setPen(ColorRepository::buttonOutlineColor());
-        painter->setBrush(ColorRepository::buttonBackground());
-    }
-}
-
 void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
     painter->save();
@@ -98,4 +69,33 @@ QSize PushButtonStyleHelper::sizeFromContents(const QStyleOptionButton *option, 
 int PushButtonStyleHelper::padding()
 {
     return qMax(PADDING_HORIZONTAL, PADDING_VERTICAL);
+}
+
+void PushButtonStyleHelper::setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
+{
+    Q_UNUSED(widget)
+    // 禁用
+    if (!(option->state & QStyle::State_Enabled))
+    {
+        painter->setPen(ColorRepository::buttonOutlineColor());
+        painter->setBrush(ColorRepository::buttonBackground());
+    }
+    // 按下
+    else if (option->state & QStyle::State_Sunken)
+    {
+        painter->setPen(ColorRepository::buttonPressedOutlineColor());
+        painter->setBrush(ColorRepository::buttonPressedBackground());
+    }
+    // 悬停
+    else if (option->state & QStyle::State_MouseOver)
+    {
+        painter->setPen(QPen(ColorRepository::buttonHoverOutlineColor(), FRAME_WIDTH));
+        painter->setBrush(ColorRepository::buttonHoveredBackground());
+    }
+    // 默认
+    else
+    {
+        painter->setPen(ColorRepository::buttonOutlineColor());
+        painter->setBrush(ColorRepository::buttonBackground());
+    }
 }

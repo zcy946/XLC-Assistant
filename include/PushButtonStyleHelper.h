@@ -9,13 +9,15 @@
 class PushButtonStyleHelper
 {
 public:
-    void setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget);
     void drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget);
     void drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget);
     void drawShadow(QPushButton *button);
     QSize sizeFromContents(const QStyleOptionButton *option, QSize contentsSize, const QWidget *widget) const;
 
     int padding();
+
+private:
+    void setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget);
 
 private:
     const int PADDING_VERTICAL = 5;    // 按钮标签与边框之间的垂直空白量

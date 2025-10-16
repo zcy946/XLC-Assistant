@@ -14,6 +14,8 @@ namespace ColorRepository
     QPalette standardPalette();
     void setDarkMode(bool dark);
 
+    QColor primaryNormal();
+
     QColor windowBackground();
     QColor baseBackground();
     QColor text();
@@ -24,14 +26,21 @@ namespace ColorRepository
     QColor pressedTextColor();
     QColor hoverTextColor();
 
+    QColor buttonOutlineColor();
     QColor buttonPressedOutlineColor();
     QColor buttonHoverOutlineColor();
-    QColor buttonOutlineColor();
 
     QColor buttonBackground();
     QColor buttonPressedBackground();
     QColor buttonHoveredBackground();
     QColor buttonDisableBackground();
+
+    QColor itemViewItemMarkColor();
+
+    QColor itemViewItemBackgroundColor();
+    QColor itemViewItemSelectedBackgroundColor();
+    QColor itemViewItemHoveredBackgroundColor();
+    QColor itemViewItemSelectedAndHoveredBackgroundColor();
 
     QBrush progressBarOutlineBrush(const QRect &rect);
     QBrush progressBarOutlineFadingBrush(const QRect &rect);

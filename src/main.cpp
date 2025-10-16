@@ -9,6 +9,7 @@
 #include "DataManager.h"
 #include "ToastManager.h"
 #include "XlcStyle.h"
+#include "ColorRepository.h"
 
 int main(int argc, char *argv[])
 {
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
     // 设置自定义样式
     app.setStyle(new XlcStyle());
+    app.setPalette(ColorRepository::standardPalette());
 
     // 设置全局字体
     app.setFont(getGlobalFont());

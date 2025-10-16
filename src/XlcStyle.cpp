@@ -4,7 +4,7 @@
 #include <QAbstractItemView>
 
 XlcStyle::XlcStyle()
-    : QCommonStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper)
+    : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemHelper(new ItemViewItemStyleHelper())
 {
 }
 
@@ -16,7 +16,7 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
         // 虚线焦点框
         break;
     default:
-        QCommonStyle::drawPrimitive(pe, option, painter, widget);
+        QProxyStyle::drawPrimitive(pe, option, painter, widget);
         break;
     }
 }
@@ -27,7 +27,7 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
     case CE_PushButton:
         // 使用默认实现
         // 以及 PE_FrameFocusRect（我们已将其重实现为空操作）。
-        QCommonStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         return;
     case CE_PushButtonBevel:
         // 绘制按钮形状（背景与边框）
@@ -48,22 +48,31 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
     case CE_RadioButtonLabel:
     case CE_CheckBox: // 仅调用 PE_IndicatorCheckBox、CE_CheckBoxLabel（及焦点框）
     case CE_CheckBoxLabel:
-        QCommonStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         return;
 
     case CE_ProgressBar: // 主入口点
         // 调用 CE_ProgressBarGroove、CE_ProgressBarContents 和 CE_ProgressBarLabel
-        QCommonStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         return;
     case CE_ProgressBarGroove:
         break;
     case CE_ProgressBarContents:
         break;
     case CE_ProgressBarLabel:
-        return;
+        break;
+    case CE_ItemViewItem:
+        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            m_itemViewItemHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
+            m_itemViewItemHelper->drawText(optionItemViewItem, painter, widget);
+            // 绘制(选中)标记
+            m_itemViewItemHelper->drawMarket(optionItemViewItem, painter, widget);
+        }
+        break;
 
     default:
-        QCommonStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
     }
 }
 
@@ -72,7 +81,7 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
     switch (complexControl)
     {
     default:
-        QCommonStyle::drawComplexControl(complexControl, option, painter, widget);
+        QProxyStyle::drawComplexControl(complexControl, option, painter, widget);
         break;
     }
 }
@@ -94,7 +103,7 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
         // 按钮按下时的水平和垂直内容偏移
         return 0; // 不偏移
     default:
-        return QCommonStyle::pixelMetric(metric, option, widget);
+        return QProxyStyle::pixelMetric(metric, option, widget);
     }
 }
 
@@ -108,7 +117,7 @@ int XlcStyle::styleHint(StyleHint stylehint, const QStyleOption *option, const Q
         break;
     }
 
-    return QCommonStyle::styleHint(stylehint, option, widget, returnData);
+    return QProxyStyle::styleHint(stylehint, option, widget, returnData);
 }
 
 QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &contentsSize, const QWidget *widget) const
@@ -123,12 +132,17 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
         break;
     case CT_RadioButton:
     case CT_CheckBox:
-        return QCommonStyle::sizeFromContents(type, option, contentsSize, widget);
-
+        return QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
+    case CT_ItemViewItem:
+        if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            return m_itemViewItemHelper->sizeFromContents(optionItemViewItem, contentsSize, widget);
+        }
+        break;
     default:
         break;
     }
-    return QCommonStyle::sizeFromContents(type, option, contentsSize, widget);
+    return QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
 }
 
 QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option, const QWidget *widget) const
@@ -146,7 +160,7 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
     default:
         break;
     }
-    return QCommonStyle::subElementRect(subElement, option, widget);
+    return QProxyStyle::subElementRect(subElement, option, widget);
 }
 
 void XlcStyle::polish(QWidget *w)
@@ -160,10 +174,10 @@ void XlcStyle::polish(QWidget *w)
     {
         // m_pushButtonStyleHelper->drawShadow(button);
     }
-    QCommonStyle::polish(w);
+    QProxyStyle::polish(w);
 }
 
 bool XlcStyle::eventFilter(QObject *obj, QEvent *event)
 {
-    return QCommonStyle::eventFilter(obj, event);
+    return QProxyStyle::eventFilter(obj, event);
 }
