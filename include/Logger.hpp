@@ -7,8 +7,10 @@
 #include <QString>
 #include <memory>
 #include <string>
+#include <fmt/format.h>
+#include <string_view>
 
-constexpr const char * FILE_NAME = "logs/logs.log";
+constexpr const char *FILE_NAME = "logs/logs.log";
 
 #define XLC_LOG_TRACE(...) Logger::trace({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
 #define XLC_LOG_DEBUG(...) Logger::debug({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
@@ -16,6 +18,32 @@ constexpr const char * FILE_NAME = "logs/logs.log";
 #define XLC_LOG_WARN(...) Logger::warn({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
 #define XLC_LOG_ERROR(...) Logger::error({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
 #define XLC_LOG_CRITICAL(...) Logger::critical({__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+
+// 为 QString 类型提供 fmtlib 格式化器特化
+template <>
+struct fmt::formatter<QString>
+{
+    constexpr auto parse(format_parse_context &ctx) -> decltype(ctx.begin())
+    {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const QString &q, FormatContext &ctx) const -> decltype(ctx.out())
+    {
+        // 1. 将 QString 转换为 UTF-8 的 QByteArray。
+        //    这个 QByteArray 是一个局部变量，其内存在此函数内安全地创建和销毁。
+        const QByteArray byteArray = q.toUtf8();
+
+        // 2. 从 QByteArray 的数据创建一个 std::string_view。
+        //    这是一个非拥有视图，它不分配任何内存，只是指向 byteArray 的内部缓冲区。
+        std::string_view view(byteArray.constData(), static_cast<size_t>(byteArray.size()));
+
+        // 3. 格式化这个 string_view。fmt 库能高效地处理它。
+        //    这里没有临时 std::string 对象被创建和跨界销毁。
+        return fmt::format_to(ctx.out(), "{}", view);
+    }
+};
 
 class Logger
 {
@@ -52,11 +80,6 @@ public:
     static auto convert(const T &value) -> decltype(value)
     {
         return value;
-    }
-
-    static std::string convert(const QString &qstr)
-    {
-        return qstr.toStdString(); // 或 qstr.toUtf8().constData() 保证 UTF-8
     }
 
     // 自动格式化 + 源位置日志调用封装
