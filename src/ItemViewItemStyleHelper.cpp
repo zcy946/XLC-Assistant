@@ -5,7 +5,7 @@
 void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
     painter->save();
-    painter->setRenderHints(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
     painter->drawRoundedRect(option->rect.adjusted(0, SPACING_TOP, 0, 0), RADIUS, RADIUS);
     painter->restore();
@@ -43,13 +43,13 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
     if (option->state & QStyle::State_Selected)
     {
         painter->save();
-        painter->setRenderHints(QPainter::Antialiasing);
+        painter->setRenderHint(QPainter::Antialiasing, true);
         painter->setPen(Qt::NoPen);
         painter->setBrush(ColorRepository::primaryNormal());
         painter->drawRoundedRect(QRectF(option->rect.x() + MARK_OFFSET_X,
-                                        option->rect.y() + MARK_PADDING_TOP + SPACING_TOP,
-                                        MARK_WIDTH,
-                                        option->rect.height() - MARK_PADDING_TOP - MARK_PADDING_BOTTOM),
+                                        option->rect.y() + SPACING_TOP + MARK_PADDING_TOP,
+                                        option->rect.x() + MARK_WIDTH,
+                                        option->rect.height() - SPACING_TOP - MARK_PADDING_TOP - MARK_PADDING_BOTTOM),
                                  MARK_RADIUS,
                                  MARK_RADIUS);
         painter->restore();

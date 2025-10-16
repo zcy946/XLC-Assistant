@@ -2,9 +2,12 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QAbstractItemView>
+#include <QScrollBar>
+#include <QTimer>
 
 XlcStyle::XlcStyle()
-    : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemHelper(new ItemViewItemStyleHelper())
+    : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
+      m_scrollBarStyleHelper(new ScrollBarStyleHelper())
 {
 }
 
@@ -64,10 +67,10 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
-            m_itemViewItemHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
-            m_itemViewItemHelper->drawText(optionItemViewItem, painter, widget);
+            m_itemViewItemStyleHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
+            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, widget);
             // 绘制(选中)标记
-            m_itemViewItemHelper->drawMarket(optionItemViewItem, painter, widget);
+            m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
         }
         break;
 
@@ -80,6 +83,12 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
 {
     switch (complexControl)
     {
+    case QStyle::CC_ScrollBar:
+        if (const QStyleOptionSlider *sliderOption = qstyleoption_cast<const QStyleOptionSlider *>(option))
+        {
+            m_scrollBarStyleHelper->drawScrollBarShapes(sliderOption, painter, widget, this);
+        }
+        break;
     default:
         QProxyStyle::drawComplexControl(complexControl, option, painter, widget);
         break;
@@ -95,6 +104,9 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
         {
             return m_pushButtonStyleHelper->padding();
         }
+        return QProxyStyle::pixelMetric(metric, option, widget);
+    case PM_ScrollBarExtent:
+        return m_scrollBarStyleHelper->scrollBarExtent();
     case PM_IndicatorHeight: // checkboxes
     case PM_IndicatorWidth:  // checkboxes
         break;
@@ -136,7 +148,7 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
     case CT_ItemViewItem:
         if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
-            return m_itemViewItemHelper->sizeFromContents(optionItemViewItem, contentsSize, widget);
+            return m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, contentsSize, widget);
         }
         break;
     default:
@@ -163,16 +175,29 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
     return QProxyStyle::subElementRect(subElement, option, widget);
 }
 
+QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOptionComplex *option, SubControl subControl, const QWidget *widget) const
+{
+    return QProxyStyle::subControlRect(complexControl, option, subControl, widget);
+}
+
 void XlcStyle::polish(QWidget *w)
 {
-    if (qobject_cast<QPushButton *>(w) || qobject_cast<QCheckBox *>(w) || qobject_cast<QAbstractItemView *>(w))
+    if (qobject_cast<QPushButton *>(w) || qobject_cast<QCheckBox *>(w) || qobject_cast<QAbstractItemView *>(w) || qobject_cast<QScrollBar *>(w))
     {
         w->setAttribute(Qt::WA_Hover);
     }
     // 为QPushButton绘制阴影
     if (QPushButton *button = qobject_cast<QPushButton *>(w))
     {
-        // m_pushButtonStyleHelper->drawShadow(button);
+        if (!button->isVisible())
+        {
+            QTimer::singleShot(0, button, [this, button]()
+                               { m_pushButtonStyleHelper->drawShadow(button); });
+        }
+        else
+        {
+            m_pushButtonStyleHelper->drawShadow(button);
+        }
     }
     QProxyStyle::polish(w);
 }

@@ -5,7 +5,7 @@
 void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
     painter->save();
-    painter->setRenderHints(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
     painter->drawRoundedRect(QRectF(option->rect).adjusted(FRAME_WIDTH, FRAME_WIDTH, -(FRAME_WIDTH), -(FRAME_WIDTH)),
                              RADIUS,

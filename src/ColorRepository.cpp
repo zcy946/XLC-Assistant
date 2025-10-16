@@ -16,7 +16,7 @@ QPalette ColorRepository::standardPalette()
     pal.setColor(QPalette::WindowText, text());
     pal.setColor(QPalette::Text, text());
 
-    // Text color on buttons
+    // 按钮上的文本
     pal.setColor(QPalette::ButtonText, text());
 
     // pal.setColor(QPalette::ToolTipBase, baseBackground());
@@ -40,25 +40,23 @@ QColor ColorRepository::primaryNormal()
 
 QColor ColorRepository::windowBackground()
 {
-    // 窗口背景颜色(例如: QWidget)
     return s_darkMode ? QColor("#202020") : QColor("#F3F3F3");
 }
 
 QColor ColorRepository::baseBackground()
 {
-    // 空间内背景颜色(例如: QListView)
     return s_darkMode ? QColor("#292929") : QColor("#FDFDFD");
 }
 
 QColor ColorRepository::text()
 {
-    // gray / dark gray
-    return s_darkMode ? QColor("#A5A5A5") : QColor("#000000");
+    return s_darkMode ? QColor("#FFFFFF") : QColor("#000000");
 }
 
 QColor ColorRepository::shadowColor()
 {
     QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#D1D1D1");
+    // QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#707070");
     colorShadow.setAlpha(255 - 2);
     return colorShadow;
 }
@@ -84,7 +82,7 @@ QColor ColorRepository::hoverTextColor()
 
 QColor ColorRepository::buttonOutlineColor()
 {
-    return s_darkMode ? QColor("#59515F") : QColor("#D1D1D1");
+    return s_darkMode ? QColor("#4B4B4B") : QColor("#D1D1D1");
 }
 
 QColor ColorRepository::buttonPressedOutlineColor()
@@ -140,6 +138,31 @@ QColor ColorRepository::itemViewItemHoveredBackgroundColor()
 QColor ColorRepository::itemViewItemSelectedAndHoveredBackgroundColor()
 {
     return s_darkMode ? QColor("#393939") : QColor("#F5F5F5");
+}
+
+QColor ColorRepository::scrollBarBackgroundColor()
+{
+    return baseBackground();
+}
+
+QColor ColorRepository::scrollBarSliderColor()
+{
+    return s_darkMode ? QColor("#9F9F9F") : QColor("#A0A0A0");
+}
+
+QColor ColorRepository::scrollBarSliderHoveredColor()
+{
+    return scrollBarSliderColor();
+}
+
+QColor ColorRepository::scrollBarSliderSelectedColor()
+{
+    return scrollBarSliderColor();
+}
+
+QColor ColorRepository::scrollBarArrowColor()
+{
+    return scrollBarSliderColor();
 }
 
 QBrush ColorRepository::progressBarOutlineBrush(const QRect &rect)

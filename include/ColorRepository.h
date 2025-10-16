@@ -16,7 +16,9 @@ namespace ColorRepository
 
     QColor primaryNormal();
 
+    // 窗口背景颜色(例如: QWidget)
     QColor windowBackground();
+    // 控件内背景颜色(例如: QListView)
     QColor baseBackground();
     QColor text();
 
@@ -41,6 +43,13 @@ namespace ColorRepository
     QColor itemViewItemSelectedBackgroundColor();
     QColor itemViewItemHoveredBackgroundColor();
     QColor itemViewItemSelectedAndHoveredBackgroundColor();
+
+    QColor scrollBarBackgroundColor();
+    QColor scrollBarSliderColor();
+    QColor scrollBarSliderHoveredColor();
+    QColor scrollBarSliderSelectedColor();
+    QColor scrollBarArrowColor();
+    
 
     QBrush progressBarOutlineBrush(const QRect &rect);
     QBrush progressBarOutlineFadingBrush(const QRect &rect);

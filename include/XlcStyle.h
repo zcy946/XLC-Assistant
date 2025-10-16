@@ -5,6 +5,7 @@
 #include <memory>
 #include "PushButtonStyleHelper.h"
 #include "ItemViewItemStyleHelper.h"
+#include "ScrollBarStyleHelper.h"
 
 class XlcStyle : public QProxyStyle
 {
@@ -17,12 +18,14 @@ public:
     int styleHint(StyleHint stylehint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const override;
     QSize sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &contentsSize, const QWidget *widget) const override;
     QRect subElementRect(SubElement subElement, const QStyleOption *option, const QWidget *widget) const override;
+    QRect subControlRect(ComplexControl complexControl, const QStyleOptionComplex *option, SubControl subControl, const QWidget *widget) const override;
     void polish(QWidget *w) override;
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;
-    std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemHelper;
+    std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemStyleHelper;
+    std::unique_ptr<ScrollBarStyleHelper> m_scrollBarStyleHelper;
 };
 
 #endif // XLCSTYLE_H

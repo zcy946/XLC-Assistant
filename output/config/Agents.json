@@ -30,27 +30,11 @@
         "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
         "maxTokens": 1024,
         "mcpServers": [
-            "d0e1f2a3-b4c5-6789-0123-def057887878"
         ],
         "name": "开发测试Agent[无mcp服务器挂载]",
         "systemPrompt": "你是一个擅长调用工具解决问题的小助手，在回答问题之前你应该看看有没有可以使用的工具。如果条件允许的话，请在一次请求中调用多个工具",
         "temperature": 0.7,
         "topP": 0.9,
         "uuid": "b8c9d0e1-f2a3-4567-8901-abcdef123456"
-    },
-    {
-        "context": 100,
-        "conversations": [
-        ],
-        "description": "默认助手",
-        "llmUUid": "091a2b3c-4d5e-5678-9012-6789abcdef01",
-        "maxTokens": 1024,
-        "mcpServers": [
-        ],
-        "name": "默认助手",
-        "systemPrompt": "按照要求，完成用户的任务。",
-        "temperature": 1,
-        "topP": 1,
-        "uuid": "9afba455-bfd1-4bad-b716-d594224c10d1"
     }
 ]
