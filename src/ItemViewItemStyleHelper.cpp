@@ -1,8 +1,9 @@
 #include "ItemViewItemStyleHelper.h"
 #include "ColorRepository.h"
 #include <QListView>
+#include <QProxyStyle>
 
-void ItemViewItemStyleHelper::drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
+void ItemViewItemStyleHelper::drawBackground(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
     // 检查请求是否由 QAbstractItemView 发起
     if (const QAbstractItemView *view = qobject_cast<const QAbstractItemView *>(widget))

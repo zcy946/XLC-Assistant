@@ -78,11 +78,22 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
-            m_itemViewItemStyleHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
+            m_itemViewItemStyleHelper->drawBackground(optionItemViewItem, painter, widget);
             QRect rectTextOriginal = QProxyStyle::subElementRect(QStyle::SE_ItemViewItemText, option, widget);
             m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, widget, rectTextOriginal);
             // 绘制(选中)标记
             m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
+
+            QStyleOptionViewItem optionNew = *optionItemViewItem;
+            // 清除文本，防止重复绘制
+            optionNew.text.clear();
+            // 迁移是否可选择状态
+            if (optionNew.state & State_Selected)
+            {
+                optionNew.state &= ~State_Selected;
+            }
+            // 调用基类绘制其他元素
+            QProxyStyle::drawControl(element, &optionNew, painter, widget);
             return;
         }
         break;

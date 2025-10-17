@@ -7,7 +7,7 @@
 class ItemViewItemStyleHelper
 {
 public:
-    void drawItemViewItemShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget);
+    void drawBackground(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget);
     void drawText(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget, QRect rectTextOriginal);
     void drawMarket(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget);
     QSize sizeFromContents(const QStyleOptionViewItem *option, QSize sizeOriginal, const QWidget *widget) const;
