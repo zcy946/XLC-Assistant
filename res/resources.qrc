@@ -12,5 +12,6 @@
         <file>image/info.svg</file>
         <file>image/success.svg</file>
         <file>image/warning.svg</file>
+        <file>font/ElaAwesome.ttf</file>
     </qresource>
 </RCC>

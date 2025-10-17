@@ -100,7 +100,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         QRect rectDrawText = QRect(option.rect.topLeft() + QPoint(lineLength, PADDING), rectText.size());
         painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(option.rect.left() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(rectDrawText.left() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
-        painter->setPen(ColorRepository::text());
+        painter->setPen(ColorRepository::basicText());
         painter->drawText(rectDrawText, text);
         painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(rectDrawText.right() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(option.rect.right() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));

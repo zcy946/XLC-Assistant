@@ -22,7 +22,10 @@ namespace ColorRepository
     // 通用控件背景颜色(例如: QListView)
     QColor basicBackground();
     // 通用文本颜色
-    QColor text();
+    QColor basicText();
+
+    // 占位符颜色
+    QColor placeHolderText();
 
     // 阴影颜色
     QColor shadowColor();
@@ -31,6 +34,13 @@ namespace ColorRepository
     QColor basicBorderColor();
     // 通用底边缘颜色
     QColor basicHemlineColor();
+    // 通用底边缘焦点颜色
+    QColor basicFocusedHemlineColor();
+
+    // 通用按压颜色
+    QColor basicPressedColor();
+    // 通用hover颜色
+    QColor basicHoveredColor();
 
     QColor disabledTextColor();
     QColor pressedTextColor();
@@ -63,6 +73,14 @@ namespace ColorRepository
     QColor lineEditBorderColor();
     QColor lineEditHemlineColor();
     QColor lineEditFocusedHemlineColor();
+
+    QColor spinBoxBackgroundColor();
+    QColor spinBoxBorderColor();
+    QColor spinBoxArrowColor();
+    QColor spinBoxPressedArrowColor();
+    QColor spinBoxHoveredArrowColor();
+    QColor spinBoxHemlineColor();
+    QColor spinBoxFocusedHemlineColor();
 
     QColor listHoveredBackgroundColor();
     QColor listSelectedBackgroundColor();

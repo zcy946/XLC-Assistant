@@ -9,22 +9,22 @@ static QColor s_colorPrimaryNormal = "#0067C0";
 
 QPalette ColorRepository::standardPalette()
 {
-    QPalette pal;
-    // TODO brush with noise.png
-    pal.setColor(QPalette::Window, windowBackground());
-    pal.setColor(QPalette::Base, basicBackground());
-    pal.setColor(QPalette::WindowText, text());
-    pal.setColor(QPalette::Text, text());
+    QPalette palette;
+    palette.setColor(QPalette::Window, windowBackground());
+    palette.setColor(QPalette::Base, basicBackground());
+    palette.setColor(QPalette::WindowText, basicText());
+    palette.setColor(QPalette::Text, basicText());
+    palette.setColor(QPalette::PlaceholderText, placeHolderText());
 
     // 按钮上的文本
-    pal.setColor(QPalette::ButtonText, text());
+    palette.setColor(QPalette::ButtonText, basicText());
 
-    // pal.setColor(QPalette::ToolTipBase, basicBackground());
-    pal.setColor(QPalette::ToolTipText, text());
+    // palette.setColor(QPalette::ToolTipBase, basicBackground());
+    palette.setColor(QPalette::ToolTipText, basicText());
 
-    QToolTip::setPalette(pal);
+    QToolTip::setPalette(palette);
 
-    return pal;
+    return palette;
 }
 
 void ColorRepository::setDarkMode(bool dark)
@@ -49,9 +49,14 @@ QColor ColorRepository::basicBackground()
     return s_darkMode ? QColor("#292929") : QColor("#FCFCFC");
 }
 
-QColor ColorRepository::text()
+QColor ColorRepository::basicText()
 {
     return s_darkMode ? QColor("#FFFFFF") : QColor("#000000");
+}
+
+QColor ColorRepository::placeHolderText()
+{
+    return s_darkMode ? QColor("#BABABA") : QColor("#80000000");
 }
 
 QColor ColorRepository::shadowColor()
@@ -69,26 +74,41 @@ QColor ColorRepository::basicBorderColor()
 
 QColor ColorRepository::basicHemlineColor()
 {
+    return s_darkMode ? QColor("#9A9A9A") : QColor("#868686");
+}
+
+QColor ColorRepository::basicFocusedHemlineColor()
+{
     return primaryNormal();
+}
+
+QColor ColorRepository::basicPressedColor()
+{
+    return s_darkMode ? QColor("#554B4B4B") : QColor("#40CCCCCC");
+}
+
+QColor ColorRepository::basicHoveredColor()
+{
+    return s_darkMode ? QColor("#754B4B4B") : QColor("#70CCCCCC");
 }
 
 QColor ColorRepository::disabledTextColor()
 {
-    QColor colorDisabledText = text();
+    QColor colorDisabledText = basicText();
     colorDisabledText.setAlphaF(0.3);
     return colorDisabledText;
 }
 
 QColor ColorRepository::pressedTextColor()
 {
-    QColor colorPressedText = text();
+    QColor colorPressedText = basicText();
     colorPressedText.setAlphaF(0.6);
     return colorPressedText;
 }
 
 QColor ColorRepository::hoverTextColor()
 {
-    return text();
+    return basicText();
 }
 
 QColor ColorRepository::buttonBorderColor()
@@ -198,12 +218,47 @@ QColor ColorRepository::lineEditBorderColor()
 
 QColor ColorRepository::lineEditHemlineColor()
 {
-    return s_darkMode ? QColor("#9A9A9A") : QColor("#868686");
+    return basicHemlineColor();
 }
 
 QColor ColorRepository::lineEditFocusedHemlineColor()
 {
+    return basicFocusedHemlineColor();
+}
+
+QColor ColorRepository::spinBoxBackgroundColor()
+{
+    return basicBackground();
+}
+
+QColor ColorRepository::spinBoxBorderColor()
+{
+    return basicBorderColor();
+}
+
+QColor ColorRepository::spinBoxArrowColor()
+{
+    return spinBoxBackgroundColor();
+}
+
+QColor ColorRepository::spinBoxPressedArrowColor()
+{
+    return basicPressedColor();
+}
+
+QColor ColorRepository::spinBoxHoveredArrowColor()
+{
+    return basicHoveredColor();
+}
+
+QColor ColorRepository::spinBoxHemlineColor()
+{
     return basicHemlineColor();
+}
+
+QColor ColorRepository::spinBoxFocusedHemlineColor()
+{
+    return basicFocusedHemlineColor();
 }
 
 QColor ColorRepository::listHoveredBackgroundColor()

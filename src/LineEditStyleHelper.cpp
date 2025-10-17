@@ -1,16 +1,45 @@
 #include "LineEditStyleHelper.h"
 #include "ColorRepository.h"
 #include <QPainterPath>
+#include <QLineEdit>
+#include <QAbstractSpinBox>
 
 void LineEditStyleHelper::drawLineEditShape(const QStyleOptionFrame *optionLineEdit, QPainter *painter, const QWidget *widget)
 {
-    Q_UNUSED(widget)
+    // 检查请求是否由 QLineEdit 发起
+    const QLineEdit *lineEdit = qobject_cast<const QLineEdit *>(widget);
+    if (!lineEdit)
+        return;
+    /**
+     * QAbstractSpinBox(QSpinBox和QDoubleSpinbox)内嵌了一个QLineEdit，在绘制背景这块排除它们
+     *  */
+    if (qobject_cast<const QAbstractSpinBox *>(lineEdit->parentWidget()))
+        return;
     // 背景
     drawBackground(optionLineEdit, painter);
     // 边框
     drawBorder(optionLineEdit, painter);
     // 底部边缘
     drawHemline(optionLineEdit, painter);
+}
+
+QRect LineEditStyleHelper::subElementRect(QStyle::SubElement subElement, const QStyleOptionFrame *option, const QWidget *widget, const QRect &rectBasic)
+{
+    if (qobject_cast<const QLineEdit *>(widget))
+    {
+        return rectBasic.adjusted(PADDING_HORIZONTAL, PADDING_VERTICAL, -PADDING_HORIZONTAL, -PADDING_VERTICAL);
+    }
+    return rectBasic;
+}
+
+QSize LineEditStyleHelper::sizeFromContents(const QStyleOptionFrame *option, QSize sizeBasic, const QWidget *widget)
+{
+    if (qobject_cast<const QLineEdit *>(widget))
+    {
+        sizeBasic.rwidth() += PADDING_HORIZONTAL * 2;
+        sizeBasic.rheight() += PADDING_VERTICAL * 2;
+    }
+    return sizeBasic;
 }
 
 void LineEditStyleHelper::drawBackground(const QStyleOptionFrame *optionLineEdit, QPainter *painter)

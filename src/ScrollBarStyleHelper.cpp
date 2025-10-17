@@ -3,10 +3,14 @@
 #include <QPainterPath>
 #include "ColorRepository.h"
 #include <QtMath>
+#include <QScrollBar>
 
 void ScrollBarStyleHelper::drawBackground(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget)
 {
-    Q_UNUSED(widget)
+    if (!qobject_cast<const QScrollBar *>(widget))
+    {
+        return;
+    }
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
@@ -18,6 +22,10 @@ void ScrollBarStyleHelper::drawBackground(const QStyleOptionSlider *option, QPai
 
 void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &grooveRect)
 {
+    if (!qobject_cast<const QScrollBar *>(widget))
+    {
+        return;
+    }
     if (option->subControls & QStyle::SC_ScrollBarGroove)
     {
         painter->save();
@@ -31,6 +39,10 @@ void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter
 
 void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSlider)
 {
+    if (!qobject_cast<const QScrollBar *>(widget))
+    {
+        return;
+    }
     if (option->subControls & QStyle::SC_ScrollBarSlider)
     {
         painter->save();
@@ -58,6 +70,10 @@ void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter
 
 void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine)
 {
+    if (!qobject_cast<const QScrollBar *>(widget))
+    {
+        return;
+    }
     // 只绘制 Line 按钮的箭头，跳过 Page 按钮 (滚动条两端的按钮)
     if (!(option->subControls & QStyle::SC_ScrollBarSubLine) && !(option->subControls & QStyle::SC_ScrollBarAddLine))
         return;

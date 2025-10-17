@@ -29,7 +29,8 @@ inline QFont getGlobalFont()
 {
     QFont font("Microsoft YaHei");
     font.setPointSize(10);
-    font.setStyleHint(QFont::SansSerif); // 微软雅黑不存在时优先考虑无衬线字体
+    font.setStyleHint(QFont::SansSerif);               // 微软雅黑不存在时优先考虑无衬线字体
+    font.setHintingPreference(QFont::PreferNoHinting); // 禁用字体微调
     return font;
 }
 

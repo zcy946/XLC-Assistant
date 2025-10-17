@@ -132,7 +132,7 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                                                                    -PADDING_CONVERSATION_COUNT,
                                                                                    -PADDING_CONVERSATION_COUNT);
         painter->setBrush(Qt::NoBrush);
-        painter->setPen(ColorRepository::text());
+        painter->setPen(ColorRepository::basicText());
         painter->setFont(fontConversationCount);
         painter->drawText(rectBackgroundConversationCount, Qt::AlignCenter, QString::number(conversationCount));
 
@@ -147,7 +147,7 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                                    -PADDING_HORIZONTAL - rectBackgroundConversationCount.width() - SPACING_NAME_TO_CONVERSATION_COUNT,
                                                    -PADDING_VERTICAL));
     QString elidedName = fm.elidedText(name, Qt::ElideRight, rectText.width());
-    painter->setPen(ColorRepository::text());
+    painter->setPen(ColorRepository::basicText());
     painter->drawText(rectText, elidedName);
 
     painter->restore();

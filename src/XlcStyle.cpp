@@ -5,11 +5,24 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QPointer>
+#include <QFontDatabase>
+#include <QLineEdit>
+
+/**
+ * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
+ *
+ *  1. 检查 enum 参数: 这是你的第一道防线。检查传入的 PrimitiveElement, ControlElement, PixelMetric, StyleHint 等是否是你感兴趣的那个。
+ *  2. 检查 QStyleOption 类型: 如果你需要访问特定于控件的额外信息（如按钮的文本、边框的宽度），必须使用 qstyleoption_cast 进行安全的类型转换，并检查返回值是否为 nullptr。
+ *  3. 检查 QWidget 类型: 这是最关键的检查之一。使用 qobject_cast 确保你正在为预期的控件（如 QLineEdit, QPushButton）执行代码。这能防止你的样式“污染”了其他无辜的控件。
+ *  4. 检查 QStyleOption::state: 如果你的自定义逻辑只在特定状态下（如 State_HasFocus, State_ReadOnly, State_On）生效，务必检查 option->state 中的标志位。
+ */
 
 XlcStyle::XlcStyle()
     : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
-      m_scrollBarStyleHelper(new ScrollBarStyleHelper()), m_lineEditStyleHelper(new LineEditStyleHelper())
+      m_scrollBarStyleHelper(new ScrollBarStyleHelper()), m_lineEditStyleHelper(new LineEditStyleHelper()),
+      m_spinBoxStyleHelper(new SpinBoxStyleHelper())
 {
+    QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
 
 void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
@@ -17,55 +30,55 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
     switch (pe)
     {
     case PE_FrameFocusRect:
-        // 虚线焦点框
-        break;
+        // 不绘制虚线焦点框
+        return;
     case PE_PanelLineEdit:
         if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
             m_lineEditStyleHelper->drawLineEditShape(optionLineEdit, painter, widget);
+            return;
         }
         break;
     default:
-        QProxyStyle::drawPrimitive(pe, option, painter, widget);
         break;
     }
+    QProxyStyle::drawPrimitive(pe, option, painter, widget);
 }
 void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element)
     {
-    case CE_PushButton:
-        // 使用默认实现
-        // 以及 PE_FrameFocusRect（我们已将其重实现为空操作）。
-        QProxyStyle::drawControl(element, option, painter, widget);
-        return;
     case CE_PushButtonBevel:
         // 绘制按钮形状（背景与边框）
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_pushButtonStyleHelper->drawButtonShape(optionButton, painter, widget);
+            return;
         }
-        return;
+        break;
     case CE_PushButtonLabel:
         // 绘制按钮文本、图标（及菜单指示器）
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_pushButtonStyleHelper->drawText(optionButton, painter, widget);
+            return;
         }
-        return;
+        break;
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
             m_itemViewItemStyleHelper->drawItemViewItemShape(optionItemViewItem, painter, widget);
             QRect rectTextOriginal = QProxyStyle::subElementRect(QStyle::SE_ItemViewItemText, option, widget);
-            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, rectTextOriginal);
+            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, widget, rectTextOriginal);
             // 绘制(选中)标记
             m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
+            return;
         }
         break;
     default:
-        QProxyStyle::drawControl(element, option, painter, widget);
+        break;
     }
+    QProxyStyle::drawControl(element, option, painter, widget);
 }
 
 void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const
@@ -73,15 +86,34 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
     switch (complexControl)
     {
     case QStyle::CC_ScrollBar:
-        if (const QStyleOptionSlider *sliderOption = qstyleoption_cast<const QStyleOptionSlider *>(option))
+        if (const QStyleOptionSlider *optionSlider = qstyleoption_cast<const QStyleOptionSlider *>(option))
         {
-            m_scrollBarStyleHelper->drawScrollBarShapes(sliderOption, painter, widget, this);
+            m_scrollBarStyleHelper->drawBackground(optionSlider, painter, widget);
+            m_scrollBarStyleHelper->drawGroove(optionSlider, painter, widget,
+                                               QProxyStyle::subControlRect(QStyle::CC_ScrollBar, option, QStyle::SC_ScrollBarGroove, widget));
+            m_scrollBarStyleHelper->drawSlider(optionSlider, painter, widget,
+                                               QProxyStyle::subControlRect(QStyle::CC_ScrollBar, option, QStyle::SC_ScrollBarSlider, widget));
+            m_scrollBarStyleHelper->drawSubControls(optionSlider, painter, widget,
+                                                    QProxyStyle::subControlRect(QStyle::CC_ScrollBar, option, QStyle::SC_ScrollBarSubLine, widget),
+                                                    QProxyStyle::subControlRect(QStyle::CC_ScrollBar, option, QStyle::SC_ScrollBarAddLine, widget));
+            return;
+        }
+        break;
+    case QStyle::CC_SpinBox:
+        if (const QStyleOptionSpinBox *optionSpinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option))
+        {
+            m_spinBoxStyleHelper->drawBackground(optionSpinBox, painter, widget);
+            m_spinBoxStyleHelper->drawSubControls(optionSpinBox, painter, widget,
+                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarSubLine, widget),
+                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarAddLine, widget));
+            m_spinBoxStyleHelper->drawHemline(optionSpinBox, painter, widget);
+            return;
         }
         break;
     default:
-        QProxyStyle::drawComplexControl(complexControl, option, painter, widget);
         break;
     }
+    QProxyStyle::drawComplexControl(complexControl, option, painter, widget);
 }
 
 int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
@@ -91,18 +123,29 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
     case PM_ButtonMargin:
         if (qstyleoption_cast<const QStyleOptionButton *>(option))
         {
-            return m_pushButtonStyleHelper->padding();
+            if (qobject_cast<const QPushButton *>(widget))
+            {
+                return m_pushButtonStyleHelper->padding();
+            }
         }
-        return QProxyStyle::pixelMetric(metric, option, widget);
+        break;
     case PM_ScrollBarExtent:
-        return m_scrollBarStyleHelper->scrollBarExtent();
+        // scrollbar宽/高度
+        if (qstyleoption_cast<const QStyleOptionSlider *>(option))
+        {
+            if (qobject_cast<const QScrollBar *>(widget))
+            {
+                return m_scrollBarStyleHelper->scrollBarExtent();
+            }
+        }
     case PM_ButtonShiftHorizontal:
     case PM_ButtonShiftVertical:
         // 按钮按下时的水平和垂直内容偏移
         return 0; // 不偏移
     default:
-        return QProxyStyle::pixelMetric(metric, option, widget);
+        break;
     }
+    return QProxyStyle::pixelMetric(metric, option, widget);
 }
 
 int XlcStyle::styleHint(StyleHint stylehint, const QStyleOption *option, const QWidget *widget, QStyleHintReturn *returnData) const
@@ -123,22 +166,26 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
     switch (type)
     {
     case CT_PushButton:
-        if (const auto *buttonOption = qstyleoption_cast<const QStyleOptionButton *>(option))
+        if (const QStyleOptionButton *buttonOption = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             return m_pushButtonStyleHelper->sizeFromContents(buttonOption, contentsSize, widget);
         }
         break;
+    case CT_LineEdit:
+        if (const QStyleOptionFrame *lineEditOption = qstyleoption_cast<const QStyleOptionFrame *>(option))
+        {
+            QSize sizeBasic = QProxyStyle::sizeFromContents(type, lineEditOption, contentsSize, widget);
+            return m_lineEditStyleHelper->sizeFromContents(lineEditOption, sizeBasic, widget);
+        }
+        break;
     case CT_ItemViewItem:
-    {
-        QSize itemSize = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-        if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
             // 让 helper 在父类尺寸基础上调整
             QSize sizeOriginal = QProxyStyle::sizeFromContents(type, optionItemViewItem, contentsSize, widget);
-            itemSize = m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, sizeOriginal, widget);
+            return m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, sizeOriginal, widget);
         }
-        return itemSize;
-    }
+        break;
     default:
         break;
     }
@@ -149,6 +196,13 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
 {
     switch (subElement)
     {
+    case SE_LineEditContents:
+        if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
+        {
+            return m_lineEditStyleHelper->subElementRect(subElement, optionLineEdit, widget,
+                                                         QProxyStyle::subElementRect(subElement, optionLineEdit, widget));
+        }
+        break;
     default:
         break;
     }
