@@ -54,6 +54,8 @@ namespace ColorRepository
     QColor buttonHoveredBackgroundColor();
     QColor buttonDisableBackgroundColor();
 
+    QColor listViewBorderColor();
+
     // listview中item左侧缘圆角矩形颜色
     QColor itemViewItemMarkColor();
     QColor itemViewItemBackgroundColor();

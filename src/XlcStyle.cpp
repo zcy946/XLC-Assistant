@@ -6,7 +6,7 @@
 #include <QTimer>
 #include <QPointer>
 #include <QFontDatabase>
-#include <QLineEdit>
+#include <QListView>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -18,8 +18,12 @@
  */
 
 XlcStyle::XlcStyle()
-    : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
-      m_scrollBarStyleHelper(new ScrollBarStyleHelper()), m_lineEditStyleHelper(new LineEditStyleHelper()),
+    : QProxyStyle(),
+      m_pushButtonStyleHelper(new PushButtonStyleHelper()),
+      m_listViewStyleHelper(new ListViewStyleHelper),
+      m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
+      m_scrollBarStyleHelper(new ScrollBarStyleHelper()),
+      m_lineEditStyleHelper(new LineEditStyleHelper()),
       m_spinBoxStyleHelper(new SpinBoxStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
@@ -29,6 +33,13 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
 {
     switch (pe)
     {
+    case PE_Frame:
+        if (qobject_cast<const QListView *>(widget))
+        {
+            m_listViewStyleHelper->drawBorder(painter, option->rect);
+            return;
+        }
+        break;
     case PE_FrameFocusRect:
         // 不绘制虚线焦点框
         return;

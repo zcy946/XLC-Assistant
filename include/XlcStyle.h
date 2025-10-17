@@ -4,6 +4,7 @@
 #include <QProxyStyle>
 #include <memory>
 #include "PushButtonStyleHelper.h"
+#include "ListViewStyleHelper.h"
 #include "ItemViewItemStyleHelper.h"
 #include "ScrollBarStyleHelper.h"
 #include "LineEditStyleHelper.h"
@@ -26,6 +27,7 @@ public:
 
 private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;
+    std::unique_ptr<ListViewStyleHelper> m_listViewStyleHelper;
     std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemStyleHelper;
     std::unique_ptr<ScrollBarStyleHelper> m_scrollBarStyleHelper;
     std::unique_ptr<LineEditStyleHelper> m_lineEditStyleHelper;

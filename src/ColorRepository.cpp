@@ -146,6 +146,11 @@ QColor ColorRepository::buttonDisableBackgroundColor()
     return s_darkMode ? QColor("#A7211F22") : QColor("#F5F5F5");
 }
 
+QColor ColorRepository::listViewBorderColor()
+{
+    return basicBorderColor();
+}
+
 QColor ColorRepository::itemViewItemMarkColor()
 {
     return primaryNormal();
