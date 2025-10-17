@@ -124,7 +124,7 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                                                 wBackgroundConversationCount,
                                                 hBackgroundConversationCount);
         painter->setPen(ColorRepository::listSelectedAndHoveredOutlineColor());
-        painter->setBrush(ColorRepository::baseBackground());
+        painter->setBrush(ColorRepository::basicBackground());
         painter->drawRoundedRect(rectBackgroundConversationCount, radiusBackgroundConversationCount, radiusBackgroundConversationCount);
         // 绘制计数
         QRect rectDrawConversationCount = rectBackgroundConversationCount.adjusted(PADDING_CONVERSATION_COUNT,
@@ -193,7 +193,7 @@ AgentListWidget::AgentListWidget(QWidget *parent)
 void AgentListWidget::paintEvent(QPaintEvent *e)
 {
     QPainter painter(viewport());
-    painter.fillRect(rect(), ColorRepository::baseBackground());
+    painter.fillRect(rect(), ColorRepository::basicBackground());
     QListView::paintEvent(e);
 }
 

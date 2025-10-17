@@ -8,7 +8,7 @@
 
 XlcStyle::XlcStyle()
     : QProxyStyle(), m_pushButtonStyleHelper(new PushButtonStyleHelper()), m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
-      m_scrollBarStyleHelper(new ScrollBarStyleHelper())
+      m_scrollBarStyleHelper(new ScrollBarStyleHelper()), m_lineEditStyleHelper(new LineEditStyleHelper())
 {
 }
 
@@ -18,6 +18,12 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
     {
     case PE_FrameFocusRect:
         // 虚线焦点框
+        break;
+    case PE_PanelLineEdit:
+        if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
+        {
+            m_lineEditStyleHelper->drawLineEditShape(optionLineEdit, painter, widget);
+        }
         break;
     default:
         QProxyStyle::drawPrimitive(pe, option, painter, widget);
@@ -123,16 +129,16 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
         }
         break;
     case CT_ItemViewItem:
-        { 
-            QSize itemSize = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
-            if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
-            {
-                // 让 helper 在父类尺寸基础上调整
-                QSize sizeOriginal = QProxyStyle::sizeFromContents(type, optionItemViewItem, contentsSize, widget);
-                itemSize = m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, sizeOriginal, widget);
-            }
-            return itemSize;
+    {
+        QSize itemSize = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
+        if (const auto *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            // 让 helper 在父类尺寸基础上调整
+            QSize sizeOriginal = QProxyStyle::sizeFromContents(type, optionItemViewItem, contentsSize, widget);
+            itemSize = m_itemViewItemStyleHelper->sizeFromContents(optionItemViewItem, sizeOriginal, widget);
         }
+        return itemSize;
+    }
     default:
         break;
     }

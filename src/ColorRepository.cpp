@@ -12,14 +12,14 @@ QPalette ColorRepository::standardPalette()
     QPalette pal;
     // TODO brush with noise.png
     pal.setColor(QPalette::Window, windowBackground());
-    pal.setColor(QPalette::Base, baseBackground());
+    pal.setColor(QPalette::Base, basicBackground());
     pal.setColor(QPalette::WindowText, text());
     pal.setColor(QPalette::Text, text());
 
     // 按钮上的文本
     pal.setColor(QPalette::ButtonText, text());
 
-    // pal.setColor(QPalette::ToolTipBase, baseBackground());
+    // pal.setColor(QPalette::ToolTipBase, basicBackground());
     pal.setColor(QPalette::ToolTipText, text());
 
     QToolTip::setPalette(pal);
@@ -43,9 +43,10 @@ QColor ColorRepository::windowBackground()
     return s_darkMode ? QColor("#202020") : QColor("#F3F3F3");
 }
 
-QColor ColorRepository::baseBackground()
+QColor ColorRepository::basicBackground()
 {
-    return s_darkMode ? QColor("#292929") : QColor("#FDFDFD");
+    // return s_darkMode ? QColor("#292929") : QColor("#FDFDFD");
+    return s_darkMode ? QColor("#292929") : QColor("#FCFCFC");
 }
 
 QColor ColorRepository::text()
@@ -59,6 +60,16 @@ QColor ColorRepository::shadowColor()
     // QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#707070");
     colorShadow.setAlpha(255 - 2);
     return colorShadow;
+}
+
+QColor ColorRepository::basicBorderColor()
+{
+    return s_darkMode ? QColor("#4B4B4B") : QColor("#E5E5E5");
+}
+
+QColor ColorRepository::basicHemlineColor()
+{
+    return primaryNormal();
 }
 
 QColor ColorRepository::disabledTextColor()
@@ -80,12 +91,12 @@ QColor ColorRepository::hoverTextColor()
     return text();
 }
 
-QColor ColorRepository::buttonOutlineColor()
+QColor ColorRepository::buttonBorderColor()
 {
     return s_darkMode ? QColor("#4B4B4B") : QColor("#D1D1D1");
 }
 
-QColor ColorRepository::buttonPressedOutlineColor()
+QColor ColorRepository::buttonPressedBorderColor()
 {
     return QColor("#B3B3B3");
 }
@@ -94,23 +105,23 @@ QColor ColorRepository::buttonHoverOutlineColor()
     return QColor("#C7C7C7");
 }
 
-QColor ColorRepository::buttonBackground()
+QColor ColorRepository::buttonBackgroundColor()
 {
     return s_darkMode ? QColor("#A7211F22") : QColor("#FDFDFD");
 }
 
-QColor ColorRepository::buttonPressedBackground()
+QColor ColorRepository::buttonPressedBackgroundColor()
 {
     return s_darkMode ? QColor("#171717") : QColor("#F3F3F3");
 }
 
-QColor ColorRepository::buttonHoveredBackground()
+QColor ColorRepository::buttonHoveredBackgroundColor()
 {
-    QColor color = buttonPressedBackground();
+    QColor color = buttonPressedBackgroundColor();
     return color;
 }
 
-QColor ColorRepository::buttonDisableBackground()
+QColor ColorRepository::buttonDisableBackgroundColor()
 {
     return s_darkMode ? QColor("#A7211F22") : QColor("#F5F5F5");
 }
@@ -122,12 +133,12 @@ QColor ColorRepository::itemViewItemMarkColor()
 
 QColor ColorRepository::itemViewItemBackgroundColor()
 {
-    return baseBackground();
+    return basicBackground();
 }
 
 QColor ColorRepository::itemViewItemSelectedBackgroundColor()
 {
-    return s_darkMode ? QColor("#3B3B3B") : QColor("#F1F1F1");
+    return s_darkMode ? QColor("#333333") : QColor("#EFEFEF");
 }
 
 QColor ColorRepository::itemViewItemHoveredBackgroundColor()
@@ -137,12 +148,12 @@ QColor ColorRepository::itemViewItemHoveredBackgroundColor()
 
 QColor ColorRepository::itemViewItemSelectedAndHoveredBackgroundColor()
 {
-    return s_darkMode ? QColor("#393939") : QColor("#F5F5F5");
+    return s_darkMode ? QColor("#303030") : QColor("#F4F4F4");
 }
 
 QColor ColorRepository::scrollBarBackgroundColor()
 {
-    return baseBackground();
+    return basicBackground();
 }
 
 QColor ColorRepository::scrollBarSliderColor()
@@ -165,47 +176,42 @@ QColor ColorRepository::scrollBarArrowColor()
     return scrollBarSliderColor();
 }
 
-QBrush ColorRepository::progressBarOutlineBrush(const QRect &rect)
+QColor ColorRepository::lineEditBackgroundColor()
 {
-    QLinearGradient gradient(0, rect.height(), rect.width(), 0);
-    gradient.setColorAt(0.0, QColor("#11C2E1"));
-    gradient.setColorAt(1.0, QColor("#893A94"));
-    return QBrush(gradient);
+    return basicBackground();
 }
 
-QBrush ColorRepository::progressBarOutlineFadingBrush(const QRect &rect)
+QColor ColorRepository::lineEditHoveredBackgroundColor()
 {
-    QLinearGradient gradient(0, rect.height(), rect.width(), 0);
-    gradient.setColorAt(0.0, QColor("#11C2E1"));
-    gradient.setColorAt(1.0, QColor("#893A94"));
-    return QBrush(gradient);
+    return basicBackground();
 }
 
-QBrush ColorRepository::progressBarContentsBrush(const QRect &rect)
+QColor ColorRepository::lineEditFocusedBackgroundColor()
 {
-    // same as outline brush but with 37% opacity (0x60 in hex)
-    // QColor(R, G, B, A) -> QColor("#AARRGGBB"). 0x60 is the alpha component.
-    QLinearGradient gradient(0, rect.height(), rect.width(), 0);
-    gradient.setColorAt(0.0, QColor("#6011C2E1"));
-    gradient.setColorAt(1.0, QColor("#60893A94"));
-    return QBrush(gradient);
+    return basicBackground();
 }
 
-QColor ColorRepository::progressBarTextColor(bool enabled)
+QColor ColorRepository::lineEditBorderColor()
 {
-    QColor textColor = text();
-    // Keep setAlphaF, as the base color is opaque
-    if (!enabled)
-        textColor.setAlphaF(textColor.alphaF() / 2.0);
-    return textColor;
+    return basicBorderColor();
 }
 
-QColor ColorRepository::listHoveredBackground()
+QColor ColorRepository::lineEditHemlineColor()
+{
+    return s_darkMode ? QColor("#9A9A9A") : QColor("#868686");
+}
+
+QColor ColorRepository::lineEditFocusedHemlineColor()
+{
+    return basicHemlineColor();
+}
+
+QColor ColorRepository::listHoveredBackgroundColor()
 {
     return QColor("#E5F3FF");
 }
 
-QColor ColorRepository::listSelectedBackground()
+QColor ColorRepository::listSelectedBackgroundColor()
 {
     return QColor("#CCE8FF");
 }

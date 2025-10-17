@@ -6,6 +6,7 @@
 #include "PushButtonStyleHelper.h"
 #include "ItemViewItemStyleHelper.h"
 #include "ScrollBarStyleHelper.h"
+#include "LineEditStyleHelper.h"
 
 class XlcStyle : public QProxyStyle
 {
@@ -26,6 +27,7 @@ private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;
     std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemStyleHelper;
     std::unique_ptr<ScrollBarStyleHelper> m_scrollBarStyleHelper;
+    std::unique_ptr<LineEditStyleHelper> m_lineEditStyleHelper;
 };
 
 #endif // XLCSTYLE_H

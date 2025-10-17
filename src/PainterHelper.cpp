@@ -17,19 +17,19 @@ void PainterHelper::drawBackground(QPainter *painter, const QStyleOptionViewItem
             pen.setWidth(OUTLINE_WIDTH);
             painter->setPen(pen);
         }
-        painter->setBrush(QBrush(ColorRepository::listSelectedBackground()));
+        painter->setBrush(QBrush(ColorRepository::listSelectedBackgroundColor()));
         painter->drawRoundedRect(rectBackground, radius, radius);
     }
     // 悬停状态
     else if (option.state & QStyle::State_MouseOver)
     {
-        painter->setBrush(QBrush(ColorRepository::listHoveredBackground()));
+        painter->setBrush(QBrush(ColorRepository::listHoveredBackgroundColor()));
         painter->drawRoundedRect(rectBackground, radius, radius);
     }
     // 普通状态
     else
     {
-        painter->setBrush(QBrush(colorNormalBackground.isValid() ? colorNormalBackground : ColorRepository::baseBackground()));
+        painter->setBrush(QBrush(colorNormalBackground.isValid() ? colorNormalBackground : ColorRepository::basicBackground()));
         painter->drawRoundedRect(rectBackground, radius, radius);
     }
     painter->restore();
