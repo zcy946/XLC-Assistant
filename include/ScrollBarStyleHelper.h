@@ -7,17 +7,11 @@
 class ScrollBarStyleHelper
 {
 public:
-    void drawScrollBarShapes(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QStyle *style);
-
-    QSize sizeFromContents(const QStyleOptionSlider *option, QSize contentsSize, const QWidget *widget) const;
-
-    int scrollBarExtent() const;
-
-private:
     void drawBackground(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget);
-    void drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QStyle *style);
-    void drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QStyle *style);
-    void drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QStyle *style);
+    void drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &grooveRect);
+    void drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSlider);
+    void drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine);
+    int scrollBarExtent() const;
 
 private:
     const int RADIUS = 6;                  // 背景圆角半径
