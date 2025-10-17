@@ -37,11 +37,6 @@ void ItemViewItemStyleHelper::drawText(const QStyleOptionViewItem *option, QPain
 
 void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
-    if (!option || !painter || !option->rect.isValid())
-    {
-        return;
-    }
-
     if (option->state & QStyle::State_Selected)
     {
         painter->save();

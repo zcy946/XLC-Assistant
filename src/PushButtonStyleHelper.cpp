@@ -15,11 +15,6 @@ void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QP
 
 void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
-    if (!option || !painter || !option->rect.isValid())
-    {
-        return;
-    }
-
     painter->save();
     QColor textColor;
     if (!(option->state & QStyle::State_Enabled))
@@ -44,7 +39,7 @@ void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter 
     {
         newFont = widget->font();
     }
-    newFont.setPixelSize(14);
+    newFont.setPixelSize(FONT_SIZE);
     painter->setFont(newFont);
 
     painter->drawText(option->rect, Qt::AlignCenter, option->text);

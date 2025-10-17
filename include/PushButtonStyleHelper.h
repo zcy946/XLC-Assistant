@@ -28,6 +28,7 @@ private:
     const int SHADOW_BLUR_RADIUS = 3;  // 阴影模糊半径
     const int SHADOW_OFFSET_X = 0;     // 阴影 x 偏移
     const int SHADOW_OFFSET_Y = 0;     // 阴影 y 偏移
+    const int FONT_SIZE = 14;          // 文本字体大小
 };
 
 #endif // PUSHBUTTONSTYLEHELPER_H
