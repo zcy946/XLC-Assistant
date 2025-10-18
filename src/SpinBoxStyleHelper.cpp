@@ -5,10 +5,7 @@
 
 void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QAbstractSpinBox *>(widget))
-    {
-        return;
-    }
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     QRect rectSpinBox = option->rect.adjusted(BORDER_WIDTH, BORDER_WIDTH, -BORDER_WIDTH, -BORDER_WIDTH);
@@ -20,10 +17,7 @@ void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPain
 
 void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine) const
 {
-    if (!qobject_cast<const QAbstractSpinBox *>(widget))
-    {
-        return;
-    }
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
@@ -80,10 +74,7 @@ void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPai
 
 void SpinBoxStyleHelper::drawHemline(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QAbstractSpinBox *>(widget))
-    {
-        return;
-    }
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);

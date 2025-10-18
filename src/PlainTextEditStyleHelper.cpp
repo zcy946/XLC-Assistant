@@ -5,10 +5,7 @@
 
 void PlainTextEditStyleHelper::drawBackgroundAndBorder(const QStyleOptionFrame *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QPlainTextEdit *>(widget))
-    {
-        return;
-    }
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     QPen borderPen;
@@ -26,10 +23,7 @@ void PlainTextEditStyleHelper::drawBackgroundAndBorder(const QStyleOptionFrame *
 
 void PlainTextEditStyleHelper::drawHemline(const QStyleOptionFrame *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QPlainTextEdit *>(widget))
-    {
-        return;
-    }
+    Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
@@ -61,12 +55,9 @@ void PlainTextEditStyleHelper::drawHemline(const QStyleOptionFrame *option, QPai
 
 QRect PlainTextEditStyleHelper::contentArea(const QStyleOptionFrame *option, const QWidget *widget) const
 {
-    if (qobject_cast<const QPlainTextEdit *>(widget))
-    {
-        return option->rect.adjusted(BORDER_WIDTH + PADDING_HORIZONTAL,
-                                     BORDER_WIDTH + PADDING_VERTICAL,
-                                     -BORDER_WIDTH, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
-                                     -BORDER_WIDTH - PADDING_VERTICAL);
-    }
-    return QRect();
+    Q_UNUSED(widget)
+    return option->rect.adjusted(BORDER_WIDTH + PADDING_HORIZONTAL,
+                                 BORDER_WIDTH + PADDING_VERTICAL,
+                                 -BORDER_WIDTH, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
+                                 -BORDER_WIDTH - PADDING_VERTICAL);
 }
