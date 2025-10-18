@@ -5,8 +5,6 @@
 #include <QToolTip>
 
 static bool s_darkMode = false;
-// static QColor s_colorPrimaryNormal = "#0067C0";
-static QColor s_colorPrimaryNormal = "#0078D4";
 
 QPalette ColorRepository::standardPalette()
 {
@@ -39,6 +37,16 @@ QColor ColorRepository::primaryNormal()
     return s_colorPrimaryNormal;
 }
 
+QColor ColorRepository::primaryPressed()
+{
+    return s_darkMode ? QColor("#42A1D2") : QColor("#3183CA");
+}
+
+QColor ColorRepository::primaryHovered()
+{
+    return s_darkMode ? QColor("#47B1E8") : QColor("#1975C5");
+}
+
 QColor ColorRepository::windowBackground()
 {
     return s_darkMode ? QColor("#202020") : QColor("#F3F3F3");
@@ -52,7 +60,12 @@ QColor ColorRepository::basicBackground()
 
 QColor ColorRepository::basicText()
 {
-    return s_darkMode ? QColor("#FFFFFF") : QColor("#000000");
+    return s_darkMode ? s_colorTextDrakMode : s_colorTextLightMode;
+}
+
+QColor ColorRepository::basicDisableText()
+{
+    return s_darkMode ? QColor("#A7A7A7") : QColor("#B6B6B6");
 }
 
 QColor ColorRepository::placeHolderText()
@@ -85,10 +98,20 @@ QColor ColorRepository::basicFocusedHemlineColor()
 
 QColor ColorRepository::basicPressedColor()
 {
-    return s_darkMode ? QColor("#554B4B4B") : QColor("#40CCCCCC");
+    return s_darkMode ? QColor("#3A3A3A") : QColor("#F7F7F7");
 }
 
 QColor ColorRepository::basicHoveredColor()
+{
+    return s_darkMode ? QColor("#404040") : QColor("#F3F3F3");
+}
+
+QColor ColorRepository::basicPressedAlphaColor()
+{
+    return s_darkMode ? QColor("#554B4B4B") : QColor("#40CCCCCC");
+}
+
+QColor ColorRepository::basicHoveredAlphaColor()
 {
     return s_darkMode ? QColor("#754B4B4B") : QColor("#70CCCCCC");
 }
@@ -269,12 +292,12 @@ QColor ColorRepository::spinBoxArrowColor()
 
 QColor ColorRepository::spinBoxPressedArrowColor()
 {
-    return basicPressedColor();
+    return basicPressedAlphaColor();
 }
 
 QColor ColorRepository::spinBoxHoveredArrowColor()
 {
-    return basicHoveredColor();
+    return basicHoveredAlphaColor();
 }
 
 QColor ColorRepository::spinBoxHemlineColor()
@@ -285,6 +308,40 @@ QColor ColorRepository::spinBoxHemlineColor()
 QColor ColorRepository::spinBoxFocusedHemlineColor()
 {
     return basicFocusedHemlineColor();
+}
+
+QColor ColorRepository::checkBoxBackgroundColor(bool status)
+{
+    if (status)
+        return primaryNormal();
+    else
+        return basicBackground();
+}
+
+QColor ColorRepository::checkBoxPressedBackgroundColor(bool status)
+{
+    if (status)
+        return primaryPressed();
+    else
+        return basicPressedColor();
+}
+
+QColor ColorRepository::checkBoxHoveredBackgroundColor(bool status)
+{
+    if (status)
+        return primaryHovered();
+    else
+        return basicHoveredColor();
+}
+
+QColor ColorRepository::checkBoxBorderColor()
+{
+    return basicBorderColor();
+}
+
+QColor ColorRepository::checkBoxIndicatorColor()
+{
+    return s_darkMode ? s_colorTextLightMode : s_colorTextDrakMode;
 }
 
 QColor ColorRepository::listHoveredBackgroundColor()

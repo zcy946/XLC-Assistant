@@ -11,11 +11,20 @@
  */
 namespace ColorRepository
 {
-    QPalette standardPalette();
+
+    // static QColor s_colorPrimaryNormal = QColor("#0067C0");
+    static QColor s_colorPrimaryNormal = QColor("#0078D4");
+    static QColor s_colorTextDrakMode = QColor("#FFFFFF");
+    static QColor s_colorTextLightMode = QColor("#000000");
+
+    QPalette
+    standardPalette();
     void setDarkMode(bool dark);
 
     // 主颜色
     QColor primaryNormal();
+    QColor primaryPressed();
+    QColor primaryHovered();
 
     // 窗口背景颜色(例如: QWidget)
     QColor windowBackground();
@@ -23,6 +32,7 @@ namespace ColorRepository
     QColor basicBackground();
     // 通用文本颜色
     QColor basicText();
+    QColor basicDisableText();
 
     // 占位符颜色
     QColor placeHolderText();
@@ -37,10 +47,13 @@ namespace ColorRepository
     // 通用底边缘焦点颜色
     QColor basicFocusedHemlineColor();
 
-    // 通用按压颜色
     QColor basicPressedColor();
-    // 通用hover颜色
     QColor basicHoveredColor();
+
+    // 通用按压颜色(alpha通道)
+    QColor basicPressedAlphaColor();
+    // 通用hover颜色(alpha通道)
+    QColor basicHoveredAlphaColor();
 
     QColor disabledTextColor();
     QColor pressedTextColor();
@@ -88,6 +101,12 @@ namespace ColorRepository
     QColor spinBoxHoveredArrowColor();
     QColor spinBoxHemlineColor();
     QColor spinBoxFocusedHemlineColor();
+
+    QColor checkBoxBackgroundColor(bool status);
+    QColor checkBoxPressedBackgroundColor(bool status);
+    QColor checkBoxHoveredBackgroundColor(bool status);
+    QColor checkBoxBorderColor();
+    QColor checkBoxIndicatorColor();
 
     QColor listHoveredBackgroundColor();
     QColor listSelectedBackgroundColor();
