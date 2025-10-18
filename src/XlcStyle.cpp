@@ -87,10 +87,15 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
             QStyleOptionViewItem optionNew = *optionItemViewItem;
             // 清除文本，防止重复绘制
             optionNew.text.clear();
-            // 迁移是否可选择状态
+            // 删除selected状态
             if (optionNew.state & State_Selected)
             {
                 optionNew.state &= ~State_Selected;
+            }
+            // 删除hovered状态
+            if (optionNew.state & State_MouseOver)
+            {
+                optionNew.state &= ~State_MouseOver;
             }
             // 调用基类绘制其他元素
             QProxyStyle::drawControl(element, &optionNew, painter, widget);
