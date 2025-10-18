@@ -92,7 +92,7 @@ void SpinBoxStyleHelper::drawHemline(const QStyleOptionSpinBox *option, QPainter
     else
         painter->setBrush(ColorRepository::spinBoxHemlineColor());
     QPainterPath path;
-    QRect rectSpinBox = option->rect.adjusted(BORDER_WIDTH, BORDER_WIDTH, -BORDER_WIDTH, -BORDER_WIDTH);
+    QRect rectSpinBox = option->rect;
     path.moveTo(MARGIN_HEMLINE, rectSpinBox.y() + rectSpinBox.height());
     path.lineTo(rectSpinBox.width() - MARGIN_HEMLINE, rectSpinBox.y() + rectSpinBox.height());
     path.arcTo(QRectF(rectSpinBox.width() - MARGIN_HEMLINE * 2,

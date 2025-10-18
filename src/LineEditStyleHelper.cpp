@@ -91,7 +91,11 @@ void LineEditStyleHelper::drawHemline(const QStyleOptionFrame *optionLineEdit, Q
     QPainterPath path;
     path.moveTo(MARGIN_HEMLINE, rectLineEdit.height());
     path.lineTo(rectLineEdit.width() - MARGIN_HEMLINE, rectLineEdit.height());
-    path.arcTo(QRectF(rectLineEdit.width() - MARGIN_HEMLINE * 2, rectLineEdit.height() - MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2), -90, 45);
+    path.arcTo(QRectF(rectLineEdit.width() - MARGIN_HEMLINE * 2,
+                      rectLineEdit.height() - MARGIN_HEMLINE * 2,
+                      MARGIN_HEMLINE * 2,
+                      MARGIN_HEMLINE * 2),
+               -90, 45);
     path.lineTo(MARGIN_HEMLINE - MARGIN_HEMLINE / 2 * std::sqrt(2), rectLineEdit.height() - (MARGIN_HEMLINE - MARGIN_HEMLINE / 2 * std::sqrt(2)));
     path.arcTo(QRectF(0, rectLineEdit.height() - MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2), 225, 45);
     path.closeSubpath();
