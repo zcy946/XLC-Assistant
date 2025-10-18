@@ -15,7 +15,7 @@ public:
     {
         if (m_target)
         {
-#ifdef QT_DEBUG
+#if ENABLE_DEBUG_BORDER == 1
             m_target->installEventFilter(this);
 #endif
         }

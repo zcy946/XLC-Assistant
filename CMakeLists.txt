@@ -74,3 +74,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/output
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/output
 )
+
+option(ENABLE_DEBUG_BORDER "启用调试边框" OFF)
+
+if(ENABLE_DEBUG_BORDER)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DEBUG_BORDER=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PRIVATE ENABLE_DEBUG_BORDER=0)
+endif()

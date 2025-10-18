@@ -18,7 +18,7 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override
     {
-#ifdef QT_DEBUG
+#if ENABLE_DEBUG_BORDER == 1
         QPainter painter(this);
         painter.setPen(QColor::fromRgb(QRandomGenerator::global()->generate()));
         painter.drawRect(rect().adjusted(1, 1, -1, -1));
