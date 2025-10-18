@@ -55,9 +55,13 @@ void PlainTextEditStyleHelper::drawHemline(const QStyleOptionFrame *option, QPai
 
 QRect PlainTextEditStyleHelper::contentArea(const QStyleOptionFrame *option, const QWidget *widget) const
 {
-    Q_UNUSED(widget)
-    return option->rect.adjusted(BORDER_WIDTH + PADDING_HORIZONTAL,
-                                 BORDER_WIDTH + PADDING_VERTICAL,
-                                 -BORDER_WIDTH, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
-                                 -BORDER_WIDTH - PADDING_VERTICAL);
+    // 仅为QPlainTextEdit做偏移
+    if (qobject_cast<const QPlainTextEdit *>(widget))
+    {
+        return option->rect.adjusted(BORDER_WIDTH + PADDING_HORIZONTAL,
+                                     BORDER_WIDTH + PADDING_VERTICAL,
+                                     -BORDER_WIDTH, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
+                                     -BORDER_WIDTH - PADDING_VERTICAL);
+    }
+    return QRect();
 }
