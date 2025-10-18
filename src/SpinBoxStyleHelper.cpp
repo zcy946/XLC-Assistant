@@ -3,7 +3,7 @@
 #include <QPainterPath>
 #include <QAbstractSpinBox>
 
-void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget)
+void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const
 {
     if (!qobject_cast<const QAbstractSpinBox *>(widget))
     {
@@ -18,7 +18,7 @@ void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPain
     painter->restore();
 }
 
-void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine)
+void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine) const
 {
     if (!qobject_cast<const QAbstractSpinBox *>(widget))
     {
@@ -78,7 +78,7 @@ void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPai
     painter->restore();
 }
 
-void SpinBoxStyleHelper::drawHemline(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget)
+void SpinBoxStyleHelper::drawHemline(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const
 {
     if (!qobject_cast<const QAbstractSpinBox *>(widget))
     {
@@ -87,21 +87,27 @@ void SpinBoxStyleHelper::drawHemline(const QStyleOptionSpinBox *option, QPainter
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
+    int marginLB = MARGIN_HEMLINE;
     if (option->state & QStyle::State_HasFocus)
+    {
         painter->setBrush(ColorRepository::spinBoxFocusedHemlineColor());
+        marginLB = MARGIN_HEMLINE_FOCUSED;
+    }
     else
+    {
         painter->setBrush(ColorRepository::spinBoxHemlineColor());
+    }
     QPainterPath path;
     QRect rectSpinBox = option->rect;
-    path.moveTo(MARGIN_HEMLINE, rectSpinBox.y() + rectSpinBox.height());
-    path.lineTo(rectSpinBox.width() - MARGIN_HEMLINE, rectSpinBox.y() + rectSpinBox.height());
-    path.arcTo(QRectF(rectSpinBox.width() - MARGIN_HEMLINE * 2,
-                      rectSpinBox.y() + rectSpinBox.height() - MARGIN_HEMLINE * 2,
-                      MARGIN_HEMLINE * 2,
-                      MARGIN_HEMLINE * 2),
+    path.moveTo(marginLB, rectSpinBox.y() + rectSpinBox.height());
+    path.lineTo(rectSpinBox.width() - marginLB, rectSpinBox.y() + rectSpinBox.height());
+    path.arcTo(QRectF(rectSpinBox.width() - marginLB * 2,
+                      rectSpinBox.y() + rectSpinBox.height() - marginLB * 2,
+                      marginLB * 2,
+                      marginLB * 2),
                -90, 45);
-    path.lineTo(MARGIN_HEMLINE - 2 * std::sqrt(2), rectSpinBox.y() + rectSpinBox.height() - (MARGIN_HEMLINE - 2 * std::sqrt(2)));
-    path.arcTo(QRectF(0, rectSpinBox.y() + rectSpinBox.height() - MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2), 225, 45);
+    path.lineTo(marginLB - marginLB / 2 * std::sqrt(2), rectSpinBox.y() + rectSpinBox.height() - (marginLB - marginLB / 2 * std::sqrt(2)));
+    path.arcTo(QRectF(0, rectSpinBox.y() + rectSpinBox.height() - marginLB * 2, marginLB * 2, marginLB * 2), 225, 45);
     path.closeSubpath();
     painter->drawPath(path);
     painter->restore();

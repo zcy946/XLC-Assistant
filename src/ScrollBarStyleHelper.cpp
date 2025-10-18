@@ -32,7 +32,10 @@ void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter
         painter->setRenderHint(QPainter::Antialiasing, true);
         painter->setBrush(ColorRepository::scrollBarBackgroundColor());
         painter->setPen(Qt::NoPen);
-        painter->drawRect(grooveRect);
+        if (option->orientation == Qt::Horizontal)
+            painter->drawRect(grooveRect.adjusted(0, 0, 0, -PADDING));
+        else
+            painter->drawRect(grooveRect.adjusted(0, 0, -PADDING, 0));
         painter->restore();
     }
 }
@@ -50,11 +53,11 @@ void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter
         QRect rectDrawSlider;
         if (option->orientation == Qt::Horizontal)
         {
-            rectDrawSlider = rectSlider.adjusted(SPACING_SLIDER_TO_ARROW, 0, -SPACING_SLIDER_TO_ARROW, 0);
+            rectDrawSlider = rectSlider.adjusted(SPACING_SLIDER_TO_ARROW, 0, -SPACING_SLIDER_TO_ARROW, -PADDING);
         }
         else
         {
-            rectDrawSlider = rectSlider.adjusted(0, SPACING_SLIDER_TO_ARROW, 0, -SPACING_SLIDER_TO_ARROW);
+            rectDrawSlider = rectSlider.adjusted(0, SPACING_SLIDER_TO_ARROW, -PADDING, -SPACING_SLIDER_TO_ARROW);
         }
         QColor sliderColor = ColorRepository::scrollBarSliderColor();
         if (option->state & QStyle::State_MouseOver)
@@ -84,10 +87,12 @@ void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPa
     painter->setPen(Qt::NoPen);
     if (option->orientation == Qt::Horizontal)
     {
+        QRect rectDrawSubLine = rectSubLine.adjusted(0, 0, 0, -PADDING);
+        QRect rectDrawAddLine = rectAddLine.adjusted(0, 0, 0, -PADDING);
         // 左三角(行减按钮)
-        qreal centerLeftX = rectSubLine.x() + rectSubLine.width() / 2;
-        qreal centerRightX = rectAddLine.x() + rectAddLine.width() / 2;
-        qreal centerY = rectSubLine.height() / 2;
+        qreal centerLeftX = rectDrawSubLine.x() + rectDrawSubLine.width() / 2;
+        qreal centerRightX = rectDrawAddLine.x() + rectDrawAddLine.width() / 2;
+        qreal centerY = rectDrawSubLine.height() / 2;
         QPainterPath leftPath;
         leftPath.moveTo(centerLeftX - qCos(30 * PI / 180.0) * SIDE_LENGTH / 2, centerY);
         leftPath.lineTo(centerLeftX + qCos(30 * PI / 180.0) * SIDE_LENGTH / 2, centerY + SIDE_LENGTH / 2);
@@ -105,12 +110,14 @@ void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPa
     }
     else
     {
+        QRect rectDrawSubLine = rectSubLine.adjusted(0, 0, -PADDING, 0);
+        QRect rectDrawAddLine = rectAddLine.adjusted(0, 0, -PADDING, 0);
         qreal centerToTop = (SIDE_LENGTH / 2) / qCos(30 * M_PI / 180.0);
         qreal centerToBottom = (SIDE_LENGTH / 2) * qTan(30 * M_PI / 180.0);
         // 上三角(行增按钮)
-        qreal centerX = rectSubLine.width() / 2.0;
-        qreal centerUpY = rectSubLine.center().y() + 2;
-        qreal centerDownY = rectAddLine.center().y() + 2;
+        qreal centerX = rectDrawSubLine.width() / 2.0;
+        qreal centerUpY = rectDrawSubLine.center().y() + 2;
+        qreal centerDownY = rectDrawAddLine.center().y() + 2;
         QPainterPath upPath;
         upPath.moveTo(centerX, centerUpY - centerToTop);
         upPath.lineTo(centerX + SIDE_LENGTH / 2, centerUpY + centerToBottom);
@@ -131,5 +138,5 @@ void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPa
 
 int ScrollBarStyleHelper::ScrollBarStyleHelper::scrollBarExtent() const
 {
-    return SCROLLBAR_EXTENT;
+    return SCROLLBAR_EXTENT + PADDING;
 }

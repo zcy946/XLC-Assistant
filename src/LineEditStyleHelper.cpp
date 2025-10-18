@@ -79,27 +79,29 @@ void LineEditStyleHelper::drawHemline(const QStyleOptionFrame *optionLineEdit, Q
 {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setPen(Qt::NoPen);
     QRect rectLineEdit = optionLineEdit->rect;
+    int marginLB = MARGIN_HEMLINE;
     if (optionLineEdit->state & QStyle::State_HasFocus)
     {
         painter->setBrush(ColorRepository::lineEditFocusedHemlineColor());
+        marginLB = MARGIN_HEMLINE_FOCUSED;
     }
     else
     {
         painter->setBrush(ColorRepository::lineEditHemlineColor());
     }
     QPainterPath path;
-    path.moveTo(MARGIN_HEMLINE, rectLineEdit.height());
-    path.lineTo(rectLineEdit.width() - MARGIN_HEMLINE, rectLineEdit.height());
-    path.arcTo(QRectF(rectLineEdit.width() - MARGIN_HEMLINE * 2,
-                      rectLineEdit.height() - MARGIN_HEMLINE * 2,
-                      MARGIN_HEMLINE * 2,
-                      MARGIN_HEMLINE * 2),
+    path.moveTo(marginLB, rectLineEdit.height());
+    path.lineTo(rectLineEdit.width() - marginLB, rectLineEdit.height());
+    path.arcTo(QRectF(rectLineEdit.width() - marginLB * 2,
+                      rectLineEdit.height() - marginLB * 2,
+                      marginLB * 2,
+                      marginLB * 2),
                -90, 45);
-    path.lineTo(MARGIN_HEMLINE - MARGIN_HEMLINE / 2 * std::sqrt(2), rectLineEdit.height() - (MARGIN_HEMLINE - MARGIN_HEMLINE / 2 * std::sqrt(2)));
-    path.arcTo(QRectF(0, rectLineEdit.height() - MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2, MARGIN_HEMLINE * 2), 225, 45);
+    path.lineTo(marginLB - marginLB / 2 * std::sqrt(2), rectLineEdit.height() - (marginLB - marginLB / 2 * std::sqrt(2)));
+    path.arcTo(QRectF(0, rectLineEdit.height() - marginLB * 2, marginLB * 2, marginLB * 2), 225, 45);
     path.closeSubpath();
-    painter->setPen(Qt::NoPen);
     painter->drawPath(path);
     painter->restore();
 }

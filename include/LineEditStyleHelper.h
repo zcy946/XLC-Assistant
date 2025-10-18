@@ -18,12 +18,12 @@ private:
     void drawHemline(const QStyleOptionFrame *optionLineEdit, QPainter *painter);
 
 private:
-    const int RADIUS = 6;         // 圆角半径
-    const int BORDER_WIDTH = 1;   // 边框宽度
-    const int MARGIN_HEMLINE = 6; // 底部边缘水平外边距
-
-    const int PADDING_VERTICAL = 5;    // 标签与边框之间的垂直空白量
-    const int PADDING_HORIZONTAL = 12; // 标签与边框之间的水平空白量
+    const int RADIUS = 6;                 // 圆角半径
+    const int BORDER_WIDTH = 1;           // 边框宽度
+    const int MARGIN_HEMLINE = 4;         // 底部边缘矩形左下角水平外边距
+    const int MARGIN_HEMLINE_FOCUSED = 6; // 底部边缘矩形左下角水平聚焦时外边距
+    const int PADDING_VERTICAL = 6;       // 标签与边框之间的垂直空白量
+    const int PADDING_HORIZONTAL = 12;    // 标签与边框之间的水平空白量
 };
 
 #endif // LINEEDITSTYLEHELPER_H
