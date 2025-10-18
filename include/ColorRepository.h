@@ -76,6 +76,11 @@ namespace ColorRepository
     QColor lineEditHemlineColor();
     QColor lineEditFocusedHemlineColor();
 
+    QColor plainTextEditBackgroundColor();
+    QColor plainTextEditBorderColor();
+    QColor plainTextEditHemlineColor();
+    QColor plainTextEditFocusedHemlineColor();
+
     QColor spinBoxBackgroundColor();
     QColor spinBoxBorderColor();
     QColor spinBoxArrowColor();

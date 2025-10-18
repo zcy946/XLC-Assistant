@@ -7,6 +7,7 @@
 #include <QPointer>
 #include <QFontDatabase>
 #include <QListView>
+#include <QPlainTextEdit>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -24,7 +25,8 @@ XlcStyle::XlcStyle()
       m_itemViewItemStyleHelper(new ItemViewItemStyleHelper()),
       m_scrollBarStyleHelper(new ScrollBarStyleHelper()),
       m_lineEditStyleHelper(new LineEditStyleHelper()),
-      m_spinBoxStyleHelper(new SpinBoxStyleHelper())
+      m_spinBoxStyleHelper(new SpinBoxStyleHelper()),
+      m_plainTextEditStyleHelper(new PlainTextEditStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
@@ -33,13 +35,6 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
 {
     switch (pe)
     {
-    case PE_Frame:
-        if (qobject_cast<const QListView *>(widget))
-        {
-            m_listViewStyleHelper->drawBorder(painter, option->rect);
-            return;
-        }
-        break;
     case PE_FrameFocusRect:
         // 不绘制虚线焦点框
         return;
@@ -100,6 +95,22 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
             // 调用基类绘制其他元素
             QProxyStyle::drawControl(element, &optionNew, painter, widget);
             return;
+        }
+        break;
+    case CE_ShapedFrame:
+        if (const QStyleOptionFrame *optionFrame = qstyleoption_cast<const QStyleOptionFrame *>(option))
+        {
+            if (qobject_cast<const QListView *>(widget))
+            {
+                m_listViewStyleHelper->drawBorder(painter, optionFrame->rect);
+                return;
+            }
+            if (qobject_cast<const QPlainTextEdit *>(widget))
+            {
+                m_plainTextEditStyleHelper->drawBackgroundAndBorder(optionFrame, painter, widget);
+                m_plainTextEditStyleHelper->drawHemline(optionFrame, painter, widget);
+                return;
+            }
         }
         break;
     default:
@@ -230,6 +241,18 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
                                                          QProxyStyle::subElementRect(subElement, optionLineEdit, widget));
         }
         break;
+    case SE_FrameContents:
+    {
+        if (const QStyleOptionFrame *optionFrame = qstyleoption_cast<const QStyleOptionFrame *>(option))
+        {
+            // 获取内容绘制区域
+            QRect rectFinal = m_plainTextEditStyleHelper->contentArea(optionFrame, widget);
+            if (!rectFinal.isValid())
+                break;
+            return rectFinal;
+        }
+        break;
+    }
     default:
         break;
     }
@@ -247,7 +270,10 @@ void XlcStyle::polish(QWidget *w)
     {
         w->setAttribute(Qt::WA_Hover);
     }
-    // 修复阴影绘制的时序问题
+
+    // NOTE 可以在 polish 中判断目标类型，从而替换调色板实现不同颜色
+
+    // 阴影绘制
     if (QPushButton *button = qobject_cast<QPushButton *>(w))
     {
         if (!button->isVisible())

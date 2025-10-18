@@ -9,6 +9,7 @@
 #include "ScrollBarStyleHelper.h"
 #include "LineEditStyleHelper.h"
 #include "SpinBoxStyleHelper.h"
+#include "PlainTextEditStyleHelper.h"
 
 class XlcStyle : public QProxyStyle
 {
@@ -32,6 +33,7 @@ private:
     std::unique_ptr<ScrollBarStyleHelper> m_scrollBarStyleHelper;
     std::unique_ptr<LineEditStyleHelper> m_lineEditStyleHelper;
     std::unique_ptr<SpinBoxStyleHelper> m_spinBoxStyleHelper;
+    std::unique_ptr<PlainTextEditStyleHelper> m_plainTextEditStyleHelper;
 };
 
 #endif // XLCSTYLE_H

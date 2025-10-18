@@ -5,7 +5,8 @@
 #include <QToolTip>
 
 static bool s_darkMode = false;
-static QColor s_colorPrimaryNormal = "#0067C0";
+// static QColor s_colorPrimaryNormal = "#0067C0";
+static QColor s_colorPrimaryNormal = "#0078D4";
 
 QPalette ColorRepository::standardPalette()
 {
@@ -227,6 +228,26 @@ QColor ColorRepository::lineEditHemlineColor()
 }
 
 QColor ColorRepository::lineEditFocusedHemlineColor()
+{
+    return basicFocusedHemlineColor();
+}
+
+QColor ColorRepository::plainTextEditBackgroundColor()
+{
+    return basicBackground();
+}
+
+QColor ColorRepository::plainTextEditBorderColor()
+{
+    return basicBorderColor();
+}
+
+QColor ColorRepository::plainTextEditHemlineColor()
+{
+    return basicHemlineColor();
+}
+
+QColor ColorRepository::plainTextEditFocusedHemlineColor()
 {
     return basicFocusedHemlineColor();
 }
