@@ -6,14 +6,8 @@
 
 void LineEditStyleHelper::drawLineEditShape(const QStyleOptionFrame *optionLineEdit, QPainter *painter, const QWidget *widget)
 {
-    // 检查请求是否由 QLineEdit 发起
-    const QLineEdit *lineEdit = qobject_cast<const QLineEdit *>(widget);
-    if (!lineEdit)
-        return;
-    /**
-     * QAbstractSpinBox(QSpinBox和QDoubleSpinbox)内嵌了一个QLineEdit，在绘制背景这块排除它们
-     *  */
-    if (qobject_cast<const QAbstractSpinBox *>(lineEdit->parentWidget()))
+    // QAbstractSpinBox(QSpinBox和QDoubleSpinbox)内嵌了一个QLineEdit，在绘制背景这块排除它们
+    if (qobject_cast<const QAbstractSpinBox *>(widget->parentWidget()))
         return;
     // 背景
     drawBackground(optionLineEdit, painter);
@@ -23,23 +17,20 @@ void LineEditStyleHelper::drawLineEditShape(const QStyleOptionFrame *optionLineE
     drawHemline(optionLineEdit, painter);
 }
 
-QRect LineEditStyleHelper::subElementRect(QStyle::SubElement subElement, const QStyleOptionFrame *option, const QWidget *widget, const QRect &rectBasic)
+QRect LineEditStyleHelper::rectText(const QStyleOptionFrame *option, const QWidget *widget, QRect rectTextOriginal)
 {
-    if (qobject_cast<const QLineEdit *>(widget))
-    {
-        return rectBasic.adjusted(PADDING_HORIZONTAL, PADDING_VERTICAL, -PADDING_HORIZONTAL, -PADDING_VERTICAL);
-    }
-    return rectBasic;
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    return rectTextOriginal.adjusted(PADDING_HORIZONTAL, PADDING_VERTICAL, -PADDING_HORIZONTAL, -PADDING_VERTICAL);
 }
 
-QSize LineEditStyleHelper::sizeFromContents(const QStyleOptionFrame *option, QSize sizeBasic, const QWidget *widget)
+QSize LineEditStyleHelper::rectAll(const QStyleOptionFrame *option, const QWidget *widget, QSize sizeAllOriginal)
 {
-    if (qobject_cast<const QLineEdit *>(widget))
-    {
-        sizeBasic.rwidth() += PADDING_HORIZONTAL * 2;
-        sizeBasic.rheight() += PADDING_VERTICAL * 2;
-    }
-    return sizeBasic;
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    sizeAllOriginal.rwidth() += PADDING_HORIZONTAL * 2;
+    sizeAllOriginal.rheight() += PADDING_VERTICAL * 2;
+    return sizeAllOriginal;
 }
 
 void LineEditStyleHelper::drawBackground(const QStyleOptionFrame *optionLineEdit, QPainter *painter)

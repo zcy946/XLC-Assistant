@@ -5,11 +5,6 @@
 
 void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
-    // 检查请求是否由 QPushButton 发起
-    if (!qobject_cast<const QPushButton *>(widget))
-    {
-        return;
-    }
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
@@ -21,11 +16,6 @@ void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QP
 
 void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
 {
-    // 检查请求是否由 QPushButton 发起
-    if (!qobject_cast<const QPushButton *>(widget))
-    {
-        return;
-    }
     painter->save();
     QColor textColor;
     if (!(option->state & QStyle::State_Enabled))

@@ -9,8 +9,10 @@ class LineEditStyleHelper
 {
 public:
     void drawLineEditShape(const QStyleOptionFrame *optionLineEdit, QPainter *painter, const QWidget *widget);
-    QRect subElementRect(QStyle::SubElement subElement, const QStyleOptionFrame *option, const QWidget *widget, const QRect &rectBasic);
-    QSize sizeFromContents(const QStyleOptionFrame *option, QSize sizeBasic, const QWidget *widget);
+    // 文本区域
+    QRect rectText(const QStyleOptionFrame *option, const QWidget *widget, QRect rectTextOriginal);
+    // 整个控件区域
+    QSize rectAll(const QStyleOptionFrame *option, const QWidget *widget, QSize sizeAllOriginal);
 
 private:
     void drawBackground(const QStyleOptionFrame *optionLineEdit, QPainter *painter);
