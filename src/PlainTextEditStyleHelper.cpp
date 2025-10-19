@@ -10,13 +10,13 @@ void PlainTextEditStyleHelper::drawBackgroundAndBorder(const QStyleOptionFrame *
     painter->setRenderHint(QPainter::Antialiasing, true);
     QPen borderPen;
     borderPen.setColor(ColorRepository::plainTextEditBorderColor());
-    borderPen.setWidth(BORDER_WIDTH);
+    borderPen.setWidth(WIDTH_BORDER);
     painter->setPen(borderPen);
     painter->setBrush(ColorRepository::plainTextEditBackgroundColor());
-    painter->drawRoundedRect(option->rect.adjusted(BORDER_WIDTH,
-                                                   BORDER_WIDTH,
-                                                   -BORDER_WIDTH,
-                                                   -BORDER_WIDTH),
+    painter->drawRoundedRect(option->rect.adjusted(WIDTH_BORDER,
+                                                   WIDTH_BORDER,
+                                                   -WIDTH_BORDER,
+                                                   -WIDTH_BORDER),
                              RADIUS, RADIUS);
     painter->restore();
 }
@@ -58,10 +58,10 @@ QRect PlainTextEditStyleHelper::contentArea(const QStyleOptionFrame *option, con
     // 仅为QPlainTextEdit做偏移
     if (qobject_cast<const QPlainTextEdit *>(widget))
     {
-        return option->rect.adjusted(BORDER_WIDTH + PADDING_HORIZONTAL,
-                                     BORDER_WIDTH + PADDING_VERTICAL,
-                                     -BORDER_WIDTH, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
-                                     -BORDER_WIDTH - PADDING_VERTICAL);
+        return option->rect.adjusted(WIDTH_BORDER + PADDING_HORIZONTAL,
+                                     WIDTH_BORDER + PADDING_VERTICAL,
+                                     -WIDTH_BORDER, // 右侧x坐标不偏移水平内边距，保证scrollbar紧贴右侧
+                                     -WIDTH_BORDER - PADDING_VERTICAL);
     }
     return QRect();
 }

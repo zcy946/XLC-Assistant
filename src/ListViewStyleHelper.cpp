@@ -7,8 +7,8 @@ void ListViewStyleHelper::drawBorder(QPainter *painter, QRect rect)
     painter->save();
     QPen borderPen;
     borderPen.setColor(ColorRepository::listViewBorderColor());
-    borderPen.setWidth(BORDER_WIDTH);
+    borderPen.setWidth(WIDTH_BORDER);
     painter->setPen(borderPen);
-    painter->drawRoundedRect(rect.adjusted(BORDER_WIDTH, BORDER_WIDTH, -BORDER_WIDTH, -BORDER_WIDTH), RADIUS, RADIUS);
+    painter->drawRoundedRect(rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER), RADIUS, RADIUS);
     painter->restore();
 }

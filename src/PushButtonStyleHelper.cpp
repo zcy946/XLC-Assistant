@@ -13,7 +13,7 @@ void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QP
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
-    painter->drawRoundedRect(QRectF(option->rect).adjusted(FRAME_WIDTH, FRAME_WIDTH, -(FRAME_WIDTH), -(FRAME_WIDTH)),
+    painter->drawRoundedRect(QRectF(option->rect).adjusted(WIDTH_BORDER, WIDTH_BORDER, -(WIDTH_BORDER), -(WIDTH_BORDER)),
                              RADIUS,
                              RADIUS);
     painter->restore();
@@ -50,7 +50,7 @@ void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter 
     {
         newFont = widget->font();
     }
-    newFont.setPixelSize(FONT_SIZE);
+    newFont.setPixelSize(SIZE_FONT);
     painter->setFont(newFont);
 
     painter->drawText(option->rect, Qt::AlignCenter, option->text);
@@ -63,9 +63,9 @@ void PushButtonStyleHelper::drawShadow(QPushButton *button)
     if (!button->graphicsEffect())
     {
         QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect(button);
-        shadowEffect->setBlurRadius(SHADOW_BLUR_RADIUS);
+        shadowEffect->setBlurRadius(RADIUS_SHADOW);
         shadowEffect->setColor(ColorRepository::shadowColor());
-        shadowEffect->setOffset(SHADOW_OFFSET_X, SHADOW_OFFSET_Y);
+        shadowEffect->setOffset(OFFSET_X_SHADOW, OFFSET_Y_SHADOW);
         button->setGraphicsEffect(shadowEffect);
     }
 }
@@ -74,8 +74,8 @@ QSize PushButtonStyleHelper::sizeFromContents(const QStyleOptionButton *option, 
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)
-    return QSize(qMax(MIN_WIDTH, contentsSize.width() + PADDING_HORIZONTAL * 2 + FRAME_WIDTH * 2),
-                 contentsSize.height() + PADDING_VERTICAL * 2 + FRAME_WIDTH * 2);
+    return QSize(qMax(WIDTH_MIN, contentsSize.width() + PADDING_HORIZONTAL * 2 + WIDTH_BORDER * 2),
+                 contentsSize.height() + PADDING_VERTICAL * 2 + WIDTH_BORDER * 2);
 }
 
 int PushButtonStyleHelper::padding()
@@ -101,7 +101,7 @@ void PushButtonStyleHelper::setupPainterForShape(const QStyleOptionButton *optio
     // 悬停
     else if (option->state & QStyle::State_MouseOver)
     {
-        painter->setPen(QPen(ColorRepository::buttonHoverOutlineColor(), FRAME_WIDTH));
+        painter->setPen(QPen(ColorRepository::buttonHoverOutlineColor(), WIDTH_BORDER));
         painter->setBrush(ColorRepository::buttonHoveredBackgroundColor());
     }
     // 默认

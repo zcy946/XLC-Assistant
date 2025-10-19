@@ -19,7 +19,7 @@ private:
 
 private:
     const int RADIUS = 6;                 // 圆角半径
-    const int BORDER_WIDTH = 1;           // 边框宽度
+    const int WIDTH_BORDER = 1;           // 边框宽度
     const int MARGIN_HEMLINE = 4;         // 底部边缘矩形左下角水平外边距
     const int MARGIN_HEMLINE_FOCUSED = 6; // 底部边缘矩形左下角水平聚焦时外边距
     const int PADDING_VERTICAL = 6;       // 标签与边框之间的垂直空白量

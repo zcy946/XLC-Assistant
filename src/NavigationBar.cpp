@@ -102,7 +102,7 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
      * 绘制文本
      */
     QFont font = getGlobalFont();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(SIZE_FONT);
     QFontMetrics fm = QFontMetrics(font);
     int textWidth = fm.horizontalAdvance(text);
     QRect rectText = fm.boundingRect(0, 0, rectBackground.width(), 0, Qt::TextWrapAnywhere, text);
@@ -121,7 +121,7 @@ QSize NavigationItemDelegate::sizeHint(const QStyleOptionViewItem &option, const
     int heightBackground = option.rect.width() - MARGIN * 2;
 
     QFont font = getGlobalFont();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(SIZE_FONT);
     QFontMetrics fm = QFontMetrics(font);
     QString text = index.data(NavigationItemListModel::Text).toString();
     QRect rectText = fm.boundingRect(0, 0, option.rect.width(), 0, Qt::TextWrapAnywhere, text);

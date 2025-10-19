@@ -48,7 +48,7 @@ private:
     const int PADDING = 5;                                 // item 内边距
     const int SPACING_ICON_TO_TEXT = 2;                    // item 图标(包含背景)到文本之间的距离
     const QString DEFAULT_ICON = "://image/fire-line.svg"; // 图标加载失败时的默认图标
-    const int FONT_SIZE = getGlobalFont().pointSize();     // 字体大小
+    const int SIZE_FONT = getGlobalFont().pointSize();     // 字体大小
 };
 
 class NavigationBar : public QListView

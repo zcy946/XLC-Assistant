@@ -83,7 +83,7 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
      * 绘制背景
      */
     QFont font = getGlobalFont();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(SIZE_FONT);
     QFontMetrics fm = QFontMetrics(font);
     int widthBackground = option.rect.width() - MARGIN * 2;
     int heightBackground = PADDING_VERTICAL + fm.height() + PADDING_VERTICAL;
@@ -156,7 +156,7 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 QSize AgentDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QFont font = getGlobalFont();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(SIZE_FONT);
     QFontMetrics fm = QFontMetrics(font);
     int height = MARGIN + PADDING_VERTICAL + fm.height() + PADDING_VERTICAL;
     return QSize(option.rect.width(), height);

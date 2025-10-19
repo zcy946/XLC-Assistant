@@ -10,7 +10,7 @@ public:
     void drawBorder(QPainter *painter, QRect rect);
 
 private:
-    const int BORDER_WIDTH = 1; // 边框宽度
+    const int WIDTH_BORDER = 1; // 边框宽度
     const int RADIUS = 4;       // 变宽圆角半径
 };
 

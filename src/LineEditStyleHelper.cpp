@@ -71,7 +71,7 @@ void LineEditStyleHelper::drawBorder(const QStyleOptionFrame *optionLineEdit, QP
     QRect rectLineEdit = optionLineEdit->rect;
     painter->setPen(ColorRepository::lineEditBorderColor());
     painter->setBrush(Qt::NoBrush);
-    painter->drawRoundedRect(rectLineEdit.adjusted(BORDER_WIDTH, BORDER_WIDTH, -BORDER_WIDTH, -BORDER_WIDTH), RADIUS, RADIUS);
+    painter->drawRoundedRect(rectLineEdit.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER), RADIUS, RADIUS);
     painter->restore();
 }
 

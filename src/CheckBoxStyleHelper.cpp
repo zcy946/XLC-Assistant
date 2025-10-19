@@ -1,14 +1,11 @@
 #include "CheckBoxStyleHelper.h"
 #include <QCheckBox>
 #include "ColorRepository.h"
-#include <QListView>
+#include "XlcStyle.h"
 
-void CheckBoxStyleHelper::drawBackground(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
+void CheckBoxStyleHelper::drawBackground(const XlcStyle *style, const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
-    Q_UNUSED(widget)
-    QRect rect = option->rect;
-    QRect rectIndicator(rect.x(), rect.y(), WIDTH_INDICATOR, HEIGHT_INDICATOR);
-    rectIndicator.adjust(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
+    QRect rectCheckIndicator = style->subElementRect(QStyle::SE_CheckBoxIndicator, option, widget);
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
@@ -51,14 +48,15 @@ void CheckBoxStyleHelper::drawBackground(const QStyleOptionButton *option, QPain
             }
         }
     }
-    painter->drawRoundedRect(rectIndicator, RADIUS, RADIUS);
+    // 绘制复选框背景
+    painter->drawRoundedRect(rectCheckIndicator, RADIUS, RADIUS);
     painter->restore();
 }
 
-void CheckBoxStyleHelper::drawIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, const QRect &rectIndicatorOriginal) const
+void CheckBoxStyleHelper::drawMarkIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, const QRect &rectIndicatorOriginal) const
 {
     Q_UNUSED(widget)
-    QRect rectIndicator = rectIndicatorOriginal.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
+    QRect rectCheckIndicator = option->rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(ColorRepository::checkBoxIndicatorColor());
@@ -66,14 +64,17 @@ void CheckBoxStyleHelper::drawIndicator(const QStyleOptionButton *option, QPaint
     {
         painter->save();
         QFont iconFont = QFont(ICONFONT_NAME);
-        iconFont.setPixelSize(WIDTH_INDICATOR * 0.75);
+        iconFont.setPixelSize(rectCheckIndicator.width() * 0.75);
         painter->setFont(iconFont);
-        painter->drawText(rectIndicator, Qt::AlignCenter, ICONFONT_Check);
+        painter->drawText(rectCheckIndicator, Qt::AlignCenter, ICONFONT_Check);
         painter->restore();
     }
     else if (option->state.testFlag(QStyle::State_NoChange))
     {
-        QLine lineCheck(rectIndicator.x() + 3, rectIndicator.center().y(), rectIndicator.right() - 3, rectIndicator.center().y());
+        int widthMarkLine = rectCheckIndicator.width() / 10 * 8;
+        int x = rectCheckIndicator.x() + (rectCheckIndicator.width() - widthMarkLine) / 2;
+        int y = rectCheckIndicator.center().y();
+        QLine lineCheck(x, y, x + widthMarkLine, y);
         painter->drawLine(lineCheck);
     }
     painter->restore();
@@ -116,15 +117,32 @@ int CheckBoxStyleHelper::heightIndicator() const
     return HEIGHT_INDICATOR;
 }
 
-QRect CheckBoxStyleHelper::rectContents(const QStyleOptionButton *option, const QWidget *widget)
+QRect CheckBoxStyleHelper::rectContents(const XlcStyle *style, const QStyleOptionButton *option, const QWidget *widget) const
 {
-    Q_UNUSED(widget)
+    int widthCheckIndicator = style->pixelMetric(QStyle::PM_IndicatorWidth, option, widget);
+    int heightCheckIndicator = style->pixelMetric(QStyle::PM_IndicatorHeight, option, widget);
+    int spacingCheckBoxToLabel = style->pixelMetric(QStyle::PM_CheckBoxLabelSpacing, option, widget);
+
+    if (option->text.isEmpty() || option->text.isNull())
+    {
+        return QRect(option->rect.x(), option->rect.y(), widthCheckIndicator, heightCheckIndicator);
+    }
     int widthText = option->fontMetrics.horizontalAdvance(option->text);
-    return QRect(option->rect.x(), option->rect.y(), WIDTH_INDICATOR + SPACING_CHECKBOX_TO_LABEL + widthText, HEIGHT_INDICATOR);
+    return QRect(option->rect.x(), option->rect.y(), widthCheckIndicator + spacingCheckBoxToLabel + widthText, heightCheckIndicator);
 }
 
-QRect CheckBoxStyleHelper::rectIndicator(const QStyleOptionButton *option, const QWidget *widget)
+QRect CheckBoxStyleHelper::rectCheckIndicator(const QStyleOptionButton *option, const QWidget *widget) const
 {
-    Q_UNUSED(widget)
-    return QRect(option->rect.x(), option->rect.y(), WIDTH_INDICATOR, HEIGHT_INDICATOR);
+    QRect rectCheckIndicator;
+    // QCheckBox中的可选框有特殊大小
+    if (qobject_cast<const QCheckBox *>(widget))
+    {
+        rectCheckIndicator = QRect(option->rect.x(), option->rect.y(), WIDTH_INDICATOR, HEIGHT_INDICATOR);
+        rectCheckIndicator.adjust(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
+    }
+    else
+    {
+        rectCheckIndicator = option->rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
+    }
+    return rectCheckIndicator;
 }

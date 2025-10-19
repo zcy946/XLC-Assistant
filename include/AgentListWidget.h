@@ -52,7 +52,7 @@ private:
     const int OUTLINE_WIDTH = 2;                       // item 轮廓宽度
     const int SPACING_NAME_TO_CONVERSATION_COUNT = 5;  // name 到 对话计数背景之间的距离
     const int PADDING_CONVERSATION_COUNT = 2;          // 对话计数内边距
-    const int FONT_SIZE = getGlobalFont().pointSize(); // 字体大小
+    const int SIZE_FONT = getGlobalFont().pointSize(); // 字体大小
     const int FONT_SIZE_CONVERSATION_COUNT = 8;        // 对话计数字体大小
 };
 

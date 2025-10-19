@@ -8,7 +8,7 @@ void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPain
     Q_UNUSED(widget)
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
-    QRect rectSpinBox = option->rect.adjusted(BORDER_WIDTH, BORDER_WIDTH, -BORDER_WIDTH, -BORDER_WIDTH);
+    QRect rectSpinBox = option->rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
     painter->setPen(ColorRepository::spinBoxBorderColor());
     painter->setBrush(ColorRepository::spinBoxBackgroundColor());
     painter->drawRoundedRect(rectSpinBox, RADIUS, RADIUS);

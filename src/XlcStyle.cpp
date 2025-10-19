@@ -8,6 +8,7 @@
 #include <QFontDatabase>
 #include <QListView>
 #include <QPlainTextEdit>
+#include <QDebug>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -26,7 +27,8 @@ XlcStyle::XlcStyle()
       m_scrollBarStyleHelper(new ScrollBarStyleHelper()),
       m_lineEditStyleHelper(new LineEditStyleHelper()),
       m_spinBoxStyleHelper(new SpinBoxStyleHelper()),
-      m_plainTextEditStyleHelper(new PlainTextEditStyleHelper())
+      m_plainTextEditStyleHelper(new PlainTextEditStyleHelper()),
+      m_checkBoxStyleHelper(new CheckBoxStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
@@ -45,11 +47,20 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
             return;
         }
         break;
+    case PE_IndicatorCheckBox:
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            m_checkBoxStyleHelper->drawBackground(this, optionButton, painter, widget);
+            m_checkBoxStyleHelper->drawMarkIndicator(optionButton, painter, widget, QProxyStyle::subElementRect(SE_CheckBoxIndicator, optionButton, widget));
+            return;
+        }
+        break;
     default:
         break;
     }
     QProxyStyle::drawPrimitive(pe, option, painter, widget);
 }
+
 void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element)
@@ -73,27 +84,14 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
+            // 绘制背景
             m_itemViewItemStyleHelper->drawBackground(optionItemViewItem, painter, widget);
-            QRect rectTextOriginal = QProxyStyle::subElementRect(QStyle::SE_ItemViewItemText, option, widget);
-            m_itemViewItemStyleHelper->drawText(optionItemViewItem, painter, widget, rectTextOriginal);
+            // 绘制复选框
+            m_itemViewItemStyleHelper->drawCheckIndicator(this, optionItemViewItem, painter, widget);
+            // 绘制文本
+            m_itemViewItemStyleHelper->drawText(this, optionItemViewItem, painter, widget);
             // 绘制(选中)标记
             m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
-
-            QStyleOptionViewItem optionNew = *optionItemViewItem;
-            // 清除文本，防止重复绘制
-            optionNew.text.clear();
-            // 删除selected状态
-            if (optionNew.state & State_Selected)
-            {
-                optionNew.state &= ~State_Selected;
-            }
-            // 删除hovered状态
-            if (optionNew.state & State_MouseOver)
-            {
-                optionNew.state &= ~State_MouseOver;
-            }
-            // 调用基类绘制其他元素
-            QProxyStyle::drawControl(element, &optionNew, painter, widget);
             return;
         }
         break;
@@ -111,6 +109,13 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
                 m_plainTextEditStyleHelper->drawHemline(optionFrame, painter, widget);
                 return;
             }
+        }
+        break;
+    case CE_CheckBoxLabel:
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            m_checkBoxStyleHelper->drawText(optionButton, painter, widget);
+            return;
         }
         break;
     default:
@@ -175,11 +180,41 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
             {
                 return m_scrollBarStyleHelper->scrollBarExtent();
             }
+            break;
         }
+        break;
     case PM_ButtonShiftHorizontal:
     case PM_ButtonShiftVertical:
         // 按钮按下时的水平和垂直内容偏移
         return 0; // 不偏移
+    case PM_CheckBoxLabelSpacing:
+        if (qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            if (qobject_cast<const QCheckBox *>(widget))
+            {
+                return m_checkBoxStyleHelper->spacingIndicatorToLabel();
+            }
+            break;
+        }
+        break;
+    case PM_IndicatorWidth:
+        if (qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            if (qobject_cast<const QCheckBox *>(widget))
+            {
+                return m_checkBoxStyleHelper->widthIndicator();
+            }
+        }
+        break;
+    case PM_IndicatorHeight:
+        if (qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            if (qobject_cast<const QCheckBox *>(widget))
+            {
+                return m_checkBoxStyleHelper->heightIndicator();
+            }
+        }
+        break;
     default:
         break;
     }
@@ -234,6 +269,29 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
 {
     switch (subElement)
     {
+    case SE_CheckBoxIndicator:
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            return m_checkBoxStyleHelper->rectCheckIndicator(optionButton, widget);
+        }
+        break;
+    case SE_ItemViewItemCheckIndicator:
+        if (const QStyleOptionViewItem *optionViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            return m_itemViewItemStyleHelper->rectCheckIndicator(optionViewItem, widget);
+        }
+        break;
+    case SE_CheckBoxContents:
+    case SE_CheckBoxClickRect:
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            return m_checkBoxStyleHelper->rectContents(this, optionButton, widget);
+        }
+        if (const QStyleOptionViewItem *optionViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            return m_itemViewItemStyleHelper->rectClickCheckIndicator(this, optionViewItem, widget);
+        }
+        break;
     case SE_LineEditContents:
         if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
@@ -253,6 +311,12 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
         }
         break;
     }
+    case SE_ItemViewItemText:
+        if (const QStyleOptionViewItem *optionViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            return m_itemViewItemStyleHelper->rectText(optionViewItem, widget, QProxyStyle::subElementRect(subElement, option, widget));
+        }
+        break;
     default:
         break;
     }

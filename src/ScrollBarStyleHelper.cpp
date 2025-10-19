@@ -57,7 +57,7 @@ void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter
             sliderColor = ColorRepository::scrollBarSliderSelectedColor();
         painter->setBrush(sliderColor);
         painter->setPen(Qt::NoPen);
-        painter->drawRoundedRect(rectDrawSlider, SCROLLBAR_EXTENT / 2, SCROLLBAR_EXTENT / 2);
+        painter->drawRoundedRect(rectDrawSlider, EXTENT_SCROLLBAR / 2, EXTENT_SCROLLBAR / 2);
         painter->restore();
     }
 }
@@ -126,5 +126,5 @@ void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPa
 
 int ScrollBarStyleHelper::ScrollBarStyleHelper::scrollBarExtent() const
 {
-    return SCROLLBAR_EXTENT + PADDING;
+    return EXTENT_SCROLLBAR + PADDING;
 }

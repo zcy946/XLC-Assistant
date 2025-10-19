@@ -13,7 +13,7 @@ public:
     void drawHemline(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const;
 
 private:
-    const int BORDER_WIDTH = 1;                     // 边框宽度
+    const int WIDTH_BORDER = 1;                     // 边框宽度
     const int RADIUS = 4;                           // 圆角半径
     const int MARGIN_HEMLINE = 4;                   // 底部边缘矩形左下角水平外边距
     const int MARGIN_HEMLINE_FOCUSED = 6;           // 底部边缘矩形左下角水平聚焦时外边距

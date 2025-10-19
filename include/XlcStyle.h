@@ -10,6 +10,7 @@
 #include "LineEditStyleHelper.h"
 #include "SpinBoxStyleHelper.h"
 #include "PlainTextEditStyleHelper.h"
+#include "CheckBoxStyleHelper.h"
 
 class XlcStyle : public QProxyStyle
 {
@@ -34,6 +35,7 @@ private:
     std::unique_ptr<LineEditStyleHelper> m_lineEditStyleHelper;
     std::unique_ptr<SpinBoxStyleHelper> m_spinBoxStyleHelper;
     std::unique_ptr<PlainTextEditStyleHelper> m_plainTextEditStyleHelper;
+    std::unique_ptr<CheckBoxStyleHelper> m_checkBoxStyleHelper;
 };
 
 #endif // XLCSTYLE_H
