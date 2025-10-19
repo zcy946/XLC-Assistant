@@ -12,7 +12,9 @@
 #include "PlainTextEditStyleHelper.h"
 #include "CheckBoxStyleHelper.h"
 #include "ComboBoxStyleHelper.h"
+#include <QStyledItemDelegate>
 
+class ComboBoxDelegate;
 class XlcStyle : public QProxyStyle
 {
 public:
@@ -29,6 +31,9 @@ public:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
+    static ComboBoxDelegate* sharedComboBoxDelegate();
+
+private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;
     std::unique_ptr<ListViewStyleHelper> m_listViewStyleHelper;
     std::unique_ptr<ItemViewItemStyleHelper> m_itemViewItemStyleHelper;
@@ -38,6 +43,13 @@ private:
     std::unique_ptr<PlainTextEditStyleHelper> m_plainTextEditStyleHelper;
     std::unique_ptr<CheckBoxStyleHelper> m_checkBoxStyleHelper;
     std::unique_ptr<ComboBoxStyleHelper> m_comboBoxStyleHelper;
+};
+
+class ComboBoxDelegate : public QStyledItemDelegate
+{
+public:
+    explicit ComboBoxDelegate(QObject *parent = nullptr);
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 };
 
 #endif // XLCSTYLE_H

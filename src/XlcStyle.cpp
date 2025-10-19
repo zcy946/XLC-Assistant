@@ -8,7 +8,7 @@
 #include <QFontDatabase>
 #include <QListView>
 #include <QPlainTextEdit>
-#include <QDebug>
+#include <QComboBox>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -48,11 +48,28 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
             return;
         }
         break;
+    case PE_IndicatorItemViewItemCheck:
+        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            m_itemViewItemStyleHelper->drawCheckIndicator(this, optionItemViewItem, painter, widget);
+            return;
+        }
+        break;
     case PE_IndicatorCheckBox:
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_checkBoxStyleHelper->drawBackground(this, optionButton, painter, widget);
             m_checkBoxStyleHelper->drawMarkIndicator(optionButton, painter, widget, QProxyStyle::subElementRect(SE_CheckBoxIndicator, optionButton, widget));
+            return;
+        }
+        break;
+    case PE_PanelItemViewItem:
+        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            // 绘制背景
+            m_itemViewItemStyleHelper->drawBackground(optionItemViewItem, painter, widget);
+            // 绘制(选中)标记
+            m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
             return;
         }
         break;
@@ -93,13 +110,11 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
             // 绘制背景
-            m_itemViewItemStyleHelper->drawBackground(optionItemViewItem, painter, widget);
+            drawPrimitive(QStyle::PE_PanelItemViewItem, optionItemViewItem, painter, widget);
             // 绘制复选框
-            m_itemViewItemStyleHelper->drawCheckIndicator(this, optionItemViewItem, painter, widget);
+            drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, optionItemViewItem, painter, widget);
             // 绘制文本
             m_itemViewItemStyleHelper->drawText(this, optionItemViewItem, painter, widget);
-            // 绘制(选中)标记
-            m_itemViewItemStyleHelper->drawMarket(optionItemViewItem, painter, widget);
             return;
         }
         break;
@@ -209,16 +224,6 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
     case PM_ButtonShiftVertical:
         // 按钮按下时的水平和垂直内容偏移
         return 0; // 不偏移
-    case PM_CheckBoxLabelSpacing:
-        if (qstyleoption_cast<const QStyleOptionButton *>(option))
-        {
-            if (qobject_cast<const QCheckBox *>(widget))
-            {
-                return m_checkBoxStyleHelper->spacingIndicatorToLabel();
-            }
-            break;
-        }
-        break;
     case PM_IndicatorWidth:
         if (qstyleoption_cast<const QStyleOptionButton *>(option))
         {
@@ -235,6 +240,16 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
             {
                 return m_checkBoxStyleHelper->heightIndicator();
             }
+        }
+        break;
+    case PM_CheckBoxLabelSpacing:
+        if (qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            if (qobject_cast<const QCheckBox *>(widget))
+            {
+                return m_checkBoxStyleHelper->spacingIndicatorToLabel();
+            }
+            break;
         }
         break;
     default:
@@ -277,8 +292,7 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
     case CT_LineEdit:
         if (const QStyleOptionFrame *lineEditOption = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
-            QSize sizeBasic = QProxyStyle::sizeFromContents(type, lineEditOption, contentsSize, widget);
-            return m_lineEditStyleHelper->sizeFromContents(lineEditOption, sizeBasic, widget);
+            return m_lineEditStyleHelper->rectAll(lineEditOption, widget, QProxyStyle::sizeFromContents(type, lineEditOption, contentsSize, widget));
         }
         break;
     case CT_ItemViewItem:
@@ -313,6 +327,7 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
         break;
     case SE_CheckBoxContents:
     case SE_CheckBoxClickRect:
+        // BUG QComboBox可选时没有绘制展开按钮
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             return m_checkBoxStyleHelper->rectContents(this, optionButton, widget);
@@ -325,8 +340,7 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
     case SE_LineEditContents:
         if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
-            return m_lineEditStyleHelper->subElementRect(subElement, optionLineEdit, widget,
-                                                         QProxyStyle::subElementRect(subElement, optionLineEdit, widget));
+            return m_lineEditStyleHelper->rectText(optionLineEdit, widget, QProxyStyle::subElementRect(subElement, optionLineEdit, widget));
         }
         break;
     case SE_FrameContents:
@@ -364,12 +378,9 @@ QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOption
         case SC_ComboBoxFrame:
             if (const QStyleOptionComboBox *optionComBoBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
             {
-                qDebug() << m_comboBoxStyleHelper->rectFrame(optionComBoBox, widget,
-                                                            QProxyStyle::subControlRect(QStyle::CC_ComboBox, optionComBoBox,
-                                                                                        QStyle::SC_ComboBoxEditField, widget));
                 return m_comboBoxStyleHelper->rectFrame(optionComBoBox, widget,
-                                                            QProxyStyle::subControlRect(QStyle::CC_ComboBox, optionComBoBox,
-                                                                                        QStyle::SC_ComboBoxEditField, widget));
+                                                        QProxyStyle::subControlRect(QStyle::CC_ComboBox, optionComBoBox,
+                                                                                    QStyle::SC_ComboBoxEditField, widget));
             }
             break;
         case SC_ComboBoxEditField:
@@ -395,17 +406,29 @@ QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOption
     return QProxyStyle::subControlRect(complexControl, option, subControl, widget);
 }
 
-void XlcStyle::polish(QWidget *w)
+void XlcStyle::polish(QWidget *widget)
 {
-    if (qobject_cast<QPushButton *>(w) || qobject_cast<QCheckBox *>(w) || qobject_cast<QAbstractItemView *>(w) || qobject_cast<QScrollBar *>(w))
+    if (qobject_cast<QPushButton *>(widget) || qobject_cast<QCheckBox *>(widget) || qobject_cast<QAbstractItemView *>(widget) || qobject_cast<QScrollBar *>(widget))
     {
-        w->setAttribute(Qt::WA_Hover);
+        widget->setAttribute(Qt::WA_Hover);
     }
 
-    // NOTE 可以在 polish 中判断目标类型，从而替换调色板实现不同颜色
+    /**
+     * NOTE 可以在 polish 中判断目标类型，从而替换调色板实现不同颜色 */
+
+    if (QComboBox *comboBox = qobject_cast<QComboBox *>(widget))
+    {
+        // 获取并配置下拉视图
+        if (QAbstractItemView *view = comboBox->view())
+        {
+            // 设置自定义 delegate(强制qt使用自定义的样式)
+            view->setItemDelegate(sharedComboBoxDelegate());
+            view->setFrameShape(QFrame::NoFrame);
+        }
+    }
 
     // 阴影绘制
-    if (QPushButton *button = qobject_cast<QPushButton *>(w))
+    if (QPushButton *button = qobject_cast<QPushButton *>(widget))
     {
         if (!button->isVisible())
         {
@@ -426,10 +449,29 @@ void XlcStyle::polish(QWidget *w)
             m_pushButtonStyleHelper->drawShadow(button);
         }
     }
-    QProxyStyle::polish(w);
+    QProxyStyle::polish(widget);
 }
 
 bool XlcStyle::eventFilter(QObject *obj, QEvent *event)
 {
     return QProxyStyle::eventFilter(obj, event);
+}
+
+ComboBoxDelegate *XlcStyle::sharedComboBoxDelegate()
+{
+    static ComboBoxDelegate delegate;
+    return &delegate;
+}
+
+/**
+ * ComboBoxDelegate
+ */
+ComboBoxDelegate::ComboBoxDelegate(QObject *parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+void ComboBoxDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QStyledItemDelegate::paint(painter, option, index);
 }
