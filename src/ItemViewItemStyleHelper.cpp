@@ -6,21 +6,6 @@
 
 void ItemViewItemStyleHelper::drawBackground(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
-    // 检查请求是否由 QListView (QListWidget是其子类)
-    /**
-     * NOTE 防御式编程最小化原则
-
-        → 如果你永远不会访问 widget 的成员，就删掉判断。
-        → 否则保留 `if (auto btn = qobject_cast<const QPushButton *>(widget))` 仅在你确实使用它时。
-
-        在 QStyle 体系中：
-
-        - **核心防御** 应该针对 `option`（空指针、类型不匹配）；
-        - **而不是针对 `widget` 类型**；
-        - 只有当你显式访问了控件属性时，才需要 `qobject_cast` 判断。
-     */
-    if (!qobject_cast<const QListView *>(widget))
-        return;
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
@@ -30,8 +15,6 @@ void ItemViewItemStyleHelper::drawBackground(const QStyleOptionViewItem *option,
 
 void ItemViewItemStyleHelper::drawText(const XlcStyle *style, const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QListView *>(widget))
-        return;
     if (option->text.isEmpty())
         return;
     QRect rectText = style->subElementRect(QStyle::SE_ItemViewItemText, option, widget);
@@ -76,8 +59,6 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
 
 void ItemViewItemStyleHelper::drawCheckIndicator(const XlcStyle *style, const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget) const
 {
-    if (!qobject_cast<const QListView *>(widget))
-        return;
     if (!(option->features & QStyleOptionViewItem::HasCheckIndicator))
     {
         return;
