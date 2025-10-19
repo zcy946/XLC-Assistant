@@ -9,8 +9,8 @@ static bool s_darkMode = false;
 QPalette ColorRepository::standardPalette()
 {
     QPalette palette;
-    palette.setColor(QPalette::Window, windowBackground());
-    palette.setColor(QPalette::Base, basicBackground());
+    palette.setColor(QPalette::Window, windowBackgroundColor());
+    palette.setColor(QPalette::Base, baseBackgroundColor());
     palette.setColor(QPalette::WindowText, basicText());
     palette.setColor(QPalette::Text, basicText());
     palette.setColor(QPalette::PlaceholderText, placeHolderText());
@@ -18,7 +18,7 @@ QPalette ColorRepository::standardPalette()
     // 按钮上的文本
     palette.setColor(QPalette::ButtonText, basicText());
 
-    // palette.setColor(QPalette::ToolTipBase, basicBackground());
+    // palette.setColor(QPalette::ToolTipBase, baseBackgroundColor());
     palette.setColor(QPalette::ToolTipText, basicText());
 
     QToolTip::setPalette(palette);
@@ -47,15 +47,20 @@ QColor ColorRepository::primaryHovered()
     return s_darkMode ? QColor("#47B1E8") : QColor("#1975C5");
 }
 
-QColor ColorRepository::windowBackground()
+QColor ColorRepository::windowBackgroundColor()
 {
     return s_darkMode ? QColor("#202020") : QColor("#F3F3F3");
 }
 
-QColor ColorRepository::basicBackground()
+QColor ColorRepository::baseBackgroundColor()
 {
     // return s_darkMode ? QColor("#292929") : QColor("#FDFDFD");
     return s_darkMode ? QColor("#292929") : QColor("#FCFCFC");
+}
+
+QColor ColorRepository::dialogBaseBackground()
+{
+    return s_darkMode ? QColor("#1F1F1F") : QColor("#FFFFFF");
 }
 
 QColor ColorRepository::basicText()
@@ -104,6 +109,11 @@ QColor ColorRepository::basicPressedColor()
 QColor ColorRepository::basicHoveredColor()
 {
     return s_darkMode ? QColor("#404040") : QColor("#F3F3F3");
+}
+
+QColor ColorRepository::basicDisabledColor()
+{
+    return s_darkMode ? QColor("#2A2A2A") : QColor("#F5F5F5");
 }
 
 QColor ColorRepository::basicPressedAlphaColor()
@@ -182,7 +192,7 @@ QColor ColorRepository::itemViewItemMarkColor()
 
 QColor ColorRepository::itemViewItemBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::itemViewItemSelectedBackgroundColor()
@@ -202,7 +212,7 @@ QColor ColorRepository::itemViewItemSelectedAndHoveredBackgroundColor()
 
 QColor ColorRepository::scrollBarBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::scrollBarSliderColor()
@@ -227,17 +237,17 @@ QColor ColorRepository::scrollBarArrowColor()
 
 QColor ColorRepository::lineEditBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::lineEditHoveredBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::lineEditFocusedBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::lineEditBorderColor()
@@ -257,7 +267,7 @@ QColor ColorRepository::lineEditFocusedHemlineColor()
 
 QColor ColorRepository::plainTextEditBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::plainTextEditBorderColor()
@@ -277,7 +287,7 @@ QColor ColorRepository::plainTextEditFocusedHemlineColor()
 
 QColor ColorRepository::spinBoxBackgroundColor()
 {
-    return basicBackground();
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::spinBoxBorderColor()
@@ -315,7 +325,7 @@ QColor ColorRepository::checkBoxBackgroundColor(bool status)
     if (status)
         return primaryNormal();
     else
-        return basicBackground();
+        return baseBackgroundColor();
 }
 
 QColor ColorRepository::checkBoxPressedBackgroundColor(bool status)
@@ -342,6 +352,41 @@ QColor ColorRepository::checkBoxBorderColor()
 QColor ColorRepository::checkBoxIndicatorColor()
 {
     return s_darkMode ? s_colorTextLightMode : s_colorTextDrakMode;
+}
+
+QColor ColorRepository::comboBoxBackgroundColor()
+{
+    return baseBackgroundColor();
+}
+
+QColor ColorRepository::comboBoxDisabledBackgroundColor()
+{
+    return basicDisabledColor();
+}
+
+QColor ColorRepository::comboBoxHoveredBackgroundColor()
+{
+    return basicHoveredColor();
+}
+
+QColor ColorRepository::comboBoxEditedBackgroundColor()
+{
+    return dialogBaseBackground();
+}
+
+QColor ColorRepository::comboBoxBorderColor()
+{
+    return basicBorderColor();
+}
+
+QColor ColorRepository::comboBoxHemlineColor()
+{
+    return basicHemlineColor();
+}
+
+QColor ColorRepository::comboBoxFocusedHemlineColor()
+{
+    return basicFocusedHemlineColor();
 }
 
 QColor ColorRepository::listHoveredBackgroundColor()

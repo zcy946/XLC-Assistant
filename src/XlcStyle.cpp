@@ -28,7 +28,8 @@ XlcStyle::XlcStyle()
       m_lineEditStyleHelper(new LineEditStyleHelper()),
       m_spinBoxStyleHelper(new SpinBoxStyleHelper()),
       m_plainTextEditStyleHelper(new PlainTextEditStyleHelper()),
-      m_checkBoxStyleHelper(new CheckBoxStyleHelper())
+      m_checkBoxStyleHelper(new CheckBoxStyleHelper()),
+      m_comboBoxStyleHelper(new ComboBoxStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
@@ -81,6 +82,13 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
             return;
         }
         break;
+    case CE_ComboBoxLabel:
+        if (const QStyleOptionComboBox *optionComboBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+        {
+            m_comboBoxStyleHelper->drawText(optionComboBox, painter, widget);
+            return;
+        }
+        break;
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
@@ -128,10 +136,24 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
 {
     switch (complexControl)
     {
-    case QStyle::CC_ScrollBar:
+    case CC_ComboBox:
+    {
+        // 主体显示绘制
+        if (const QStyleOptionComboBox *optionComboBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+        {
+            m_comboBoxStyleHelper->drawBackground(this, optionComboBox, painter, widget);
+            m_comboBoxStyleHelper->drawHemline(optionComboBox, painter, widget);
+            m_comboBoxStyleHelper->drawArrow(this, optionComboBox, painter, widget);
+            return;
+        }
+        break;
+    }
+    break;
+    case CC_ScrollBar:
         if (const QStyleOptionSlider *optionSlider = qstyleoption_cast<const QStyleOptionSlider *>(option))
         {
             m_scrollBarStyleHelper->drawBackground(optionSlider, painter, widget);
+            // TODO 查看是否能单拉出基类rect
             m_scrollBarStyleHelper->drawGroove(optionSlider, painter, widget,
                                                QProxyStyle::subControlRect(QStyle::CC_ScrollBar, option, QStyle::SC_ScrollBarGroove, widget));
             m_scrollBarStyleHelper->drawSlider(optionSlider, painter, widget,
@@ -142,7 +164,7 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
             return;
         }
         break;
-    case QStyle::CC_SpinBox:
+    case CC_SpinBox:
         if (const QStyleOptionSpinBox *optionSpinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option))
         {
             m_spinBoxStyleHelper->drawBackground(optionSpinBox, painter, widget);
@@ -239,11 +261,19 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
     switch (type)
     {
     case CT_PushButton:
-        if (const QStyleOptionButton *buttonOption = qstyleoption_cast<const QStyleOptionButton *>(option))
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
-            return m_pushButtonStyleHelper->sizeFromContents(buttonOption, contentsSize, widget);
+            return m_pushButtonStyleHelper->sizeFromContents(optionButton, contentsSize, widget);
         }
         break;
+    case CT_ComboBox:
+    {
+        if (const QStyleOptionComboBox *optionComboBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+        {
+            return m_comboBoxStyleHelper->sizeFromContents(optionComboBox, contentsSize, widget);
+        }
+        break;
+    }
     case CT_LineEdit:
         if (const QStyleOptionFrame *lineEditOption = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
@@ -325,6 +355,43 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
 
 QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOptionComplex *option, SubControl subControl, const QWidget *widget) const
 {
+    switch (complexControl)
+    {
+    case CC_ComboBox:
+    {
+        switch (subControl)
+        {
+        case SC_ComboBoxFrame:
+            if (const QStyleOptionComboBox *optionComBoBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+            {
+                qDebug() << m_comboBoxStyleHelper->rectFrame(optionComBoBox, widget,
+                                                            QProxyStyle::subControlRect(QStyle::CC_ComboBox, optionComBoBox,
+                                                                                        QStyle::SC_ComboBoxEditField, widget));
+                return m_comboBoxStyleHelper->rectFrame(optionComBoBox, widget,
+                                                            QProxyStyle::subControlRect(QStyle::CC_ComboBox, optionComBoBox,
+                                                                                        QStyle::SC_ComboBoxEditField, widget));
+            }
+            break;
+        case SC_ComboBoxEditField:
+            if (const QStyleOptionComboBox *optionComBoBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+            {
+                return m_comboBoxStyleHelper->rectEditField(optionComBoBox, widget);
+            }
+            break;
+        case SC_ComboBoxArrow:
+            if (const QStyleOptionComboBox *optionComBoBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+            {
+                return m_comboBoxStyleHelper->rectArrow(optionComBoBox, widget);
+            }
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+    default:
+        break;
+    }
     return QProxyStyle::subControlRect(complexControl, option, subControl, widget);
 }
 

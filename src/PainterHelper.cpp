@@ -29,7 +29,7 @@ void PainterHelper::drawBackground(QPainter *painter, const QStyleOptionViewItem
     // 普通状态
     else
     {
-        painter->setBrush(QBrush(colorNormalBackground.isValid() ? colorNormalBackground : ColorRepository::basicBackground()));
+        painter->setBrush(QBrush(colorNormalBackground.isValid() ? colorNormalBackground : ColorRepository::baseBackgroundColor()));
         painter->drawRoundedRect(rectBackground, radius, radius);
     }
     painter->restore();

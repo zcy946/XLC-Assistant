@@ -27,9 +27,11 @@ namespace ColorRepository
     QColor primaryHovered();
 
     // 窗口背景颜色(例如: QWidget)
-    QColor windowBackground();
+    QColor windowBackgroundColor();
     // 通用控件背景颜色(例如: QListView)
-    QColor basicBackground();
+    QColor baseBackgroundColor();
+    // 对话框背景颜色
+    QColor dialogBaseBackground();
     // 通用文本颜色
     QColor basicText();
     QColor basicDisableText();
@@ -49,6 +51,7 @@ namespace ColorRepository
 
     QColor basicPressedColor();
     QColor basicHoveredColor();
+    QColor basicDisabledColor();
 
     // 通用按压颜色(alpha通道)
     QColor basicPressedAlphaColor();
@@ -107,6 +110,14 @@ namespace ColorRepository
     QColor checkBoxHoveredBackgroundColor(bool status);
     QColor checkBoxBorderColor();
     QColor checkBoxIndicatorColor();
+
+    QColor comboBoxBackgroundColor();
+    QColor comboBoxDisabledBackgroundColor();
+    QColor comboBoxHoveredBackgroundColor();
+    QColor comboBoxEditedBackgroundColor();
+    QColor comboBoxBorderColor();
+    QColor comboBoxHemlineColor();
+    QColor comboBoxFocusedHemlineColor();
 
     QColor listHoveredBackgroundColor();
     QColor listSelectedBackgroundColor();

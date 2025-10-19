@@ -11,6 +11,7 @@
 #include "SpinBoxStyleHelper.h"
 #include "PlainTextEditStyleHelper.h"
 #include "CheckBoxStyleHelper.h"
+#include "ComboBoxStyleHelper.h"
 
 class XlcStyle : public QProxyStyle
 {
@@ -36,6 +37,7 @@ private:
     std::unique_ptr<SpinBoxStyleHelper> m_spinBoxStyleHelper;
     std::unique_ptr<PlainTextEditStyleHelper> m_plainTextEditStyleHelper;
     std::unique_ptr<CheckBoxStyleHelper> m_checkBoxStyleHelper;
+    std::unique_ptr<ComboBoxStyleHelper> m_comboBoxStyleHelper;
 };
 
 #endif // XLCSTYLE_H

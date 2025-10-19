@@ -79,7 +79,7 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     int backgroundWidth = rect.width() - MARGIN * 2;
     QRect rectBackground = QRect(rect.x() + (rect.width() - backgroundWidth) / 2, rect.y() + MARGIN, backgroundWidth, backgroundWidth);
 
-    PainterHelper::drawBackground(painter, option, rectBackground, RADIUS, ColorRepository::windowBackground());
+    PainterHelper::drawBackground(painter, option, rectBackground, RADIUS, ColorRepository::windowBackgroundColor());
 
     /**
      * 获取数据
@@ -163,7 +163,7 @@ NavigationBar::NavigationBar(QWidget *parent)
 void NavigationBar::paintEvent(QPaintEvent *e)
 {
     QPainter painter(viewport());
-    painter.fillRect(rect(), ColorRepository::windowBackground());
+    painter.fillRect(rect(), ColorRepository::windowBackgroundColor());
     QListView::paintEvent(e);
 }
 
