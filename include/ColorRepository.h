@@ -127,6 +127,9 @@ namespace ColorRepository
     QColor listSelectedBackgroundColor();
     QColor listSelectedAndHoveredOutlineColor();
 
+    QColor groupBoxBackgroundColor();
+    QColor groupBoxBorderColor();
+
     QColor historyMessageListSeparator(); // 清除上下文分割线颜色
     QColor historyMessageListTimestamp(); // 时间戳的字体颜色
 }

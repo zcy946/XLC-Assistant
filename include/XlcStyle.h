@@ -12,6 +12,7 @@
 #include "PlainTextEditStyleHelper.h"
 #include "CheckBoxStyleHelper.h"
 #include "ComboBoxStyleHelper.h"
+#include "GroupBoxStyleHelper.h"
 #include <QStyledItemDelegate>
 
 class ComboBoxDelegate;
@@ -43,6 +44,7 @@ private:
     std::unique_ptr<PlainTextEditStyleHelper> m_plainTextEditStyleHelper;
     std::unique_ptr<CheckBoxStyleHelper> m_checkBoxStyleHelper;
     std::unique_ptr<ComboBoxStyleHelper> m_comboBoxStyleHelper;
+    std::unique_ptr<GroupBoxStyleHelper> m_groupBoxStyleHelper;
 };
 
 class ComboBoxDelegate : public QStyledItemDelegate

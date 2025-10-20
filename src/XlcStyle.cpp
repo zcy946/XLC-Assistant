@@ -30,7 +30,8 @@ XlcStyle::XlcStyle()
       m_spinBoxStyleHelper(new SpinBoxStyleHelper()),
       m_plainTextEditStyleHelper(new PlainTextEditStyleHelper()),
       m_checkBoxStyleHelper(new CheckBoxStyleHelper()),
-      m_comboBoxStyleHelper(new ComboBoxStyleHelper())
+      m_comboBoxStyleHelper(new ComboBoxStyleHelper()),
+      m_groupBoxStyleHelper(new GroupBoxStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
@@ -160,6 +161,17 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
 {
     switch (complexControl)
     {
+    case CC_SpinBox:
+        if (const QStyleOptionSpinBox *optionSpinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option))
+        {
+            m_spinBoxStyleHelper->drawBackground(optionSpinBox, painter, widget);
+            m_spinBoxStyleHelper->drawSubControls(optionSpinBox, painter, widget,
+                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarSubLine, widget),
+                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarAddLine, widget));
+            m_spinBoxStyleHelper->drawHemline(optionSpinBox, painter, widget);
+            return;
+        }
+        break;
     case CC_ComboBox:
     {
         // 主体显示绘制
@@ -188,14 +200,11 @@ void XlcStyle::drawComplexControl(ComplexControl complexControl, const QStyleOpt
             return;
         }
         break;
-    case CC_SpinBox:
-        if (const QStyleOptionSpinBox *optionSpinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option))
+    case CC_GroupBox:
+        if (const QStyleOptionGroupBox *optionGroupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(option))
         {
-            m_spinBoxStyleHelper->drawBackground(optionSpinBox, painter, widget);
-            m_spinBoxStyleHelper->drawSubControls(optionSpinBox, painter, widget,
-                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarSubLine, widget),
-                                                  QProxyStyle::subControlRect(complexControl, optionSpinBox, QStyle::SC_ScrollBarAddLine, widget));
-            m_spinBoxStyleHelper->drawHemline(optionSpinBox, painter, widget);
+            m_groupBoxStyleHelper->drawBorder(this, optionGroupBox, painter, widget);
+            m_groupBoxStyleHelper->drawLabel(this, optionGroupBox, painter, widget);
             return;
         }
         break;
@@ -415,6 +424,34 @@ QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOption
             break;
         }
         break;
+    }
+    case CC_GroupBox:
+    {
+        switch (subControl)
+        {
+        case SC_GroupBoxFrame:
+            if (const QStyleOptionGroupBox *optionGroupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(option))
+            {
+                return m_groupBoxStyleHelper->rectFrame(optionGroupBox, widget);
+            }
+            break;
+        case SC_GroupBoxLabel:
+            if (const QStyleOptionGroupBox *optionGroupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(option))
+            {
+                return m_groupBoxStyleHelper->rectLabel(optionGroupBox, widget,
+                                                        QProxyStyle::subControlRect(QStyle::CC_GroupBox, optionGroupBox, QStyle::SC_GroupBoxLabel, widget));
+            }
+            break;
+        case SC_GroupBoxContents:
+            if (const QStyleOptionGroupBox *optionGroupBox = qstyleoption_cast<const QStyleOptionGroupBox *>(option))
+            {
+                return m_groupBoxStyleHelper->rectContents(optionGroupBox, widget,
+                                                           QProxyStyle::subControlRect(QStyle::CC_GroupBox, optionGroupBox, QStyle::SC_GroupBoxContents, widget));
+            }
+            break;
+        default:
+            break;
+        }
     }
     default:
         break;

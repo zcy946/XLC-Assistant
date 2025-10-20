@@ -421,6 +421,16 @@ QColor ColorRepository::listSelectedAndHoveredOutlineColor()
     return QColor("#99D1FF");
 }
 
+QColor ColorRepository::groupBoxBackgroundColor()
+{
+    return s_darkMode ? QColor("#272727") : QColor("#F7F7F7");
+}
+
+QColor ColorRepository::groupBoxBorderColor()
+{
+    return basicBorderColor();
+}
+
 QColor ColorRepository::historyMessageListSeparator()
 {
     return QColor("#D0D0D0");
