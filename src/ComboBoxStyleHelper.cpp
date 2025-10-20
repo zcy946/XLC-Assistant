@@ -94,6 +94,32 @@ void ComboBoxStyleHelper::drawArrow(const XlcStyle *style, const QStyleOptionCom
     painter->restore();
 }
 
+void ComboBoxStyleHelper::drawContainerBackground(const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+{
+    Q_UNUSED(widget)
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    QStyleOptionComboBox *optionComBoBox = new QStyleOptionComboBox();
+    optionComBoBox->rect = option->rect;
+    QRect rect = option->rect;
+    /**
+     * BUG 绘制透明色会导致动画期间黑色
+        drawShadow(painter, rect);
+        QRect rectForeground(rect.x() + WIDTH_BORDER + WIDTH_SHADOW_BORDER,
+                            rect.y() + WIDTH_BORDER,
+                            rect.width() - WIDTH_SHADOW_BORDER * 2 - WIDTH_BORDER * 2,
+                            rect.height() - WIDTH_SHADOW_BORDER - WIDTH_BORDER * 2);
+        painter->setPen(ColorRepository::popupBorderColor());
+        painter->setBrush(ColorRepository::popupBackgroundColor());
+        painter->drawRoundedRect(rectForeground, RADIUS, RADIUS);
+     */
+    painter->setPen(ColorRepository::popupBorderColor());
+    painter->setBrush(ColorRepository::popupBackgroundColor());
+    painter->drawRect(rect);
+    painter->restore();
+    return;
+}
+
 QSize ComboBoxStyleHelper::sizeFromContents(const QStyleOptionComboBox *option, QSize contentsSize, const QWidget *widget) const
 {
     return QSize(contentsSize.width() + PADDING_HORIZONTAL * 2, contentsSize.height() + PADDING_VERTICAL * 2);
@@ -124,4 +150,44 @@ QRect ComboBoxStyleHelper::rectArrow(const QStyleOptionComboBox *option, const Q
     int y = (option->rect.height() - heightIconFont) / 2;
     QRect rectArrow = QRect(x, y, widthIconFont, heightIconFont);
     return rectArrow;
+}
+
+QRect ComboBoxStyleHelper::rectPopup(const QStyleOptionComboBox *option, const QWidget *widget, QRect rectPopupOriginal) const
+{
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    // BUG 绘制透明色会导致动画期间黑色
+    // return rectPopupOriginal.adjusted(-WIDTH_SHADOW_BORDER - WIDTH_BORDER,
+    //                                   SPACING_CONTENT_TO_POPUP,
+    //                                   WIDTH_SHADOW_BORDER + WIDTH_BORDER,
+    //                                   SPACING_CONTENT_TO_POPUP);
+    return rectPopupOriginal.adjusted(0, SPACING_CONTENT_TO_POPUP, 0, SPACING_CONTENT_TO_POPUP);
+}
+
+int ComboBoxStyleHelper::margin() const
+{
+    return WIDTH_SHADOW_BORDER + WIDTH_BORDER;
+}
+
+void ComboBoxStyleHelper::drawShadow(QPainter *painter, QRect rect) const
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    QPainterPath path;
+    path.setFillRule(Qt::WindingFill);
+    QColor color = ColorRepository::shadowColor();
+    for (int i = 0; i < WIDTH_SHADOW_BORDER; i++)
+    {
+        path.addRoundedRect(rect.x() + WIDTH_SHADOW_BORDER - i,
+                            rect.y(),
+                            rect.width() - (WIDTH_SHADOW_BORDER - i) * 2,
+                            rect.height() - (WIDTH_SHADOW_BORDER - i),
+                            RADIUS + i,
+                            RADIUS + i);
+        int alpha = 1 * (WIDTH_SHADOW_BORDER - i + 1);
+        color.setAlpha(alpha > 255 ? 255 : alpha);
+        painter->setPen(color);
+        painter->drawPath(path);
+    }
+    painter->restore();
 }

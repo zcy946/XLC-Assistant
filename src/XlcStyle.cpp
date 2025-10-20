@@ -9,6 +9,7 @@
 #include <QListView>
 #include <QPlainTextEdit>
 #include <QComboBox>
+#include <QLayout>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -88,6 +89,7 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_pushButtonStyleHelper->drawButtonShape(optionButton, painter, widget);
+            m_pushButtonStyleHelper->drawShadow(optionButton, painter, widget);
             return;
         }
         break;
@@ -132,6 +134,12 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
                 m_plainTextEditStyleHelper->drawHemline(optionFrame, painter, widget);
                 return;
             }
+        }
+        // QComboBox的菜单容器
+        if (widget->objectName() == "XlcComboBoxContainer")
+        {
+            m_comboBoxStyleHelper->drawContainerBackground(option, painter, widget);
+            return;
         }
         break;
     case CE_CheckBoxLabel:
@@ -395,6 +403,13 @@ QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOption
                 return m_comboBoxStyleHelper->rectArrow(optionComBoBox, widget);
             }
             break;
+        case SC_ComboBoxListBoxPopup:
+            if (const QStyleOptionComboBox *optionComBoBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
+            {
+                return m_comboBoxStyleHelper->rectPopup(optionComBoBox, widget,
+                                                        QProxyStyle::subControlRect(complexControl, option, subControl, widget));
+            }
+            break;
         default:
             break;
         }
@@ -413,42 +428,38 @@ void XlcStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_Hover);
     }
 
-    /**
-     * NOTE 可以在 polish 中判断目标类型，从而替换调色板实现不同颜色 */
+    if (QListView *itemView = qobject_cast<QListView *>(widget))
+    {
+        // 通过私有类名`QComboBoxPrivateContainer`捕获QComboBox的菜单容器
+        QWidget *popup = itemView->parentWidget();
+        auto isComboBoxPopupContainer = popup && popup->inherits("QComboBoxPrivateContainer");
+        if (isComboBoxPopupContainer)
+        {
+            popup->setAttribute(Qt::WA_TranslucentBackground, true);
+            popup->setAttribute(Qt::WA_OpaquePaintEvent, false);
+            popup->setAttribute(Qt::WA_NoSystemBackground, true);
+            popup->setWindowFlag(Qt::FramelessWindowHint, true);
+            popup->setWindowFlag(Qt::NoDropShadowWindowHint, true);
+            popup->setObjectName("XlcComboBoxContainer");
+
+            /**
+             * BUG 绘制透明色会导致动画期间黑色
+                // 增加外边距，为阴影绘制留空
+                int widthShadowBorder = m_comboBoxStyleHelper->margin();
+                popup->layout()->setContentsMargins(widthShadowBorder, 0, widthShadowBorder, widthShadowBorder);
+             */
+        }
+    }
 
     if (QComboBox *comboBox = qobject_cast<QComboBox *>(widget))
     {
-        // 获取并配置下拉视图
-        if (QAbstractItemView *view = comboBox->view())
-        {
-            // 设置自定义 delegate(强制qt使用自定义的样式)
-            view->setItemDelegate(sharedComboBoxDelegate());
-            view->setFrameShape(QFrame::NoFrame);
-        }
+        // 安装自定义样式
+        comboBox->setItemDelegate(sharedComboBoxDelegate());
     }
 
-    // 阴影绘制
-    if (QPushButton *button = qobject_cast<QPushButton *>(widget))
-    {
-        if (!button->isVisible())
-        {
-            // 使用 QPointer 防止悬空指针
-            QPointer<QPushButton> safeButton(button);
-            QTimer::singleShot(0, this,
-                               [this, safeButton]()
-                               {
-                                   if (safeButton)
-                                   {
-                                       // 检查指针是否仍然有效
-                                       m_pushButtonStyleHelper->drawShadow(safeButton);
-                                   }
-                               });
-        }
-        else
-        {
-            m_pushButtonStyleHelper->drawShadow(button);
-        }
-    }
+    /**
+     * NOTE 可以在 polish 中判断目标类型，从而替换调色板实现不同颜色 */
+
     QProxyStyle::polish(widget);
 }
 

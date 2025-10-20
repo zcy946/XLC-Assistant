@@ -119,6 +119,9 @@ namespace ColorRepository
     QColor comboBoxHemlineColor();
     QColor comboBoxFocusedHemlineColor();
 
+    QColor popupBorderColor();
+    QColor popupBackgroundColor();
+
     QColor listHoveredBackgroundColor();
     QColor listSelectedBackgroundColor();
     QColor listSelectedAndHoveredOutlineColor();

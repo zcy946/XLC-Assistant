@@ -31,7 +31,7 @@ public:
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
-    static ComboBoxDelegate* sharedComboBoxDelegate();
+    static ComboBoxDelegate *sharedComboBoxDelegate();
 
 private:
     std::unique_ptr<PushButtonStyleHelper> m_pushButtonStyleHelper;

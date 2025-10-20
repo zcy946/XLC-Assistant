@@ -80,9 +80,8 @@ QColor ColorRepository::placeHolderText()
 
 QColor ColorRepository::shadowColor()
 {
-    QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#D1D1D1");
-    // QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#707070");
-    colorShadow.setAlpha(255 - 2);
+    // QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#D1D1D1");
+    QColor colorShadow = s_darkMode ? QColor("#9C9B9E") : QColor("#707070");
     return colorShadow;
 }
 
@@ -387,6 +386,16 @@ QColor ColorRepository::comboBoxHemlineColor()
 QColor ColorRepository::comboBoxFocusedHemlineColor()
 {
     return basicFocusedHemlineColor();
+}
+
+QColor ColorRepository::popupBorderColor()
+{
+    return s_darkMode ? QColor("#474747") : QColor("#D6D6D6");
+}
+
+QColor ColorRepository::popupBackgroundColor()
+{
+    return s_darkMode ? QColor("#2C2C2C") : QColor("#FAFAFA");
 }
 
 QColor ColorRepository::listHoveredBackgroundColor()
