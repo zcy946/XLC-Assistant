@@ -2,19 +2,20 @@
 #include "ColorRepository.h"
 #include <QGraphicsDropShadowEffect>
 #include <QPushButton>
+#include <QPainterPath>
 
-void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
+void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     setupPainterForShape(option, painter, widget);
-    painter->drawRoundedRect(QRectF(option->rect).adjusted(WIDTH_BORDER, WIDTH_BORDER, -(WIDTH_BORDER), -(WIDTH_BORDER)),
+    painter->drawRoundedRect(QRectF(option->rect).adjusted(RADIUS_SHADOW + WIDTH_BORDER, RADIUS_SHADOW + WIDTH_BORDER, -(RADIUS_SHADOW + WIDTH_BORDER), -(RADIUS_SHADOW + WIDTH_BORDER)),
                              RADIUS,
                              RADIUS);
     painter->restore();
 }
 
-void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
+void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
     painter->save();
     QColor textColor;
@@ -47,25 +48,36 @@ void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter 
     painter->restore();
 }
 
-void PushButtonStyleHelper::drawShadow(QPushButton *button)
+void PushButtonStyleHelper::drawShadow(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
-    // 确保只有一个阴影效果
-    if (!button->graphicsEffect())
+    Q_UNUSED(widget)
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    QPainterPath path;
+    path.setFillRule(Qt::WindingFill);
+    QColor color = ColorRepository::shadowColor();
+    for (int i = 0; i < RADIUS_SHADOW; i++)
     {
-        QGraphicsDropShadowEffect *shadowEffect = new QGraphicsDropShadowEffect(button);
-        shadowEffect->setBlurRadius(RADIUS_SHADOW);
-        shadowEffect->setColor(ColorRepository::shadowColor());
-        shadowEffect->setOffset(OFFSET_X_SHADOW, OFFSET_Y_SHADOW);
-        button->setGraphicsEffect(shadowEffect);
+        path.addRoundedRect(option->rect.x() + RADIUS_SHADOW - i,
+                            option->rect.y() + RADIUS_SHADOW - i,
+                            option->rect.width() - (RADIUS_SHADOW - i) * 2,
+                            option->rect.height() - (RADIUS_SHADOW - i) * 2,
+                            RADIUS + i,
+                            RADIUS + i);
+        int alpha = 1 * (RADIUS_SHADOW - i + 1);
+        color.setAlpha(alpha > 255 ? 255 : alpha);
+        painter->setPen(color);
+        painter->drawPath(path);
     }
+    painter->restore();
 }
 
 QSize PushButtonStyleHelper::sizeFromContents(const QStyleOptionButton *option, QSize contentsSize, const QWidget *widget) const
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)
-    return QSize(qMax(WIDTH_MIN, contentsSize.width() + PADDING_HORIZONTAL * 2 + WIDTH_BORDER * 2),
-                 contentsSize.height() + PADDING_VERTICAL * 2 + WIDTH_BORDER * 2);
+    return QSize(qMax(WIDTH_MIN, contentsSize.width() + PADDING_HORIZONTAL * 2 + WIDTH_BORDER * 2 + RADIUS_SHADOW * 2),
+                 contentsSize.height() + PADDING_VERTICAL * 2 + WIDTH_BORDER * 2 + RADIUS_SHADOW * 2);
 }
 
 int PushButtonStyleHelper::padding()
@@ -73,7 +85,7 @@ int PushButtonStyleHelper::padding()
     return qMax(PADDING_HORIZONTAL, PADDING_VERTICAL);
 }
 
-void PushButtonStyleHelper::setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget)
+void PushButtonStyleHelper::setupPainterForShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
     Q_UNUSED(widget)
     // 禁用
