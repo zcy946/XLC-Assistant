@@ -8,9 +8,9 @@ class ScrollBarStyleHelper
 {
 public:
     void drawBackground(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget);
-    void drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &grooveRect);
-    void drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSlider);
-    void drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine);
+    void drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect grooveRect);
+    void drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect rectSlider);
+    void drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect rectSubLine, QRect rectAddLine);
     int scrollBarExtent() const;
 
 private:

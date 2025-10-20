@@ -11,7 +11,7 @@ public:
     // 绘制背景
     void drawBackground(const XlcStyle *style, const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
     // 绘制复选框中的状态图标
-    void drawMarkIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, const QRect &rectIndicatorOriginal) const;
+    void drawMarkIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, QRect rectIndicatorOriginal) const;
     // 绘制文本
     void drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
     // 复选框到文本之间的距离

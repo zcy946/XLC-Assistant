@@ -125,7 +125,7 @@ QSize ComboBoxStyleHelper::sizeFromContents(const QStyleOptionComboBox *option, 
     return QSize(contentsSize.width() + PADDING_HORIZONTAL * 2, contentsSize.height() + PADDING_VERTICAL * 2);
 }
 
-QRect ComboBoxStyleHelper::rectFrame(const QStyleOptionComboBox *option, const QWidget *widget, const QRect &rectFrameOriginal) const
+QRect ComboBoxStyleHelper::rectFrame(const QStyleOptionComboBox *option, const QWidget *widget, QRect rectFrameOriginal) const
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)

@@ -91,7 +91,7 @@ QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *opti
     return QSize(width, height);
 }
 
-QRect ItemViewItemStyleHelper::rectText(const QStyleOptionViewItem *option, const QWidget *widget, const QRect &rectTextOriginal) const
+QRect ItemViewItemStyleHelper::rectText(const QStyleOptionViewItem *option, const QWidget *widget, QRect rectTextOriginal) const
 {
     Q_UNUSED(option)
     Q_UNUSED(widget)

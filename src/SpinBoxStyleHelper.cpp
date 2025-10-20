@@ -15,7 +15,7 @@ void SpinBoxStyleHelper::drawBackground(const QStyleOptionSpinBox *option, QPain
     painter->restore();
 }
 
-void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine) const
+void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, QRect rectSubLine, QRect rectAddLine) const
 {
     Q_UNUSED(widget)
     painter->save();

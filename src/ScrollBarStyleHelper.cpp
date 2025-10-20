@@ -17,7 +17,7 @@ void ScrollBarStyleHelper::drawBackground(const QStyleOptionSlider *option, QPai
     painter->restore();
 }
 
-void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &grooveRect)
+void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect grooveRect)
 {
     Q_UNUSED(widget)
     if (option->subControls & QStyle::SC_ScrollBarGroove)
@@ -34,7 +34,7 @@ void ScrollBarStyleHelper::drawGroove(const QStyleOptionSlider *option, QPainter
     }
 }
 
-void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSlider)
+void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect rectSlider)
 {
     Q_UNUSED(widget)
     if (option->subControls & QStyle::SC_ScrollBarSlider)
@@ -62,7 +62,7 @@ void ScrollBarStyleHelper::drawSlider(const QStyleOptionSlider *option, QPainter
     }
 }
 
-void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine)
+void ScrollBarStyleHelper::drawSubControls(const QStyleOptionSlider *option, QPainter *painter, const QWidget *widget, QRect rectSubLine, QRect rectAddLine)
 {
     Q_UNUSED(widget)
     // 只绘制 Line 按钮的箭头，跳过 Page 按钮 (滚动条两端的按钮)

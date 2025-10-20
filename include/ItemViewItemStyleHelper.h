@@ -19,7 +19,7 @@ public:
     // 全部内容的区域
     QSize sizeFromContents(const QStyleOptionViewItem *option, QSize sizeOriginal, const QWidget *widget) const;
     // 文本区域
-    QRect rectText(const QStyleOptionViewItem *option, const QWidget *widget, const QRect &rectTextOriginal) const;
+    QRect rectText(const QStyleOptionViewItem *option, const QWidget *widget, QRect rectTextOriginal) const;
     // 复选框区域
     QRect rectCheckIndicator(const QStyleOptionViewItem *option, const QWidget *widget) const;
     // 复选框响应点击区域

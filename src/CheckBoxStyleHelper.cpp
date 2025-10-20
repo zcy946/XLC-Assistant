@@ -53,7 +53,7 @@ void CheckBoxStyleHelper::drawBackground(const XlcStyle *style, const QStyleOpti
     painter->restore();
 }
 
-void CheckBoxStyleHelper::drawMarkIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, const QRect &rectIndicatorOriginal) const
+void CheckBoxStyleHelper::drawMarkIndicator(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget, QRect rectIndicatorOriginal) const
 {
     Q_UNUSED(widget)
     QRect rectCheckIndicator = option->rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);

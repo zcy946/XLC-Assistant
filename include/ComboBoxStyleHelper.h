@@ -21,7 +21,7 @@ public:
     // 整个控件的区域
     QSize sizeFromContents(const QStyleOptionComboBox *option, QSize contentsSize, const QWidget *widget) const;
     // 边框区域(不包含展开按钮)
-    QRect rectFrame(const QStyleOptionComboBox *option, const QWidget *widget, const QRect &rectFrameOriginal) const;
+    QRect rectFrame(const QStyleOptionComboBox *option, const QWidget *widget, QRect rectFrameOriginal) const;
     // 文本编辑区域(设置了可修改属性)
     QRect rectEditField(const QStyleOptionComboBox *option, const QWidget *widget) const;
     // 展开按钮区域

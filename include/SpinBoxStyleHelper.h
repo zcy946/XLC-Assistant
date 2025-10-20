@@ -9,7 +9,7 @@ class SpinBoxStyleHelper
 {
 public:
     void drawBackground(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const;
-    void drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, const QRect &rectSubLine, const QRect &rectAddLine) const;
+    void drawSubControls(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget, QRect rectSubLine, QRect rectAddLine) const;
     void drawHemline(const QStyleOptionSpinBox *option, QPainter *painter, const QWidget *widget) const;
 
 private:
