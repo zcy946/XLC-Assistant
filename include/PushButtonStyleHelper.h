@@ -9,11 +9,11 @@
 class PushButtonStyleHelper
 {
 public:
-    void drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
+    void drawBackground(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
+    void drawHemline(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
     void drawText(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
     void drawShadow(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const;
     QSize sizeFromContents(const QStyleOptionButton *option, QSize contentsSize, const QWidget *widget) const;
-
     int padding();
 
 private:

@@ -88,8 +88,9 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         // 绘制按钮形状（背景与边框）
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
-            m_pushButtonStyleHelper->drawButtonShape(optionButton, painter, widget);
             m_pushButtonStyleHelper->drawShadow(optionButton, painter, widget);
+            m_pushButtonStyleHelper->drawBackground(optionButton, painter, widget);
+            m_pushButtonStyleHelper->drawHemline(optionButton, painter, widget);
             return;
         }
         break;

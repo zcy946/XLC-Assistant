@@ -146,26 +146,29 @@ QColor ColorRepository::hoverTextColor()
 
 QColor ColorRepository::buttonBorderColor()
 {
-    return s_darkMode ? QColor("#4B4B4B") : QColor("#D1D1D1");
+    return basicBorderColor();
 }
 
 QColor ColorRepository::buttonPressedBorderColor()
 {
-    return QColor("#B3B3B3");
+    return buttonBorderColor();
 }
+
 QColor ColorRepository::buttonHoverOutlineColor()
 {
-    return QColor("#C7C7C7");
+    return buttonBorderColor();
 }
 
 QColor ColorRepository::buttonBackgroundColor()
 {
-    return s_darkMode ? QColor("#A7211F22") : QColor("#FDFDFD");
+    // return s_darkMode ? QColor("#A7211F22") : QColor("#FDFDFD");
+    return baseBackgroundColor();
 }
 
 QColor ColorRepository::buttonPressedBackgroundColor()
 {
-    return s_darkMode ? QColor("#171717") : QColor("#F3F3F3");
+    // return s_darkMode ? QColor("#171717") : QColor("#F3F3F3");
+    return basicPressedColor();
 }
 
 QColor ColorRepository::buttonHoveredBackgroundColor()
@@ -177,6 +180,11 @@ QColor ColorRepository::buttonHoveredBackgroundColor()
 QColor ColorRepository::buttonDisableBackgroundColor()
 {
     return s_darkMode ? QColor("#A7211F22") : QColor("#F5F5F5");
+}
+
+QColor ColorRepository::buttonHemlineColor()
+{
+    return s_darkMode ? QColor("#454545") : QColor("#D1D1D1");
 }
 
 QColor ColorRepository::listViewBorderColor()

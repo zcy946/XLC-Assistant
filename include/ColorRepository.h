@@ -69,6 +69,7 @@ namespace ColorRepository
     QColor buttonPressedBackgroundColor();
     QColor buttonHoveredBackgroundColor();
     QColor buttonDisableBackgroundColor();
+    QColor buttonHemlineColor();
 
     QColor listViewBorderColor();
 

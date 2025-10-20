@@ -4,7 +4,7 @@
 #include <QPushButton>
 #include <QPainterPath>
 
-void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
+void PushButtonStyleHelper::drawBackground(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
 {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
@@ -12,6 +12,23 @@ void PushButtonStyleHelper::drawButtonShape(const QStyleOptionButton *option, QP
     painter->drawRoundedRect(QRectF(option->rect).adjusted(RADIUS_SHADOW + WIDTH_BORDER, RADIUS_SHADOW + WIDTH_BORDER, -(RADIUS_SHADOW + WIDTH_BORDER), -(RADIUS_SHADOW + WIDTH_BORDER)),
                              RADIUS,
                              RADIUS);
+    painter->restore();
+}
+
+void PushButtonStyleHelper::drawHemline(const QStyleOptionButton *option, QPainter *painter, const QWidget *widget) const
+{
+    if (option->state & QStyle::State_Sunken)
+        return;
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    QColor color = ColorRepository::buttonHemlineColor();
+    color.setAlpha(7);
+    painter->setPen(color);
+    QRect rectForeground = option->rect.adjusted(WIDTH_BORDER, WIDTH_BORDER, -WIDTH_BORDER, -WIDTH_BORDER);
+    painter->drawLine(rectForeground.x() + RADIUS,
+                      rectForeground.height() - RADIUS_SHADOW,
+                      rectForeground.width() - RADIUS,
+                      rectForeground.height() - RADIUS_SHADOW);
     painter->restore();
 }
 

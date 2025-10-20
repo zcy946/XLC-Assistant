@@ -287,7 +287,7 @@ void HistoryMessageListWidget::paintEvent(QPaintEvent *event)
     {
         QPainter painter(viewport());
         painter.save();
-        painter.setPen(palette().color(QPalette::Disabled, QPalette::Text));
+        painter.setPen(ColorRepository::basicText());
         QString message = tr("(´-﹏-`；) 空空如也呢～ 输入内容点击发送开始对话吧 (。・∀・)ノ゛");
         painter.drawText(viewport()->rect(), Qt::AlignCenter, message);
         painter.restore();
