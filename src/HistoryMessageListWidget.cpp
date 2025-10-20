@@ -132,7 +132,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     // 绘制昵称
     QRect rectNick(rectAvatar.topRight() + QPoint(NICK_MARGIN, 0),
                    QPoint(option.rect.right() - PADDING, rectAvatar.top() + fontMetrics.height()));
-    painter->setPen(Qt::black);
+    painter->setPen(ColorRepository::basicText());
     painter->drawText(rectNick, nick);
 
     // 绘制时间戳
@@ -147,7 +147,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->drawText(rectDateTime, createDateTime);
 
     // 绘制文本
-    painter->setPen(Qt::black);
+    painter->setPen(ColorRepository::basicText());
     painter->setFont(option.font);
     int textWidth = option.rect.width() - rectAvatar.width() - PADDING * 3;
     QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);

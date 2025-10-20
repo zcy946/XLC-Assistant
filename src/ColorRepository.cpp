@@ -4,7 +4,7 @@
 #include <QBrush>
 #include <QToolTip>
 
-static bool s_darkMode = false;
+static bool s_darkMode = true;
 
 QPalette ColorRepository::standardPalette()
 {
