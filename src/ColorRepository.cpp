@@ -16,7 +16,7 @@ QPalette ColorRepository::standardPalette()
     // 按钮上的文本
     palette.setColor(QPalette::ButtonText, basicTextColor());
 
-    // palette.setColor(QPalette::ToolTipBase, baseBackgroundColor());
+    palette.setColor(QPalette::ToolTipBase, baseBackgroundColor());
     palette.setColor(QPalette::ToolTipText, basicTextColor());
 
     QToolTip::setPalette(palette);
@@ -426,17 +426,17 @@ QColor ColorRepository::menuBorderColor()
 
 QColor ColorRepository::listHoveredBackgroundColor()
 {
-    return QColor("#E5F3FF");
+    return itemViewItemHoveredBackgroundColor();
 }
 
 QColor ColorRepository::listSelectedBackgroundColor()
 {
-    return QColor("#CCE8FF");
+    return itemViewItemSelectedBackgroundColor();
 }
 
 QColor ColorRepository::listSelectedAndHoveredOutlineColor()
 {
-    return QColor("#99D1FF");
+    return itemViewItemSelectedAndHoveredBackgroundColor();
 }
 
 QColor ColorRepository::groupBoxBackgroundColor()
