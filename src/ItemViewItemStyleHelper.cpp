@@ -30,7 +30,7 @@ void ItemViewItemStyleHelper::drawText(const XlcStyle *style, const QStyleOption
     }
     else
     {
-        textColor = ColorRepository::basicText();
+        textColor = ColorRepository::basicTextColor();
     }
     painter->setPen(QColor(textColor));
     QFontMetrics fm(option->font);

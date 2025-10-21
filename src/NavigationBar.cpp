@@ -111,7 +111,7 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
                                rectText.width(),
                                rectText.height());
 
-    painter->setPen(ColorRepository::basicText());
+    painter->setPen(ColorRepository::basicTextColor());
     painter->drawText(rectDrawText, Qt::TextWrapAnywhere, text);
     painter->restore();
 }

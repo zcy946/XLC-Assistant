@@ -26,7 +26,7 @@ void GroupBoxStyleHelper::drawLabel(const XlcStyle *style, const QStyleOptionGro
                       rectLabel.x() + option->fontMetrics.horizontalAdvance(option->text) + PADDING_LABEL,
                       rectFrame.y());
     // 绘制文本
-    painter->setPen(ColorRepository::basicText());
+    painter->setPen(ColorRepository::basicTextColor());
     painter->drawText(rectLabel, Qt::AlignVCenter, option->text);
     painter->restore();
 }

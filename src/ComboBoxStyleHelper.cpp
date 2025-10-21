@@ -39,7 +39,7 @@ void ComboBoxStyleHelper::drawText(const QStyleOptionComboBox *option, QPainter 
     {
         QRect textRect = option->rect.adjusted(PADDING_HORIZONTAL, PADDING_VERTICAL, -PADDING_HORIZONTAL, -PADDING_VERTICAL);
         if (option->state & QStyle::State_Enabled)
-            painter->setPen(ColorRepository::basicText());
+            painter->setPen(ColorRepository::basicTextColor());
         else
             painter->setPen(ColorRepository::basicDisableText());
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignBottom, option->currentText);
@@ -87,7 +87,7 @@ void ComboBoxStyleHelper::drawArrow(const XlcStyle *style, const QStyleOptionCom
     iconFont.setPixelSize(ICONFONG_SIZE);
     painter->setFont(iconFont);
     if (option->state.testFlag(QStyle::State_Enabled))
-        painter->setPen(ColorRepository::basicText());
+        painter->setPen(ColorRepository::basicTextColor());
     else
         painter->setPen(ColorRepository::basicDisableText());
     painter->drawText(rectExpandIcon, Qt::AlignCenter, ICONFONT_AngleDown);

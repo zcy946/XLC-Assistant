@@ -9,7 +9,7 @@
 #include <QListView>
 #include <QPlainTextEdit>
 #include <QComboBox>
-#include <QLayout>
+#include <QMenu>
 
 /**
  * Note 在重写任何 QProxyStyle 虚函数时，都要遵循这张清单:
@@ -31,7 +31,8 @@ XlcStyle::XlcStyle()
       m_plainTextEditStyleHelper(new PlainTextEditStyleHelper()),
       m_checkBoxStyleHelper(new CheckBoxStyleHelper()),
       m_comboBoxStyleHelper(new ComboBoxStyleHelper()),
-      m_groupBoxStyleHelper(new GroupBoxStyleHelper())
+      m_groupBoxStyleHelper(new GroupBoxStyleHelper()),
+      m_menuStyleHelper(new MenuStyleHelper())
 {
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
@@ -75,6 +76,15 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
             return;
         }
         break;
+    case PE_PanelMenu:
+        if (const QStyleOptionMenuItem *optionItemMenuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option))
+        {
+            m_menuStyleHelper->drawBackground(optionItemMenuItem, painter, widget);
+            // TODO 修改Menu的背景添加自定义阴影(如何去除自带的阴影)
+            // m_menuStyleHelper->drawShadow(optionItemMenuItem, painter, widget);
+            return;
+        }
+        break;
     default:
         break;
     }
@@ -100,6 +110,19 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_pushButtonStyleHelper->drawText(optionButton, painter, widget);
+            return;
+        }
+        break;
+    case CE_MenuItem:
+        if (const QStyleOptionMenuItem *optionMenuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option))
+        {
+            m_menuStyleHelper->drawBackgroundItem(optionMenuItem, painter, widget);
+            m_menuStyleHelper->drawSeparator(optionMenuItem, painter, widget);
+            m_menuStyleHelper->drawCheckIndicator(optionMenuItem, painter, widget);
+            m_menuStyleHelper->drawText(optionMenuItem, painter, widget);
+            m_menuStyleHelper->drawIcon(QProxyStyle::pixelMetric(QStyle::PM_SmallIconSize, optionMenuItem, widget),
+                                        optionMenuItem, painter, widget);
+            m_menuStyleHelper->drawIconExpand(optionMenuItem, painter, widget);
             return;
         }
         break;
@@ -218,6 +241,10 @@ int XlcStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, const 
 {
     switch (metric)
     {
+    case PM_MenuPanelWidth:
+    case PM_MenuHMargin:
+    case PM_MenuVMargin:
+        return 0;
     case PM_ButtonMargin:
         if (qstyleoption_cast<const QStyleOptionButton *>(option))
         {
@@ -300,13 +327,17 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
         }
         break;
     case CT_ComboBox:
-    {
         if (const QStyleOptionComboBox *optionComboBox = qstyleoption_cast<const QStyleOptionComboBox *>(option))
         {
             return m_comboBoxStyleHelper->sizeFromContents(optionComboBox, contentsSize, widget);
         }
         break;
-    }
+    case CT_MenuItem:
+        if (const QStyleOptionMenuItem *optionMenuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option))
+        {
+            return m_menuStyleHelper->sizeMenuItem(optionMenuItem, contentsSize, widget);
+        }
+        break;
     case CT_LineEdit:
         if (const QStyleOptionFrame *lineEditOption = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
@@ -466,12 +497,11 @@ void XlcStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_Hover);
     }
 
-    if (QListView *itemView = qobject_cast<QListView *>(widget))
+    if (QListView *listView = qobject_cast<QListView *>(widget))
     {
         // 通过私有类名`QComboBoxPrivateContainer`捕获QComboBox的菜单容器
-        QWidget *popup = itemView->parentWidget();
-        auto isComboBoxPopupContainer = popup && popup->inherits("QComboBoxPrivateContainer");
-        if (isComboBoxPopupContainer)
+        QWidget *popup = listView->parentWidget();
+        if (popup && popup->inherits("QComboBoxPrivateContainer"))
         {
             popup->setAttribute(Qt::WA_TranslucentBackground, true);
             popup->setAttribute(Qt::WA_OpaquePaintEvent, false);

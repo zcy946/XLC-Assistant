@@ -65,7 +65,7 @@ void SpinBoxStyleHelper::drawSubControls(const QStyleOptionSpinBox *option, QPai
     QFont iconFont = QFont(ICONFONT_NAME);
     iconFont.setPixelSize(ICONFONT_SIZE);
     painter->setFont(iconFont);
-    painter->setPen(ColorRepository::basicText());
+    painter->setPen(ColorRepository::basicTextColor());
     painter->drawText(rectAddLine, Qt::AlignCenter, ICONFONT_AngleUp);
     // 减小图标
     painter->drawText(rectSubLine, Qt::AlignCenter, ICONFONT_AngleDown);

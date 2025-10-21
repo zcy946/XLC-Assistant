@@ -87,7 +87,7 @@ void CheckBoxStyleHelper::drawText(const QStyleOptionButton *option, QPainter *p
     painter->setRenderHint(QPainter::Antialiasing, true);
     if (option->state.testFlag(QStyle::State_Enabled))
     {
-        painter->setPen(ColorRepository::basicText());
+        painter->setPen(ColorRepository::basicTextColor());
     }
     else
     {

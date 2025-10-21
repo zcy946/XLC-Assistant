@@ -100,7 +100,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         QRect rectDrawText = QRect(option.rect.topLeft() + QPoint(lineLength, PADDING), rectText.size());
         painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(option.rect.left() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(rectDrawText.left() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
-        painter->setPen(ColorRepository::basicText());
+        painter->setPen(ColorRepository::basicTextColor());
         painter->drawText(rectDrawText, text);
         painter->setPen(ColorRepository::historyMessageListSeparator());
         painter->drawLine(QPoint(rectDrawText.right() + PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2), QPoint(option.rect.right() - PADDING, option.rect.top() + PADDING + fontMetrics.height() / 2));
@@ -132,7 +132,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     // 绘制昵称
     QRect rectNick(rectAvatar.topRight() + QPoint(NICK_MARGIN, 0),
                    QPoint(option.rect.right() - PADDING, rectAvatar.top() + fontMetrics.height()));
-    painter->setPen(ColorRepository::basicText());
+    painter->setPen(ColorRepository::basicTextColor());
     painter->drawText(rectNick, nick);
 
     // 绘制时间戳
@@ -147,7 +147,7 @@ void CMessageDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->drawText(rectDateTime, createDateTime);
 
     // 绘制文本
-    painter->setPen(ColorRepository::basicText());
+    painter->setPen(ColorRepository::basicTextColor());
     painter->setFont(option.font);
     int textWidth = option.rect.width() - rectAvatar.width() - PADDING * 3;
     QRect rectText = fontMetrics.boundingRect(0, 0, textWidth, 0, Qt::TextWordWrap, text);
@@ -287,7 +287,7 @@ void HistoryMessageListWidget::paintEvent(QPaintEvent *event)
     {
         QPainter painter(viewport());
         painter.save();
-        painter.setPen(ColorRepository::basicText());
+        painter.setPen(ColorRepository::basicTextColor());
         QString message = tr("(´-﹏-`；) 空空如也呢～ 输入内容点击发送开始对话吧 (。・∀・)ノ゛");
         painter.drawText(viewport()->rect(), Qt::AlignCenter, message);
         painter.restore();

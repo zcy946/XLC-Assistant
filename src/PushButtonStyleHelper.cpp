@@ -50,7 +50,7 @@ void PushButtonStyleHelper::drawText(const QStyleOptionButton *option, QPainter 
     }
     else
     {
-        textColor = ColorRepository::basicText();
+        textColor = ColorRepository::basicTextColor();
     }
     painter->setPen(QColor(textColor));
     QFont newFont = painter->font();

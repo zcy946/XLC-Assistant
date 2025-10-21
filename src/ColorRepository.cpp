@@ -4,22 +4,20 @@
 #include <QBrush>
 #include <QToolTip>
 
-static bool s_darkMode = true;
-
 QPalette ColorRepository::standardPalette()
 {
     QPalette palette;
     palette.setColor(QPalette::Window, windowBackgroundColor());
     palette.setColor(QPalette::Base, baseBackgroundColor());
-    palette.setColor(QPalette::WindowText, basicText());
-    palette.setColor(QPalette::Text, basicText());
+    palette.setColor(QPalette::WindowText, basicTextColor());
+    palette.setColor(QPalette::Text, basicTextColor());
     palette.setColor(QPalette::PlaceholderText, placeHolderText());
 
     // 按钮上的文本
-    palette.setColor(QPalette::ButtonText, basicText());
+    palette.setColor(QPalette::ButtonText, basicTextColor());
 
     // palette.setColor(QPalette::ToolTipBase, baseBackgroundColor());
-    palette.setColor(QPalette::ToolTipText, basicText());
+    palette.setColor(QPalette::ToolTipText, basicTextColor());
 
     QToolTip::setPalette(palette);
 
@@ -63,7 +61,7 @@ QColor ColorRepository::dialogBaseBackground()
     return s_darkMode ? QColor("#1F1F1F") : QColor("#FFFFFF");
 }
 
-QColor ColorRepository::basicText()
+QColor ColorRepository::basicTextColor()
 {
     return s_darkMode ? s_colorTextDrakMode : s_colorTextLightMode;
 }
@@ -127,21 +125,21 @@ QColor ColorRepository::basicHoveredAlphaColor()
 
 QColor ColorRepository::disabledTextColor()
 {
-    QColor colorDisabledText = basicText();
+    QColor colorDisabledText = basicTextColor();
     colorDisabledText.setAlphaF(0.3);
     return colorDisabledText;
 }
 
 QColor ColorRepository::pressedTextColor()
 {
-    QColor colorPressedText = basicText();
+    QColor colorPressedText = basicTextColor();
     colorPressedText.setAlphaF(0.6);
     return colorPressedText;
 }
 
 QColor ColorRepository::hoverTextColor()
 {
-    return basicText();
+    return basicTextColor();
 }
 
 QColor ColorRepository::buttonBorderColor()
@@ -404,6 +402,26 @@ QColor ColorRepository::popupBorderColor()
 QColor ColorRepository::popupBackgroundColor()
 {
     return s_darkMode ? QColor("#2C2C2C") : QColor("#FAFAFA");
+}
+
+QColor ColorRepository::menuSeparatorColor()
+{
+    return basicBorderColor();
+}
+
+QColor ColorRepository::menuBackgroundColor()
+{
+    return s_darkMode ? QColor("#2C2C2C") : QColor("#FAFAFA");
+}
+
+QColor ColorRepository::menuHoveredBackgroundColor()
+{
+    return s_darkMode ? QColor("#383838") : QColor("#F0F0F0");
+}
+
+QColor ColorRepository::menuBorderColor()
+{
+    return s_darkMode ? QColor("#474747") : QColor("#D6D6D6");
 }
 
 QColor ColorRepository::listHoveredBackgroundColor()

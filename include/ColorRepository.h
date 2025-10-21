@@ -1,17 +1,14 @@
-
-
 #ifndef COLORREPOSITORY_H
 #define COLORREPOSITORY_H
 
 #include <QColor>
 #include <QPalette>
 
-/**
- * Our colors. They are separate from the widget style so that custom widgets can also use them directly.
- */
+
 namespace ColorRepository
 {
 
+    static bool s_darkMode = false;
     // static QColor s_colorPrimaryNormal = QColor("#0067C0");
     static QColor s_colorPrimaryNormal = QColor("#0078D4");
     static QColor s_colorTextDrakMode = QColor("#FFFFFF");
@@ -33,7 +30,7 @@ namespace ColorRepository
     // 对话框背景颜色
     QColor dialogBaseBackground();
     // 通用文本颜色
-    QColor basicText();
+    QColor basicTextColor();
     QColor basicDisableText();
 
     // 占位符颜色
@@ -122,6 +119,11 @@ namespace ColorRepository
 
     QColor popupBorderColor();
     QColor popupBackgroundColor();
+
+    QColor menuSeparatorColor();
+    QColor menuBackgroundColor();
+    QColor menuHoveredBackgroundColor();
+    QColor menuBorderColor();
 
     QColor listHoveredBackgroundColor();
     QColor listSelectedBackgroundColor();
