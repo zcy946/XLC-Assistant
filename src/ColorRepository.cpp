@@ -1,7 +1,5 @@
 #include "ColorRepository.h"
-
 #include <QApplication>
-#include <QBrush>
 #include <QToolTip>
 
 QPalette ColorRepository::standardPalette()
@@ -12,15 +10,10 @@ QPalette ColorRepository::standardPalette()
     palette.setColor(QPalette::WindowText, basicTextColor());
     palette.setColor(QPalette::Text, basicTextColor());
     palette.setColor(QPalette::PlaceholderText, placeHolderText());
-
-    // 按钮上的文本
     palette.setColor(QPalette::ButtonText, basicTextColor());
-
     palette.setColor(QPalette::ToolTipBase, baseBackgroundColor());
     palette.setColor(QPalette::ToolTipText, basicTextColor());
-
     QToolTip::setPalette(palette);
-
     return palette;
 }
 

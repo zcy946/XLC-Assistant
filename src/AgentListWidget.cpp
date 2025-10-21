@@ -80,35 +80,17 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
     /**
-     * 绘制背景
-     */
-    QFont font = getGlobalFont();
-    font.setPointSize(SIZE_FONT);
-    QFontMetrics fm = QFontMetrics(font);
-    int widthBackground = option.rect.width() - MARGIN * 2;
-    int heightBackground = PADDING_VERTICAL + fm.height() + PADDING_VERTICAL;
-    int xBackground = option.rect.x() + (option.rect.width() - widthBackground) / 2;
-    int yBackground = option.rect.y() + (option.rect.height() - heightBackground) / 2;
-    QRect rectBackground = QRect(xBackground, yBackground, widthBackground, heightBackground);
-    int radius = heightBackground / 2;
-
-    PainterHelper::drawBackground(painter, option, rectBackground, radius);
-
-    /**
      * 获取数据
      */
     QString name = index.data(AgentListModel::Name).toString();
     int conversationCount = index.data(AgentListModel::ConversationCount).toInt();
 
-    /**
-     * 绘制对话计数
-     */
+    // 绘制区域计算
     QRect rectBackgroundConversationCount = QRect();
+    int radiusBackgroundConversationCount;
+    QFont fontConversationCount = getGlobalFont();
     if (option.state & QStyle::State_Selected)
     {
-        painter->save();
-        // 绘制背景
-        QFont fontConversationCount = getGlobalFont();
         fontConversationCount.setPointSize(FONT_SIZE_CONVERSATION_COUNT);
         QFontMetrics fmConversationCount(fontConversationCount);
 
@@ -116,13 +98,33 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         int hBackgroundConversationCount = PADDING_CONVERSATION_COUNT + rectConversationCount.height() + PADDING_CONVERSATION_COUNT;
         int wBackgroundConversationCount = qMax(hBackgroundConversationCount,
                                                 PADDING_CONVERSATION_COUNT + fmConversationCount.horizontalAdvance(QString::number(conversationCount)) + PADDING_CONVERSATION_COUNT);
-        int xBackgroundConversationCount = rectBackground.topRight().x() - wBackgroundConversationCount - PADDING_HORIZONTAL;
-        int yBackgroundConversationCount = rectBackground.y() + (rectBackground.height() - hBackgroundConversationCount) / 2;
-        int radiusBackgroundConversationCount = hBackgroundConversationCount / 2;
+        int xBackgroundConversationCount = option.rect.topRight().x() - wBackgroundConversationCount - PADDING_HORIZONTAL;
+        int yBackgroundConversationCount = option.rect.y() + (option.rect.height() - hBackgroundConversationCount) / 2;
+        radiusBackgroundConversationCount = hBackgroundConversationCount / 2;
         rectBackgroundConversationCount = QRect(xBackgroundConversationCount,
                                                 yBackgroundConversationCount,
                                                 wBackgroundConversationCount,
                                                 hBackgroundConversationCount);
+    }
+
+    /**
+     * 绘制名字
+     */
+    QRect rectTextOriginal = option.widget->style()->subElementRect(QStyle::SE_ItemViewItemText, &option, option.widget);
+    QRect rectText = rectTextOriginal.adjusted(0, 0, -rectBackgroundConversationCount.width() - SPACING_NAME_TO_CONVERSATION_COUNT, 0);
+    QString elidedName = option.fontMetrics.elidedText(name, Qt::ElideRight, rectText.width());
+    painter->setPen(ColorRepository::basicTextColor());
+    QStyleOptionViewItem opt = option;
+    opt.text = elidedName;
+    QStyledItemDelegate::paint(painter, opt, index);
+
+    /**
+     * 绘制对话计数
+     */
+    if (option.state & QStyle::State_Selected)
+    {
+        painter->save();
+        // 绘制背景
         painter->setPen(ColorRepository::listSelectedAndHoveredOutlineColor());
         painter->setBrush(ColorRepository::baseBackgroundColor());
         painter->drawRoundedRect(rectBackgroundConversationCount, radiusBackgroundConversationCount, radiusBackgroundConversationCount);
@@ -135,31 +137,9 @@ void AgentDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         painter->setPen(ColorRepository::basicTextColor());
         painter->setFont(fontConversationCount);
         painter->drawText(rectBackgroundConversationCount, Qt::AlignCenter, QString::number(conversationCount));
-
         painter->restore();
     }
-
-    /**
-     * 绘制名字
-     */
-    QRect rectText = QRect(rectBackground.adjusted(PADDING_HORIZONTAL,
-                                                   PADDING_VERTICAL,
-                                                   -PADDING_HORIZONTAL - rectBackgroundConversationCount.width() - SPACING_NAME_TO_CONVERSATION_COUNT,
-                                                   -PADDING_VERTICAL));
-    QString elidedName = fm.elidedText(name, Qt::ElideRight, rectText.width());
-    painter->setPen(ColorRepository::basicTextColor());
-    painter->drawText(rectText, elidedName);
-
     painter->restore();
-}
-
-QSize AgentDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-    QFont font = getGlobalFont();
-    font.setPointSize(SIZE_FONT);
-    QFontMetrics fm = QFontMetrics(font);
-    int height = MARGIN + PADDING_VERTICAL + fm.height() + PADDING_VERTICAL;
-    return QSize(option.rect.width(), height);
 }
 
 /**

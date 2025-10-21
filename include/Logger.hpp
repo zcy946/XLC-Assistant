@@ -70,8 +70,7 @@ public:
 #endif
 
         auto logger = std::make_shared<spdlog::logger>("multi_sink", spdlog::sinks_init_list{console_sink, rotating_sink});
-        // logger->set_level(spdlog::level::trace);
-        logger->set_level(spdlog::level::critical);
+        logger->set_level(spdlog::level::trace);
         spdlog::register_logger(logger);
         spdlog::set_default_logger(logger);
     }
