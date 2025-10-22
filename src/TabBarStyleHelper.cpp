@@ -69,17 +69,14 @@ void TabBarStyleHelper::drawBackground(const QStyleOptionTab *option, QPainter *
         }
         painter->drawRoundedRect(rectTab, RADIUS_TAB, RADIUS_TAB);
     }
-
     painter->restore();
 }
 
 void TabBarStyleHelper::drawLabel(const XlcStyle *style, const QStyleOptionTab *option, QPainter *painter, const QWidget *widget) const
 {
-
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     QRect rectTextOriginal = style->subElementRect(QStyle::SE_TabBarTabText, option, widget);
-
     rectTextOriginal.setLeft(rectTextOriginal.left() + (MARGIN_TAB + 1));
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
@@ -88,7 +85,6 @@ void TabBarStyleHelper::drawLabel(const XlcStyle *style, const QStyleOptionTab *
     if (!icon.isNull())
     {
         QRectF iconRect(option->rect.x() + 15, rectTextOriginal.center().y() - (qreal)option->iconSize.height() / 2 + 1, option->iconSize.width(), option->iconSize.height());
-
         QPixmap iconPix = icon.pixmap(option->iconSize,
                                       (option->state & QStyle::State_Enabled) ? QIcon::Normal
                                                                               : QIcon::Disabled,

@@ -4,17 +4,14 @@
 #include <QColor>
 #include <QPalette>
 
-
 namespace ColorRepository
 {
-
-    static bool s_darkMode = true;
+    static bool s_darkMode = false;
     static QColor s_colorPrimaryNormal = QColor("#0078D4");
     static QColor s_colorTextDrakMode = QColor("#FFFFFF");
     static QColor s_colorTextLightMode = QColor("#000000");
 
-    QPalette
-    standardPalette();
+    QPalette standardPalette();
     void setDarkMode(bool dark);
 
     // 主颜色
