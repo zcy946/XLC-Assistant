@@ -32,8 +32,10 @@ XlcStyle::XlcStyle()
       m_checkBoxStyleHelper(new CheckBoxStyleHelper()),
       m_comboBoxStyleHelper(new ComboBoxStyleHelper()),
       m_groupBoxStyleHelper(new GroupBoxStyleHelper()),
-      m_menuStyleHelper(new MenuStyleHelper())
+      m_menuStyleHelper(new MenuStyleHelper()),
+      m_tabBarStyleHelper(new TabBarStyleHelper())
 {
+    // 注册字体图标
     QFontDatabase::addApplicationFont("://font/ElaAwesome.ttf");
 }
 
@@ -85,6 +87,13 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
             return;
         }
         break;
+    case PE_FrameTabWidget:
+        if (const QStyleOptionTabWidgetFrame *optionTabWidgetFrame = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(option))
+        {
+            m_tabBarStyleHelper->drawTabWidgetBackground(optionTabWidgetFrame, painter, widget);
+            return;
+        }
+        break;
     default:
         break;
     }
@@ -110,6 +119,27 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
         {
             m_pushButtonStyleHelper->drawText(optionButton, painter, widget);
+            return;
+        }
+        break;
+    case CE_CheckBoxLabel:
+        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
+        {
+            m_checkBoxStyleHelper->drawText(optionButton, painter, widget);
+            return;
+        }
+        break;
+    case CE_TabBarTabShape:
+        if (const QStyleOptionTab *optionTab = qstyleoption_cast<const QStyleOptionTab *>(option))
+        {
+            m_tabBarStyleHelper->drawBackground(optionTab, painter, widget);
+            return;
+        }
+        break;
+    case CE_TabBarTabLabel:
+        if (const QStyleOptionTab *optionTab = qstyleoption_cast<const QStyleOptionTab *>(option))
+        {
+            m_tabBarStyleHelper->drawLabel(this, optionTab, painter, widget);
             return;
         }
         break;
@@ -164,13 +194,6 @@ void XlcStyle::drawControl(ControlElement element, const QStyleOption *option, Q
         if (widget->objectName() == "XlcComboBoxContainer")
         {
             m_comboBoxStyleHelper->drawContainerBackground(option, painter, widget);
-            return;
-        }
-        break;
-    case CE_CheckBoxLabel:
-        if (const QStyleOptionButton *optionButton = qstyleoption_cast<const QStyleOptionButton *>(option))
-        {
-            m_checkBoxStyleHelper->drawText(optionButton, painter, widget);
             return;
         }
         break;
@@ -338,6 +361,12 @@ QSize XlcStyle::sizeFromContents(ContentsType type, const QStyleOption *option, 
             return m_menuStyleHelper->sizeMenuItem(optionMenuItem, contentsSize, widget);
         }
         break;
+    case CT_TabBarTab:
+        if (const QStyleOptionTab *optionTab = qstyleoption_cast<const QStyleOptionTab *>(option))
+        {
+            return m_tabBarStyleHelper->sizeTab(optionTab, contentsSize, widget);
+        }
+        break;
     case CT_LineEdit:
         if (const QStyleOptionFrame *lineEditOption = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
@@ -407,7 +436,13 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
     case SE_ItemViewItemText:
         if (const QStyleOptionViewItem *optionViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
         {
-            return m_itemViewItemStyleHelper->rectText(optionViewItem, widget, QProxyStyle::subElementRect(subElement, option, widget));
+            return m_itemViewItemStyleHelper->rectText(optionViewItem, widget, QProxyStyle::subElementRect(QStyle::SE_ItemViewItemText, optionViewItem, widget));
+        }
+        break;
+    case SE_TabBarTabText:
+        if (const QStyleOptionTab *optionTab = qstyleoption_cast<const QStyleOptionTab *>(option))
+        {
+            return m_tabBarStyleHelper->rectText(optionTab, widget, QProxyStyle::subElementRect(SE_TabBarTabText, optionTab, widget));
         }
         break;
     default:
@@ -492,11 +527,6 @@ QRect XlcStyle::subControlRect(ComplexControl complexControl, const QStyleOption
 
 void XlcStyle::polish(QWidget *widget)
 {
-    if (qobject_cast<QPushButton *>(widget) || qobject_cast<QCheckBox *>(widget) || qobject_cast<QAbstractItemView *>(widget) || qobject_cast<QScrollBar *>(widget))
-    {
-        widget->setAttribute(Qt::WA_Hover);
-    }
-
     if (QListView *listView = qobject_cast<QListView *>(widget))
     {
         // 通过私有类名`QComboBoxPrivateContainer`捕获QComboBox的菜单容器

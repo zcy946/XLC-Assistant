@@ -14,6 +14,7 @@
 #include "ComboBoxStyleHelper.h"
 #include "GroupBoxStyleHelper.h"
 #include "MenuStyleHelper.h"
+#include "TabBarStyleHelper.h"
 #include <QStyledItemDelegate>
 
 class ComboBoxDelegate;
@@ -47,6 +48,7 @@ private:
     std::unique_ptr<ComboBoxStyleHelper> m_comboBoxStyleHelper;
     std::unique_ptr<GroupBoxStyleHelper> m_groupBoxStyleHelper;
     std::unique_ptr<MenuStyleHelper> m_menuStyleHelper;
+    std::unique_ptr<TabBarStyleHelper> m_tabBarStyleHelper;
 };
 
 class ComboBoxDelegate : public QStyledItemDelegate

@@ -108,12 +108,17 @@ QColor ColorRepository::basicDisabledColor()
 
 QColor ColorRepository::basicPressedAlphaColor()
 {
-    return s_darkMode ? QColor("#554B4B4B") : QColor("#40CCCCCC");
+    return s_darkMode ? QColor(0x4B, 0x4B, 0x4B, 55) : QColor(0xCC, 0xCC, 0xCC, 40);
 }
 
 QColor ColorRepository::basicHoveredAlphaColor()
 {
-    return s_darkMode ? QColor("#754B4B4B") : QColor("#70CCCCCC");
+    return s_darkMode ? QColor(0x4B, 0x4B, 0x4B, 75) : QColor(0xCC, 0xCC, 0xCC, 70);
+}
+
+QColor ColorRepository::basicSelectedAlphaColor()
+{
+    return s_darkMode ? QColor(0x4B, 0x4B, 0x4B, 75) : QColor(0xCC, 0xCC, 0xCC, 70);
 }
 
 QColor ColorRepository::disabledTextColor()

@@ -8,7 +8,7 @@
 namespace ColorRepository
 {
 
-    static bool s_darkMode = false;
+    static bool s_darkMode = true;
     static QColor s_colorPrimaryNormal = QColor("#0078D4");
     static QColor s_colorTextDrakMode = QColor("#FFFFFF");
     static QColor s_colorTextLightMode = QColor("#000000");
@@ -53,6 +53,8 @@ namespace ColorRepository
     QColor basicPressedAlphaColor();
     // 通用hover颜色(alpha通道)
     QColor basicHoveredAlphaColor();
+    // 通用select颜色(alpha通道)
+    QColor basicSelectedAlphaColor();
 
     QColor disabledTextColor();
     QColor pressedTextColor();
