@@ -1,8 +1,8 @@
 [
     {
-        "baseUrl": "",
+        "baseUrl": "http://localhost:8888",
         "description": "一个用于开发测试的mcp服务器",
-        "endpoint": "",
+        "endpoint": "/sse",
         "host": "127.0.0.1",
         "isActive": true,
         "name": "本地开发测试服务器",
