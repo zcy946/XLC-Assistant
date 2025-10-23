@@ -1,7 +1,7 @@
 
 # XLCAssistant - An Advanced LLM & Agent Aggregation Platform
 
-**XLCAssistant** 是一款基于 C++17 和 Qt5(QWidget) 的、由现代 CMake 管理的跨平台模块化AI聚合平台。它不仅仅是一个简单的聊天客户端，更是一个为高级用户和开发者设计的智能体（Agent）中枢。
+**XLCAssistant** 是一款基于 C++17 和 Qt5(QWidget) 的、由现代 CMake 管理的跨平台模块化AI聚合平台。
 
 该项目的核心亮点在于**自主构建了一套像素级精准控制的UI渲染框架**：通过全面继承 `QProxyStyle` 并结合 `QPainter` 底层绘制，实现了对原生控件的深度美化。功能上支持自定义LLM与Agent，并完整实现了“LLM → tool_calls → MCP协议 → 本地工具执行 → 结果返回LLM”的**闭环智能体工作流**。
 
@@ -34,7 +34,7 @@
 -   **工具调用 (Tool Calls)**: 完整实现了基于MCP协议的外部工具调用工作流，赋予了LLM与本地环境交互的能力。
 -   **统一聊天界面**: 提供现代化、高性能的聊天视图，支持代码高亮、多媒体内容等。
 -   **深度定制UI**: 所有UI控件都经过重新设计和渲染，提供统一、美观的视觉体验。
--   **数据持久化**: 所有配置信息（LLM, Agent等）均通过SQLite进行本地持久化存储。
+-   **数据持久化**: 对话信息通过SQLite进行本地持久化存储。
 -   **跨平台**: 基于CMake和Qt，可轻松在Windows和Linux上编译和运行。
 
 ## 🚀 技术栈与架构亮点
