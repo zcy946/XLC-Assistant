@@ -17,7 +17,7 @@
 
 ![设置-agent](./assets/设置-agent.png)
 
-设置页面 - MCPServer
+### 设置页面 - MCPServer
 
 ![设置-mcp](./assets/设置-mcp.png)
 
@@ -72,7 +72,7 @@
 -   C++17 兼容的编译器 (MSVC 2019+, GCC 9+)
 -   CMake (3.15+)
 -   Qt (5.15.2 或更高版本)
--   (可选) spdlog (如果代码中作为子模块或需要手动安装)
+-   (可选) spdlog (需要手动安装)
 
 ### 编译步骤
 
