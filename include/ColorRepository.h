@@ -132,6 +132,10 @@ namespace ColorRepository
 
     QColor historyMessageListSeparator(); // 清除上下文分割线颜色
     QColor historyMessageListTimestamp(); // 时间戳的字体颜色
+
+    QColor navigationItemHoveredBackgroundColor();
+    QColor navigationItemSelectedBackgroundColor();
+    QColor navigationItemHoveredAndSelectedBackgroundColor();
 }
 
 #endif // COLORREPOSITORY_H

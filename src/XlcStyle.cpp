@@ -82,7 +82,7 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
         if (const QStyleOptionMenuItem *optionItemMenuItem = qstyleoption_cast<const QStyleOptionMenuItem *>(option))
         {
             m_menuStyleHelper->drawBackground(optionItemMenuItem, painter, widget);
-            // TODO 修改Menu的背景添加自定义阴影(如何去除自带的阴影)
+            // NOTE 修改Menu的背景添加自定义阴影(需要配合窗口标识符去除自带的阴影，目前暂未找到可用的自动设置方案，因此暂不考虑绘制阴影)
             // m_menuStyleHelper->drawShadow(optionItemMenuItem, painter, widget);
             return;
         }

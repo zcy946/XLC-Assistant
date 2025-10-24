@@ -456,3 +456,18 @@ QColor ColorRepository::historyMessageListTimestamp()
 {
     return QColor("#9E9E9E");
 }
+
+QColor ColorRepository::navigationItemHoveredBackgroundColor()
+{
+    return s_darkMode ? QColor("#2D2D2D") : QColor("#E8E8E8");
+}
+
+QColor ColorRepository::navigationItemSelectedBackgroundColor()
+{
+    return s_darkMode ? QColor("#2D2D2D") : QColor("#E8E8E8");
+}
+
+QColor ColorRepository::navigationItemHoveredAndSelectedBackgroundColor()
+{
+    return s_darkMode ? QColor("#292929") : QColor("#EDEDED");
+}

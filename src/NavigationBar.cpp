@@ -4,7 +4,6 @@
 #include "Logger.hpp"
 #include "global.h"
 #include "ColorRepository.h"
-#include "PainterHelper.h"
 
 /**
  * NavigationItemListModel
@@ -78,8 +77,32 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     painter->setRenderHint(QPainter::Antialiasing);
     int backgroundWidth = rect.width() - MARGIN * 2;
     QRect rectBackground = QRect(rect.x() + (rect.width() - backgroundWidth) / 2, rect.y() + MARGIN, backgroundWidth, backgroundWidth);
-
-    PainterHelper::drawBackground(painter, option, rectBackground, RADIUS, ColorRepository::windowBackgroundColor());
+    painter->setPen(Qt::NoPen);
+    // 选中状态
+    if (option.state & QStyle::State_Selected)
+    {
+        // 选中且悬停
+        if (option.state & QStyle::State_MouseOver)
+        {
+            QPen pen(ColorRepository::navigationItemHoveredBackgroundColor());
+            pen.setWidth(OUTLINE_WIDTH);
+            painter->setPen(pen);
+        }
+        painter->setBrush(QBrush(ColorRepository::navigationItemSelectedBackgroundColor()));
+        painter->drawRoundedRect(rectBackground, RADIUS, RADIUS);
+    }
+    // 悬停状态
+    else if (option.state & QStyle::State_MouseOver)
+    {
+        painter->setBrush(QBrush(ColorRepository::navigationItemHoveredBackgroundColor()));
+        painter->drawRoundedRect(rectBackground, RADIUS, RADIUS);
+    }
+    // 普通状态
+    else
+    {
+        painter->setBrush(ColorRepository::windowBackgroundColor());
+        painter->drawRoundedRect(rectBackground, RADIUS, RADIUS);
+    }
 
     /**
      * 获取数据

@@ -1,6 +1,5 @@
 #include "AgentListWidget.h"
 #include "ColorRepository.h"
-#include "PainterHelper.h"
 
 /**
  * AgentListModel
