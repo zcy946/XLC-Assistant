@@ -17,13 +17,9 @@
 
 ![聊天](./assets/聊天界面.png)
 
-### 设置 - Agent
+### 设置
 
 ![设置-agent](./assets/设置-Agent.png)
-
-### 设置 - LLM
-
-![设置-llm](./assets/设置-LLM.png)
 
 ### 工具调用
 
