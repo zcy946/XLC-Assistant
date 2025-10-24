@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(xlc_mcp_client VERSION 0.0.1 LANGUAGES CXX)
+project(XLCAssistant VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_WARN_UNUSED_CLI YES)
 
@@ -26,7 +26,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 查找包
 set(MCP_DIR "E:/github/1MyFork/cpp-mcp/install/cmake")
-# set(Qt5_DIR "D:/Software/Development/Qt/5.15.17-msvc2019-x64/lib/cmake/Qt5")
 find_package(spdlog CONFIG REQUIRED)
 find_package(Qt5 COMPONENTS Core Widgets Gui Svg Concurrent Sql Network REQUIRED)
 find_package(MCP REQUIRED)

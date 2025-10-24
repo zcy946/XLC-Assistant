@@ -315,12 +315,14 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
         itemNewConversation->setData(Qt::UserRole, QVariant::fromValue(newConversation->uuid));
         m_listWidgetConversations->addItem(itemNewConversation);
         DataManager::getInstance()->addConversation(newConversation);
+
         // 选择新建的对话
         m_listWidgetConversations->setCurrentItem(itemNewConversation);
         // 刷新WidgetChat
         m_widgetChat->refreshHistoryMessageList(newConversation->uuid);
         XLC_LOG_INFO("Create new conversation successfully");
-        // 通知更新设置界面-agent-对话列表
+
+        // 通知更新设置界面-agent-对话列表和pagechat中agent列表的对话数量
         QJsonObject jsonObj;
         jsonObj["id"] = static_cast<int>(EventBus::States::AGENT_UPDATED);
         jsonObj["agentUuid"] = agentUuid;
@@ -331,12 +333,12 @@ void PageChat::slot_onBtnClickedCreateNewConversation()
 void PageChat::refreshAgentList()
 {
     // 保留当前选中agent的uuid，用于再次选中
-    QString selectedAgentUuid = -1;
+    QString selectedAgentUuid = QString::number(-1);
     if (DataManager::getInstance()->getAgent(m_agentListWidget->currentAgentUuid()))
     {
         selectedAgentUuid = m_agentListWidget->currentAgentUuid();
     }
-    // 更新listwidget
+    // FIXME 更新listwidget(m_agentListWidget已经改为qlistview，所以应该更新而不是清除重新添加)
     m_agentListWidget->clear();
     for (auto &agent : DataManager::getInstance()->getAgents())
     {
@@ -344,16 +346,15 @@ void PageChat::refreshAgentList()
     }
     // m_agentListWidget->sortItems();
     // 重新选中之前的item
-    if (selectedAgentUuid == -1)
+    if (selectedAgentUuid == QString::number(-1))
         return;
-    m_agentListWidget->selectFirstAgent();
     m_agentListWidget->setCurrentAgent(selectedAgentUuid);
 }
 
 void PageChat::refreshConversationList()
 {
     // 保留当前选中conversation的uuid，用于再次选中
-    QString selectedConversationUuid = -1;
+    QString selectedConversationUuid = QString::number(-1);
     QListWidgetItem *selectedConversationItem = m_listWidgetConversations->currentItem();
     if (selectedConversationItem)
     {
@@ -382,7 +383,7 @@ void PageChat::refreshConversationList()
     }
     m_listWidgetConversations->sortItems();
     // 重新选中之前的item
-    if (selectedConversationUuid != -1)
+    if (selectedConversationUuid != QString::number(-1))
     {
         for (int i = 0; i < m_listWidgetConversations->count(); ++i)
         {

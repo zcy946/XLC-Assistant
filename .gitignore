@@ -3,9 +3,6 @@ example/
 .vscode/
 test.json
 test.ui
-output/xlc_mcp_client.pdb
-output/xlc_mcp_client.ilk
-output/xlc_mcp_client.exe
 output/fmtd.dll
 output/logs/
 test.md
@@ -19,6 +16,8 @@ test.cpp
 output/config/Agents.json.bak
 output/config/LLMs.json.bak
 output/config/MCPServers.json.bak
-output/xlc_assistant.db
 sqlite.sql
 xlc_assistant.db
+output/XLCAssistant.exe
+output/XLCAssistant.ilk
+output/XLCAssistant.pdb
