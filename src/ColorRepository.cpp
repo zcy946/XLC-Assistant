@@ -23,6 +23,14 @@ void ColorRepository::setDarkMode(bool dark)
     qApp->setPalette(standardPalette());
 }
 
+void ColorRepository::setPrimaryColor(const QColor &colorNew)
+{
+    if (!colorNew.isValid())
+        return;
+    s_colorPrimaryNormal = colorNew;
+    qApp->setPalette(standardPalette());
+}
+
 QColor ColorRepository::primaryNormal()
 {
     return s_colorPrimaryNormal;
@@ -30,12 +38,14 @@ QColor ColorRepository::primaryNormal()
 
 QColor ColorRepository::primaryPressed()
 {
-    return s_darkMode ? QColor("#42A1D2") : QColor("#3183CA");
+    // return s_darkMode ? QColor("#42A1D2") : QColor("#3183CA");
+    return primaryNormal().dark(105);
 }
 
 QColor ColorRepository::primaryHovered()
 {
-    return s_darkMode ? QColor("#47B1E8") : QColor("#1975C5");
+    // return s_darkMode ? QColor("#47B1E8") : QColor("#1975C5");
+    return primaryNormal().dark(108);
 }
 
 QColor ColorRepository::windowBackgroundColor()

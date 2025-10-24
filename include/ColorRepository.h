@@ -6,13 +6,14 @@
 
 namespace ColorRepository
 {
-    static bool s_darkMode = false;
-    static QColor s_colorPrimaryNormal = QColor("#0078D4");
+    static bool s_darkMode = true;
+    static QColor s_colorPrimaryNormal = QColor("#FF5F5F");
     static QColor s_colorTextDrakMode = QColor("#FFFFFF");
     static QColor s_colorTextLightMode = QColor("#000000");
 
     QPalette standardPalette();
     void setDarkMode(bool dark);
+    void setPrimaryColor(const QColor &colorNew);
 
     // 主颜色
     QColor primaryNormal();

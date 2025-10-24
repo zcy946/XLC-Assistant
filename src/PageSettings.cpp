@@ -10,6 +10,7 @@
 #include "EventBus.h"
 #include <QJsonObject>
 #include <QMessageBox>
+#include "ColorRepository.h"
 
 // PageSettings
 PageSettings::PageSettings(QWidget *parent)
@@ -24,6 +25,8 @@ PageSettings::PageSettings(QWidget *parent)
     addPage("MCP 服务器", new PageSettingsMcp(this));
     // pageSettingData
     addPage("存储设置", new PageSettingsStorage(this));
+    // PageSettingsDisplay
+    addPage("显示设置", new PageSettingsDisplay(this));
     // pageAbout
     addPage("关于", new PageAbout(this));
 #ifdef QT_DEBUG
@@ -1277,6 +1280,72 @@ void PageSettingsStorage::slot_onFilePathChangedMcpServers(const QString &filePa
     if (filePath.isEmpty())
         return;
     m_lineEditFilePathMcpServers->setText(QFileInfo(filePath).absoluteFilePath());
+}
+
+// PageSettingsDisplay
+
+PageSettingsDisplay::PageSettingsDisplay(QWidget *parent)
+    : BaseWidget(parent)
+{
+    initUI();
+}
+
+void PageSettingsDisplay::initWidget()
+{
+}
+
+void PageSettingsDisplay::initItems()
+{
+    // m_comboBoxTheme
+    m_comboBoxTheme = new QComboBox(this);
+    m_comboBoxTheme->addItem("浅色");
+    m_comboBoxTheme->addItem("深色");
+    // m_pushButtonTheme
+    m_pushButtonTheme = new QPushButton("确定", this);
+    connect(m_pushButtonTheme, &QPushButton::clicked, this,
+            [this]()
+            {
+                QString strTheme = m_comboBoxTheme->currentText();
+                if (strTheme == m_lineEditPrimaryColor->text())
+                    return;
+                if (strTheme == "浅色")
+                    ColorRepository::setDarkMode(false);
+                else if (strTheme == "深色")
+                    ColorRepository::setDarkMode(true);
+                XLC_LOG_DEBUG("Theme changed(currentTheme={})", strTheme);
+            });
+    // m_lineEditPrimaryColor
+    m_lineEditPrimaryColor = new QLineEdit(this);
+    m_lineEditPrimaryColor->setPlaceholderText("#FF5F5F");
+    // m_pushButtonPrimaryColor
+    m_pushButtonPrimaryColor = new QPushButton("确定", this);
+    connect(m_pushButtonPrimaryColor, &QPushButton::clicked, this,
+            [this]()
+            {
+                QColor colorPrimaryNew(m_lineEditPrimaryColor->text());
+                if (!colorPrimaryNew.isValid())
+                    return;
+                ColorRepository::setPrimaryColor(colorPrimaryNew);
+                XLC_LOG_DEBUG("Primary color changed(newColor={})", m_lineEditPrimaryColor->text());
+            });
+}
+
+void PageSettingsDisplay::initLayout()
+{
+    QGridLayout *gLayoutDisplay = new QGridLayout();
+    gLayoutDisplay->addWidget(new QLabel("主题", this), 0, 0);
+    gLayoutDisplay->addWidget(m_comboBoxTheme, 0, 1);
+    gLayoutDisplay->addWidget(m_pushButtonTheme, 0, 2);
+    gLayoutDisplay->addWidget(new QLabel("主题颜色", this), 1, 0);
+    gLayoutDisplay->addWidget(m_lineEditPrimaryColor, 1, 1);
+    gLayoutDisplay->addWidget(m_pushButtonPrimaryColor, 1, 2);
+    // groupBoxStorage
+    QGroupBox *groupBoxDisplay = new QGroupBox("显示设置", this);
+    groupBoxDisplay->setLayout(gLayoutDisplay);
+    // vLayout
+    QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->addWidget(groupBoxDisplay);
+    vLayout->addStretch();
 }
 
 // PageAbout

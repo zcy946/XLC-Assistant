@@ -321,6 +321,24 @@ private:
     QPushButton *m_pushButtonSelectFileMcpServers;
 };
 
+class PageSettingsDisplay : public BaseWidget
+{
+    Q_OBJECT
+public:
+    explicit PageSettingsDisplay(QWidget *parent = nullptr);
+
+protected:
+    void initWidget() override;
+    void initItems() override;
+    void initLayout() override;
+
+private:
+    QComboBox *m_comboBoxTheme;
+    QPushButton *m_pushButtonTheme;
+    QLineEdit *m_lineEditPrimaryColor;
+    QPushButton *m_pushButtonPrimaryColor;
+};
+
 class PageAbout : public BaseWidget
 {
     Q_OBJECT
