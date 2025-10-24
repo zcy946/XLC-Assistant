@@ -13,17 +13,17 @@
 
 ![明暗主题](./assets/明暗主题.png)
 
-### 聊天页面
+### 聊天
 
-![聊天](./assets/聊天.png)
+![聊天](./assets/聊天界面.png)
 
-### 设置页面 - Agent
+### 设置 - Agent
 
-![设置-agent](./assets/设置-agent.png)
+![设置-agent](./assets/设置-Agent.png)
 
-### 设置页面 - LLM
+### 设置 - LLM
 
-![设置-llm](./assets/设置-llm.png)
+![设置-llm](./assets/设置-LLM.png)
 
 ### 工具调用
 
