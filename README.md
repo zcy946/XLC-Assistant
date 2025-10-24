@@ -19,7 +19,7 @@
 
 ### 设置
 
-![设置-agent](./assets/设置-Agent.png)
+![设置](./assets/设置.png)
 
 ### 工具调用
 
