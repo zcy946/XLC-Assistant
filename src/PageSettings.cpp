@@ -1300,14 +1300,16 @@ void PageSettingsDisplay::initItems()
     m_comboBoxTheme = new QComboBox(this);
     m_comboBoxTheme->addItem("浅色");
     m_comboBoxTheme->addItem("深色");
+    if (ColorRepository::s_darkMode)
+        m_comboBoxTheme->setCurrentIndex(1);
+    else
+        m_comboBoxTheme->setCurrentIndex(0);
     // m_pushButtonTheme
     m_pushButtonTheme = new QPushButton("确定", this);
     connect(m_pushButtonTheme, &QPushButton::clicked, this,
             [this]()
             {
                 QString strTheme = m_comboBoxTheme->currentText();
-                if (strTheme == m_lineEditPrimaryColor->text())
-                    return;
                 if (strTheme == "浅色")
                     ColorRepository::setDarkMode(false);
                 else if (strTheme == "深色")
