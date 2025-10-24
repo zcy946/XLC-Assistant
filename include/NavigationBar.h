@@ -49,7 +49,10 @@ private:
     const int SPACING_ICON_TO_TEXT = 2;                    // item 图标(包含背景)到文本之间的距离
     const QString DEFAULT_ICON = "://image/fire-line.svg"; // 图标加载失败时的默认图标
     const int SIZE_FONT = getGlobalFont().pointSize();     // 字体大小
-    static const int OUTLINE_WIDTH = 2;                    // item 外边框宽度
+    const int OUTLINE_WIDTH = 2;                           // item 外边框宽度
+    const int MARGIN_MARK = 2;                             // 选中标记外边距
+    const int WIDTH_MARK = 3;                              // 选中标记宽度
+    const int RADIUS_MARK = 2;                             // 选中标记圆角半径
 };
 
 class NavigationBar : public QListView

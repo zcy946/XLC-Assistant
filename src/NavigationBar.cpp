@@ -129,6 +129,24 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
     renderer.render(painter, rectIcon);
 
     /**
+     * 绘制选中标记
+     */
+    if ((option.state & QStyle::State_Selected))
+    {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(ColorRepository::primaryNormal());
+        qreal heightMark = rectIcon.height() * 0.5;
+        painter->drawRoundedRect(QRectF(option.rect.x() + MARGIN_MARK,
+                                        rectIcon.y() + (rectIcon.height() - heightMark) / 2,
+                                        WIDTH_MARK,
+                                        heightMark),
+                                 RADIUS_MARK, RADIUS_MARK);
+        painter->restore();
+    }
+
+    /**
      * 绘制文本
      */
     QFont font = getGlobalFont();

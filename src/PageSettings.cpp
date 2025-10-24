@@ -1319,6 +1319,7 @@ void PageSettingsDisplay::initItems()
     // m_lineEditPrimaryColor
     m_lineEditPrimaryColor = new QLineEdit(this);
     m_lineEditPrimaryColor->setPlaceholderText("#FF5F5F");
+    m_lineEditPrimaryColor->setText(ColorRepository::primaryNormal().name());
     // m_pushButtonPrimaryColor
     m_pushButtonPrimaryColor = new QPushButton("确定", this);
     connect(m_pushButtonPrimaryColor, &QPushButton::clicked, this,
