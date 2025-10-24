@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "global.h"
 #include "ColorRepository.h"
+#include <QFile>
 
 /**
  * NavigationItemListModel
@@ -114,7 +115,13 @@ void NavigationItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem
      * 绘制图标
      */
     QRect rectIcon = rectBackground.adjusted(PADDING, PADDING, -PADDING, -PADDING);
-    QSvgRenderer renderer(iconFilePath);
+    QFile fileSvg(iconFilePath);
+    fileSvg.open(QIODevice::ReadOnly);
+    QString strSvg = QString::fromUtf8(fileSvg.readAll());
+    fileSvg.close();
+    // 正则替换 fill 颜色
+    strSvg.replace(QRegExp("fill=\"#[0-9A-Fa-f]{3,6}\""), QString("fill=\"%1\"").arg(ColorRepository::basicTextColor().name()));
+    QSvgRenderer renderer(strSvg.toUtf8());
     if (!renderer.isValid())
     {
         renderer.load(DEFAULT_ICON);
