@@ -33,7 +33,6 @@ void ItemViewItemStyleHelper::drawText(const XlcStyle *style, const QStyleOption
         textColor = ColorRepository::basicTextColor();
     }
     painter->setPen(QColor(textColor));
-    QFontMetrics fm(option->font);
     painter->drawText(rectText, option->text);
     painter->restore();
 }
@@ -142,32 +141,28 @@ QRect ItemViewItemStyleHelper::rectBranchIndicator(const QStyleOptionViewItem *o
 void ItemViewItemStyleHelper::setupPainterForShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
 {
     Q_UNUSED(widget)
+    painter->setPen(Qt::NoPen);
     // 选中
     if (option->state & QStyle::State_Selected)
     {
         // 选中且悬停
         if (option->state & QStyle::State_MouseOver)
         {
-            QPen pen(ColorRepository::listSelectedAndHoveredOutlineColor());
-            painter->setPen(Qt::NoPen);
             painter->setBrush(ColorRepository::itemViewItemSelectedAndHoveredBackgroundColor());
         }
         else
         {
-            painter->setPen(Qt::NoPen);
             painter->setBrush(ColorRepository::itemViewItemSelectedBackgroundColor());
         }
     }
     // 悬停
     else if (option->state & QStyle::State_MouseOver)
     {
-        painter->setPen(Qt::NoPen);
         painter->setBrush(ColorRepository::itemViewItemHoveredBackgroundColor());
     }
     // 默认
     else
     {
-        painter->setPen(Qt::NoPen);
         painter->setBrush(ColorRepository::itemViewItemBackgroundColor());
     }
 }

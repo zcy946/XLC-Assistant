@@ -133,6 +133,11 @@ QColor ColorRepository::basicSelectedAlphaColor()
     return s_darkMode ? QColor(0x4B, 0x4B, 0x4B, 75) : QColor(0xCC, 0xCC, 0xCC, 70);
 }
 
+QColor ColorRepository::basicSelectedAndHoveredAlphaColor()
+{
+    return s_darkMode ? QColor(0x4B, 0x4B, 0x4B, 55) : QColor(0xCC, 0xCC, 0xCC, 40);
+}
+
 QColor ColorRepository::disabledTextColor()
 {
     QColor colorDisabledText = basicTextColor();
@@ -469,17 +474,32 @@ QColor ColorRepository::historyMessageListTimestamp()
     return QColor("#9E9E9E");
 }
 
+QColor ColorRepository::navigationItemBackgroundColor()
+{
+    return windowBackgroundColor();
+}
+
+QColor ColorRepository::navigationPressedBackgroundColor()
+{
+    return basicSelectedAndHoveredAlphaColor();
+}
+
 QColor ColorRepository::navigationItemHoveredBackgroundColor()
 {
-    return s_darkMode ? QColor("#2D2D2D") : QColor("#E8E8E8");
+    return basicHoveredAlphaColor();
 }
 
 QColor ColorRepository::navigationItemSelectedBackgroundColor()
 {
-    return s_darkMode ? QColor("#2D2D2D") : QColor("#E8E8E8");
+    return basicSelectedAlphaColor();
 }
 
-QColor ColorRepository::navigationItemHoveredAndSelectedBackgroundColor()
+QColor ColorRepository::navigationSelectedAndPressedBackgroundColor()
 {
-    return s_darkMode ? QColor("#292929") : QColor("#EDEDED");
+    return basicHoveredAlphaColor();
+}
+
+QColor ColorRepository::navigationItemSelectedAndHoveredBackgroundColor()
+{
+    return basicSelectedAndHoveredAlphaColor();
 }

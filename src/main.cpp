@@ -10,7 +10,7 @@
 #include "ToastManager.h"
 #include "XlcStyle.h"
 #include "ColorRepository.h"
-#include <QScreen>
+#include "XlcNavigationBar.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,9 +44,23 @@ int main(int argc, char *argv[])
     // 设置全局字体
     app.setFont(getGlobalFont());
 
-    MainWindow w;
-    w.resize(1200, 700);
-    w.show();
+    // MainWindow w;
+    // w.resize(1200, 700);
+    // w.show();
+
+    XlcNavigationBar *xlcNavigationBar = new XlcNavigationBar();
+    xlcNavigationBar->addNavigationNode("超长文本超长文本超长文本测试1", QChar(0xf0f0), "target_测试1");
+    xlcNavigationBar->addNavigationNode("测试2", QChar(0xf0f0));
+    xlcNavigationBar->addNavigationNode("测试2-1", QChar(0xf0f0), "target_测试2-1", "测试2");
+    xlcNavigationBar->addNavigationNode("超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本测试2-2", QChar(0xf0f0), QString(), "测试2");
+    xlcNavigationBar->addNavigationNode("测试2-2-1", QChar(0xf0f0), "target_测试2-2-1", "超长文本超长文本超长文本超长文本超长文本超长文本超长文本超长文本测试2-2");
+    QObject::connect(xlcNavigationBar, &XlcNavigationBar::sig_currentItemChanged,
+            [](const QString &targetId)
+            {
+                XLC_LOG_DEBUG("jump to {}", targetId);
+            });
+    xlcNavigationBar->resize(300, 800);
+    xlcNavigationBar->show();
 
     app.exec();
     return 0;

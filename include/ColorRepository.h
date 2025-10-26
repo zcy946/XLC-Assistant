@@ -6,7 +6,7 @@
 
 namespace ColorRepository
 {
-    static bool s_darkMode = true;
+    static bool s_darkMode = false;
     static QColor s_colorPrimaryNormal = QColor("#FF5F5F");
     static QColor s_colorTextDrakMode = QColor("#FFFFFF");
     static QColor s_colorTextLightMode = QColor("#000000");
@@ -53,6 +53,7 @@ namespace ColorRepository
     QColor basicHoveredAlphaColor();
     // 通用select颜色(alpha通道)
     QColor basicSelectedAlphaColor();
+    QColor basicSelectedAndHoveredAlphaColor();
 
     QColor disabledTextColor();
     QColor pressedTextColor();
@@ -134,9 +135,12 @@ namespace ColorRepository
     QColor historyMessageListSeparator(); // 清除上下文分割线颜色
     QColor historyMessageListTimestamp(); // 时间戳的字体颜色
 
+    QColor navigationItemBackgroundColor();
+    QColor navigationPressedBackgroundColor();
     QColor navigationItemHoveredBackgroundColor();
     QColor navigationItemSelectedBackgroundColor();
-    QColor navigationItemHoveredAndSelectedBackgroundColor();
+    QColor navigationSelectedAndPressedBackgroundColor();
+    QColor navigationItemSelectedAndHoveredBackgroundColor();
 }
 
 #endif // COLORREPOSITORY_H
