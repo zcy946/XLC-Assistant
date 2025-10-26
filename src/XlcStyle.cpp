@@ -46,10 +46,24 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
     case PE_FrameFocusRect:
         // 不绘制虚线焦点框
         return;
+    case PE_FrameTabWidget:
+        if (const QStyleOptionTabWidgetFrame *optionTabWidgetFrame = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(option))
+        {
+            m_tabBarStyleHelper->drawTabWidgetBackground(optionTabWidgetFrame, painter, widget);
+            return;
+        }
+        break;
     case PE_PanelLineEdit:
         if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
             m_lineEditStyleHelper->drawLineEditShape(optionLineEdit, painter, widget);
+            return;
+        }
+        break;
+    case PE_IndicatorBranch:
+        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            m_itemViewItemStyleHelper->drawBranchIndicator(this, optionItemViewItem, painter, widget);
             return;
         }
         break;
@@ -84,13 +98,6 @@ void XlcStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *option, QP
             m_menuStyleHelper->drawBackground(optionItemMenuItem, painter, widget);
             // NOTE 修改Menu的背景添加自定义阴影(需要配合窗口标识符去除自带的阴影，目前暂未找到可用的自动设置方案，因此暂不考虑绘制阴影)
             // m_menuStyleHelper->drawShadow(optionItemMenuItem, painter, widget);
-            return;
-        }
-        break;
-    case PE_FrameTabWidget:
-        if (const QStyleOptionTabWidgetFrame *optionTabWidgetFrame = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(option))
-        {
-            m_tabBarStyleHelper->drawTabWidgetBackground(optionTabWidgetFrame, painter, widget);
             return;
         }
         break;
@@ -415,10 +422,18 @@ QRect XlcStyle::subElementRect(SubElement subElement, const QStyleOption *option
             return m_itemViewItemStyleHelper->rectClickCheckIndicator(this, optionViewItem, widget);
         }
         break;
+    case SE_TreeViewDisclosureItem:
+        if (const QStyleOptionViewItem *optionViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
+        {
+            return m_itemViewItemStyleHelper->rectBranchIndicator(optionViewItem, widget,
+                                                                  QProxyStyle::subElementRect(QStyle::SE_TreeViewDisclosureItem, optionViewItem, widget));
+        }
+        break;
     case SE_LineEditContents:
         if (const QStyleOptionFrame *optionLineEdit = qstyleoption_cast<const QStyleOptionFrame *>(option))
         {
-            return m_lineEditStyleHelper->rectText(optionLineEdit, widget, QProxyStyle::subElementRect(subElement, optionLineEdit, widget));
+            return m_lineEditStyleHelper->rectText(optionLineEdit, widget,
+                                                   QProxyStyle::subElementRect(QStyle::SE_LineEditContents, optionLineEdit, widget));
         }
         break;
     case SE_FrameContents:

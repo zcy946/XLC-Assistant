@@ -83,6 +83,22 @@ void ItemViewItemStyleHelper::drawCheckIndicator(const XlcStyle *style, const QS
     style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &optionCheckBox, painter, widget);
 }
 
+void ItemViewItemStyleHelper::drawBranchIndicator(const XlcStyle *style, const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget) const
+{
+    // 展开图标绘制
+    if (option->state & QStyle::State_Children)
+    {
+        painter->save();
+        QRect rectBranchIndicator = style->subElementRect(QStyle::SE_TreeViewDisclosureItem, option, widget);
+        QFont iconFont = QFont(ICONFONT_NAME);
+        painter->setFont(iconFont);
+        painter->setPen(ColorRepository::basicTextColor());
+        QChar iconfontBranchIndicator = (option->state & QStyle::State_Open) ? ICONFONT_AngleDown : ICONFONT_AngleRight;
+        painter->drawText(rectBranchIndicator, Qt::AlignVCenter | Qt::AlignRight, iconfontBranchIndicator);
+        painter->restore();
+    }
+}
+
 QSize ItemViewItemStyleHelper::sizeFromContents(const QStyleOptionViewItem *option, QSize sizeOriginal, const QWidget *widget) const
 {
     Q_UNUSED(widget)
@@ -114,6 +130,13 @@ QRect ItemViewItemStyleHelper::rectCheckIndicator(const QStyleOptionViewItem *op
 QRect ItemViewItemStyleHelper::rectClickCheckIndicator(const XlcStyle *style, const QStyleOptionViewItem *option, const QWidget *widget)
 {
     return style->subElementRect(QStyle::SE_ItemViewItemCheckIndicator, option, widget);
+}
+
+QRect ItemViewItemStyleHelper::rectBranchIndicator(const QStyleOptionViewItem *option, const QWidget *widget, QRect rectBranchIndicatorOriginal)
+{
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    return rectBranchIndicatorOriginal;
 }
 
 void ItemViewItemStyleHelper::setupPainterForShape(const QStyleOptionViewItem *option, QPainter *painter, const QWidget *widget)
