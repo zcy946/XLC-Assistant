@@ -49,7 +49,7 @@ void ItemViewItemStyleHelper::drawMarket(const QStyleOptionViewItem *option, QPa
         painter->setBrush(ColorRepository::primaryNormal());
         painter->drawRoundedRect(QRectF(option->rect.x() + OFFSET_MARK_X,
                                         option->rect.y() + SPACING_TOP + PADDING_MARK_TOP,
-                                        option->rect.x() + WIDTH_MARK,
+                                        WIDTH_MARK,
                                         option->rect.height() - SPACING_TOP - PADDING_MARK_TOP - PADDING_MARK_BOTTOM),
                                  RADIUS_MARK,
                                  RADIUS_MARK);
