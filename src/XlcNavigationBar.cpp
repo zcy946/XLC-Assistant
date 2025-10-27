@@ -4,45 +4,17 @@
 #include "ColorRepository.h"
 
 /**
- * XlcNavigationStyle
- */
-XlcNavigationStyle::XlcNavigationStyle()
-    : XlcStyle()
-{
-}
-
-void XlcNavigationStyle::drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
-{
-    // QTreeView内部对展开/折叠指示器进行硬编码，无法通过subElementRect进行修改。因此直接取消绘制，在委托中手动绘制
-    if (element == PE_IndicatorBranch)
-        return;
-    return XlcStyle::drawPrimitive(element, option, painter, widget);
-}
-
-QSize XlcNavigationStyle::sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &contentsSize, const QWidget *widget) const
-{
-
-    if (type == CT_ItemViewItem)
-    {
-        if (const QStyleOptionViewItem *optionItemViewItem = qstyleoption_cast<const QStyleOptionViewItem *>(option))
-        {
-            return QSize(XlcStyle::sizeFromContents(type, optionItemViewItem, contentsSize, widget).width(), HEIGHT_ITEM);
-        }
-    }
-    return XlcStyle::sizeFromContents(type, option, contentsSize, widget);
-}
-
-/**
  * XlcNavigationTreeView
  */
 XlcNavigationTreeView::XlcNavigationTreeView(QWidget *parent)
     : QTreeView(parent)
 {
-    setStyle(new XlcNavigationStyle());
     // 隐藏表头
     setHeaderHidden(true);
     // 取消为顶层节点绘制展开/折叠箭头和连接线
     setRootIsDecorated(false);
+    // 去除边框
+    setFrameShape(QFrame::NoFrame);
 
     // 设置调色板
     setAutoFillBackground(true);
@@ -96,6 +68,18 @@ void XlcNavigationTreeView::mousePressEvent(QMouseEvent *event)
     }
     // 拦截信号
     event->accept();
+}
+
+void XlcNavigationTreeView::changeEvent(QEvent *event)
+{
+    // 响应主题切换
+    if (event->type() == QEvent::PaletteChange)
+    {
+        QPalette palette = this->palette();
+        palette.setBrush(QPalette::Base, ColorRepository::windowBackgroundColor());
+        setPalette(palette);
+    }
+    QTreeView::changeEvent(event);
 }
 
 /**
@@ -362,7 +346,7 @@ void XlcNavigationDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
         painter->drawRoundedRect(QRectF(option.rect.x() + OFFSET_MARK_X,
                                         option.rect.y() + SPACING_TOP + PADDING_MARK_TOP,
                                         WIDTH_MARK,
-                                        option.rect.height() - SPACING_TOP - PADDING_MARK_TOP - PADDING_MARK_BOTTOM),
+                                        option.rect.height() - SPACING_TOP - PADDING_MARK_TOP - PADDING_MARK_BOTTOM - PADDING_VERTICAL),
                                  RADIUS_MARK,
                                  RADIUS_MARK);
         painter->restore();
@@ -438,6 +422,12 @@ void XlcNavigationDelegate::paint(QPainter *painter, const QStyleOptionViewItem 
     painter->restore();
 }
 
+QSize XlcNavigationDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QSize sizeOriginal = QStyledItemDelegate::sizeHint(option, index);
+    return QSize(sizeOriginal.width(), sizeOriginal.height() + PADDING_VERTICAL * 2);
+}
+
 /**
  * XlcNavigationBar
  */
@@ -460,6 +450,14 @@ void XlcNavigationBar::addNavigationNode(const QString &title, const QChar &icon
         }
     }
     m_navigationModel->addNavigationNode(title, iconfont, targetId, parentIndex);
+}
+
+void XlcNavigationBar::setSelectedItem(const QString &title)
+{
+    QModelIndex targetIndex = m_navigationModel->findIndexByTitle(title);
+    if (!targetIndex.isValid())
+        return;
+    m_treeView->setCurrentIndex(targetIndex);
 }
 
 void XlcNavigationBar::initWidget()

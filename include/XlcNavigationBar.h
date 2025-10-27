@@ -7,19 +7,7 @@
 #include <QTreeView>
 #include <QMouseEvent>
 #include <QPaintEvent>
-#include "XlcStyle.h"
-
-class XlcNavigationStyle : public XlcStyle
-{
-    Q_OBJECT
-public:
-    explicit XlcNavigationStyle();
-    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget = nullptr) const override;
-    QSize sizeFromContents(ContentsType type, const QStyleOption *option, const QSize &contentsSize, const QWidget *widget) const override;
-
-private:
-    const int HEIGHT_ITEM = 40; // item高度
-};
+#include <QStyledItemDelegate>
 
 class XlcNavigationTreeView : public QTreeView
 {
@@ -31,6 +19,7 @@ public:
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private:
     // 被选中的叶子节点
@@ -97,6 +86,7 @@ class XlcNavigationDelegate : public QStyledItemDelegate
 public:
     explicit XlcNavigationDelegate(QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
 private:
     const QString ICONFONT_NAME = "ElaAwesome";     // 字体图标名称
@@ -113,6 +103,7 @@ private:
     const int SPACING_MARK_TO_TEXT = 5;             // 选中标记到文本之间的距离
     const int SPACING_TOP = 2;                      // 不用于计算绘制的到上一个item的距离(不绘制 SPACING_TOP 这段距离，视觉效果就像setSpacing(SPACING_TOP))
     const int RADIUS = 4;                           // 圆角半径
+    const int PADDING_VERTICAL = 4;                 // XlcNavigation中的item相较于普通item额外增加的内边距
 };
 
 class XlcNavigationBar : public BaseWidget
@@ -127,7 +118,8 @@ private Q_SLOTS:
 public:
     explicit XlcNavigationBar(BaseWidget *parent = nullptr);
     void addNavigationNode(const QString &title, const QChar &iconfont, const QString &targetId = QString(), const QString &parentTitle = QString());
-    // TODO 设置选中项
+    // 设置选中项
+    void setSelectedItem(const QString &title);
 
 protected:
     void initWidget() override;
