@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "BaseWidget.hpp"
-#include "NavigationBar.h"
+#include "XlcNavigationBar.h"
 #include <QStackedLayout>
 #include "PageChat.h"
 #include "PageSettings.h"
@@ -12,7 +12,7 @@ class MainWindow : public BaseWidget
 {
     Q_OBJECT
 private Q_SLOTS:
-    void handleNavigationBarIndexChanged(int index);
+    void handleNavigationBarItemChanged(const QString &targetId);
     void handlePageSwitched(const QVariant &data);
 
 public:
@@ -25,10 +25,11 @@ protected:
     void initLayout() override;
 
 private:
-    NavigationBar *m_navigationBar;
+    XlcNavigationBar *m_navigationBar;
     QStackedLayout *m_stackedLayout;
     PageChat *m_pageChat;
     PageSettings *m_pageSettings;
+    QMap<QString, QWidget *> m_pages; // targetId - QWidget *
 };
 
 #endif // MAINWINDOW_H
