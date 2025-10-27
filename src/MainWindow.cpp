@@ -61,26 +61,15 @@ void MainWindow::initLayout()
     m_stackedLayout->addWidget(m_pageSettings);
     // splitter
     QSplitter *splitter = new QSplitter(this);
+    splitter->setContentsMargins(0, 0, 0, 0);
     splitter->addWidget(m_navigationBar);
     splitter->addWidget(widgetPages);
     splitter->setStretchFactor(0, 3);
     splitter->setStretchFactor(1, 7);
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->addWidget(splitter);
-
-    // // h_layout
-    // QHBoxLayout *h_layout = new QHBoxLayout(this);
-    // h_layout->setSpacing(0);
-    // h_layout->setContentsMargins(0, 0, 0, 0);
-    // h_layout->addWidget(m_navigationBar);
-    // // m_stackedLayout
-    // m_stackedLayout = new QStackedLayout();
-    // m_stackedLayout->setContentsMargins(0, 0, 0, 0);
-    // m_stackedLayout->setSpacing(0);
-    // m_stackedLayout->addWidget(m_pageChat);
-    // m_stackedLayout->addWidget(m_pageSettings);
-    // h_layout->addLayout(m_stackedLayout);
 }
 
 void MainWindow::handleNavigationBarItemChanged(const QString &targetId)

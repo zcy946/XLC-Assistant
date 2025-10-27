@@ -20,6 +20,7 @@ public:
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void changeEvent(QEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     // 被选中的叶子节点

@@ -82,6 +82,15 @@ void XlcNavigationTreeView::changeEvent(QEvent *event)
     QTreeView::changeEvent(event);
 }
 
+void XlcNavigationTreeView::paintEvent(QPaintEvent *event)
+{
+    QTreeView::paintEvent(event);
+    QPainter painter(viewport());
+    painter.setPen(ColorRepository::basicBorderColor());
+    painter.setBrush(Qt::NoBrush);
+    painter.drawRoundedRect(viewport()->rect().adjusted(1,1,-1,-1), 5, 5);
+}
+
 /**
  * XlcNavigationNode
  */

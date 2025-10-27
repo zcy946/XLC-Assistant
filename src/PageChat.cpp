@@ -187,6 +187,8 @@ void PageChat::slot_onMessageSent(const QString &message)
     {
         // 添加消息到界面
         m_widgetChat->addNewMessage(HistoryMessage(message, Message::USER, getCurrentDateTime()));
+        // 清除用户输入
+        m_widgetChat->clearPlainTextEdit();
         // 记录问题
         conversation->addMessage(Message(message, Message::USER, getCurrentDateTime()));
         LLMService::getInstance()->postMessage(conversation, agent, MCPService::getInstance()->getToolsFromServers(agent->mcpServers));
@@ -552,4 +554,9 @@ void WidgetChat::refreshHistoryMessageList(const QString &conversationUuid)
         m_historyMessageList->addMessage(HistoryMessage(message.id, displayContent, message.role, message.createdTime, message.toolCalls, message.toolCallId, message.avatarFilePath));
     }
     XLC_LOG_DEBUG("Refresh history message list (conversationUuid={}, messageCount={})", conversationUuid, messages.size());
+}
+
+void WidgetChat::clearPlainTextEdit()
+{
+    m_plainTextEdit->clear();
 }

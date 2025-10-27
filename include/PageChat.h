@@ -59,6 +59,7 @@ public:
     const QString getConversationUuid();
     // 刷新历史消息列表展示 conversationUuid 的消息
     void refreshHistoryMessageList(const QString &conversationUuid);
+    void clearPlainTextEdit();
 
 protected:
     void initWidget() override;
