@@ -83,6 +83,7 @@ void PageChat::initLayout()
 {
     // splitter
     QSplitter *splitter = new QSplitter(this);
+    splitter->setContentsMargins(0, 0, 0, 0);
     splitter->setChildrenCollapsible(false);
     splitter->addWidget(m_tabWidgetSiderBar);
     splitter->addWidget(m_widgetChat);
@@ -90,6 +91,7 @@ void PageChat::initLayout()
     splitter->setStretchFactor(1, 8);
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
+    vLayout->setContentsMargins(0, 10, 10, 10);
     vLayout->addWidget(splitter);
 }
 
