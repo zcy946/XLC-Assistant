@@ -22,7 +22,7 @@ PageSettings::PageSettings(QWidget *parent)
     // pageSettingsLLM
     addPage("模型服务", new PageSettingsLLM(this));
     // pageSettingsMcp
-    addPage("MCP 服务器", new PageSettingsMcp(this));
+    addPage("MCP服务器", new PageSettingsMcp(this));
     // pageSettingData
     addPage("存储设置", new PageSettingsStorage(this));
     // PageSettingsDisplay
@@ -35,14 +35,8 @@ PageSettings::PageSettings(QWidget *parent)
         QString nameSetting = "设置测试实例" + QString::number(i + 1);
         QListWidgetItem *itemSetting = new QListWidgetItem();
         itemSetting->setText(nameSetting);
-        m_listWidget->addItem(itemSetting);
     }
 #endif
-    // 默认选中并展示第一项
-    if (m_listWidget->currentItem() == nullptr)
-    {
-        m_listWidget->setCurrentRow(0);
-    }
 }
 
 void PageSettings::initWidget()
@@ -51,44 +45,34 @@ void PageSettings::initWidget()
 
 void PageSettings::initItems()
 {
-    // m_listWidget
-    m_listWidget = new QListWidget(this);
-    connect(m_listWidget, &QListWidget::currentTextChanged, this,
-            [this](const QString &currentText)
-            {
-                const auto &it = m_pages.find(currentText);
-                if (it == m_pages.end())
-                {
-                    XLC_LOG_WARN("Non-existent setting item ({})", currentText);
-                    return;
-                }
-                m_stackedWidget->setCurrentWidget(it.value());
-                XLC_LOG_TRACE("Setting item selected (item={})", currentText);
-            });
-
     // m_stackedWidget
     m_stackedWidget = new QStackedWidget(this);
 }
 
 void PageSettings::initLayout()
 {
-    // splitter
-    QSplitter *splitter = new QSplitter(this);
-    splitter->setChildrenCollapsible(false);
-    splitter->addWidget(m_listWidget);
-    splitter->addWidget(m_stackedWidget);
-    splitter->setStretchFactor(0, 2);
-    splitter->setStretchFactor(1, 8);
     // vLayout
     QVBoxLayout *vLayout = new QVBoxLayout(this);
     vLayout->setContentsMargins(0, 0, 0, 0);
-    vLayout->addWidget(splitter);
+    vLayout->addWidget(m_stackedWidget);
+}
+
+QList<QString> PageSettings::getPages()
+{
+    return m_titlesPage;
+}
+
+void PageSettings::showPage(const QString &title)
+{
+    if (m_pages.find(title) == m_pages.end())
+        return;
+    m_stackedWidget->setCurrentWidget(m_pages.value(title));
 }
 
 void PageSettings::addPage(const QString &name, QWidget *page)
 {
-    m_listWidget->addItem(name);
     m_stackedWidget->addWidget(page);
+    m_titlesPage.append(name);
     m_pages.insert(name, page);
 }
 

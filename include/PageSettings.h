@@ -28,6 +28,8 @@ class PageSettings : public BaseWidget
     Q_OBJECT
 public:
     explicit PageSettings(QWidget *parent = nullptr);
+    QList<QString> getPages();
+    void showPage(const QString &title);
     /**
      * 添加配置页
      */
@@ -39,9 +41,9 @@ protected:
     void initLayout() override;
 
 private:
-    QListWidget *m_listWidget;
     QStackedWidget *m_stackedWidget;
     QMap<QString, QWidget *> m_pages;
+    QList<QString> m_titlesPage;
 };
 
 class WidgetAgentInfo;

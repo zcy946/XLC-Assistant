@@ -39,6 +39,11 @@ void MainWindow::initItems()
     // m_navigationBar->setFixedWidth(300);
     m_navigationBar->addNavigationNode("聊天", QChar(0xefa0), m_pageChat->objectName());
     m_navigationBar->addNavigationNode("设置", QChar(0xedab), m_pageSettings->objectName());
+    QList<QString> settingPages = m_pageSettings->getPages();
+    for (const QString &title : settingPages)
+    {
+        m_navigationBar->addNavigationNode(title, QChar(0xedac), QString("settingPage_%1").arg(title), "设置");
+    }
     m_navigationBar->setSelectedItem("聊天");
     connect(m_navigationBar, &XlcNavigationBar::sig_currentItemChanged, this, &MainWindow::handleNavigationBarItemChanged);
 #ifdef QT_DEBUG
@@ -74,9 +79,19 @@ void MainWindow::initLayout()
 
 void MainWindow::handleNavigationBarItemChanged(const QString &targetId)
 {
-    if (!m_pages.contains(targetId))
+    if (m_pages.contains(targetId))
+    {
+        m_stackedLayout->setCurrentWidget(m_pages.value(targetId));
+    }
+    else if (targetId.contains("settingPage_"))
+    {
+        m_stackedLayout->setCurrentWidget(m_pageSettings);
+        m_pageSettings->showPage(targetId.section("_", 1));
+    }
+    else
+    {
         return;
-    m_stackedLayout->setCurrentWidget(m_pages.value(targetId));
+    }
     XLC_LOG_TRACE("Navigating to target page (targetId={})", targetId);
     // WARNING：必须重新置顶ToastManager，否则切换stackedLayout会被遮盖
     ToastManager::getInstance()->raise();

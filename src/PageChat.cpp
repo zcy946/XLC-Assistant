@@ -225,13 +225,13 @@ void PageChat::slot_handlePageSwitched(const QVariant &data)
 
             // 选中agent
             m_agentListWidget->setCurrentAgent(agentUuid);
+            refreshConversationList();
             // 查找应当选中的conversation
             for (int j = 0; j < m_listWidgetConversations->count(); ++j)
             {
                 if (m_listWidgetConversations->item(j)->data(Qt::UserRole).toString() == conversationUuid)
                 {
                     m_listWidgetConversations->setCurrentRow(j);
-                    m_widgetChat->refreshHistoryMessageList(conversationUuid);
                     return;
                 }
             }
@@ -386,6 +386,7 @@ void PageChat::refreshConversationList()
         m_listWidgetConversations->addItem(itemConversation);
     }
     m_listWidgetConversations->sortItems();
+    XLC_LOG_DEBUG("Refresh conversation list(agentUuid={})", selectedAgentUuid);
     // 重新选中之前的item
     if (selectedConversationUuid != QString::number(-1))
     {
